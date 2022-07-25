@@ -2,8 +2,8 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Origin: http://localhost:3000");
-header("Access-Control-Allow-Methods: GET,HEAD,OPTIONS,POST,PUT");
-header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization");
+header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
 class Popclub extends CI_Controller {
 
@@ -11,7 +11,6 @@ class Popclub extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->model('deals_model');
-	
 	}
 
 	public function platform()
@@ -80,16 +79,14 @@ class Popclub extends CI_Controller {
 				echo json_encode($response);
 				break;
 			case 'POST':
-				if($this->input->server('REQUEST_METHOD') !== 'POST'){
-					return show_404();
-				}
-		
+				$post = json_decode(file_get_contents("php://input"), true);
+				
 				$_SESSION['popclub_data'] = [
-					'platform' => 'snackshop',
+					'platform' => $post['platform'],
 				];
 				
 				$response = array(
-					'message' => 'Successfully set platform'
+					'message' => 'Successfully set popclub_data'
 				);
 				
 				header('content-type: application/json');

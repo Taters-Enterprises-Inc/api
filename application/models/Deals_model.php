@@ -17,7 +17,7 @@ class Deals_model extends CI_Model
 		return $query->result();
 	}
 	
-	public function getDeals($platform=null, $category=null, $is_available=null){
+	public function getDeals($platform=null, $category=null, $is_available=null, $store_id=null){
     
 
 		if($platform !== null && $category !== null && $is_available !== null){
@@ -51,6 +51,13 @@ class Deals_model extends CI_Model
 		  $this->db->join('dotcom_deals_platform_combination B', 'B.deal_id = A.id');
 		  $this->db->where('A.status',$is_available);
 		  $this->db->where('B.platform_category_id',$deals_category->id);
+
+		  if($store_id != null){
+			$this->db->join('deals_region_da_log C','C.deal_id = A.id');
+			$this->db->where('C.platform_category_id',$deals_category->id);
+			$this->db->where('C.status',0);
+			$this->db->where('C.store_id',$store_id);
+		  }
 	
 		  $query = $this->db->get();
 		  return $query->result();
