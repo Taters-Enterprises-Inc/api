@@ -16,11 +16,36 @@ class Deals_model extends CI_Model
 		$query = $this->db->get();
 		return $query->result();
 	}
+
+
+	public function getDeal($hash=null){
+		if($hash !== null){
+		  $this->db->select('*');
+		  $this->db->from('dotcom_deals_tb');
+		  $this->db->where('hash',$hash);
+		  $query = $this->db->get();
+		  return $query->row();
+		}
+	
+		return null;
+	  }
 	
 	public function getDeals($platform=null, $category=null, $is_available=null, $store_id=null){
     
 
 		if($platform !== null && $category !== null && $is_available !== null){
+
+
+		 if($category == 'all'){
+
+			$this->db->select('*');
+			$this->db->from('dotcom_deals_tb A');
+			$this->db->join('dotcom_deals_platform_combination B', 'B.deal_id = A.id');
+			$this->db->where('A.status',$is_available);
+
+			$query = $this->db->get();
+			return $query->result();
+		 }
 	
 		  // Platform
 		  $this->db->select('id');

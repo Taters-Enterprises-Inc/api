@@ -10,6 +10,10 @@ $route['popclub/session'] = 'popclub/session';
 $route['popclub/clear_all_session'] = 'popclub/clear_all_session';
 
 
-$route['popclub/(:any)'] = 'popclub/deal/$1';
+$route['popclub/deal/(:any)'] = 'popclub/deal/$1';
+$route['popclub/(:any)'] = 'popclub/deals/$1';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+
+$route['store'] = 'store';

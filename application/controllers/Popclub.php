@@ -51,7 +51,7 @@ class Popclub extends CI_Controller {
 
 	}
 
-	public function deal($platform){
+	public function deals($platform){
 		$category = $this->input->get('category');
 
 		$deals = $this->deals_model->getDeals($platform,$category, true);
@@ -63,6 +63,19 @@ class Popclub extends CI_Controller {
 		
 		header('content-type: application/json');
 		echo json_encode($response);
+	}
+
+	
+	public function deal($hash){
+		$deal = $this->deals_model->getDeal($hash);
+		
+		$response = array(
+			'data' => $deal,
+			'message' => 'Successfully fetch deals'
+		);
+		
+		header('content-type: application/json');
+		echo json_encode($response, JSON_PRETTY_PRINT);
 	}
 
 	public function popclub_data(){
@@ -97,8 +110,37 @@ class Popclub extends CI_Controller {
 	}
 
 	public function session(){
-		echo "<pre>";
-		print_r($_SESSION);
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$data = array(
+					'cache_data' => $this->session->cache_data,
+					'customer_address' => $this->session->customer_address,
+				);
+		
+				$response = array(
+					'message' => 'Successfully set popclub_data',
+					'data' => $data,
+					'session' => $_SESSION,
+				);
+				
+				header('content-type: application/json');
+				echo json_encode($response, JSON_PRETTY_PRINT);
+				break;
+			case 'POST':
+				$post = json_decode(file_get_contents("php://input"), true);
+
+				foreach($post['session'] as $key => $session){
+					$_SESSION[$key] = $session;
+				}
+				
+				$response = array(
+					'message' => 'Successfully update session'
+				);
+				
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
 	}
 	
 	public function clear_all_session(){
