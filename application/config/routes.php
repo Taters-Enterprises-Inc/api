@@ -15,5 +15,10 @@ $route['popclub/(:any)'] = 'popclub/deals/$1';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+$route['facebook/login'] = 'user_authentication';
+$route['facebook/login_point'] = 'user_authentication/fb_login_point';
+$route['facebook/login/success'] = 'user_authentication/success_login';
+$route['facebook/logout'] = 'user_authentication/logout';
+
 
 $route['store'] = 'store';

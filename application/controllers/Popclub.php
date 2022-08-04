@@ -53,8 +53,13 @@ class Popclub extends CI_Controller {
 
 	public function deals($platform){
 		$category = $this->input->get('category');
+		$store_id = $this->session->cache_data['store_id'];
 
-		$deals = $this->deals_model->getDeals($platform,$category, true);
+		if($platform == 'walk-in'){
+			$deals = $this->deals_model->getDeals($platform,$category, true);
+		}else{
+			$deals = $this->deals_model->getDeals($platform,$category, true, $store_id);
+		}
 		
 		$response = array(
 			'data' => $deals,
@@ -113,8 +118,10 @@ class Popclub extends CI_Controller {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 				$data = array(
+					'popclub_data' => $this->session->popclub_data,
 					'cache_data' => $this->session->cache_data,
 					'customer_address' => $this->session->customer_address,
+					'userData' => $this->session->userData,
 				);
 		
 				$response = array(
