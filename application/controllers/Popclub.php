@@ -55,7 +55,7 @@ class Popclub extends CI_Controller {
 		$category = $this->input->get('category');
 		$store_id = $this->session->cache_data['store_id'];
 
-		if($platform == 'walk-in'){
+		if($platform == 'store-visit'){
 			$deals = $this->deals_model->getDeals($platform,$category, true);
 		}else{
 			$deals = $this->deals_model->getDeals($platform,$category, true, $store_id);
