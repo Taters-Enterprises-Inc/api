@@ -12,6 +12,94 @@ class Popclub extends CI_Controller {
 		parent::__construct();
 		$this->load->model('deals_model');
 	}
+	
+	public function redeem_deal(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+
+				if(!isset($_SESSION['cache_data']) && !isset($_SESSION['userData'])){
+					$response = array(
+						"message" => 'Cannot redeem code',
+					);
+
+					header('content-type: application/json');
+					echo json_encode($response);
+
+					break;
+				}
+				// Modify this to corressponding time
+				date_default_timezone_set('Asia/Singapore');
+				$post = json_decode(file_get_contents("php://input"), true);
+
+				$hash = $post['hash'];
+				$deal = $this->deals_model->getDeal($hash);	
+		
+				$date_redeemed = date("Y-m-d H:i:s");
+				$expiration_date = date("Y-m-d H:i:s", time()+(1*30));
+				$redeem_code = "DC" . substr(md5(uniqid(mt_rand(), true)), 0, 6);
+				$trans_hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+		
+				//get deals to insert on transaction
+				$client_details = $this->deals_model->insert_client_details();
+		
+				if ($client_details) {
+					$client_id = $client_details->id;
+		
+					$transaction_data = array(
+							'redeem_code' 					=> $redeem_code,
+							'client_id' 	   				=> $client_id,
+							'purchase_amount'   			=> $deal->promo_price == NULL? 0 :  $deal->promo_price,
+							'remarks' 		    			=> '',
+							'status' 		    			=> 1,
+							'dateadded'         			=> $date_redeemed,
+							'expiration'					=> $expiration_date,
+							'hash_key'          			=> $trans_hash_key,
+							'logon_type'        			=> "facebook",
+							'store'							=> $_SESSION['cache_data']['store_id']
+					);
+					
+					$query_transaction_result = $this->deals_model->insert_pickup_transaction_details($transaction_data);
+		
+					if ($query_transaction_result->status == true) {
+						$order_data[] = array(
+							'transaction_id'  => $query_transaction_result->id,
+							'deal_id'         => $deal->id,
+							'price'			  => $deal->original_price,
+							'quantity'	      => 1,
+							'status'	      => 0,
+						);
+					}
+		
+					$query_orders_result = $this->deals_model->insert_client_orders($order_data);
+		
+					if ($query_orders_result) {
+						$redeem_session = array(
+							'deal_id' => $deal->id,
+							'deal_hash' => $hash,
+							'date_redeemed' => $date_redeemed,
+							'expiration' => $expiration_date,
+							'redeem_code'=> $redeem_code,
+						);
+						$_SESSION['redeem_data'][]=$redeem_session;
+					}
+		
+				}
+
+				$response = array(
+					"message" => 'Successfully Redeem Code',
+					"data" => array(
+						'date_redeemed' => $date_redeemed,
+						'expiration' => $expiration_date,
+						'redeem_code'=> $redeem_code,
+					),
+				);
+		
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+
+		}
+	}
 
 	public function platform()
 	{
@@ -112,6 +200,46 @@ class Popclub extends CI_Controller {
 				break;
 		}
 
+	}
+
+	public function check_product_variant_deals(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				return show_404();
+			case 'POST':
+					$post = json_decode(file_get_contents("php://input"), true);
+					$deal = $this->deals_model->getDeal($post['hash']);
+			
+					$deal_products_with_variants = $this->deals_model->getDealProductsWithVariants($deal->id);
+					$deal_products = array();
+			
+					foreach($deal_products_with_variants as $value){
+						
+						$product_variants = $this->deals_model->getDealProductVariantsWithSelectedOption($value->product_id, $value->product_variant_options_id);
+						$product = $this->deals_model->getProduct($value->product_id);
+						$product_variant_option =  $this->deals_model->getProductVariantOption($value->product_variant_options_id);
+						$product->name = $product_variant_option->name . ' ' . $product->name;
+				
+						foreach($product_variants as $product_variant){
+							$product_variant->options = $this->deals_model->getProductVariantOptions($product_variant->id);
+						}	
+			
+						array_push($deal_products, array(
+							'option_id' => $value->product_variant_options_id,
+							'product_variants' => $product_variants,
+							'product' => $product,
+						));
+					}
+			
+					$response = array(
+						'message'=> 'Successfully add to cart deals',
+						'data' => $deal_products,
+					);
+					
+					header('content-type: application/json');
+					echo json_encode($response);
+				break;
+		}
 	}
 
 	public function session(){

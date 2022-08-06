@@ -5,10 +5,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['popclub/platform'] = 'popclub/platform';
 $route['popclub/category'] = 'popclub/category';
 
+$route['popclub/redeem_deal'] = 'popclub/redeem_deal';
 $route['popclub/popclub_data'] = 'popclub/popclub_data';
 $route['popclub/session'] = 'popclub/session';
+$route['popclub/check_product_variant_deals'] = 'popclub/check_product_variant_deals';
 $route['popclub/clear_all_session'] = 'popclub/clear_all_session';
-
 
 $route['popclub/deal/(:any)'] = 'popclub/deal/$1';
 $route['popclub/(:any)'] = 'popclub/deals/$1';
