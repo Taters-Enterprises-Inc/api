@@ -13,7 +13,7 @@ class Deals_model extends CI_Model
 	}
 
 	//insert transaction data
-	public function insert_pickup_transaction_details($data)
+	public function insert_redeem_transaction($data)
 	{   
 		$this->db->trans_start();
 		$this->db->insert('deals_redeems_tb', $data);
@@ -73,9 +73,29 @@ class Deals_model extends CI_Model
 
 	public function getDeal($hash=null){
 		if($hash !== null){
-		  $this->db->select('*');
-		  $this->db->from('dotcom_deals_tb');
-		  $this->db->where('hash',$hash);
+		  $this->db->select('
+			A.id,
+			a.name,
+			A.product_image,
+			A.original_price,
+			A.promo_price,
+			A.minimum_purchase,
+			A.description,
+			A.available_start_time,
+			A.available_end_time,
+			A.available_days,
+			A.violator_free_item,
+			A.violator_save,
+			A.violator_free_product_id,
+			A.violator_percentage_discount,
+			A.status,
+			A.hash,
+			C.dotcom_deals_platform_id AS platform_id
+		  ');
+		  $this->db->from('dotcom_deals_tb A');
+		  $this->db->join('dotcom_deals_platform_combination B', 'B.deal_id = A.id');
+		  $this->db->join('dotcom_deals_category C', 'C.id = B.platform_category_id');
+		  $this->db->where('A.hash',$hash);
 		  $query = $this->db->get();
 		  return $query->row();
 		}

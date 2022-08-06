@@ -12,7 +12,21 @@ class Popclub extends CI_Controller {
 		parent::__construct();
 		$this->load->model('deals_model');
 	}
-	
+
+	public function redeems(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$response = array(
+					'message' => 'Successfully fetch redeems',
+					'data' => $this->session->redeem_data,
+				);
+			
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+
 	public function redeem_deal(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
@@ -24,25 +38,26 @@ class Popclub extends CI_Controller {
 
 					header('content-type: application/json');
 					echo json_encode($response);
-
 					break;
 				}
-				// Modify this to corressponding time
-				date_default_timezone_set('Asia/Singapore');
-				$post = json_decode(file_get_contents("php://input"), true);
-
-				$hash = $post['hash'];
-				$deal = $this->deals_model->getDeal($hash);	
-		
-				$date_redeemed = date("Y-m-d H:i:s");
-				$expiration_date = date("Y-m-d H:i:s", time()+(1*30));
-				$redeem_code = "DC" . substr(md5(uniqid(mt_rand(), true)), 0, 6);
-				$trans_hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
-		
+				
 				//get deals to insert on transaction
 				$client_details = $this->deals_model->insert_client_details();
 		
 				if ($client_details) {
+					
+					// Modify this to corressponding time
+					date_default_timezone_set('Asia/Singapore');
+					$post = json_decode(file_get_contents("php://input"), true);
+
+					$hash = $post['hash'];
+					$deal = $this->deals_model->getDeal($hash);	
+			
+					$date_redeemed = date("Y-m-d H:i:s");
+					$expiration_date = date("Y-m-d H:i:s", time()+(1*30));
+					$redeem_code = "DC" . substr(md5(uniqid(mt_rand(), true)), 0, 6);
+					$trans_hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+		
 					$client_id = $client_details->id;
 		
 					$transaction_data = array(
@@ -50,6 +65,7 @@ class Popclub extends CI_Controller {
 							'client_id' 	   				=> $client_id,
 							'purchase_amount'   			=> $deal->promo_price == NULL? 0 :  $deal->promo_price,
 							'remarks' 		    			=> '',
+							'platform_id'					=> $deal->platform_id,
 							'status' 		    			=> 1,
 							'dateadded'         			=> $date_redeemed,
 							'expiration'					=> $expiration_date,
@@ -58,7 +74,7 @@ class Popclub extends CI_Controller {
 							'store'							=> $_SESSION['cache_data']['store_id']
 					);
 					
-					$query_transaction_result = $this->deals_model->insert_pickup_transaction_details($transaction_data);
+					$query_transaction_result = $this->deals_model->insert_redeem_transaction($transaction_data);
 		
 					if ($query_transaction_result->status == true) {
 						$order_data[] = array(
@@ -82,22 +98,38 @@ class Popclub extends CI_Controller {
 						);
 						$_SESSION['redeem_data'][]=$redeem_session;
 					}
-		
+
+					$products= array(
+						'deal_id' => $deal->id,
+						'deal_image_name' => $deal->product_image,
+						'deal_name' => $deal->name,
+						'description' => $deal->description,
+						'deal_qty' => 1, 
+					);
+					
+			
+					if($deal->minimum_purchase != null){
+						$products['minimum_purchase'] = $deal->minimum_purchase;
+					}else{
+						$products['deal_original_price'] = $deal->original_price;
+						$products['deal_promo_price'] = $deal->promo_price;
+						$products['deal_remarks'] = $post['remarks'];
+	
+						$_SESSION['orders'] = array($products);	
+					}
+	
+					$_SESSION['deals'] = array($products);	
+	
+					$response = array(
+						"message" => 'Successfully Redeem Code',
+					);
+					
+			
+					header('content-type: application/json');
+					echo json_encode($response);
 				}
-
-				$response = array(
-					"message" => 'Successfully Redeem Code',
-					"data" => array(
-						'date_redeemed' => $date_redeemed,
-						'expiration' => $expiration_date,
-						'redeem_code'=> $redeem_code,
-					),
-				);
 		
-				header('content-type: application/json');
-				echo json_encode($response);
 				break;
-
 		}
 	}
 
@@ -226,6 +258,7 @@ class Popclub extends CI_Controller {
 			
 						array_push($deal_products, array(
 							'option_id' => $value->product_variant_options_id,
+							'quantity' => $value->quantity,
 							'product_variants' => $product_variants,
 							'product' => $product,
 						));
@@ -250,6 +283,9 @@ class Popclub extends CI_Controller {
 					'cache_data' => $this->session->cache_data,
 					'customer_address' => $this->session->customer_address,
 					'userData' => $this->session->userData,
+					'orders' => $this->session->orders,
+					'redeem_data' => $this->session->redeem_data,
+					'deals' => $this->session->orders,
 				);
 		
 				$response = array(
