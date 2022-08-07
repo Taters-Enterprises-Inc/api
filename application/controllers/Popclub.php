@@ -13,6 +13,28 @@ class Popclub extends CI_Controller {
 		$this->load->model('deals_model');
 	}
 
+	public function delete_redeem(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+				$post = json_decode(file_get_contents("php://input"), true);
+				$deal_hash = $post['deal_hash'];
+
+				foreach($_SESSION['redeem_data'] as $key => $redeem_data){
+					if($deal_hash === $redeem_data['deal_hash']){
+						unset($_SESSION['redeem_data'][$key]);
+					}
+				}
+
+				$response = array(
+					'message' => 'Successfully delete redeem',
+				);
+			
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+
 	public function redeems(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
@@ -27,13 +49,45 @@ class Popclub extends CI_Controller {
 		}
 	}
 
+	public function redeem(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				date_default_timezone_set('Asia/Singapore');
+				$deal_id = $this->input->get('deal_id');
+				$redeems = $this->deals_model->get_redeem($deal_id);
+				$latest_not_expired_redeem = null;
+				$today = date("Y-m-d H:i:s");
+
+				foreach($redeems as $redeem){
+					$expire = date($redeem->expiration);
+
+					if($today < $expire){
+						$latest_not_expired_redeem = $redeem;
+						break;
+					}
+				}
+
+				$response = array(
+					'message' => 'Successfully fetch redeem',
+					'data' => $latest_not_expired_redeem,
+				);
+			
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+
 	public function redeem_deal(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
 
-				if(!isset($_SESSION['cache_data']) && !isset($_SESSION['userData'])){
+				if(
+					(!isset($_SESSION['cache_data']) && 
+					!isset($_SESSION['userData']) ) 
+					){
 					$response = array(
-						"message" => 'Cannot redeem code',
+						"message" => 'Cannot redeem the code',
 					);
 
 					header('content-type: application/json');
@@ -54,14 +108,15 @@ class Popclub extends CI_Controller {
 					$deal = $this->deals_model->getDeal($hash);	
 			
 					$date_redeemed = date("Y-m-d H:i:s");
-					$expiration_date = date("Y-m-d H:i:s", time()+(1*30));
+					$expiration_date = date("Y-m-d H:i:s", time()+(4*30));
 					$redeem_code = "DC" . substr(md5(uniqid(mt_rand(), true)), 0, 6);
 					$trans_hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 		
 					$client_id = $client_details->id;
 		
-					$transaction_data = array(
+					$redeems_transaction_data = array(
 							'redeem_code' 					=> $redeem_code,
+							'deal_id'						=> $deal->id,
 							'client_id' 	   				=> $client_id,
 							'purchase_amount'   			=> $deal->promo_price == NULL? 0 :  $deal->promo_price,
 							'remarks' 		    			=> '',
@@ -74,11 +129,11 @@ class Popclub extends CI_Controller {
 							'store'							=> $_SESSION['cache_data']['store_id']
 					);
 					
-					$query_transaction_result = $this->deals_model->insert_redeem_transaction($transaction_data);
+					$query_transaction_result = $this->deals_model->insert_redeem_transaction($redeems_transaction_data);
 		
 					if ($query_transaction_result->status == true) {
 						$order_data[] = array(
-							'transaction_id'  => $query_transaction_result->id,
+							'redeems_id'  => $query_transaction_result->id,
 							'deal_id'         => $deal->id,
 							'price'			  => $deal->original_price,
 							'quantity'	      => 1,
@@ -86,18 +141,8 @@ class Popclub extends CI_Controller {
 						);
 					}
 		
-					$query_orders_result = $this->deals_model->insert_client_orders($order_data);
+					 $this->deals_model->insert_client_orders($order_data);
 		
-					if ($query_orders_result) {
-						$redeem_session = array(
-							'deal_id' => $deal->id,
-							'deal_hash' => $hash,
-							'date_redeemed' => $date_redeemed,
-							'expiration' => $expiration_date,
-							'redeem_code'=> $redeem_code,
-						);
-						$_SESSION['redeem_data'][]=$redeem_session;
-					}
 
 					$products= array(
 						'deal_id' => $deal->id,
@@ -122,6 +167,13 @@ class Popclub extends CI_Controller {
 	
 					$response = array(
 						"message" => 'Successfully Redeem Code',
+						"data" => array(
+							'deal_id' => $deal->id,
+							'deal_hash' => $hash,
+							'date_redeemed' => $date_redeemed,
+							'expiration' => $expiration_date,
+							'redeem_code'=> $redeem_code,
+						)
 					);
 					
 			
@@ -284,7 +336,6 @@ class Popclub extends CI_Controller {
 					'customer_address' => $this->session->customer_address,
 					'userData' => $this->session->userData,
 					'orders' => $this->session->orders,
-					'redeem_data' => $this->session->redeem_data,
 					'deals' => $this->session->orders,
 				);
 		
@@ -316,6 +367,12 @@ class Popclub extends CI_Controller {
 	
 	public function clear_all_session(){
 		$this->session->sess_destroy();
+		echo "<pre>";
+		print_r($_SESSION);
+	}
+
+	public function clear_redeems(){
+		unset($_SESSION['redeem_data']);
 		echo "<pre>";
 		print_r($_SESSION);
 	}

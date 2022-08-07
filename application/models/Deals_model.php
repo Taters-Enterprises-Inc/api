@@ -2,7 +2,47 @@
 
 class Deals_model extends CI_Model 
 {
-	
+	public function get_redeem($deal_id = null){
+		$fb_user_id = $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']);
+
+		$this->db->select('id');
+		$this->db->from('deals_client_tb');
+		$this->db->where('fb_user_id', $fb_user_id);
+		$clients_query = $this->db->get();
+		$clients = $clients_query->result();
+
+		$deals_redeems = array();
+
+		foreach($clients as $client){
+			$this->db->select('
+				A.deal_id,
+				A.redeem_code,
+				A.expiration,
+				A.dateadded AS date_redeemed,
+				B.name,
+				B.product_image,
+				B.description,
+				B.original_price,
+				B.promo_price,
+			');
+			$this->db->from('deals_redeems_tb A');
+			$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+			$this->db->where('A.client_id', $client->id);
+
+			if($deal_id !== null){
+				$this->db->where('A.deal_id', $deal_id);
+			}
+			
+			$redeems_query = $this->db->get();
+			$result =  $redeems_query->result();
+			if(!empty($result)){
+				$deals_redeems = array_merge($deals_redeems,$result);
+			}
+		}
+
+
+		return $deals_redeems;
+	}
   	//inset order data
 	public function insert_client_orders($data)
 	{
@@ -90,6 +130,7 @@ class Deals_model extends CI_Model
 			A.violator_percentage_discount,
 			A.status,
 			A.hash,
+			C.name as category_name,
 			C.dotcom_deals_platform_id AS platform_id
 		  ');
 		  $this->db->from('dotcom_deals_tb A');
