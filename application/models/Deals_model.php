@@ -20,6 +20,7 @@ class Deals_model extends CI_Model
 				A.expiration,
 				A.dateadded AS date_redeemed,
 				B.name,
+				B.hash AS deal_hash,
 				B.product_image,
 				B.description,
 				B.original_price,
@@ -115,12 +116,13 @@ class Deals_model extends CI_Model
 		if($hash !== null){
 		  $this->db->select('
 			A.id,
-			a.name,
+			A.name,
 			A.product_image,
 			A.original_price,
 			A.promo_price,
 			A.minimum_purchase,
 			A.description,
+			A.seconds_before_expiration,
 			A.available_start_time,
 			A.available_end_time,
 			A.available_days,

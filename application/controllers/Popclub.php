@@ -81,6 +81,8 @@ class Popclub extends CI_Controller {
 	public function redeem_deal(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
+				// Modify this to corressponding time
+				date_default_timezone_set('Asia/Singapore');
 
 				if(
 					(!isset($_SESSION['cache_data']) && 
@@ -94,21 +96,38 @@ class Popclub extends CI_Controller {
 					echo json_encode($response);
 					break;
 				}
+
+				$post = json_decode(file_get_contents("php://input"), true);
+				$hash = $post['hash'];
 				
+				$deal = $this->deals_model->getDeal($hash);	
+
+				$redeems = $this->deals_model->get_redeem();
+				$today = date("Y-m-d H:i:s");
+
+
+				foreach($redeems as $redeem){
+					$expire = date($redeem->expiration);
+
+					if($today < $expire){
+
+						$response = array(
+							"message" => 'You have an ongoing deal',
+						);
+	
+						header('content-type: application/json');
+						echo json_encode($response);
+						return;
+					}
+				}
+
 				//get deals to insert on transaction
 				$client_details = $this->deals_model->insert_client_details();
 		
 				if ($client_details) {
-					
-					// Modify this to corressponding time
-					date_default_timezone_set('Asia/Singapore');
-					$post = json_decode(file_get_contents("php://input"), true);
-
-					$hash = $post['hash'];
-					$deal = $this->deals_model->getDeal($hash);	
 			
 					$date_redeemed = date("Y-m-d H:i:s");
-					$expiration_date = date("Y-m-d H:i:s", time()+(4*30));
+					$expiration_date = date("Y-m-d H:i:s", time()+($deal->seconds_before_expiration));
 					$redeem_code = "DC" . substr(md5(uniqid(mt_rand(), true)), 0, 6);
 					$trans_hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 		
@@ -179,9 +198,9 @@ class Popclub extends CI_Controller {
 			
 					header('content-type: application/json');
 					echo json_encode($response);
+					return;
 				}
 		
-				break;
 		}
 	}
 
