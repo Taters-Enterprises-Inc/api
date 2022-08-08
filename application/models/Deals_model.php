@@ -19,15 +19,18 @@ class Deals_model extends CI_Model
 				A.redeem_code,
 				A.expiration,
 				A.dateadded AS date_redeemed,
+				A.status,
 				B.name,
 				B.hash AS deal_hash,
 				B.product_image,
 				B.description,
 				B.original_price,
 				B.promo_price,
+				C.url_name AS platform_name,
 			');
 			$this->db->from('deals_redeems_tb A');
 			$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+			$this->db->join('dotcom_deals_platform C', 'C.id = A.platform_id');
 			$this->db->where('A.client_id', $client->id);
 
 			if($deal_id !== null){
