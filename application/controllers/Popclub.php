@@ -131,21 +131,6 @@ class Popclub extends CI_Controller {
 
 				$platform_selected = $_SESSION['popclub_data']['platform'];
 
-				foreach($redeems as $redeem){
-					$expire = date($redeem->expiration);
-
-					if($today < $expire  && $platform_selected == $redeem->platform_name){
-
-						$response = array(
-							"message" => 'You have an ongoing deal',
-						);
-	
-						header('content-type: application/json');
-						echo json_encode($response);
-						return;
-					}
-				}
-
 				//get deals to insert on transaction
 				$client_details = $this->deals_model->insert_client_details();
 		
@@ -212,11 +197,15 @@ class Popclub extends CI_Controller {
 					$response = array(
 						"message" => 'Successfully Redeem Code',
 						"data" => array(
-							'deal_id' => $deal->id,
-							'deal_hash' => $hash,
-							'date_redeemed' => $date_redeemed,
-							'expiration' => $expiration_date,
-							'redeem_code'=> $redeem_code,
+							"redeem_data" => array(
+								'deal_id' => $deal->id,
+								'deal_hash' => $hash,
+								'date_redeemed' => $date_redeemed,
+								'expiration' => $expiration_date,
+								'redeem_code'=> $redeem_code,
+							),
+							"deals" => $products,
+							"orders" => $products,
 						)
 					);
 					
@@ -380,7 +369,7 @@ class Popclub extends CI_Controller {
 					'customer_address' => $this->session->customer_address,
 					'userData' => $this->session->userData,
 					'orders' => $this->session->orders,
-					'deals' => $this->session->orders,
+					'deals' => $this->session->deals,
 				);
 		
 				$response = array(
