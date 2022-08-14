@@ -14,6 +14,28 @@ class Shop extends CI_Controller {
 		$this->load->model('product_model');
 	}
 
+	public function product(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+
+				$hash = $this->input->get('hash');
+
+				$product = $this->product_model->get_product($hash);
+
+				
+				$response = array(
+					'data' => array(
+						'product' => $product
+					),
+					'message' => 'Successfully fetch product'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response, JSON_PRETTY_PRINT);
+				return;
+		}
+	}
+
 	public function products(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':

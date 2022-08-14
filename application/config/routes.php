@@ -2,6 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 //Shop
+$route['shop/product'] = 'shop/product';
 $route['shop/products'] = 'shop/products';
 
 // POPCLUB 

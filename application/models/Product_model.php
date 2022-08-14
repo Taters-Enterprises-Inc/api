@@ -3,6 +3,30 @@
 class Product_model extends CI_Model 
 {
 	
+		
+	public function get_product($hash)
+    {
+        $this->db->select('
+			id, 
+			product_image, 
+			name, 
+			description, 
+			add_details, 
+			delivery_details, 
+			price, 
+			category, 
+			num_flavor, 
+			add_remarks, 
+			note, 
+			to_gc_value
+		');
+        $this->db->from('products_tb');
+		$this->db->where('product_hash', $hash);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
 
     function fetch_category_products($region,$category,$sort_id,$min,$max,$name)
     {   // select disable products
