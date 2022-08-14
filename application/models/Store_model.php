@@ -3,7 +3,7 @@
 class Store_model extends CI_Model 
 {
 	public function get_store_info($id){
-	  $this->db->select('store_id,active_reseller_region_id,name');
+	  $this->db->select('store_id,active_reseller_region_id,name,delivery_hours');
 	  $this->db->from('store_tb');
 	  $this->db->where('status',1);
 	  $this->db->where('store_id',$id);
