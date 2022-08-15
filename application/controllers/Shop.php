@@ -12,6 +12,7 @@ class Shop extends CI_Controller {
 		parent::__construct();
 		$this->load->model('store_model');
 		$this->load->model('product_model');
+		$this->load->library('images');
 	}
 
 	public function product(){
@@ -21,11 +22,28 @@ class Shop extends CI_Controller {
 				$hash = $this->input->get('hash');
 
 				$product = $this->product_model->get_product($hash);
+				
+				$product_size = $this->product_model->fetch_product_variants($product->id,'size');
+				$product_flavor = $this->product_model->fetch_product_variants($product->id,'flavor');
+				$product_date = $this->product_model->fetch_product_variants($product->id,'date');
+				// $product_images = $this->images->product_images(basename($product->product_image, '.jpg'));
+				$youtube_video_ads = $this->product_model->youtube_video_ads($product->id);
 
+				
+				$check_with_addons = $this->product_model->get_product_addons($product->id);
+				if ($check_with_addons != null) {
+					$addons = $this->product_model->get_product_addons_join($product->id);
+				}
 				
 				$response = array(
 					'data' => array(
-						'product' => $product
+						'product' => $product,
+						'addons' => $addons,
+						'product_size' => $product_size,
+						'product_flavor' => $product_flavor,
+						'product_date' => $product_date,
+						// 'product_images' => $product_images,
+						'youtube_video_ads' => $youtube_video_ads,
 					),
 					'message' => 'Successfully fetch product'
 				);

@@ -2,7 +2,41 @@
 
 class Product_model extends CI_Model 
 {
+    function youtube_video_ads($prod_id){
+        $this->db->select('*');
+        $this->db->from('youtube_video_ads');
+        $this->db->where('product_id',$prod_id);
+        $query = $this->db->get();
+        return $query->result();
+    }
 	
+    function get_product_addons_join($prod_id){
+        $this->db->select('*');
+        $this->db->from('product_with_addons');
+        $this->db->where('product_id',$prod_id);
+        $this->db->join('products_tb','products_tb.id = product_with_addons.addon_product_id');
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function get_product_addons($prod_id){
+        $this->db->select('*');
+        $this->db->where('product_id',$prod_id);
+        $query = $this->db->get('product_with_addons');
+        return $query->result();
+    }
+	
+    function fetch_product_variants($product_id,$name)
+    {
+        $this->db->select("B.id,B.name");
+        $this->db->from('product_variants_tb A');
+        $this->db->join('product_variant_options_tb B', 'B.product_variant_id = A.id','left');
+        $this->db->where('A.product_id', $product_id);
+        $this->db->where('A.name', $name);
+        $this->db->where('B.status', 1);
+        $query = $this->db->get();
+        return $query->result();
+    }
 		
 	public function get_product($hash)
     {
