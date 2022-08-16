@@ -35,7 +35,7 @@ class Cart extends CI_Controller {
                 }
 
                 $product_price = (empty($varx)) ? $product_details->price : $product_sku_price;
-                $calc_price    = $post['calc_price'];
+                $prod_calc_amount   = $post['prod_calc_amount'];
 
                 $prod_flavor = $this->product_model->fetch_variants_details($post['prod_flavor']);
                 $prod_size = $this->product_model->fetch_variants_details($post['prod_size']);
@@ -48,7 +48,7 @@ class Cart extends CI_Controller {
                 $set_value['prod_qty']              = (int)$post['prod_qty'];
                 $set_value['prod_price']            = (int)$product_price;
                 // $set_value['prod_calc_amount']      = $product_price * $post['prod_qty');
-                $set_value['prod_calc_amount']      = $calc_price;
+                $set_value['prod_calc_amount']      = $prod_calc_amount;
                 $set_value['prod_flavor']           = (empty($prod_flavor)) ? '' : $prod_flavor->name;
                 $set_value['prod_flavor_id']        = $post['prod_flavor'];
                 $set_value['prod_with_drinks']      = ($post['prod_with_drinks']) ? 1 : 0;
