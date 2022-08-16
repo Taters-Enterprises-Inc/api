@@ -12,8 +12,8 @@ class Store_model extends CI_Model
 	}
 
 	public function get_stores_available(
-		$latitude,
-		$longitude
+		$latitude = 0,
+		$longitude = 0
 	){
 		$this->db->select('
 			A.id,
@@ -32,7 +32,8 @@ class Store_model extends CI_Model
 			B.region_id, 
 			B.region_store_id, 
 			C.name AS region_name, 
-			C.sequence, ( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
+			C.sequence, 
+			( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
 			FROM `store_tb` A join region_store_combination_tb B ON B.region_store_id = A.region_store_combination_id 
 			join region_tb C ON C.id = B.region_id WHERE A.status = 1 ORDER BY distance
 		');

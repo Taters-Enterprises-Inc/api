@@ -2,6 +2,32 @@
 
 class Product_model extends CI_Model 
 {
+
+    function fetch_variants_details($id)
+    {
+        $this->db->select('name');
+        $this->db->where('id', $id);
+        $query = $this->db->get('product_variant_options_tb');
+        return $query->row();
+    }
+
+    function fetch_product_sku($variants)
+    {
+        $this->db->select("MAX(B.price) AS price,A.sku_id,MAX(B.sku) AS sku,MAX(B.product_id) AS product_id");
+        $this->db->from('product_variant_option_combinations_tb A');
+        $this->db->join('product_skus_tb B', 'A.sku_id = B.id');
+        if(count($variants) === 1){
+            $this->db->where('A.product_variant_option_id', $variants[0]);
+        }else{
+            $this->db->where_in('A.product_variant_option_id', $variants);
+            $this->db->having('COUNT(A.sku_id) > 1');
+        }
+        $this->db->group_by('A.sku_id');
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+
     function youtube_video_ads($prod_id){
         $this->db->select('*');
         $this->db->from('youtube_video_ads');
@@ -60,6 +86,18 @@ class Product_model extends CI_Model
         $query = $this->db->get();
         return $query->row();
     }
+	
+    function get_details($id)
+    {
+
+        $this->db->select("*");
+        $this->db->from('products_tb');
+        $this->db->where('id', $id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
 
 
     function fetch_category_products($region,$category,$sort_id,$min,$max,$name)

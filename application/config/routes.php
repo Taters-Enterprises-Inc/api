@@ -33,6 +33,9 @@ $route['facebook/logout'] = 'user_authentication/logout';
 // Store
 $route['store'] = 'store';
 
+//Cart
+$route['cart'] = 'cart';
+
 //Others
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

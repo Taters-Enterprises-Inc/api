@@ -14,6 +14,7 @@ class Shop extends CI_Controller {
 		$this->load->model('product_model');
 		$this->load->library('images');
 	}
+	
 
 	public function product(){
 		switch($this->input->server('REQUEST_METHOD')){
