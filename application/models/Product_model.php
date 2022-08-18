@@ -2,6 +2,40 @@
 
 class Product_model extends CI_Model 
 {
+	
+    function get_suggested_product($prod_id)
+    {
+        if(isset($_SESSION['cache_data'])){
+            $region = $this->db
+                    ->select('product_id')
+                    ->get_where('region_da_log', array('region_id' => $_SESSION['cache_data']['region_id'],
+                        'status' => 1))
+                    ->result();
+            foreach ($region as $row) {
+                $disable_region_items[] = $row->product_id;
+            }
+        }else{
+            $disable_region_items = array();
+        }
+        $disable_products = empty($disable_region_items) ? 0 : $disable_region_items;
+
+        $product_ids = $this->db->select('paired_products_id')
+            ->get_where('suggestive_selling_tb', array('product_id' => $prod_id))
+            ->result();
+
+        foreach ($product_ids as $val) {
+            $paired_ids[] = $val->paired_products_id;
+        }
+        $suggested_product_ids = empty($paired_ids) ? 0 : $paired_ids;
+
+        $this->db->select('id,product_image AS image,name,description,price,uom,product_hash AS hash');
+        $this->db->where('status', 1);
+        $this->db->where_in('id', $suggested_product_ids);
+        $this->db->where_not_in('id', $disable_products);
+
+        $query = $this->db->get('products_tb');
+        return $query->result();
+    }
 
     function fetch_variants_details($id)
     {

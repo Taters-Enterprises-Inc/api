@@ -29,6 +29,7 @@ class Shop extends CI_Controller {
 				$product_date = $this->product_model->fetch_product_variants($product->id,'date');
 				// $product_images = $this->images->product_images(basename($product->product_image, '.jpg'));
 				$youtube_video_ads = $this->product_model->youtube_video_ads($product->id);
+				$suggested_products = $this->product_model->get_suggested_product($product->id);
 
 				
 				$check_with_addons = $this->product_model->get_product_addons($product->id);
@@ -45,6 +46,7 @@ class Shop extends CI_Controller {
 						'product_date' => $product_date,
 						// 'product_images' => $product_images,
 						'youtube_video_ads' => $youtube_video_ads,
+						'suggested_products' => $suggested_products,
 					),
 					'message' => 'Successfully fetch product'
 				);

@@ -33,6 +33,9 @@ $route['facebook/logout'] = 'user_authentication/logout';
 // Store
 $route['store'] = 'store';
 
+// Branches
+$route['branches'] = 'branches';
+
 //Cart
 $route['cart'] = 'cart';
 

@@ -2,6 +2,68 @@
 
 class Store_model extends CI_Model 
 {
+	
+
+    public function fetch_ncr()
+    {
+    	$this->db->select('dotcom_stores.name as nameofstore, dotcom_stores.address as address,
+    					   IFNULL(dotcom_stores.contact_number, "No contact number") as contactno,
+    					   dotcom_stores.operating_hours as operatinghours, dotcom_stores.map_link as maplink, store_tb.store_image');
+    	$this->db->from('dotcom_stores');
+    	$this->db->join('dotcom_locale_tb', 'dotcom_stores.locale = dotcom_locale_tb.id' ,'right');
+    	$this->db->join('store_tb', 'store_tb.store_id = dotcom_stores.store_id');
+    	$this->db->where('dotcom_stores.status', 1);
+        $this->db->where('dotcom_locale_tb.id', 1);
+        $this->db->order_by('dotcom_stores.name');
+    	$query = $this->db->get();
+        return $query->result();
+    }
+
+    public function fetch_luzon()
+    {
+    	$this->db->select('dotcom_stores.name as nameofstore, dotcom_stores.address as address,
+    					   IFNULL(dotcom_stores.contact_number, "No contact number") as contactno,
+    					   dotcom_stores.operating_hours as operatinghours, dotcom_stores.map_link as maplink, store_tb.store_image');
+    	$this->db->from('dotcom_stores');
+    	$this->db->join('dotcom_locale_tb', 'dotcom_stores.locale = dotcom_locale_tb.id' ,'right');
+    	$this->db->join('store_tb', 'store_tb.store_id = dotcom_stores.store_id');
+    	$this->db->where('dotcom_stores.status', 1);
+        $this->db->where('dotcom_locale_tb.id', 2);
+        $this->db->order_by('dotcom_stores.name');
+    	$query = $this->db->get();
+        return $query->result();
+    }
+
+    public function fetch_visayas()
+    {
+    	$this->db->select('dotcom_stores.name as nameofstore, dotcom_stores.address as address,
+    					   IFNULL(dotcom_stores.contact_number, "No contact number") as contactno,
+    					   dotcom_stores.operating_hours as operatinghours, dotcom_stores.map_link as maplink, store_tb.store_image');
+    	$this->db->from('dotcom_stores');
+    	$this->db->join('dotcom_locale_tb', 'dotcom_stores.locale = dotcom_locale_tb.id' ,'right');
+    	$this->db->join('store_tb', 'store_tb.store_id = dotcom_stores.store_id');
+    	$this->db->where('dotcom_stores.status', 1);
+        $this->db->where('dotcom_locale_tb.id', 3);
+        $this->db->order_by('dotcom_stores.name');
+    	$query = $this->db->get();
+        return $query->result();
+    }
+	
+    public function fetch_mindanao()
+    {
+    	$this->db->select('dotcom_stores.name as nameofstore, dotcom_stores.address as address,
+    					   IFNULL(dotcom_stores.contact_number, "No contact number") as contactno,
+    					   dotcom_stores.operating_hours as operatinghours, dotcom_stores.map_link as maplink, store_tb.store_image');
+    	$this->db->from('dotcom_stores');
+    	$this->db->join('dotcom_locale_tb', 'dotcom_stores.locale = dotcom_locale_tb.id' ,'right');
+    	$this->db->join('store_tb', 'store_tb.store_id = dotcom_stores.store_id');
+    	$this->db->where('dotcom_stores.status', 1);
+        $this->db->where('dotcom_locale_tb.id', 4);
+        $this->db->order_by('dotcom_stores.name');
+    	$query = $this->db->get();
+        return $query->result();
+    }
+
 	public function get_store_info($id){
 	  $this->db->select('store_id,active_reseller_region_id,name,delivery_hours');
 	  $this->db->from('store_tb');
@@ -49,6 +111,8 @@ class Store_model extends CI_Model
 			  'store_name'       => $value->store_name,
 			  'store_address'    => $value->address,
 			  'store_distance'   => $value->distance,
+			  'latitude'   		=> $value->distance,
+			  'longitude'   	=> $value->distance,
 			  'menu_type'        => $value->menu_type,
 			  'store_image'      => $value->store_image,
 			  'region_store_id'  => $value->region_store_id,
