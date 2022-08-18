@@ -3,6 +3,34 @@
 class Store_model extends CI_Model 
 {
 	
+    public function fetch_bank_details($id)
+    {
+        $this->db->select('indicator AS id,moh_type AS type,bank_name AS name, bank_account_num AS acct, bank_account_name AS acct_name, qr_code');
+        $this->db->where('store_id', $id);
+        $query = $this->db->get('bank_account_tb');
+        return $query->result();
+    }
+
+    function get_store_schedule($store_id){
+        $this->db->select('name, address, delivery_rate, minimum_rate, catering_delivery_rate, catering_minimum_rate, opening, closing, menu_type');
+        $this->db->where('store_id', $store_id);
+        $query = $this->db->get('store_tb');
+        return $query->row();
+    }
+
+    function fetch_moh_setup($region_id){
+        $this->db->select('*');
+        $this->db->where('region_id', $region_id);
+        $query = $this->db->get('area_moh_tb');
+        return $query->row();
+    }
+
+    function check_surcharge($id){
+        $this->db->select('enable_surcharge,surcharge_delivery_rate,surcharge_minimum_rate');
+        $this->db->where('store_id', $id);
+        $query = $this->db->get('store_tb');
+        return $query->row();
+    }
 
     public function fetch_ncr()
     {
@@ -65,7 +93,7 @@ class Store_model extends CI_Model
     }
 
 	public function get_store_info($id){
-	  $this->db->select('store_id,active_reseller_region_id,name,delivery_hours');
+	  $this->db->select('store_id,region_id,name,delivery_hours');
 	  $this->db->from('store_tb');
 	  $this->db->where('status',1);
 	  $this->db->where('store_id',$id);

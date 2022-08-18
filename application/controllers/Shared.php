@@ -16,18 +16,32 @@ class Shared extends CI_Controller {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 				$data = array(
-					'popclub_data' => $this->session->popclub_data,
-					'cache_data' => $this->session->cache_data,
-					'customer_address' => $this->session->customer_address,
-					'userData' => $this->session->userData,
-					'orders' => $this->session->orders,
-					'deals' => $this->session->deals,
+					'popclub_data' 					=> $this->session->popclub_data,
+					'cache_data' 					=> $this->session->cache_data,
+					'customer_address' 				=> $this->session->customer_address,
+					'userData' 						=> $this->session->userData,
+					'orders'						=> $this->session->orders,
+					'deals' 						=> $this->session->deals,
+					"km_radius"						=> $this->session->km_radius,
+					"km_min"						=> $this->session->km_min,
+					"free_delivery"					=> $this->session->free_delivery,
+					"free_min_delivery"				=> $this->session->free_min_delivery,
+					"delivery_rate"					=> $this->session->delivery_rate,
+					"minimum_rate"					=> $this->session->minimum_rate,
+					"catering_delivery_rate"		=> $this->session->catering_delivery_rate,
+					"catering_minimum_rate"			=> $this->session->catering_minimum_rate,
+					"distance"						=> $this->session->distance,
+					"distance_rate_id"				=> $this->session->distance_rate_id,
+					"distance_rate_price"			=> $this->session->distance_rate_price,
+					"distance_rate_price_before"	=> $this->session->distance_rate_price_before,
+					"distance_routes"				=> $this->session->distance_routes,
+					"distance_radius"				=> $this->session->distance_radius,
+					"payops_list"					=> $this->session->payops_list,
 				);
 		
 				$response = array(
-					'message' => 'Successfully set popclub_data',
+					'message' => 'Successfully fetch session',
 					'data' => $data,
-					'session' => $_SESSION,
 				);
 				
 				header('content-type: application/json');
