@@ -2,45 +2,69 @@
 
 class Transaction_model extends CI_Model {
     
-    public function insert_client_details($hash_key)
+    public function insert_client_orders($data)
+    {
+        $this->db->trans_start();
+        $this->db->insert_batch('order_items', $data);
+        $this->db->trans_complete();
+        return  $this->db->trans_status();
+    }
+	
+    public function insert_client_orders_deal($data)
+    {
+        $this->db->trans_start();
+        $this->db->insert_batch('deals_order_items', $data);
+        $this->db->trans_complete();
+        return  $this->db->trans_status();
+    }
+
+    public function insert_transaction_details($data)
+    {   
+        $this->db->trans_start();
+		$this->db->insert('transaction_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        $id = ($this->db->trans_status() === FALSE) ? 0 : $insert_id;
+        return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
+    }
+    
+    public function insert_client_details($post)
     {  
-        if($_SESSION['moh'] == 2){
-            $payops = $this->input->post('delivery_checkout_payops');
-        }else{
-            $payops = $this->input->post('checkout_payops');
-        }
         if (isset($_SESSION['userData']['oauth_uid'])) {
+
             $this->db->trans_start();
-                // $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
-                $data = array(
-                    'fb_user_id'        => $this->shop_model->get_facebook_client_id($_SESSION['userData']['oauth_uid']),
-                    'email'             => $this->input->post('checkout_email'),
-                    'address'           => $this->input->post('checkout_address'),
-                    'contact_number'    => $this->input->post('checkout_phone'),
-                    'moh'               => $this->session->moh,
-                    'payops'            => (isset($_SESSION['userData']['store_user_id'])) ? 0 : $payops,
-                    'add_name'          => $this->input->post('checkout_fname').' '.$this->input->post('checkout_lname'),
-                    'add_contact'       => $this->input->post('checkout_phone'),
-                    'add_address'       => $this->input->post('checkout_address')
-                );
-                $this->db->insert('client_tb', $data);
-                $insert_id = $this->db->insert_id();
+            // $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
+            $data = array(
+                'fb_user_id'        => $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']),
+                'email'             => $post['eMail'],
+                'address'           => $post['address'],
+                'contact_number'    => $post['phoneNumber'],
+                'moh'               => 2,
+                'payops'            => $post['payops'],
+                'add_name'          => $post['firstName'].' '.$post['lastName'],
+                'add_contact'       => $post['phoneNumber'],
+                'add_address'       => $post['address']
+            );
+            $this->db->insert('client_tb', $data);
+            $insert_id = $this->db->insert_id();
             $this->db->trans_complete();
+
         } elseif(isset($_SESSION['userData']) && $_SESSION['userData']['login_type'] == 'mobile'){
-            $this->db->trans_start();
+                $this->db->trans_start();
                 // $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
                 $data = array(
-                    'mobile_user_id'    => $this->shop_model->get_mobile_client_id($_SESSION['userData']['mobile_user_id']),
-                    'fname'             => $this->input->post('checkout_fname'),
-                    'lname'             => $this->input->post('checkout_lname'),
-                    'email'             => $this->input->post('checkout_email'),
-                    'address'           => $this->input->post('checkout_address'),
-                    'contact_number'    => $this->input->post('checkout_phone'),
-                    'moh'               => $this->session->moh,
-                    'payops'            => (isset($_SESSION['userData']['store_user_id'])) ? 0 : $payops,
-                    'add_name'          => $this->input->post('checkout_fname').' '.$this->input->post('checkout_lname'),
-                    'add_contact'       => $this->input->post('checkout_phone'),
-                    'add_address'       => $this->input->post('checkout_address')
+                    'mobile_user_id'    => $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']),
+                    'fname'             => $post['firstName'],
+                    'lname'             => $post['lastName'],
+                    'email'             => $post['eMail'],
+                    'address'           => $post['address'],
+                    'contact_number'    => $post['phoneNumber'],
+                    'moh'               => 2,
+                    'payops'            => $post['payops'],
+                    'add_name'          => $post['firstName'].' '.$post['lastName'],
+                    'add_contact'       => $post['phoneNumber'],
+                    'add_address'       => $post['address']
                 );
                 $this->db->insert('client_tb', $data);
                 $insert_id = $this->db->insert_id();
@@ -49,16 +73,16 @@ class Transaction_model extends CI_Model {
             $this->db->trans_start();
                 // $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
                 $data = array(
-                    'fname'             => $this->input->post('checkout_fname'),
-                    'lname'             => $this->input->post('checkout_lname'),
-                    'email'             => $this->input->post('checkout_email'),
-                    'address'           => $this->input->post('checkout_address'),
-                    'contact_number'    => $this->input->post('checkout_phone'),
-                    'moh'               => $this->session->moh,
-                    'payops'            => $payops,
-                    'add_name'          => $this->input->post('checkout_fname').' '.$this->input->post('checkout_lname'),
-                    'add_contact'       => $this->input->post('checkout_phone'),
-                    'add_address'       => $this->input->post('checkout_address')
+                    'fname'             => $post['firstName'],
+                    'lname'             => $post['lastName'],
+                    'email'             => $post['eMail'],
+                    'address'           => $post['address'],
+                    'contact_number'    => $post['phoneNumber'],
+                    'moh'               => 2,
+                    'payops'            => $post['payops'],
+                    'add_name'          => $post['firstName'].' '.$post['lastName'],
+                    'add_contact'       => $post['phoneNumber'],
+                    'add_address'       => $post['address']
                 );
                 $this->db->insert('client_tb', $data);
                 $insert_id = $this->db->insert_id();
@@ -85,5 +109,23 @@ class Transaction_model extends CI_Model {
 
         $id = ($this->db->trans_status() === FALSE) ? 0 : $insert_id;
         return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
+    }
+    
+    //jepoy get facebook client id
+    public function get_facebook_client_id($oauth_id){
+        $this->db->select('id');
+        $this->db->where('oauth_uid', $oauth_id);
+        $query = $this->db->get('fb_users');
+        $data = $query->result_array();
+        return $data[0]['id'];
+    }
+    
+    //jepoy get mobile client id
+    public function get_mobile_client_id($id){
+        $this->db->select('id');
+        $this->db->where('id', $id);
+        $query = $this->db->get('mobile_users');
+        $data = $query->result_array();
+        return $data[0]['id'];
     }
 }

@@ -4,6 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 //Shop
 $route['shop/product'] = 'shop/product';
 $route['shop/products'] = 'shop/products';
+$route['shop/orders'] = 'shop/orders';
+$route['shop/upload_payment'] = 'shop/upload_payment';
 
 // POPCLUB 
 $route['popclub/platform'] = 'popclub/platform';
@@ -38,6 +40,12 @@ $route['branches'] = 'branches';
 
 //Cart
 $route['cart'] = 'cart';
+
+//Transactions
+$route['transaction/shop'] = 'transaction/shop';
+
+//Image
+$route['load-image/(:any)'] = 'image/load_image/$1';	
 
 //Others
 $route['404_override'] = '';

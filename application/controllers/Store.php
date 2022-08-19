@@ -43,10 +43,13 @@ class Store extends CI_Controller {
 				$surcharge = $check_surcharge->enable_surcharge;
 				$surcharge_delivery_rate = $check_surcharge->surcharge_delivery_rate;
 				$surcharge_minimum_rate = $check_surcharge->surcharge_minimum_rate;
+				
+				$region = $this->store_model->select_region($store->region_id);
 
                 $_SESSION['cache_data'] = array(
                     'store_id'					=>	$store->store_id,
                     'region_id'					=>	$store->region_id,
+                    'region_name'				=>	$region->name,
                     'store_name'				=>	$store->name,
 					'surcharge_delivery_rate'	=>	$surcharge_delivery_rate,
 					'surcharge_minimum_rate'	=>	$surcharge_minimum_rate,
@@ -88,6 +91,7 @@ class Store extends CI_Controller {
 				
 				$payops_list = $this->store_model->fetch_bank_details($store_id);
 				$this->session->set_userdata('payops_list', $payops_list);
+                $this->session->set_userdata('cash_delivery', '50');
 				
 
 				$response = array(

@@ -37,6 +37,7 @@ class Shared extends CI_Controller {
 					"distance_routes"				=> $this->session->distance_routes,
 					"distance_radius"				=> $this->session->distance_radius,
 					"payops_list"					=> $this->session->payops_list,
+					"cash_delivery"					=> $this->session->cash_delivery,
 				);
 		
 				$response = array(

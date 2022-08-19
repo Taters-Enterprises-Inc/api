@@ -2,6 +2,30 @@
 
 class Store_model extends CI_Model 
 {
+    //jepoy get store id by hash key
+    public function get_store_id_by_hash_key($hash_key){
+        $this->db->select('store');
+        $this->db->where('hash_key', $hash_key);
+        $query = $this->db->get('transaction_tb');
+        $data = $query->result_array();
+        return $data[0]['store'];
+    }
+	
+    //jepoy dynamic delivery hours
+    public function get_delivery_hours($store_id){
+        $this->db->select('delivery_hours');
+        $this->db->where('store_id', $store_id);
+        $query = $this->db->get('store_tb');
+        $data = $query->result_array();
+        return $data[0]['delivery_hours'];
+    }
+
+    function select_region($id){
+		$this->db->select('name');
+		$this->db->where('id', $id);
+		$query = $this->db->get('region_tb');
+		return $query->row();
+    }
 	
     public function fetch_bank_details($id)
     {

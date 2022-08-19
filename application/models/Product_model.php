@@ -2,7 +2,144 @@
 
 class Product_model extends CI_Model 
 {
+    
+    function upload_payment($data,$file_name,$tracking_no,$transaction_id)
+    { 
+        date_default_timezone_set('Asia/Manila');
+        $upload_time = date('Y-m-d H:i:s');
+        $file_name = $data['file_name'];
+
+        $this->db->set('payment_proof', $file_name);
+        $this->db->set('status', 2);
+        $this->db->set('upload_date', $upload_time);
+        $this->db->where("tracking_no", $tracking_no);
+        $this->db->update("transaction_tb");
+        // return ($this->db->affected_rows() != 1) ? false : true;
+        $return_data['upload_status'] = ($this->db->affected_rows() != 1) ? false : true;
+
+        if($return_data['upload_status'] > 0){
+            
+            $client_query = $this->db->select('client_id')
+                ->get_where('transaction_tb', array('id' => $transaction_id))
+                ->result();
+            $return_data['client_data'] = $client_query[0];
+        }
+        return $return_data;
+    }
+
+    
+    public function get_facebook_details($id){
+        $this->db->select("*");
+        $this->db->from('fb_users');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    public function view_order($hash_key)
+    {   
+        $this->db->select('hash_key');
+        $this->db->from('transaction_tb');
+        $this->db->where('hash_key', $hash_key);
+        $this->db->where('status !=', 4);
+        // $this->db->where('status !=', 6);
+        $check_hash = $this->db->get();
+        $result = $check_hash->result();
+
+        if(!empty($result)){
+            $table = "client_tb A";
+            $select_column = array("A.fb_user_id","A.fname", "A.lname", "A.email","A.address", "A.contact_number","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","B.voucher_id","B.table_number","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","A.add_name","A.add_contact","A.add_address","V.discount_value","V.voucher_code","B.giftcard_discount","B.giftcard_number");
+            $join_A = "A.id = B.client_id";
+            $this->db->select($select_column);  
+            $this->db->from($table);
+            $this->db->join('transaction_tb B', $join_A ,'left');
+            $this->db->join('store_tb Z', 'Z.store_id = B.store' ,'left');
+            $this->db->join('voucher_logs_tb V', 'V.transaction_id = B.id' ,'left');
+            $this->db->where('B.hash_key', $hash_key);
+            // $this->db->where('B.status !=', 4);
+            // $this->db->where('B.status !=', 6);
+            $query_info = $this->db->get();
+            $info = $query_info->result();
+
+            // $fb_table = "fb_users F";
+            // $select_column_F = array("F.first_name", "F.last_name", "F.email","C.address", "C.contact_number","B.logon_type","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","C.moh","C.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","B.voucher_id","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","C.add_address","V.discount_value","V.voucher_code");
+            // $join_F = "F.id = B.client_id";
+            // $this->db->select($select_column_F);  
+            // $this->db->from($fb_table);
+            // $this->db->join('transaction_tb B', $join_F ,'left');
+            // $this->db->join('store_tb Z', 'Z.store_id = B.store' ,'left');
+            // $this->db->join('fb_client_tb C', 'C.hash_key = B.hash_key' ,'left');
+            // $this->db->join('voucher_logs_tb V', 'V.transaction_id = B.id' ,'left');
+            // $this->db->where('B.hash_key', $hash_key);
+            // $query_fb_info = $this->db->get();
+            // $fb_info = $query_fb_info->result();
+
+            //jepoy addon for tag on view cart
+            $select_col = array("O.product_id","O.combination_id","O.type","O.quantity","O.status","O.remarks","O.promo_id","O.promo_price","O.sku","O.sku_id","O.price AS calc_price","O.product_price","P.product_image","P.name","P.description","P.delivery_details","P.uom","P.add_details","P.add_remarks","P.product_hash","P.note","P.product_code","O.product_label","O.addon_drink","O.addon_flav","O.addon_butter","O.addon_base_product","U.name AS freebie_prod_name");
+            $this->db->from('products_tb P');
+            $this->db->select($select_col);
+            $this->db->join('order_items O', 'P.id = O.product_id' ,'left');
+            $this->db->join('transaction_tb T', 'O.transaction_id = T.id' ,'left');
+            $this->db->join('freebie_products_tb U', 'U.id = O.product_id' ,'left');
+            $this->db->where('T.hash_key', $hash_key);
+            $this->db->order_by('type','DESC');
+            $query_orders = $this->db->get();
+            $orders = $query_orders->result();
+
+            $select_col = array("D.name", 'D.product_image', 'O.quantity', 'O.remarks', "O.price",);
+			$this->db->from('dotcom_deals_tb D');
+            $this->db->select($select_col);
+            $this->db->join('deals_order_items O', 'D.id = O.deal_id' ,'left');
+            $this->db->join('transaction_tb T', 'O.redeems_id = T.id' ,'left');
+            $this->db->where('T.hash_key', $hash_key);
+            $query_deals = $this->db->get();
+            $deals = $query_deals->result();
+			
+
+            $this->db->from('personnel_tb');
+            $this->db->select('name,contact_number');
+            // $this->db->where('reference_code', ($result[0]->logon_type == 'facebook') ? $fb_info[0]->moh : $info[0]->moh);
+            // $this->db->where('assigned_store', ($result[0]->logon_type == 'facebook') ? $fb_info[0]->store: $info[0]->store);
+            $this->db->where('reference_code', $info[0]->moh);
+            $this->db->where('assigned_store', $info[0]->store);
+            $query_orders = $this->db->get();
+            $personnel = $query_orders->result();
+
+            $this->db->from('bank_account_tb');
+            $this->db->select('*');
+            $this->db->where('store_id', $info[0]->store);
+            $this->db->where('indicator', $info[0]->payops);
+            $query_orders = $this->db->get();
+            $bank = $query_orders->result();
+
+            $join_data['clients_info'] = $info[0];
+            // $join_data['fb_info'] = $fb_info[0];
+            $join_data['order_details'] = $orders;
+			$join_data['deals_details'] = $deals;
+            $join_data['personnel'] = $personnel[0];
+            $join_data['bank'] = $bank[0];
+            
+            // print_r($join_data);
+            return $join_data;
+        }else{
+            return $join_data = array();
+        }
+    }
+
+    function fetch_product_name($id)
+    {
+        $this->db->select('name');
+        // $this->db->where('product_id', $id);
+        $this->db->where('id', $id);
+        $query = $this->db->get('products_tb');
+        return $query->result();
+    }
 	
+    function insert_giftcard_user($data){
+        $this->db->insert('giftcard_users',$data);
+        return $this->db->affected_rows() ? 1 : 0;
+    }
+    
     function get_suggested_product($prod_id)
     {
         if(isset($_SESSION['cache_data'])){
