@@ -10,7 +10,7 @@ class Cart extends CI_Controller {
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->model('product_model');
+		$this->load->model('shop_model');
 	}
 	public function index(){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -18,7 +18,7 @@ class Cart extends CI_Controller {
 				$post = json_decode(file_get_contents("php://input"), true);
 				
                 $prod_id = (int)$post['prod_id'];
-                $product_details = $this->product_model->get_details($prod_id)[0];
+                $product_details = $this->shop_model->get_details($prod_id)[0];
 				$prod_image_name = $post['prod_image_name'];
 
                 $product_sku_price = 0;
@@ -26,7 +26,7 @@ class Cart extends CI_Controller {
                     $varx[] = (int)$post['prod_flavor'];
                     $varx[] = (int)$post['prod_size'];
                     $varxz = array_values(array_filter($varx));
-                    $product_sku = $this->product_model->fetch_product_sku($varxz);
+                    $product_sku = $this->shop_model->fetch_product_sku($varxz);
                     if(!empty($product_sku)){
                         $product_sku_price = $product_sku->price;
                     }else{
@@ -37,8 +37,8 @@ class Cart extends CI_Controller {
                 $product_price = (empty($varx)) ? $product_details->price : $product_sku_price;
                 $prod_calc_amount   = $post['prod_calc_amount'];
 
-                $prod_flavor = $this->product_model->fetch_variants_details($post['prod_flavor']);
-                $prod_size = $this->product_model->fetch_variants_details($post['prod_size']);
+                $prod_flavor = $this->shop_model->fetch_variants_details($post['prod_flavor']);
+                $prod_size = $this->shop_model->fetch_variants_details($post['prod_size']);
 
 
 

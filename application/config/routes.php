@@ -32,6 +32,10 @@ $route['facebook/login_point'] = 'user_authentication/fb_login_point';
 $route['facebook/login/success'] = 'user_authentication/success_login';
 $route['facebook/logout'] = 'user_authentication/logout';
 
+// Profile
+$route['profile/snackshop-orders'] = 'profile/snackshop_orders';
+$route['profile/catering-bookings'] = 'profile/catering_bookings';
+
 // Store
 $route['store'] = 'store';
 

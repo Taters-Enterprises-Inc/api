@@ -11,7 +11,8 @@ class Shop extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->model('store_model');
-		$this->load->model('product_model');
+		$this->load->model('shop_model');
+		$this->load->model('user_model');
 		$this->load->library('images');
 	}
 	
@@ -45,7 +46,7 @@ class Shop extends CI_Controller {
                 $tracking_no = $_POST['tracking_no'];
                 $transaction_id = $_POST['trans_id'];
 
-                $query_result = $this->product_model->upload_payment($data, $file_name, $tracking_no, $transaction_id);
+                $query_result = $this->shop_model->upload_payment($data, $file_name, $tracking_no, $transaction_id);
 
                 // $transaction_id = $_SESSION['transaction_id'];
                 // $user_id = $this->session->userdata('user_id');
@@ -74,7 +75,7 @@ class Shop extends CI_Controller {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 				$hash = $this->input->get('hash');
-				$order_details = $this->product_model->view_order($hash);
+				$order_details = $this->shop_model->view_order($hash);
 				
                 if ($order_details['clients_info']->reseller_id != 0) {
                     $subtotal = $order_details['clients_info']->purchase_amount;
@@ -101,8 +102,8 @@ class Shop extends CI_Controller {
                 }
 
 
-				$firstname = $this->product_model->get_facebook_details($order_details['clients_info']->fb_user_id)[0]->first_name;
-				$lastname = $this->product_model->get_facebook_details($order_details['clients_info']->fb_user_id)[0]->last_name;
+				$firstname = $this->shop_model->get_facebook_details($order_details['clients_info']->fb_user_id)[0]->first_name;
+				$lastname = $this->shop_model->get_facebook_details($order_details['clients_info']->fb_user_id)[0]->last_name;
 
 				$store_id = $this->store_model->get_store_id_by_hash_key($hash);
 				$delivery_hours = $this->store_model->get_delivery_hours($store_id);
@@ -134,19 +135,19 @@ class Shop extends CI_Controller {
 
 				$hash = $this->input->get('hash');
 
-				$product = $this->product_model->get_product($hash);
+				$product = $this->shop_model->get_product($hash);
 				
-				$product_size = $this->product_model->fetch_product_variants($product->id,'size');
-				$product_flavor = $this->product_model->fetch_product_variants($product->id,'flavor');
-				$product_date = $this->product_model->fetch_product_variants($product->id,'date');
+				$product_size = $this->shop_model->fetch_product_variants($product->id,'size');
+				$product_flavor = $this->shop_model->fetch_product_variants($product->id,'flavor');
+				$product_date = $this->shop_model->fetch_product_variants($product->id,'date');
 				// $product_images = $this->images->product_images(basename($product->product_image, '.jpg'));
-				$youtube_video_ads = $this->product_model->youtube_video_ads($product->id);
-				$suggested_products = $this->product_model->get_suggested_product($product->id);
+				$youtube_video_ads = $this->shop_model->youtube_video_ads($product->id);
+				$suggested_products = $this->shop_model->get_suggested_product($product->id);
 
 				
-				$check_with_addons = $this->product_model->get_product_addons($product->id);
+				$check_with_addons = $this->shop_model->get_product_addons($product->id);
 				if ($check_with_addons != null) {
-					$addons = $this->product_model->get_product_addons_join($product->id);
+					$addons = $this->shop_model->get_product_addons_join($product->id);
 				}
 				
 				$response = array(
@@ -184,7 +185,7 @@ class Shop extends CI_Controller {
 				}
 
 
-				$products = $this->product_model->fetch_category_products($region_id,'','','','','');
+				$products = $this->shop_model->fetch_category_products($region_id,'','','','','');
 
 				
 				$response = array(

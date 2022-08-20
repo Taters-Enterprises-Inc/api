@@ -1,8 +1,31 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Product_model extends CI_Model 
+class Shop_model extends CI_Model 
 {
-    
+    public function get_user_order_history($id,$type){
+        $this->db->select('
+            A.dateadded,
+            A.tracking_no,
+            A.purchase_amount,
+            C.generated_raffle_code,
+            C.application_status,
+            A.hash_key,
+        ');
+        $this->db->from('transaction_tb A');
+        $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
+        $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
+        $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
+        // $this->db->join('raffle_coupon_code_tb D', 'A.raffle_coupon_code = D.raffle_coupon_code' ,'left');
+        if ($type == 'mobile') {
+            $this->db->where('B.mobile_user_id', $id);
+        } else {
+            $this->db->where('B.fb_user_id', $id);
+        }
+        $this->db->order_by('A.dateadded','DESC');
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     function upload_payment($data,$file_name,$tracking_no,$transaction_id)
     { 
         date_default_timezone_set('Asia/Manila');
@@ -26,7 +49,6 @@ class Product_model extends CI_Model
         }
         return $return_data;
     }
-
     
     public function get_facebook_details($id){
         $this->db->select("*");
@@ -198,7 +220,6 @@ class Product_model extends CI_Model
         return $query->row();
     }
 
-
     function youtube_video_ads($prod_id){
         $this->db->select('*');
         $this->db->from('youtube_video_ads');
@@ -269,10 +290,8 @@ class Product_model extends CI_Model
         return $query->result();
     }
 
-
-
     function fetch_category_products($region,$category,$sort_id,$min,$max,$name)
-    {   // select disable products
+    {  
         if($region!=0){
             $region = $this->db
                 ->select('product_id')

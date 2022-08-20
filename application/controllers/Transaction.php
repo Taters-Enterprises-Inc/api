@@ -11,7 +11,7 @@ class Transaction extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->model('transaction_model');
-		$this->load->model('product_model');
+		$this->load->model('shop_model');
 	}
 
     public function get_facebook_client_id($oauth_id){
@@ -182,7 +182,7 @@ class Transaction extends CI_Controller {
 										'product_label'       => $value['prod_size'],
 										'product_discount'    => $value['prod_discount'],
 										// 'addon_base_product'        => $value['addon_base_product_id'],
-										// 'addon_base_product_name'   => $this->product_model->fetch_product_name($value['addon_base_product_id'])[0]->name,
+										// 'addon_base_product_name'   => $this->shop_model->fetch_product_name($value['addon_base_product_id'])[0]->name,
 									);
 									if($value['prod_category'] == 17) {
 										if (isset($this->session->userData['mobile_user_id'])) {
@@ -200,7 +200,7 @@ class Transaction extends CI_Controller {
 											'status'            =>0,
 											'giftcard_number'   =>null,
 										);
-										$this->product_model->insert_giftcard_user($data);
+										$this->shop_model->insert_giftcard_user($data);
 									}
 								}else if($value['deal_id']){
 									$order_data_deal[] = array(
