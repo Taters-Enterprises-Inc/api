@@ -27,7 +27,7 @@ class Store extends CI_Controller {
 
 				$response = array(
 					'data' => $stores,
-					'message' => 'Successfully fetch popclub_data'
+					'message' => 'Select a store that is available near you'
 				);
 				
 				header('content-type: application/json');

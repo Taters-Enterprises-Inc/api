@@ -190,7 +190,7 @@ class Shop extends CI_Controller {
 				
 				$response = array(
 					'data' => $products,
-					'message' => 'Successfully fetch products'
+					'message' => "Successfully fetch products"
 				);
 
 				header('content-type: application/json');
