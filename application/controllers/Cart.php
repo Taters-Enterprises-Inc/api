@@ -41,41 +41,27 @@ class Cart extends CI_Controller {
                 $prod_size = $this->shop_model->fetch_variants_details($post['prod_size']);
 
 
-
                 $set_value['prod_id']               = $prod_id;
                 $set_value['prod_image_name']       = $prod_image_name;
                 $set_value['prod_name']             = $product_details->name;
                 $set_value['prod_qty']              = (int)$post['prod_qty'];
                 $set_value['prod_price']            = (int)$product_price;
-                // $set_value['prod_calc_amount']      = $product_price * $post['prod_qty');
                 $set_value['prod_calc_amount']      = $prod_calc_amount;
                 $set_value['prod_flavor']           = (empty($prod_flavor)) ? '' : $prod_flavor->name;
                 $set_value['prod_flavor_id']        = $post['prod_flavor'];
-                $set_value['prod_with_drinks']      = ($post['prod_with_drinks']) ? 1 : 0;
                 $set_value['prod_size']             = (empty($prod_size)) ? '' : $prod_size->name;
                 $set_value['prod_size_id']          = $post['prod_size'];
-                $set_value['prod_multiflavors']     = $post['flavors_details'];
-                $set_value['prod_sku_id']           = $post['prod_sku_id'];
-                $set_value['prod_sku']              = $post['prod_sku'];
                 $set_value['prod_discount']         = 0;
                 $set_value['prod_category']         = $product_details->category;
 
-                $validation_status = 'success';
-                $message = array();
-
-                // set to session
-                if($post['action'] == 'update'){
-                    $_SESSION['orders'][$post['order_key']] = $set_value;
-                }else{
-                    $_SESSION['orders'][] = $set_value;
-                }
+                $_SESSION['orders'][] = $set_value;
 
 				$response = array(
-					'message' => 'Successfully add to cart'
+					'message' => 'Successfully add to cart item'
 				);
 
 				header('content-type: application/json');
-				echo json_encode($response, JSON_PRETTY_PRINT);
+				echo json_encode($response);
 				break;
 		}
 	}
