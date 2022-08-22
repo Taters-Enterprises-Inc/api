@@ -49,8 +49,12 @@ class Cart extends CI_Controller {
                 $set_value['prod_calc_amount']      = $prod_calc_amount;
                 $set_value['prod_flavor']           = (empty($prod_flavor)) ? '' : $prod_flavor->name;
                 $set_value['prod_flavor_id']        = $post['prod_flavor'];
+                $set_value['prod_with_drinks']      = $post['prod_with_drinks'] ? 1 : 0;
                 $set_value['prod_size']             = (empty($prod_size)) ? '' : $prod_size->name;
                 $set_value['prod_size_id']          = $post['prod_size'];
+                $set_value['prod_multiflavors']     = $post['flavors_details'];
+                $set_value['prod_sku_id']           = $post['prod_sku_id'];
+                $set_value['prod_sku']              = $post['prod_sku'];
                 $set_value['prod_discount']         = 0;
                 $set_value['prod_category']         = $product_details->category;
 
