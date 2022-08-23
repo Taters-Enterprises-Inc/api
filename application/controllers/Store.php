@@ -104,6 +104,23 @@ class Store extends CI_Controller {
 		}
 	}
 	
+	public function reset(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$this->session->unset_userdata('cache_data');
+				$this->session->unset_userdata('orders');
+				
+				$response = array(
+					'message' => 'Reset user selection'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+		
+	}
+	
     private function distance_computation($dist)
     {   
         //check if catering order

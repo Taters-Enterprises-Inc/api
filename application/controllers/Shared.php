@@ -46,7 +46,7 @@ class Shared extends CI_Controller {
 				);
 				
 				header('content-type: application/json');
-				echo json_encode($response, JSON_PRETTY_PRINT);
+				echo json_encode($response);
 				break;
 			case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);

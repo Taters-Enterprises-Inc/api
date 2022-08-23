@@ -68,10 +68,12 @@ class User_Authentication extends CI_Controller {
 		$this->session->unset_userdata('userData');
         $this->session->unset_userdata('orders');
 
-		// Redirect to previous page
-		$referrer = $_SERVER['HTTP_REFERER'];
+        $response = array(
+            'message' => "Successfully logout user"
+        );
 
-		redirect($referrer);
+        header('content-type: application/json');
+        echo json_encode($response);
     }
     
     public function success_login() {

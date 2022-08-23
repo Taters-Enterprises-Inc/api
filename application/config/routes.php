@@ -38,6 +38,7 @@ $route['profile/catering-bookings'] = 'profile/catering_bookings';
 
 // Store
 $route['store'] = 'store';
+$route['store/reset'] = 'store/reset';
 
 // Branches
 $route['branches'] = 'branches';

@@ -15,7 +15,7 @@ class Shop extends CI_Controller {
 		$this->load->model('user_model');
 		$this->load->library('images');
 	}
-	
+
     public function upload_payment()
     {
         if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
@@ -124,7 +124,7 @@ class Shop extends CI_Controller {
 				);
 
 				header('content-type: application/json');
-				echo json_encode($response, JSON_PRETTY_PRINT);
+				echo json_encode($response);
 				break;
 		}
 	}
@@ -146,6 +146,7 @@ class Shop extends CI_Controller {
 
 				
 				$check_with_addons = $this->shop_model->get_product_addons($product->id);
+				$addons = null;
 				if ($check_with_addons != null) {
 					$addons = $this->shop_model->get_product_addons_join($product->id);
 				}
@@ -165,7 +166,7 @@ class Shop extends CI_Controller {
 				);
 
 				header('content-type: application/json');
-				echo json_encode($response, JSON_PRETTY_PRINT);
+				echo json_encode($response);
 				return;
 		}
 	}
@@ -180,7 +181,7 @@ class Shop extends CI_Controller {
 						'message' => 'Unable to process your request...'
 					);
 					header('content-type: application/json');
-					echo json_encode($response, JSON_PRETTY_PRINT);
+					echo json_encode($response);
 					break;
 				}
 
@@ -194,7 +195,7 @@ class Shop extends CI_Controller {
 				);
 
 				header('content-type: application/json');
-				echo json_encode($response, JSON_PRETTY_PRINT);
+				echo json_encode($response);
 				return;
 		}
 	}
