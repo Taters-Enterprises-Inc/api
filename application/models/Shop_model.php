@@ -2,6 +2,7 @@
 
 class Shop_model extends CI_Model 
 {
+
     public function get_user_order_history($id,$type){
         $this->db->select('
             A.dateadded,

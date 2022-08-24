@@ -15,60 +15,46 @@ class Shop extends CI_Controller {
 		$this->load->model('user_model');
 		$this->load->library('images');
 	}
-
-    public function upload_payment()
+	
+    public function get_product_sku()
     {
-        if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
-			
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+				$post = json_decode(file_get_contents("php://input"), true);
 
-            $config['upload_path'] = './assets/upload/proof_payment';   // Save Folder
-
-			// Creates a proof_payment directory if not existing
-			if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
-
-            $config['allowed_types']    = 'gif|png|jpg|jpeg';       // File Type
-            $config['max_size']         = 2000; // file size kb
-            $config['max_width']        = 0;
-            $config['max_height']       = 0;
-            $config['encrypt_name']     = TRUE; // convert file name to hash
-
-            $this->load->library('upload', $config);
-
-            if (!$this->upload->do_upload('uploaded_file')) { // Upload validation
-                $error = $this->upload->display_errors();
-                header('content-type: application/json');
-                echo json_encode(array("status" => 'failed', "message" => $error));
-            } else {
-
-                // File-Uploaded-Successfull
-                $data = $this->upload->data(); // Get file details
-                $file_name = $data['file_name'];
-                $tracking_no = $_POST['tracking_no'];
-                $transaction_id = $_POST['trans_id'];
-
-                $query_result = $this->shop_model->upload_payment($data, $file_name, $tracking_no, $transaction_id);
-
-                // $transaction_id = $_SESSION['transaction_id'];
-                // $user_id = $this->session->userdata('user_id');
-                // $user_id = (isset($_SESSION['client_id'])) ? $_SESSION['client_id'] : $_SESSION['user_id'];
-                // $upload_notif = $this->status_notification($transaction_id, 2, 0);
-
-                // if ($upload_notif) {
-                $user_id = $query_result['client_data']->client_id;
-                // if ($query_result['upload_status'] == 1) {
-                //     snap($user_id, 1, $transaction_id, 'Uploading-notification-success');
-                // } else {
-                //     snap($user_id, 1, $transaction_id, 'Uploading-notification-failed');
-                // }
-
-                header('content-type: application/json');
-                echo json_encode(array("status" => 'success', "message" => $query_result));
-            }
-        } else {
-            $message = 'No file';
-            header('content-type: application/json');
-            echo json_encode(array("status" => 'error', "message" => $message));
-        }
+				if(isset($post['prod_flavor']) || isset($post['prod_size'])){
+					$variant[] = (int)$post['prod_flavor'];
+					$variant[] = (int)$post['prod_size'];
+				}
+				if(isset($post['selected_drink'])){
+					$drink_id = (int)$post['selected_drink'];
+					if($drink_id == 232){
+						$variant[] = 165;
+					}
+					if($drink_id == 233){
+						$variant[] = 166;
+					}
+					if($drink_id == 234){
+						$variant[] = 167;
+					}
+				}
+				if(isset($post['sel_extra_flavor'])){
+					$variant[] = (int)$post['sel_extra_flavor'];
+				}
+				if(isset($post['sel_extra_butter'])){
+					$variant[] = (int)$post['sel_extra_butter'];
+				}
+	
+				$variants = array_values(array_filter($variant));
+	
+				$query_result = $this->shop_model->fetch_product_sku($variants);
+				header('content-type: application/json');
+				echo json_encode(array(
+					'message'=> 'Successfully get product sku',
+					'data'=> $query_result,
+				));
+				break;
+		}
     }
 
 	public function orders(){

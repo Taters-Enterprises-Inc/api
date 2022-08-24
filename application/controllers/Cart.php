@@ -69,4 +69,23 @@ class Cart extends CI_Controller {
 				break;
 		}
 	}
+    
+    public function delete($prod_index){
+
+        $prod_index = (int) $prod_index;
+
+        
+        if(isset($_SESSION['orders'])){
+            unset($_SESSION['orders'][$prod_index]);
+            $reindexed_array = array_values($_SESSION['orders']);
+            $this->session->set_userdata('orders', $reindexed_array);
+        }
+ 
+        $response = array(
+            'message' => 'Successfully remove item from cart'
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+    }
 }

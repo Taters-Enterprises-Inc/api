@@ -10,7 +10,46 @@ class Shared extends CI_Controller {
 	public function __construct()
 	{
 		parent::__construct();
+		$this->load->model('shop_model');
 	}
+	
+    public function upload_payment()
+    {
+        if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
+            $config['upload_path'] = './assets/upload/proof_payment'; 
+
+			if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
+
+            $config['allowed_types']    = 'gif|png|jpg|jpeg'; 
+            $config['max_size']         = 2000;
+            $config['max_width']        = 0;
+            $config['max_height']       = 0;
+            $config['encrypt_name']     = TRUE;
+
+            $this->load->library('upload', $config);
+
+            if (!$this->upload->do_upload('uploaded_file')) {
+                $error = $this->upload->display_errors();
+				$this->output->set_status_header('401');
+                echo json_encode(array( "message" => $error));
+            } else {
+
+                $data = $this->upload->data();
+                $file_name = $data['file_name'];
+                $tracking_no = $_POST['tracking_no'];
+                $transaction_id = $_POST['trans_id'];
+
+                $this->shop_model->upload_payment($data, $file_name, $tracking_no, $transaction_id);
+
+                header('content-type: application/json');
+                echo json_encode(array( "message" => 'Succesfully upload payment'));
+            }
+        } else {
+			$this->output->set_status_header('401');
+			echo json_encode(array( "message" => 'Failed upload payment check your image'));
+        }
+    }
+
 
 	public function session(){
 		switch($this->input->server('REQUEST_METHOD')){

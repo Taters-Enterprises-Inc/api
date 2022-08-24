@@ -5,7 +5,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['shop/product'] = 'shop/product';
 $route['shop/products'] = 'shop/products';
 $route['shop/orders'] = 'shop/orders';
-$route['shop/upload_payment'] = 'shop/upload_payment';
+$route['shop/get_product_sku'] = 'shop/get_product_sku';
+
+//Catering
+$route['catering/products'] = 'catering/products';
 
 // POPCLUB 
 $route['popclub/platform'] = 'popclub/platform';
@@ -25,6 +28,7 @@ $route['popclub/(:any)'] = 'popclub/deals/$1';
 $route['shared/session'] = 'shared/session';
 $route['shared/clear_redeems'] = 'shared/clear_redeems';
 $route['shared/clear_all_session'] = 'shared/clear_all_session';
+$route['shared/upload_payment'] = 'shared/upload_payment';
 
 // Facebook
 $route['facebook/login'] = 'user_authentication';
@@ -45,6 +49,7 @@ $route['branches'] = 'branches';
 
 //Cart
 $route['cart'] = 'cart';
+$route['cart/delete/(:num)'] = 'cart/delete/$1';
 
 //Transactions
 $route['transaction/shop'] = 'transaction/shop';
