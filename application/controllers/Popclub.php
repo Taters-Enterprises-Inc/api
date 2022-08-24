@@ -285,7 +285,7 @@ class Popclub extends CI_Controller {
 		);
 		
 		header('content-type: application/json');
-		echo json_encode($response, JSON_PRETTY_PRINT);
+		echo json_encode($response);
 	}
 
 	public function popclub_data(){

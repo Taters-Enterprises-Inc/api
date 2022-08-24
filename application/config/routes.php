@@ -4,6 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 //Shop
 $route['shop/product'] = 'shop/product';
 $route['shop/products'] = 'shop/products';
+$route['shop/orders'] = 'shop/orders';
+$route['shop/upload_payment'] = 'shop/upload_payment';
 
 // POPCLUB 
 $route['popclub/platform'] = 'popclub/platform';
@@ -30,14 +32,25 @@ $route['facebook/login_point'] = 'user_authentication/fb_login_point';
 $route['facebook/login/success'] = 'user_authentication/success_login';
 $route['facebook/logout'] = 'user_authentication/logout';
 
+// Profile
+$route['profile/snackshop-orders'] = 'profile/snackshop_orders';
+$route['profile/catering-bookings'] = 'profile/catering_bookings';
+
 // Store
 $route['store'] = 'store';
+$route['store/reset'] = 'store/reset';
 
 // Branches
 $route['branches'] = 'branches';
 
 //Cart
 $route['cart'] = 'cart';
+
+//Transactions
+$route['transaction/shop'] = 'transaction/shop';
+
+//Image
+$route['load-image/(:any)'] = 'image/load_image/$1';	
 
 //Others
 $route['404_override'] = '';

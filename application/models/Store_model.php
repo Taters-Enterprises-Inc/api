@@ -2,7 +2,59 @@
 
 class Store_model extends CI_Model 
 {
+    //jepoy get store id by hash key
+    public function get_store_id_by_hash_key($hash_key){
+        $this->db->select('store');
+        $this->db->where('hash_key', $hash_key);
+        $query = $this->db->get('transaction_tb');
+        $data = $query->result_array();
+        return $data[0]['store'];
+    }
 	
+    //jepoy dynamic delivery hours
+    public function get_delivery_hours($store_id){
+        $this->db->select('delivery_hours');
+        $this->db->where('store_id', $store_id);
+        $query = $this->db->get('store_tb');
+        $data = $query->result_array();
+        return $data[0]['delivery_hours'];
+    }
+
+    function select_region($id){
+		$this->db->select('name');
+		$this->db->where('id', $id);
+		$query = $this->db->get('region_tb');
+		return $query->row();
+    }
+	
+    public function fetch_bank_details($id)
+    {
+        $this->db->select('indicator AS id,moh_type AS type,bank_name AS name, bank_account_num AS acct, bank_account_name AS acct_name, qr_code');
+        $this->db->where('store_id', $id);
+        $query = $this->db->get('bank_account_tb');
+        return $query->result();
+    }
+
+    function get_store_schedule($store_id){
+        $this->db->select('name, address, delivery_rate, minimum_rate, catering_delivery_rate, catering_minimum_rate, opening, closing, menu_type');
+        $this->db->where('store_id', $store_id);
+        $query = $this->db->get('store_tb');
+        return $query->row();
+    }
+
+    function fetch_moh_setup($region_id){
+        $this->db->select('*');
+        $this->db->where('region_id', $region_id);
+        $query = $this->db->get('area_moh_tb');
+        return $query->row();
+    }
+
+    function check_surcharge($id){
+        $this->db->select('enable_surcharge,surcharge_delivery_rate,surcharge_minimum_rate');
+        $this->db->where('store_id', $id);
+        $query = $this->db->get('store_tb');
+        return $query->row();
+    }
 
     public function fetch_ncr()
     {
@@ -65,7 +117,7 @@ class Store_model extends CI_Model
     }
 
 	public function get_store_info($id){
-	  $this->db->select('store_id,active_reseller_region_id,name,delivery_hours');
+	  $this->db->select('store_id,region_id,name,delivery_hours');
 	  $this->db->from('store_tb');
 	  $this->db->where('status',1);
 	  $this->db->where('store_id',$id);
