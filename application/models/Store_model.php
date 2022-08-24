@@ -94,10 +94,13 @@ class Store_model extends CI_Model
 			B.region_id, 
 			B.region_store_id, 
 			C.name AS region_name, 
-			C.sequence, 
+			C.sequence,
+			D.name as nameofstore, D.address as address,
+    		IFNULL(D.contact_number, "No contact number") as contactno,
+    		D.operating_hours as operatinghours, D.map_link as maplink , 
 			( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
 			FROM `store_tb` A join region_store_combination_tb B ON B.region_store_id = A.region_store_combination_id 
-			join region_tb C ON C.id = B.region_id WHERE A.status = 1 ORDER BY distance
+			join region_tb C ON C.id = B.region_id join dotcom_stores D ON D.store_id = A.store_id  WHERE A.status = 1 ORDER BY distance
 		');
 
 		$query = $this->db->get();  
@@ -120,7 +123,12 @@ class Store_model extends CI_Model
 			  'opening_time'     => $value->opening,
 			  'closing_time'     => $value->closing,
 			  'disable_delivery' => $value->disable_delivery,
-			  'disable_pickup'   => $value->disable_pickup
+			  'disable_pickup'   => $value->disable_pickup,
+			  'nameofstore'   => $value->nameofstore,
+			  'contactno'   => $value->contactno,
+			  'address'   => $value->address,
+			  'operatinghours'   => $value->operatinghours,
+			  'maplink'   => $value->maplink
 			);  
 		}
 	  
