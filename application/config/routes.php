@@ -29,6 +29,7 @@ $route['shared/session'] = 'shared/session';
 $route['shared/clear_redeems'] = 'shared/clear_redeems';
 $route['shared/clear_all_session'] = 'shared/clear_all_session';
 $route['shared/upload_payment'] = 'shared/upload_payment';
+$route['shared/contacts'] = 'shared/contacts';
 
 // Facebook
 $route['facebook/login'] = 'user_authentication';

@@ -11,7 +11,43 @@ class Shared extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->model('shop_model');
+		$this->load->model('user_model');
 	}
+
+    public function contacts(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+				$contacts = $this->shop_model->get_user_contact($get_fb_user_details->id);
+
+				$response = array(
+					'message' => 'Successfully add contact',
+					'data' => $contacts,
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+			case 'POST':
+				$post = json_decode(file_get_contents("php://input"), true);
+				$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+				
+				$data = array(
+					'fb_id' => $get_fb_user_details->id,
+					'contact' => $post['contact']
+				);
+	
+				$this->shop_model->add_contact($data);
+
+				$response = array(
+					'message' => 'Successfully add contact',
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+    }
 	
     public function upload_payment()
     {
