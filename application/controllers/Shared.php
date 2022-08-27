@@ -11,6 +11,7 @@ class Shared extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->model('shop_model');
+		$this->load->model('contact_model');
 		$this->load->model('user_model');
 	}
 
@@ -18,7 +19,7 @@ class Shared extends CI_Controller {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 				$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-				$contacts = $this->shop_model->get_user_contact($get_fb_user_details->id);
+				$contacts = $this->contact_model->get_user_contact($get_fb_user_details->id);
 
 				$response = array(
 					'message' => 'Successfully add contact',
@@ -37,7 +38,7 @@ class Shared extends CI_Controller {
 					'contact' => $post['contact']
 				);
 	
-				$this->shop_model->add_contact($data);
+				$this->contact_model->add_contact($data);
 
 				$response = array(
 					'message' => 'Successfully add contact',

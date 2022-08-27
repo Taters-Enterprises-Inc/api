@@ -40,6 +40,7 @@ $route['facebook/logout'] = 'user_authentication/logout';
 // Profile
 $route['profile/snackshop-orders'] = 'profile/snackshop_orders';
 $route['profile/catering-bookings'] = 'profile/catering_bookings';
+$route['profile/contact/(:num)'] = 'profile/contact/$1';
 
 // Store
 $route['store'] = 'store';

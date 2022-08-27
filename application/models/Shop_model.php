@@ -2,24 +2,6 @@
 
 class Shop_model extends CI_Model 
 {
-
-    //jepoy add user contact
-    public function add_contact($data){
-        $insert = $this->db->insert('fb_user_contact', $data);
-        if ($insert) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-    //jepoy get facebook contactes
-    public function get_user_contact($fb_id){
-        $this->db->select('*');
-        $this->db->where('fb_id', $fb_id);
-        $query = $this->db->get('fb_user_contact');
-        return $query->result();
-    }
-
     public function get_user_order_history($id,$type){
         $this->db->select('
             A.dateadded,
