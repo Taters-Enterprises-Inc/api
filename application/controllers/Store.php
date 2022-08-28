@@ -51,6 +51,8 @@ class Store extends CI_Controller {
                     'region_id'					=>	$store->region_id,
                     'region_name'				=>	$region->name,
                     'store_name'				=>	$store->name,
+					'moh_notes'					=>	$store->moh_notes,
+					'store_address'				=> 	$store->address,
 					'surcharge_delivery_rate'	=>	$surcharge_delivery_rate,
 					'surcharge_minimum_rate'	=>	$surcharge_minimum_rate,
 					'surcharge'					=>	$surcharge

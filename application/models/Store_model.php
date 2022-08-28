@@ -2,7 +2,6 @@
 
 class Store_model extends CI_Model 
 {
-    //jepoy get store id by hash key
     public function get_store_id_by_hash_key($hash_key){
         $this->db->select('store');
         $this->db->where('hash_key', $hash_key);
@@ -11,7 +10,6 @@ class Store_model extends CI_Model
         return $data[0]['store'];
     }
 	
-    //jepoy dynamic delivery hours
     public function get_delivery_hours($store_id){
         $this->db->select('delivery_hours');
         $this->db->where('store_id', $store_id);
@@ -117,7 +115,7 @@ class Store_model extends CI_Model
     }
 
 	public function get_store_info($id){
-	  $this->db->select('store_id,region_id,name,delivery_hours');
+	  $this->db->select('store_id,region_id,name,delivery_hours,address,moh_notes');
 	  $this->db->from('store_tb');
 	  $this->db->where('status',1);
 	  $this->db->where('store_id',$id);
@@ -147,7 +145,7 @@ class Store_model extends CI_Model
 			B.region_store_id, 
 			C.name AS region_name, 
 			C.sequence,
-			D.name as nameofstore, D.address as address,
+			D.name as nameofstore,
     		IFNULL(D.contact_number, "No contact number") as contactno,
     		D.operating_hours as operatinghours, D.map_link as maplink , 
 			( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 

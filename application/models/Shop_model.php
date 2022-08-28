@@ -7,6 +7,8 @@ class Shop_model extends CI_Model
             A.dateadded,
             A.tracking_no,
             A.purchase_amount,
+            A.distance_price,
+            A.cod_fee,
             C.generated_raffle_code,
             C.application_status,
             A.hash_key,
