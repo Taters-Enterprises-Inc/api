@@ -41,5 +41,45 @@ class Catering extends CI_Controller {
                 break;
         }
     }
+	
+	public function product(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$hash = $this->input->get('hash');
+
+				$product = $this->catering_model->get_product($hash);
+
+				if(!isset($product)){
+					$this->output->set_status_header(401);
+					echo json_encode(array('message'=>'Product not found...'));
+					return;
+				}
+				
+				$region_id = $_SESSION['cache_data']['region_id'];
+				
+				$product_flavor = $this->catering_model->get_product_variants($product->id);
+				// $data['product_images'] = $this->package_images(basename($data['product']->product_image, '.jpg'));
+
+				$addons = $this->catering_model->get_catering_addons($region_id);
+				$product_addons = $this->catering_model->get_catering_product_addons($region_id);
+				$product_prices = $this->catering_model->get_product_prices($product->id);
+
+				$response = array(
+					'data' => array(
+						'product' => $product,
+						'product_flavor' => $product_flavor,
+						'addons' => $addons,
+						'product_addons' => $product_addons,
+						'product_prices' => $product_prices,
+						// 'product_images' => $product_images,
+					),
+					'message' => 'Successfully fetch product'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response, JSON_PRETTY_PRINT);
+				return;
+		}
+	}
 
 }

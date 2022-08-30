@@ -2,6 +2,69 @@
 
 class Catering_model extends CI_Model 
 {
+    function get_product_prices($id){
+        $this->db->select('*');
+        $this->db->from('catering_package_prices_tb');
+        $this->db->where('package_id',$id);
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+    function get_catering_product_addons($region_id){
+        $this->db->select('*');
+        $this->db->from('catering_product_addons_tb a');
+        $this->db->join('products_tb b','b.id = a.product_id');
+        $this->db->where('a.region_id',$region_id);
+        $this->db->where('a.status','0');
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function get_catering_addons($region_id){
+        $this->db->select('*');
+        $this->db->from('catering_package_addons_tb a');
+        $this->db->join('catering_packages_tb b','b.id = a.product_id');
+        $this->db->where('a.region_id',$region_id);
+        $this->db->where('a.status','0');
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    public function get_product_variants($product_id)
+    {
+        $this->db->select("B.id,B.name,B.product_variant_id, A.name as parent_name");
+        $this->db->from('catering_package_variants_tb A');
+        $this->db->join('catering_package_variant_options_tb B', 'B.product_variant_id = A.id','left');
+        $this->db->where('A.product_id', $product_id);
+        $this->db->where('B.status', 1);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function get_product($hash){
+        
+        $this->db->select('
+            A.id, 
+            A.product_image, 
+            A.name, 
+            A.description, 
+            A.add_details, 
+            A.delivery_details, 
+            A.price, A.category, 
+            A.num_flavor, 
+            A.add_remarks,
+            A.note, 
+            B.category_name, 
+            A.to_gc_value
+        ');
+        $this->db->from('catering_packages_tb A');
+        $this->db->join('catering_category_tb B', 'B.id= A.category');
+        $this->db->where('A.product_hash', $hash);
+
+        $query = $this->db->get();
+
+        return $query->row();    
+    } 
     
     function fetch_category_products($region,$category,$sort_id,$min,$max,$name){
         if($region!=0){
