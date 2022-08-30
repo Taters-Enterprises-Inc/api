@@ -2,9 +2,9 @@
 
 class Images
 {
-    public function product_images($product_image)
+    public function product_images($url,$product_image)
     {
-        $files1 = scandir('assets/img/500');
+        $files1 = scandir($url);
         $images = array();
         foreach ($files1 as $value) {
             if (strpos($value,$product_image) !== false) {

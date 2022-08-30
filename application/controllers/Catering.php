@@ -11,6 +11,7 @@ class Catering extends CI_Controller {
 		parent::__construct();
 		$this->load->model('store_model');
 		$this->load->model('catering_model');
+		$this->load->library('images');
 	}
 
     public function products(){
@@ -58,7 +59,10 @@ class Catering extends CI_Controller {
 				$region_id = $_SESSION['cache_data']['region_id'];
 				
 				$product_flavor = $this->catering_model->get_product_variants($product->id);
-				// $data['product_images'] = $this->package_images(basename($data['product']->product_image, '.jpg'));
+				$product_images = $this->images->product_images(
+					'assets/images/catering/products',
+					basename($product->product_image, '.jpg')
+				);
 
 				$addons = $this->catering_model->get_catering_addons($region_id);
 				$product_addons = $this->catering_model->get_catering_product_addons($region_id);
@@ -71,7 +75,7 @@ class Catering extends CI_Controller {
 						'addons' => $addons,
 						'product_addons' => $product_addons,
 						'product_prices' => $product_prices,
-						// 'product_images' => $product_images,
+						'product_images' => $product_images,
 					),
 					'message' => 'Successfully fetch product'
 				);

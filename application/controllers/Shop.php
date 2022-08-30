@@ -126,7 +126,10 @@ class Shop extends CI_Controller {
 				$product_size = $this->shop_model->fetch_product_variants($product->id,'size');
 				$product_flavor = $this->shop_model->fetch_product_variants($product->id,'flavor');
 				$product_date = $this->shop_model->fetch_product_variants($product->id,'date');
-				// $product_images = $this->images->product_images(basename($product->product_image, '.jpg'));
+				$product_images = $this->images->product_images(
+					'assets/images/shared/products/500',
+					basename($product->product_image, '.jpg')
+				);
 				$youtube_video_ads = $this->shop_model->youtube_video_ads($product->id);
 				$suggested_products = $this->shop_model->get_suggested_product($product->id);
 
@@ -144,7 +147,7 @@ class Shop extends CI_Controller {
 						'product_size' => $product_size,
 						'product_flavor' => $product_flavor,
 						'product_date' => $product_date,
-						// 'product_images' => $product_images,
+						'product_images' => $product_images,
 						'youtube_video_ads' => $youtube_video_ads,
 						'suggested_products' => $suggested_products,
 					),
