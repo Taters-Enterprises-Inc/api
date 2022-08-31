@@ -155,7 +155,7 @@ class Shop extends CI_Controller {
 				);
 
 				header('content-type: application/json');
-				echo json_encode($response);
+				echo json_encode($response, JSON_PRETTY_PRINT);
 				return;
 		}
 	}
