@@ -37,6 +37,7 @@ class Store extends CI_Controller {
 				$post = json_decode(file_get_contents("php://input"), true);
 				$address = $post['address'];
 				$store_id = $post['storeId'];
+				$region_id = $post['regionId'];
                 $store = $this->store_model->get_store_info($store_id);
 
 				$check_surcharge = $this->store_model->check_surcharge($store_id);
@@ -44,11 +45,11 @@ class Store extends CI_Controller {
 				$surcharge_delivery_rate = $check_surcharge->surcharge_delivery_rate;
 				$surcharge_minimum_rate = $check_surcharge->surcharge_minimum_rate;
 				
-				$region = $this->store_model->select_region($store->region_id);
+				$region = $this->store_model->select_region($region_id);
 
                 $_SESSION['cache_data'] = array(
                     'store_id'					=>	$store->store_id,
-                    'region_id'					=>	$store->region_id,
+                    'region_id'					=>	$region_id,
                     'region_name'				=>	$region->name,
                     'store_name'				=>	$store->name,
 					'moh_notes'					=>	$store->moh_notes,
