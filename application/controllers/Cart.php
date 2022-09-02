@@ -22,9 +22,20 @@ class Cart extends CI_Controller {
 				$prod_image_name = $post['prod_image_name'];
 
                 $product_sku_price = 0;
+                $prod_flavor = NULL;
+                $prod_size = NULL;
                 if(isset($post['prod_flavor']) || isset($post['prod_size'])){
-                    $varx[] = (int)$post['prod_flavor'];
-                    $varx[] = (int)$post['prod_size'];
+
+                    if(isset($post['prod_flavor']) ){
+                        $varx[] = (int)$post['prod_flavor'];
+                        $prod_flavor = $this->shop_model->fetch_variants_details($post['prod_flavor']);
+                    }
+                    
+                    if(isset($post['prod_size']) ){
+                        $varx[] = (int)$post['prod_size'];
+                        $prod_size = $this->shop_model->fetch_variants_details($post['prod_size']);
+                    }
+
                     $varxz = array_values(array_filter($varx));
                     $product_sku = $this->shop_model->fetch_product_sku($varxz);
                     if(!empty($product_sku)){
@@ -37,8 +48,6 @@ class Cart extends CI_Controller {
                 $product_price = (empty($varx)) ? $product_details->price : $product_sku_price;
                 $prod_calc_amount   = $post['prod_calc_amount'];
 
-                $prod_flavor = $this->shop_model->fetch_variants_details($post['prod_flavor']);
-                $prod_size = $this->shop_model->fetch_variants_details($post['prod_size']);
 
 
                 $set_value['prod_id']               = $prod_id;
@@ -48,11 +57,11 @@ class Cart extends CI_Controller {
                 $set_value['prod_price']            = (int)$product_price;
                 $set_value['prod_calc_amount']      = $prod_calc_amount;
                 $set_value['prod_flavor']           = (empty($prod_flavor)) ? '' : $prod_flavor->name;
-                $set_value['prod_flavor_id']        = $post['prod_flavor'];
+                $set_value['prod_flavor_id']        = isset($post['prod_flavor']) ? $post['prod_flavor']: '';
                 $set_value['prod_with_drinks']      = $post['prod_with_drinks'] ? 1 : 0;
                 $set_value['prod_size']             = (empty($prod_size)) ? '' : $prod_size->name;
-                $set_value['prod_size_id']          = $post['prod_size'];
-                $set_value['prod_multiflavors']     = $post['flavors_details'];
+                $set_value['prod_size_id']          = isset($post['prod_size']) ? $post['prod_size']: '';
+                $set_value['prod_multiflavors']     = isset($post['flavors_details']) ? $post['flavors_details']: '';
                 $set_value['prod_sku_id']           = $post['prod_sku_id'];
                 $set_value['prod_sku']              = $post['prod_sku'];
                 $set_value['prod_discount']         = 0;
