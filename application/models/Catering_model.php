@@ -41,6 +41,32 @@ class Catering_model extends CI_Model
         return $query->result();
     }
 
+    function fetch_variants_details($id)
+    {
+        $this->db->select('name');
+        $this->db->where('id', $id);
+        $query = $this->db->get('catering_package_variant_options_tb');
+        return $query->row();
+    }
+    
+
+    function get_package_prices($id){
+        $this->db->select('*');
+        $this->db->from('catering_package_prices_tb');
+        $this->db->where('package_id',$id);
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+    
+    function get_details($id){
+        $this->db->select("*");
+        $this->db->from('catering_packages_tb');
+        $this->db->where('id', $id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
     public function get_product($hash){
         
         $this->db->select('
