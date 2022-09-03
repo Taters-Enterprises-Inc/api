@@ -106,6 +106,8 @@ class Shared extends CI_Controller {
 					"minimum_rate"					=> $this->session->minimum_rate,
 					"catering_delivery_rate"		=> $this->session->catering_delivery_rate,
 					"catering_minimum_rate"			=> $this->session->catering_minimum_rate,
+					"catering_start_date"			=> $this->session->catering_start_date,
+					"catering_end_date"				=> $this->session->catering_end_date,
 					"distance"						=> $this->session->distance,
 					"distance_rate_id"				=> $this->session->distance_rate_id,
 					"distance_rate_price"			=> $this->session->distance_rate_price,
