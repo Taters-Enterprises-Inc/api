@@ -73,6 +73,7 @@ class Catering extends CI_Controller {
 				$addons = $this->catering_model->get_catering_addons($region_id);
 				$product_addons = $this->catering_model->get_catering_product_addons($region_id);
 				$product_prices = $this->catering_model->get_product_prices($product->id);
+				$product->base_price = $product->price;
 
 
 				$response = array(
