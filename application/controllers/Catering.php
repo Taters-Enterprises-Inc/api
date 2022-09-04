@@ -66,7 +66,7 @@ class Catering extends CI_Controller {
 				}
 
 				$product_images = $this->images->product_images(
-					'assets/images/catering/products',
+					'assets/images/shared/products/500',
 					basename($product->product_image, '.jpg')
 				);
 

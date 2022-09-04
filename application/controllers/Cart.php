@@ -105,6 +105,7 @@ class Cart extends CI_Controller {
                 $prod_id = (int)$post['prod_id'];
                 $product_details = $this->catering_model->get_details($prod_id);
 				$prod_image_name = $post['prod_image_name'];
+                $package_price =  $product_details->price;
                 
                 foreach ($this->catering_model->get_package_prices($prod_id) as $price) {
                     if ((int) $post['prod_qty']>= $price['min_qty']) {
