@@ -25,19 +25,14 @@ class Catering_model extends CI_Model
 
     public function insert_client_details($post)
     {  
-        if($_SESSION['moh'] == 2){
-            $payops = $this->input->post('delivery_checkout_payops');
-        }else{
-            $payops = $this->input->post('checkout_payops');
-        }
         if (isset($_SESSION['userData']['oauth_uid'])) {
             $this->db->trans_start();
                 // $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
                 $data = array(
                     'fb_user_id'        => $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']),
-                    'email'             => $post['checkout_email'],
-                    'address'           => $post['checkout_address'],
-                    'contact_number'    => $post['checkout_phone'],
+                    'email'             => $post['eMail'],
+                    'address'           => $post['address'],
+                    'contact_number'    => $post['phoneNumber'],
                     'moh'               => 2,
                     'payops'            => $post['payops'],
                     'add_name'          => $post['firstName'].' '.$post['lastName'],

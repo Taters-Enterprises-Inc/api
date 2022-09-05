@@ -46,7 +46,7 @@ class Transaction extends CI_Controller {
                     }
 
                     
-                    $remarks = (empty($post('checkout_remarks'))) ? '' : $post('checkout_remarks');
+                    $remarks = empty($post['checkout_remarks']) ? '' : $post['checkout_remarks'];
                     $distance_rate_id = (empty($this->session->distance_rate_id)) ? 0 : $this->session->distance_rate_id;
                     $distance_rate_price = (empty($this->session->distance_rate_price)) ? 0 : $this->session->distance_rate_price;
                     $payops = $post['payops'];
@@ -87,22 +87,22 @@ class Transaction extends CI_Controller {
                         'contract'          => 0,
                         'store'             => $this->session->cache_data['store_id'],
                         'dateadded'         => date('Y-m-d H:i:s'),
-						'company_name'		=> $post('catering_company_name')  ? $post('catering_company_name') : '',
-						'message'			=> $post('other_details'),
+						'company_name'		=> isset($post['catering_company_name']) ? $post['catering_company_name'] : '',
+						'message'			=> isset($post['other_details']) ? $post['other_details'] : '',
 						'serving_time'		=> $serving_time,
                         'start_datetime'    => $catering_start_date,
                         'end_datetime'      => $catering_end_date,
-                        'event_class'       => $post('event_class'),
+                        'event_class'       => isset($post['event_class']) ? $post['event_class'] : '',
                         'service_fee'       => $comp_total * 0.1,
-                        'night_diff_fee'    => $this->get_night_diff($start_datetime, $end_datetime),
-                        'additional_hour_charge' => $this->get_succeeding_hour_charge($start_datetime, $end_datetime),
+                        'night_diff_fee'    => $this->get_night_diff((int)$start_datetime, (int)$end_datetime),
+                        'additional_hour_charge' => $this->get_succeeding_hour_charge((int)$start_datetime, (int)$end_datetime),
                         'distance'          => '2',
                         'distance_id'       => $distance_rate_id,
                         'distance_price'    => $distance_rate_price,
                         'cod_fee'           => $cod_fee,
                         'payops'            => $payops,
                         'payment_plan'      => $post['payment_plan'],
-                        'discount'          => '',
+                        'discount'          => 0,
                         'custom_message'    => '',
                         'logon_type'        => $logon_type,
                     );
@@ -111,7 +111,6 @@ class Transaction extends CI_Controller {
                     $query_transaction_result = $this->catering_model->insert_transaction_details($transaction_data);
                     
                     if($query_transaction_result->status){
-                        $trans_id = $query_transaction_result->id;
                         
                         if(!empty($this->session->orders)){
                             $comp_total = 0;
@@ -141,7 +140,6 @@ class Transaction extends CI_Controller {
                                 );
                             }
                             $query_orders_result = $this->catering_model->insert_client_orders($order_data);
-                            $status_response = $query_orders_result;
                         }
                     }
                     
@@ -617,7 +615,7 @@ class Transaction extends CI_Controller {
         }
     }
 
-    public function get_night_diff($start_datetime, $end_datetime){
+    private function get_night_diff($start_datetime, $end_datetime){
         date_default_timezone_set('Asia/Manila');
         $start   = date('Y-m-d 22:00:00',$start_datetime);
         $end     = date('Y-m-d 06:00:00',$start_datetime + 86400);
