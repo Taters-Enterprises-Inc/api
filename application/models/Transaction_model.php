@@ -29,7 +29,7 @@ class Transaction_model extends CI_Model {
         return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
     }
     
-    public function insert_client_details($post)
+    public function insert_client_details_shop($post)
     {  
         if (isset($_SESSION['userData']['oauth_uid'])) {
 

@@ -18,11 +18,12 @@ class Store extends CI_Controller {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 				$address = $this->input->get('address');
+				$service = $this->input->get('service');
 
 				if($address){
-					$stores = $this->store_model->get_stores_available($this->google->geolocator($address)['lat'],$this->google->geolocator($address)['lng']);
+					$stores = $this->store_model->get_stores_available($this->google->geolocator($address)['lat'],$this->google->geolocator($address)['lng'],$service);
 				}else{
-					$stores = $this->store_model->get_stores_available();
+					$stores = $this->store_model->get_stores_available($service);
 				}
 
 				$response = array(
