@@ -105,7 +105,8 @@ class Cart extends CI_Controller {
                 $prod_id = (int)$post['prod_id'];
                 $product_details = $this->catering_model->get_details($prod_id);
 				$prod_image_name = $post['prod_image_name'];
-                $package_price =  $product_details->price;
+                $is_free_item = isset($post['is_free_item']) && $post['is_free_item'] === true  ? true : false;
+                $package_price = $is_free_item === true ? 0 : $product_details->price;
                 
                 foreach ($this->catering_model->get_package_prices($prod_id) as $price) {
                     if ((int) $post['prod_qty']>= $price['min_qty']) {
@@ -144,7 +145,24 @@ class Cart extends CI_Controller {
                 $set_value['prod_discount']         = 0;
                 $set_value['prod_category']         = $product_details->category;
 
-                $_SESSION['orders'][] = $set_value;
+                if($is_free_item === true){
+                    $found_existing_free_item = false;
+                    $set_value['is_free_item']      = $is_free_item;
+                    $set_value['free_threshold']    = $product_details->free_threshold;
+                    foreach($_SESSION['orders'] as $key => $order){
+                        if(isset($order['is_free_item']) && $order['is_free_item'] === true){
+                            $_SESSION['orders'][$key] = $set_value;
+                            $found_existing_free_item = true;
+                            break;
+                        }
+                    }
+                    if($found_existing_free_item === false){
+                        $_SESSION['orders'][] = $set_value;
+                    }
+                }else{
+                    $_SESSION['orders'][] = $set_value;
+                }
+
 
 				$response = array(
 					'message' => 'Successfully add to cart item'
