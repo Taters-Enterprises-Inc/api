@@ -11,6 +11,7 @@ class Cart extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->model('shop_model');
+        $this->load->library('images');
 	}
 	public function index(){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -67,6 +68,56 @@ class Cart extends CI_Controller {
 				header('content-type: application/json');
 				echo json_encode($response);
 				break;
+      case 'GET':
+            $id = $this->input->get('id');
+            $order_item = $_SESSION['orders'][$id];
+            $product = $this->shop_model->get_product_by_id($order_item['prod_id']);
+             $product_addson = $this->shop_model->get_product_addons_join($order_item['prod_id']);
+              $product_size =  $this->shop_model->fetch_product_variants($order_item['prod_id'] ,'size');
+		    $product_flavor = $this->shop_model->fetch_product_variants($order_item['prod_id'],'flavor');
+			$product_date = $this->shop_model->fetch_product_variants($order_item['prod_id'],'date');
+            $suggested_products = $this->shop_model->get_suggested_product($order_item['prod_id']);
+            $product_images = $this->images->product_images(
+                'assets/images/shared/products/500',
+                basename($product->product_image,'.jpg')
+            );
+
+           
+          $data = array(
+            "product"=>$product,
+            "order_item"=>$order_item,
+            "product_addson"=>$product_addson,
+            "product_size"=> $product_size,
+            "product_flavor"=>$product_flavor,
+            "product_date"=>$product_date,
+            "suggested_products"=>$suggested_products,
+             "product_images"=>$product_images,
+           "_SESSION"=>  $_SESSION['orders'][$id]
+          );
+
+          $response = array("message"=>"successfully fetch data","data"=>$data);
+          
+          header('content-type: application/json');
+          echo json_encode($response);
+          break;
+
+          case "PUT":
+            $put = json_decode(file_get_contents("php://input"), true);
+            $order_item = $_SESSION['orders'][$put['product_id']];
+
+            $_SESSION['orders'][$put['product_id']]['prod_qty'] = $put['quantity'];
+            $_SESSION['orders'][$put['product_id']]['prod_size_id'] = $put['currentFlavor'];
+            $_SESSION['orders'][$put['product_id']]['prod_flavor_id'] = $put['currentSize'];
+            $_SESSION['orders'][$put['product_id']]['prod_flavor'] = $put['flavorName'];
+            $_SESSION['orders'][$put['product_id']]['prod_size'] = $put['sizeName'];
+            $_SESSION['orders'][$put['product_id']]['prod_calc_amount'] = $put['total_amount'];
+
+            $response = array("message"=>"Edit Successfully ","data"=> array("order"=>$_SESSION['orders'][$put['product_id']]['prod_flavor_id'] ,"f"=>$put['currentFlavor']));
+            header('content-type: application/json');
+            echo json_encode($response);
+          
+          break;
+
 		}
 	}
     
@@ -88,4 +139,6 @@ class Cart extends CI_Controller {
         header('content-type: application/json');
         echo json_encode($response);
     }
+
+
 }

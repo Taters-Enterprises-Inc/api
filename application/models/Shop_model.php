@@ -280,6 +280,29 @@ class Shop_model extends CI_Model
         $query = $this->db->get();
         return $query->row();
     }
+
+    public function get_product_by_id($id)
+    {
+        $this->db->select('
+			id, 
+			product_image, 
+			name, 
+			description, 
+			add_details, 
+			delivery_details, 
+			price, 
+			category, 
+			num_flavor, 
+			add_remarks, 
+			note, 
+			to_gc_value
+		');
+        $this->db->from('products_tb');
+		$this->db->where('id', $id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
 	
     function get_details($id)
     {
