@@ -51,8 +51,8 @@ $route['store/reset'] = 'store/reset';
 $route['branches'] = 'branches';
 
 //Cart
-$route['cart'] = 'cart';
-$route['cart/delete/(:num)'] = 'cart/delete/$1';
+$route['cart/shop'] = 'cart/shop';
+$route['cart/catering'] = 'cart/catering';
 
 //Transactions
 $route['transaction/shop'] = 'transaction/shop';

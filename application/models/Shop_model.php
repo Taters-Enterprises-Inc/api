@@ -262,6 +262,7 @@ class Shop_model extends CI_Model
     {
         $this->db->select('
 			id, 
+            product_hash,
 			product_image, 
 			name, 
 			description, 

@@ -37,6 +37,9 @@ class Store extends CI_Controller {
 				$post = json_decode(file_get_contents("php://input"), true);
 				$address = $post['address'];
 				$store_id = $post['storeId'];
+				$region_id = $post['regionId'];
+				$catering_start_date = $post['cateringStartDate'];
+				$catering_end_date = $post['cateringEndDate'];
                 $store = $this->store_model->get_store_info($store_id);
 
 				$check_surcharge = $this->store_model->check_surcharge($store_id);
@@ -44,11 +47,11 @@ class Store extends CI_Controller {
 				$surcharge_delivery_rate = $check_surcharge->surcharge_delivery_rate;
 				$surcharge_minimum_rate = $check_surcharge->surcharge_minimum_rate;
 				
-				$region = $this->store_model->select_region($store->region_id);
+				$region = $this->store_model->select_region($region_id);
 
                 $_SESSION['cache_data'] = array(
                     'store_id'					=>	$store->store_id,
-                    'region_id'					=>	$store->region_id,
+                    'region_id'					=>	$region_id,
                     'region_name'				=>	$region->name,
                     'store_name'				=>	$store->name,
 					'moh_notes'					=>	$store->moh_notes,
@@ -74,6 +77,18 @@ class Store extends CI_Controller {
 				$this->session->set_userdata('minimum_rate', $opening->minimum_rate);
 				$this->session->set_userdata('catering_delivery_rate', $opening->catering_delivery_rate);
 				$this->session->set_userdata('catering_minimum_rate', $opening->catering_minimum_rate);
+
+				if(isset($catering_start_date)){
+					$str_start_datetime = strtotime($catering_start_date);
+					$start_datetime = date($str_start_datetime);
+					$this->session->set_userdata('catering_start_date', $start_datetime);
+				}
+				
+				if(isset($catering_end_date)){
+					$str_end_datetime = strtotime($catering_end_date);
+					$end_datetime = date($str_end_datetime);
+					$this->session->set_userdata('catering_end_date', $end_datetime);
+				}
 	
 				$customer_address= $this->session->customer_address;
 				$store_address = $opening->address;
@@ -94,6 +109,7 @@ class Store extends CI_Controller {
 				$payops_list = $this->store_model->fetch_bank_details($store_id);
 				$this->session->set_userdata('payops_list', $payops_list);
                 $this->session->set_userdata('cash_delivery', '50');
+
 				
 
 				$response = array(

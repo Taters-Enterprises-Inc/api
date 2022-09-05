@@ -58,20 +58,28 @@ class Catering extends CI_Controller {
 				
 				$region_id = $_SESSION['cache_data']['region_id'];
 				
-				$product_flavor = $this->catering_model->get_product_variants($product->id);
+				$product_flavor = array();
+				$flavors = $this->catering_model->get_product_variants($product->id);
+				foreach($flavors as $key => $flavor){
+					$product_flavor[$flavor->product_variant_id]['parent_name'] = $flavor->parent_name;
+					$product_flavor[$flavor->product_variant_id]['flavors'][] =  $flavor;
+				}
+
 				$product_images = $this->images->product_images(
-					'assets/images/catering/products',
+					'assets/images/shared/products/500',
 					basename($product->product_image, '.jpg')
 				);
 
 				$addons = $this->catering_model->get_catering_addons($region_id);
 				$product_addons = $this->catering_model->get_catering_product_addons($region_id);
 				$product_prices = $this->catering_model->get_product_prices($product->id);
+				$product->base_price = $product->price;
+
 
 				$response = array(
 					'data' => array(
 						'product' => $product,
-						'product_flavor' => $product_flavor,
+						'product_flavor' => array_values($product_flavor),
 						'addons' => $addons,
 						'product_addons' => $product_addons,
 						'product_prices' => $product_prices,
