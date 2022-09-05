@@ -38,6 +38,7 @@ class Store extends CI_Controller {
 				$address = $post['address'];
 				$store_id = $post['storeId'];
 				$region_id = $post['regionId'];
+				$service = $post['service'];
 				$catering_start_date = $post['cateringStartDate'];
 				$catering_end_date = $post['cateringEndDate'];
                 $store = $this->store_model->get_store_info($store_id);
@@ -75,26 +76,37 @@ class Store extends CI_Controller {
 	
 				$this->session->set_userdata('delivery_rate', $opening->delivery_rate);
 				$this->session->set_userdata('minimum_rate', $opening->minimum_rate);
-				$this->session->set_userdata('catering_delivery_rate', $opening->catering_delivery_rate);
-				$this->session->set_userdata('catering_minimum_rate', $opening->catering_minimum_rate);
-
-				if(isset($catering_start_date)){
-					$str_start_datetime = strtotime($catering_start_date);
-					$start_datetime = date($str_start_datetime);
-					$this->session->set_userdata('catering_start_date', $start_datetime);
-				}
 				
-				if(isset($catering_end_date)){
-					$str_end_datetime = strtotime($catering_end_date);
-					$end_datetime = date($str_end_datetime);
-					$this->session->set_userdata('catering_end_date', $end_datetime);
+				if($service == 'CATERING'){
+
+
+					$this->session->set_userdata('catering_delivery_rate', $opening->catering_delivery_rate);
+					$this->session->set_userdata('catering_minimum_rate', $opening->catering_minimum_rate);
+	
+					if(isset($catering_start_date)){
+						$str_start_datetime = strtotime($catering_start_date);
+						$start_datetime = date($str_start_datetime);
+						$this->session->set_userdata('catering_start_date', $start_datetime);
+					}
+					
+					if(isset($catering_end_date)){
+						$str_end_datetime = strtotime($catering_end_date);
+						$end_datetime = date($str_end_datetime);
+						$this->session->set_userdata('catering_end_date', $end_datetime);
+					}
+
+					$night_diff = $this->get_night_diff($start_datetime, $end_datetime);
+					$this->session->set_userdata('catering_night_differential_fee', (int) $night_diff);
+
+					$succeeding_hour_charge = $this->get_succeeding_hour_charge($start_datetime, $end_datetime);
+					$this->session->set_userdata('catering_succeeding_hour_charge', (int) $succeeding_hour_charge);
 				}
 	
 				$customer_address= $this->session->customer_address;
 				$store_address = $opening->address;
 	
 				$get_routes = $this->google->get_distance($store_address, $customer_address);
-				$delivery_charge = $this->distance_computation(round($get_routes));
+				$delivery_charge = $this->distance_computation(round($get_routes), $service);
 	
 				$routes   = $get_routes;
 				$distance = $get_routes;
@@ -139,18 +151,22 @@ class Store extends CI_Controller {
 		
 	}
 	
-    private function distance_computation($dist)
+    private function distance_computation($dist, $service)
     {   
         //check if catering order
-        if (isset($_SESSION['catering_data'])) {
-            $delivery_rate = (isset($_SESSION['catering_delivery_rate'])) ? $_SESSION['catering_delivery_rate'] : 10;
-            $minimum_rate = (isset($_SESSION['catering_minimum_rate'])) ? $_SESSION['catering_minimum_rate'] : 1000;
-            $km_min = (isset($_SESSION['km_min'])) ? $_SESSION['km_min'] : 5;
-        } else {
-            $delivery_rate = (isset($_SESSION['delivery_rate'])) ? $_SESSION['delivery_rate'] : 8;
-            $minimum_rate = (isset($_SESSION['minimum_rate'])) ? $_SESSION['minimum_rate'] : 80;
-            $km_min = (isset($_SESSION['km_min'])) ? $_SESSION['km_min'] : 5;
-        }
+
+		switch($service){
+			case 'SNACKSHOP':
+				$delivery_rate = (isset($_SESSION['delivery_rate'])) ? $_SESSION['delivery_rate'] : 8;
+				$minimum_rate = (isset($_SESSION['minimum_rate'])) ? $_SESSION['minimum_rate'] : 80;
+				$km_min = (isset($_SESSION['km_min'])) ? $_SESSION['km_min'] : 5;
+				break;
+			case 'CATERING':
+				$delivery_rate = (isset($_SESSION['catering_delivery_rate'])) ? $_SESSION['catering_delivery_rate'] : 10;
+				$minimum_rate = (isset($_SESSION['catering_minimum_rate'])) ? $_SESSION['catering_minimum_rate'] : 1000;
+				$km_min = (isset($_SESSION['km_min'])) ? $_SESSION['km_min'] : 5;
+				break;
+		}
 
         if(isset($_SESSION['free_delivery']) && isset($_SESSION['free_min_delivery'])) {
             if($_SESSION['free_delivery'] != 1) { // free delivery all location
@@ -162,15 +178,19 @@ class Store extends CI_Controller {
                         $comp = $charge_per_km + $minimum_rate;
                         $delivery_charge = $comp;
                     } else {
-                        if (isset($_SESSION['catering_data'])) {
-                            $charge_per_km = $delivery_rate * $dist;
-                            $comp = $charge_per_km + $minimum_rate;
-                            $delivery_charge = $comp;
-                        } else {
-                            $charge_per_km = $_SESSION['cache_data']['surcharge_delivery_rate'] * $dist;
-                            $comp = $charge_per_km + $_SESSION['cache_data']['surcharge_minimum_rate'];
-                            $delivery_charge = $comp;
-                        }
+						
+						switch($service){
+							case 'SNACKSHOP':
+								$charge_per_km = $_SESSION['cache_data']['surcharge_delivery_rate'] * $dist;
+								$comp = $charge_per_km + $_SESSION['cache_data']['surcharge_minimum_rate'];
+								$delivery_charge = $comp;
+								break;
+							case 'CATERING':
+								$charge_per_km = $delivery_rate * $dist;
+								$comp = $charge_per_km + $minimum_rate;
+								$delivery_charge = $comp;
+								break;
+						}
                     }
                 }
             }else{
@@ -181,6 +201,53 @@ class Store extends CI_Controller {
         }
 
         return $delivery_charge;
+    }
+
+	
+    public function get_night_diff($start_datetime, $end_datetime){
+        date_default_timezone_set('Asia/Manila');
+        $start   = date('Y-m-d 22:00:00',$start_datetime);
+        $end     = date('Y-m-d 06:00:00',$start_datetime + 86400);
+
+        $event_start  = date('Y-m-d H:i:s',$start_datetime);
+        $event_end    = date('Y-m-d H:i:s',$end_datetime);
+
+        $night_diff = 0;
+        if($event_end > $start AND $event_end <= $end AND $event_start <= $start){
+            $night_diff = abs(strtotime($start) - strtotime($event_end)) / 3600;
+        }else if($event_end <= $end AND $event_start > $start){
+            $night_diff = abs(strtotime($event_start) - strtotime($event_end)) / 3600;
+        }else if($event_end > $end AND $event_start > $start){
+            $night_diff = abs(strtotime($event_start) - strtotime($end)) / 3600;
+        }else if($event_end > $end AND $event_start <= $start){
+            $night_diff = abs(strtotime($start) - strtotime($end)) / 3600;
+        }else if($event_start < $end){  
+            $night_diff=0;
+            for ($i=date('H',$start_datetime); $i < date('H',$end_datetime); $i++) { 
+               if ($i < 6) {
+                $night_diff++;               
+                }
+            }
+        }
+        return $night_diff * 500;
+    }
+
+	
+    public function get_succeeding_hour_charge($start_datetime, $end_datetime){
+        $event_start = $start_datetime;
+        $event_end = $end_datetime;
+        $time_diff = $event_end - $event_start;
+
+        $event_duration = ($time_diff/60)/60;
+        
+        if ($event_duration > 3) {
+            $comp = $event_duration - 3;
+            $additional_fee = $comp * 500;
+        } else {
+            $additional_fee = 0;
+        }
+
+        return $additional_fee;
     }
 
 }
