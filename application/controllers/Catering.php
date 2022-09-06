@@ -69,7 +69,7 @@ class Catering extends CI_Controller {
 					$order->calc_price = number_format($order->calc_price  ,2,'.',',');
 	
 					$package_selection[$key] = $order;
-					$remarks = explode("<br>",$order->remarks); 
+					$remarks = explode("<br/>",$order->remarks); 
 	
 					foreach($remarks as $remarks_key => $remark){
 						$get_first_letter = substr($remark,8);
@@ -109,15 +109,23 @@ class Catering extends CI_Controller {
 					"message" => "Success",
 					'data' => array(
 						'order' => $order_details,
+						'package_selection' => $package_selection,
+
 						'firstname' => $firstname,
 						'lastname' => $lastname,
 
-						'grand_total' => $grand_total,
 						'subtotal' => $subtotal,
 						'transportation_fee' => $transportation_fee,
 						'night_diff_charge' => $night_diff_charge,
 						'service_fee' => $service_fee,
 						'cod_fee' => $cod_fee,
+						
+						'grand_total' => $grand_total,
+						'package_price' => $package_price,
+						'service_charge'=>number_format($service_fee, 2),
+						'transportation_fee' => $transportation_fee,
+						'additional_hour_fee' => $transportation_fee,
+						'night_diff_charge' => $night_diff_charge,
 
 						'no_of_pax' => $no_of_pax,
 						'date_of_event' => $date_of_event,
