@@ -10,6 +10,7 @@ $route['shop/get_product_sku'] = 'shop/get_product_sku';
 //Catering
 $route['catering/products'] = 'catering/products';
 $route['catering/product'] = 'catering/product';
+$route['catering/orders'] = 'catering/orders';
 
 // POPCLUB 
 $route['popclub/platform'] = 'popclub/platform';

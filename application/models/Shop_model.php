@@ -2,6 +2,14 @@
 
 class Shop_model extends CI_Model 
 {
+    public function get_logon_type($hash_key){
+        $this->db->select('logon_type');
+        $this->db->from('transaction_tb');
+        $this->db->where('hash_key', $hash_key);
+        $query_logon_type = $this->db->get();
+        return $query_logon_type->row();
+    }
+
     public function get_user_order_history($id,$type){
         $this->db->select('
             A.dateadded,

@@ -2,7 +2,92 @@
 
 class Catering_model extends CI_Model 
 {
+    
+    public function get_logon_type($hash_key){
+        $this->db->select('logon_type');
+        $this->db->from('catering_transaction_tb');
+        $this->db->where('hash_key', $hash_key);
+        $query_logon_type = $this->db->get();
+        return $query_logon_type->row();
+    }
+    
+    public function get_facebook_details($id){
+        $this->db->select("*");
+        $this->db->from('fb_users');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        return $query->row();
+    }
 
+    public function view_order($hash_key)
+    {   
+        $this->db->select('hash_key');
+        $this->db->from('catering_transaction_tb');
+        $this->db->where('hash_key', $hash_key);
+        $check_hash = $this->db->get();
+        $result = $check_hash->result();
+
+        
+        if(!empty($result)){
+            $table = "catering_client_tb A";
+            $select_column = array("A.fb_user_id","A.fname", "A.lname", "A.email","A.address", "A.contact_number","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.company_name", "B.message", "B.serving_time", "B.event_class","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.discount","B.payment_plan","B.initial_payment","B.final_payment","B.final_payment_proof","B.contract","B.uploaded_contract","B.start_datetime","B.end_datetime","B.night_diff_fee","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","A.add_name","A.add_contact","A.add_address");
+            $join_A = "A.id = B.client_id";
+            $this->db->select($select_column);  
+            $this->db->from($table);
+            $this->db->join('catering_transaction_tb B', $join_A ,'left');
+            $this->db->join('store_tb Z', 'Z.store_id = B.store' ,'left');
+            $this->db->where('B.hash_key', $hash_key);
+
+            $query_info = $this->db->get();
+            $info = $query_info->result();
+
+            $select_col = array("O.product_id","O.combination_id","O.type","O.quantity","O.status","O.remarks","O.promo_id","O.promo_price","O.sku","O.sku_id","O.price AS calc_price","O.product_price","P.product_image","P.name","P.description","P.delivery_details","P.uom","P.add_details","P.add_remarks","P.product_hash","P.note","P.product_code", "P.category","O.product_label","U.name AS freebie_prod_name");
+            $this->db->from('catering_packages_tb P');
+            $this->db->select($select_col);
+            $this->db->join('catering_order_items O', 'P.id = O.product_id' ,'left');
+            $this->db->join('catering_transaction_tb T', 'O.transaction_id = T.id' ,'left');
+            $this->db->join('freebie_products_tb U', 'U.id = O.product_id' ,'left');
+            $this->db->where('T.hash_key', $hash_key);
+            $this->db->order_by('type','DESC');
+            $query_orders = $this->db->get();
+            $orders = $query_orders->result();
+
+            $select_addon_col = array("O.product_id","O.combination_id","O.type","O.quantity","O.status","O.remarks","O.promo_id","O.promo_price","O.sku","O.sku_id","O.price AS calc_price","O.product_price","P.product_image","P.name","P.description","P.delivery_details","P.uom","P.add_details","P.add_remarks","P.product_hash","P.status", "P.category","P.note","P.product_code","O.product_label");
+            $this->db->from('products_tb P');
+            $this->db->select($select_addon_col);
+            $this->db->join('catering_order_items O', 'P.id = O.product_id' ,'left');
+            $this->db->join('catering_transaction_tb T', 'O.transaction_id = T.id' ,'left');
+            $this->db->where('T.hash_key', $hash_key);
+            $this->db->order_by('type','DESC');
+            $query_addons = $this->db->get();
+            $addons = $query_addons->result();
+
+            $this->db->from('personnel_tb');
+            $this->db->select('name,contact_number');
+            $this->db->where('reference_code', $info[0]->moh);
+            $this->db->where('assigned_store', $info[0]->store);
+            $query_orders = $this->db->get();
+            $personnel = $query_orders->result();
+
+            $this->db->from('bank_account_tb');
+            $this->db->select('*');
+            $this->db->where('store_id', $info[0]->store);
+            $this->db->where('indicator', $info[0]->payops);
+            $query_orders = $this->db->get();
+            $bank = $query_orders->result();
+
+            $join_data['clients_info'] = $info[0];
+            $join_data['order_details'] = $orders;
+            $join_data['addons'] = $addons;
+            $join_data['personnel'] = $personnel[0];
+            $join_data['bank'] = $bank[0];
+            
+            return $join_data;
+        }else{
+            return $join_data = array();
+        }
+
+    }
     
     public function insert_transaction_details($data)
     {   

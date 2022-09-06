@@ -86,10 +86,15 @@ class Shop extends CI_Controller {
                     $grand_total = (int)$subtotal + (int)$delivery_fee + (int)$cod_fee - (double)$voucher_amount - (double)$giftcard_amount;
                     // $grand_total = number_format($subtotal + $delivery_fee + $cod_fee - $voucher_amount,2);
                 }
+				
+				$query_logon  = $this->shop_model->get_logon_type($hash);
+				$logon_type   = $query_logon->logon_type;
 
-
-				$firstname = $this->shop_model->get_facebook_details($order_details['clients_info']->fb_user_id)[0]->first_name;
-				$lastname = $this->shop_model->get_facebook_details($order_details['clients_info']->fb_user_id)[0]->last_name;
+				if ($logon_type == 'facebook') {
+					$facebook_details = $this->shop_model->get_facebook_details($order_details['clients_info']->fb_user_id);
+					$firstname = $facebook_details[0]->first_name;
+					$lastname = $facebook_details[0]->last_name;
+				}
 
 				$store_id = $this->store_model->get_store_id_by_hash_key($hash);
 				$delivery_hours = $this->store_model->get_delivery_hours($store_id);

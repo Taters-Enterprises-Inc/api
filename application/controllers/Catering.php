@@ -14,6 +14,88 @@ class Catering extends CI_Controller {
 		$this->load->library('images');
 	}
 
+	public function orders(){
+		
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$hash = $this->input->get('hash');
+				$order_details = $this->catering_model->view_order($hash);
+				
+                if ($order_details['clients_info']->reseller_id != 0) {
+                    $subtotal = $order_details['clients_info']->purchase_amount;
+                    $reseller_discount = $order_details['clients_info']->reseller_discount;
+                    $grand_total = $subtotal - $reseller_discount;
+                    $delivery_fee = 0;
+                    $voucher_amount = 0;
+                } else {
+					$subtotal = $order_details['clients_info']->purchase_amount;
+					$transportation_fee = $order_details['clients_info']->distance_price;
+
+					
+                    $catering_start_date = $order_details['clients_info']->start_datetime;
+                    $str_start_datetime = strtotime($catering_start_date);
+                    $start_datetime = date($str_start_datetime);
+                    
+                    $catering_end_date = $order_details['clients_info']->end_datetime;
+                    $str_end_datetime = strtotime($catering_end_date);
+                    $end_datetime = date($str_end_datetime);
+                    
+					
+					$service_fee = 0;
+					$service_fee_percentage = 0.1;
+					$night_diff_charge = $this->get_night_diff((int)$start_datetime,(int)$end_datetime);
+			
+					if(isset($service_fee_percentage)){
+						$service_fee = round($subtotal * $service_fee_percentage);
+					}
+		
+					if($order_details['clients_info']->discount == NULL){
+						$voucher_amount = 0;
+					}else{
+						$voucher_amount = $order_details['clients_info']->discount;
+					}
+					if($order_details['clients_info']->giftcard_discount == NULL){
+						$giftcard_amount = 0;
+					}else{
+						$giftcard_amount = $order_details['clients_info']->giftcard_discount;
+					}
+					$cod_fee = $order_details['clients_info']->cod_fee;
+					$grand_total = (int)$subtotal + (int)$transportation_fee + (int)$service_fee + (int)$night_diff_charge + (int)$this->get_succeeding_hour_charge((int)$start_datetime, (int)$end_datetime) + (int)$cod_fee - (double)$voucher_amount - (double)$giftcard_amount;
+				}
+
+				
+				$query_logon  = $this->catering_model->get_logon_type($hash);
+				$logon_type   = $query_logon->logon_type;
+
+				if ($logon_type == 'facebook') {
+					$facebook_details = $this->catering_model->get_facebook_details($order_details['clients_info']->fb_user_id);
+					$firstname = $facebook_details->first_name;
+					$lastname = $facebook_details->last_name;
+				}
+
+
+				$response = array(
+					"message" => "Success",
+					'data' => array(
+						'order' => $order_details,
+						'firstname' => $firstname,
+						'lastname' => $lastname,
+
+						'grand_total' => $grand_total,
+						'subtotal' => $subtotal,
+						'transportation_fee' => $transportation_fee,
+						'night_diff_charge' => $night_diff_charge,
+						'service_fee' => $service_fee,
+						'cod_fee' => $cod_fee,
+					),
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+
     public function products(){
         
 		switch($this->input->server('REQUEST_METHOD')){
@@ -93,5 +175,50 @@ class Catering extends CI_Controller {
 				return;
 		}
 	}
+	
+    private function get_night_diff($start_datetime, $end_datetime){
+        date_default_timezone_set('Asia/Manila');
+        $start   = date('Y-m-d 22:00:00',$start_datetime);
+        $end     = date('Y-m-d 06:00:00',$start_datetime + 86400);
+
+        $event_start  = date('Y-m-d H:i:s',$start_datetime);
+        $event_end    = date('Y-m-d H:i:s',$end_datetime);
+
+        $night_diff = 0;
+        if($event_end > $start AND $event_end <= $end AND $event_start <= $start){
+            $night_diff = abs(strtotime($start) - strtotime($event_end)) / 3600;
+        }else if($event_end <= $end AND $event_start > $start){
+            $night_diff = abs(strtotime($event_start) - strtotime($event_end)) / 3600;
+        }else if($event_end > $end AND $event_start > $start){
+            $night_diff = abs(strtotime($event_start) - strtotime($end)) / 3600;
+        }else if($event_end > $end AND $event_start <= $start){
+            $night_diff = abs(strtotime($start) - strtotime($end)) / 3600;
+        }else if($event_start < $end){  
+            $night_diff=0;
+            for ($i=date('H',$start_datetime); $i < date('H',$end_datetime); $i++) { 
+               if ($i < 6) {
+                $night_diff++;               
+                }
+            }
+        }
+        return $night_diff * 500;
+    }
+	
+    public function get_succeeding_hour_charge($start_datetime, $end_datetime){
+        $event_start = $start_datetime;
+        $event_end = $end_datetime;
+        $time_diff = $event_end - $event_start;
+
+        $event_duration = ($time_diff/60)/60;
+        
+        if ($event_duration > 3) {
+            $comp = $event_duration - 3;
+            $additional_fee = $comp * 500;
+        } else {
+            $additional_fee = 0;
+        }
+
+        return $additional_fee;
+    }
 
 }
