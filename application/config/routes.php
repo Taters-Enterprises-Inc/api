@@ -59,6 +59,9 @@ $route['cart/catering'] = 'cart/catering';
 $route['transaction/shop'] = 'transaction/shop';
 $route['transaction/catering'] = 'transaction/catering';
 
+//Download
+$route['download/contract/(:any)'] = 'download/contract/$1';
+
 //Image
 $route['load-image/(:any)'] = 'image/load_image/$1';	
 

@@ -2,6 +2,26 @@
 
 class Shop_model extends CI_Model 
 {
+    
+    //jepoy get store id by hash key
+    public function get_store_id_by_hash_key($hash_key){
+        $this->db->select('store');
+        $this->db->where('hash_key', $hash_key);
+        $query = $this->db->get('transaction_tb');
+        $data = $query->row();
+        return $data;
+    }
+
+    //jepoy get facebook client id
+    public function get_facebook_client_id($oauth_id){
+        $this->db->select('id');
+        $this->db->where('oauth_uid', $oauth_id);
+        $query = $this->db->get('fb_users');
+        $data = $query->result_array();
+        return $data[0]['id'];
+    }
+
+
     public function get_logon_type($hash_key){
         $this->db->select('logon_type');
         $this->db->from('transaction_tb');

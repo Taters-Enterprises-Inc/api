@@ -15,7 +15,6 @@ class Catering extends CI_Controller {
 	}
 
 	public function orders(){
-		
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 				$hash = $this->input->get('hash');
