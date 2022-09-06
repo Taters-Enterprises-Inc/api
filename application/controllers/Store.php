@@ -23,7 +23,7 @@ class Store extends CI_Controller {
 				if($address){
 					$stores = $this->store_model->get_stores_available($this->google->geolocator($address)['lat'],$this->google->geolocator($address)['lng'],$service);
 				}else{
-					$stores = $this->store_model->get_stores_available($service);
+					$stores = $this->store_model->get_stores_available();
 				}
 
 				$response = array(
