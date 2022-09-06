@@ -2,6 +2,14 @@
 
 class Shop_model extends CI_Model 
 {
+    public function get_logon_type($hash_key){
+        $this->db->select('logon_type');
+        $this->db->from('transaction_tb');
+        $this->db->where('hash_key', $hash_key);
+        $query_logon_type = $this->db->get();
+        return $query_logon_type->row();
+    }
+
     public function get_user_order_history($id,$type){
         $this->db->select('
             A.dateadded,
@@ -277,6 +285,29 @@ class Shop_model extends CI_Model
 		');
         $this->db->from('products_tb');
 		$this->db->where('product_hash', $hash);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function get_product_by_id($id)
+    {
+        $this->db->select('
+			id, 
+			product_image, 
+			name, 
+			description, 
+			add_details, 
+			delivery_details, 
+			price, 
+			category, 
+			num_flavor, 
+			add_remarks, 
+			note, 
+			to_gc_value
+		');
+        $this->db->from('products_tb');
+		$this->db->where('id', $id);
 
         $query = $this->db->get();
         return $query->row();

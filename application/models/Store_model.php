@@ -125,7 +125,8 @@ class Store_model extends CI_Model
 
 	public function get_stores_available(
 		$latitude = 0,
-		$longitude = 0
+		$longitude = 0,
+		$service='SNACKSHOP'
 	){
 		$this->db->select('
 			A.id,
@@ -147,12 +148,26 @@ class Store_model extends CI_Model
 			C.sequence,
 			D.name as nameofstore,
     		IFNULL(D.contact_number, "No contact number") as contactno,
-    		D.operating_hours as operatinghours, D.map_link as maplink , 
+    		D.operating_hours as operatinghours, 
+			D.map_link as maplink, 
 			( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
-			FROM `store_tb` A join region_store_combination_tb B ON B.region_store_id = A.region_store_combination_id 
-			join region_tb C ON C.id = B.region_id join dotcom_stores D ON D.store_id = A.store_id  WHERE A.status = 1 ORDER BY distance
 		');
 
+        $this->db->from('store_tb A');
+        $this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
+        $this->db->join('region_tb C', 'C.id = B.region_id');
+        $this->db->join('dotcom_stores D', 'D.store_id = A.store_id');
+
+		switch($service){
+			case 'SNACKSHOP':
+				$this->db->where('A.status', 1);
+				break;
+			case 'CATERING':
+				$this->db->where('A.catering_status', 1);
+				break;
+		}
+
+		$this->db->order_by('distance', 'ASC');
 		$query = $this->db->get();  
 		$query_data = $query->result();
 		$region_data = array();

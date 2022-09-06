@@ -14,6 +14,7 @@ class Transaction extends CI_Controller {
 		parent::__construct();
 		$this->load->model('transaction_model');
 		$this->load->model('shop_model');
+		$this->load->model('catering_model');
 	}
 
     public function get_facebook_client_id($oauth_id){
@@ -22,6 +23,142 @@ class Transaction extends CI_Controller {
         $query = $this->db->get('fb_users');
         $data = $query->result_array();
         return $data[0]['id'];
+    }
+    
+    public function catering(){
+        
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+				$post = json_decode(file_get_contents("php://input"), true);
+                
+                $hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+                $tracking_no = substr(md5(uniqid(mt_rand(), true)), 0, 6);
+
+                
+                $insert_client_details = $this->catering_model->insert_client_details($post);
+                if($insert_client_details->status == true){
+
+                    if(!empty($this->session->orders)){
+                        $comp_total = 0;
+                        foreach ($this->session->orders as $row => $val) {
+                            $comp_total += $val['prod_calc_amount'];
+                        }
+                    }
+
+                    
+                    $remarks = empty($post['checkout_remarks']) ? '' : $post['checkout_remarks'];
+                    $distance_rate_id = (empty($this->session->distance_rate_id)) ? 0 : $this->session->distance_rate_id;
+                    $distance_rate_price = (empty($this->session->distance_rate_price)) ? 0 : $this->session->distance_rate_price;
+                    $payops = $post['payops'];
+                    
+                    $cod_fee = "0";
+                    if($this->session->moh == 2 && $payops == '3'){
+                        $cod_fee = $this->session->cash_delivery;
+                    }
+
+                    
+                    if (isset($this->session->userData['oauth_uid'])) {
+                        $logon_type = 'facebook';
+                    } elseif(isset($this->session->userData['mobile_user_id'])){
+                        $logon_type = 'mobile';
+                    } else {
+                        $logon_type = 'guest';
+                    }
+                    
+					$str_serving_time = strtotime($post['catering_serving_time']);
+					$serving_time = date($str_serving_time);
+                    
+                    $catering_start_date = $_SESSION['catering_start_date'];
+                    $str_start_datetime = strtotime($catering_start_date);
+                    $start_datetime = date($str_start_datetime);
+                    
+                    $catering_end_date = $_SESSION['catering_end_date'];
+                    $str_end_datetime = strtotime($catering_end_date);
+                    $end_datetime = date($str_end_datetime);
+                    
+                    $client_id = $insert_client_details->id;
+                    $transaction_data = array(
+                        'tracking_no' 		=> $tracking_no,
+                        'hash_key'          => $hash_key,
+                        'client_id' 	   	=> $client_id,
+                        'purchase_amount'   => $comp_total,
+                        'remarks' 		    => $remarks,
+                        'status' 		    => 1,
+                        'contract'          => 0,
+                        'store'             => $this->session->cache_data['store_id'],
+                        'dateadded'         => date('Y-m-d H:i:s'),
+						'company_name'		=> isset($post['catering_company_name']) ? $post['catering_company_name'] : '',
+						'message'			=> isset($post['other_details']) ? $post['other_details'] : '',
+						'serving_time'		=> $serving_time,
+                        'start_datetime'    => $catering_start_date,
+                        'end_datetime'      => $catering_end_date,
+                        'event_class'       => isset($post['event_class']) ? $post['event_class'] : '',
+                        'service_fee'       => $comp_total * 0.1,
+                        'night_diff_fee'    => $this->get_night_diff((int)$start_datetime, (int)$end_datetime),
+                        'additional_hour_charge' => $this->get_succeeding_hour_charge((int)$start_datetime, (int)$end_datetime),
+                        'distance'          => '2',
+                        'distance_id'       => $distance_rate_id,
+                        'distance_price'    => $distance_rate_price,
+                        'cod_fee'           => $cod_fee,
+                        'payops'            => $payops,
+                        'payment_plan'      => $post['payment_plan'],
+                        'discount'          => 0,
+                        'custom_message'    => '',
+                        'logon_type'        => $logon_type,
+                    );
+
+                        
+                    $query_transaction_result = $this->catering_model->insert_transaction_details($transaction_data);
+                    
+                    if($query_transaction_result->status){
+                        
+                        if(!empty($this->session->orders)){
+                            $comp_total = 0;
+
+                            foreach ($this->session->orders as $k => $value) {
+                                $remarks = (empty($value['prod_multiflavors'])) ? $value['prod_flavor'] : $value['prod_multiflavors'];
+                                $type = (isset($value['addon_base_product_id']) && ($value['addon_base_product_id']) ? 'addon' : 'main');
+
+                                $order_data[] = array(
+                                    'transaction_id'      => $query_transaction_result->id,
+                                    'combination_id'      => $k,
+                                    'product_id'          => $value['prod_id'],
+                                    'quantity'            => $value['prod_qty'],
+                                    'remarks'             => $remarks,
+                                    'type'                => isset($value['is_free_item']) && $value['is_free_item'] === true ? "freebie" : "main",
+                                    'type'                => $type,
+                                    'status'              => 1,
+                                    'promo_id'            => "",
+                                    'promo_price'         => "",
+                                    'sku'                 => $value['prod_sku'],
+                                    'sku_id'              => $value['prod_sku_id'],
+                                    'price'               => $value['prod_calc_amount'],
+                                    'product_price'       => $value['prod_price'],
+                                    'product_label'       => $value['prod_size'],
+                                    'product_discount'    => $value['prod_discount'],
+                                    'addon_base_product'  => (isset($value['addon_base_product'])) ? $value['addon_base_product'] : '',
+                                );
+                            }
+                            $query_orders_result = $this->catering_model->insert_client_orders($order_data);
+                        }
+                    }
+                    
+
+                }
+                
+                $response = array(
+                    "data" => array(
+                        "hash" => $hash_key,
+                    ),
+                    "message" => "Succesfully checkout order"
+                );
+                
+                header('content-type: application/json');
+                echo json_encode($response);
+
+
+                break;
+        }
     }
 
     public function shop(){
@@ -63,7 +200,7 @@ class Transaction extends CI_Controller {
 
                     
                     $cod_fee = "0";
-                    if($this->session->moh == 2 && $payops == '3'){
+                    if( $payops == '3'){
                         $cod_fee = $this->session->cash_delivery;
                     }
                     
@@ -249,7 +386,6 @@ class Transaction extends CI_Controller {
                 break;
         }
     }
-
 
 
     private function summary_actions($request)
@@ -477,6 +613,52 @@ class Transaction extends CI_Controller {
                 echo json_encode(array('status' => 'error', 'id' => null));
                 break;
         }
+    }
+
+    private function get_night_diff($start_datetime, $end_datetime){
+        date_default_timezone_set('Asia/Manila');
+        $start   = date('Y-m-d 22:00:00',$start_datetime);
+        $end     = date('Y-m-d 06:00:00',$start_datetime + 86400);
+
+        $event_start  = date('Y-m-d H:i:s',$start_datetime);
+        $event_end    = date('Y-m-d H:i:s',$end_datetime);
+
+        $night_diff = 0;
+        if($event_end > $start AND $event_end <= $end AND $event_start <= $start){
+            $night_diff = abs(strtotime($start) - strtotime($event_end)) / 3600;
+        }else if($event_end <= $end AND $event_start > $start){
+            $night_diff = abs(strtotime($event_start) - strtotime($event_end)) / 3600;
+        }else if($event_end > $end AND $event_start > $start){
+            $night_diff = abs(strtotime($event_start) - strtotime($end)) / 3600;
+        }else if($event_end > $end AND $event_start <= $start){
+            $night_diff = abs(strtotime($start) - strtotime($end)) / 3600;
+        }else if($event_start < $end){  
+            $night_diff=0;
+            for ($i=date('H',$start_datetime); $i < date('H',$end_datetime); $i++) { 
+               if ($i < 6) {
+                $night_diff++;               
+                }
+            }
+        }
+        return $night_diff * 500;
+    }
+    
+	
+    public function get_succeeding_hour_charge($start_datetime, $end_datetime){
+        $event_start = $start_datetime;
+        $event_end = $end_datetime;
+        $time_diff = $event_end - $event_start;
+
+        $event_duration = ($time_diff/60)/60;
+        
+        if ($event_duration > 3) {
+            $comp = $event_duration - 3;
+            $additional_fee = $comp * 500;
+        } else {
+            $additional_fee = 0;
+        }
+
+        return $additional_fee;
     }
 
 
