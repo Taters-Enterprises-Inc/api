@@ -21,48 +21,79 @@ class Catering extends CI_Controller {
 				$hash = $this->input->get('hash');
 				$order_details = $this->catering_model->view_order($hash);
 				
-                if ($order_details['clients_info']->reseller_id != 0) {
-                    $subtotal = $order_details['clients_info']->purchase_amount;
-                    $reseller_discount = $order_details['clients_info']->reseller_discount;
-                    $grand_total = $subtotal - $reseller_discount;
-                    $delivery_fee = 0;
-                    $voucher_amount = 0;
-                } else {
-					$subtotal = $order_details['clients_info']->purchase_amount;
-					$transportation_fee = $order_details['clients_info']->distance_price;
+				$subtotal = $order_details['clients_info']->purchase_amount;
+				$transportation_fee = $order_details['clients_info']->distance_price;
 
-					
-                    $catering_start_date = $order_details['clients_info']->start_datetime;
-                    $str_start_datetime = strtotime($catering_start_date);
-                    $start_datetime = date($str_start_datetime);
-                    
-                    $catering_end_date = $order_details['clients_info']->end_datetime;
-                    $str_end_datetime = strtotime($catering_end_date);
-                    $end_datetime = date($str_end_datetime);
-                    
-					
-					$service_fee = 0;
-					$service_fee_percentage = 0.1;
-					$night_diff_charge = $this->get_night_diff((int)$start_datetime,(int)$end_datetime);
-			
-					if(isset($service_fee_percentage)){
-						$service_fee = round($subtotal * $service_fee_percentage);
-					}
+				
+				$catering_start_date = $order_details['clients_info']->start_datetime;
+				$str_start_datetime = strtotime($catering_start_date);
+				$start_datetime = date($str_start_datetime);
+				
+				$catering_end_date = $order_details['clients_info']->end_datetime;
+				$str_end_datetime = strtotime($catering_end_date);
+				$end_datetime = date($str_end_datetime);
+				
+				
+				$service_fee = 0;
+				$service_fee_percentage = 0.1;
+				$night_diff_charge = $this->get_night_diff((int)$start_datetime,(int)$end_datetime);
 		
-					if($order_details['clients_info']->discount == NULL){
-						$voucher_amount = 0;
-					}else{
-						$voucher_amount = $order_details['clients_info']->discount;
-					}
-					if($order_details['clients_info']->giftcard_discount == NULL){
-						$giftcard_amount = 0;
-					}else{
-						$giftcard_amount = $order_details['clients_info']->giftcard_discount;
-					}
-					$cod_fee = $order_details['clients_info']->cod_fee;
-					$grand_total = (int)$subtotal + (int)$transportation_fee + (int)$service_fee + (int)$night_diff_charge + (int)$this->get_succeeding_hour_charge((int)$start_datetime, (int)$end_datetime) + (int)$cod_fee - (double)$voucher_amount - (double)$giftcard_amount;
+				if(isset($service_fee_percentage)){
+					$service_fee = round($subtotal * $service_fee_percentage);
+				}
+	
+				if($order_details['clients_info']->discount == NULL){
+					$voucher_amount = 0;
+				}else{
+					$voucher_amount = $order_details['clients_info']->discount;
 				}
 
+				$cod_fee = $order_details['clients_info']->cod_fee;
+				$grand_total = (int)$subtotal + (int)$transportation_fee + (int)$service_fee + (int)$night_diff_charge + (int)$this->get_succeeding_hour_charge((int)$start_datetime, (int)$end_datetime) + (int)$cod_fee - (double)$voucher_amount;
+				
+				$no_of_pax = 0;
+				$package_price = 0;
+
+				$all_of_orders = array_merge($order_details['order_details'], $order_details['addons']);
+
+				foreach($all_of_orders  as $key => $order){
+					if($order->status == 0){
+						continue;
+					}
+					if($order->category != 11 && $order->category != 5){
+						$no_of_pax += $order->quantity;
+					}
+					$package_price += $order->calc_price;
+	
+					$order->product_price = number_format($order->product_price  ,2,'.',',');
+					$order->calc_price = number_format($order->calc_price  ,2,'.',',');
+	
+					$package_selection[$key] = $order;
+					$remarks = explode("<br>",$order->remarks); 
+	
+					foreach($remarks as $remarks_key => $remark){
+						$get_first_letter = substr($remark,8);
+						$quantity = (int)strtok($get_first_letter, " - ");
+						$remarks[$remarks_key] = array(
+							'quantity' => $quantity,
+							'name' => substr($remark,21),
+						);
+					}
+	
+					$package_selection[$key]->flavors = $remarks;
+					array_pop($package_selection[$key]->flavors);
+				}
+
+				$package_price = number_format($package_price ,2,'.',',');	
+				
+				$start_date = date('l jS  F Y', $order_details['clients_info']->start_datetime);
+				$end_date = date('l jS  F Y', $order_details['clients_info']->end_datetime);
+				$date_of_event = $start_date;
+				$serving_time = date('h:i A',$order_details['clients_info']->serving_time);
+				$event_date_and_time = date('h:i A',$order_details['clients_info']->start_datetime) . ' to ' . date('h:i A',$order_details['clients_info']->end_datetime);
+				if($start_date != $end_date){
+					$date_of_event = $start_date . ' to ' . $end_date;
+				}
 				
 				$query_logon  = $this->catering_model->get_logon_type($hash);
 				$logon_type   = $query_logon->logon_type;
@@ -87,6 +118,11 @@ class Catering extends CI_Controller {
 						'night_diff_charge' => $night_diff_charge,
 						'service_fee' => $service_fee,
 						'cod_fee' => $cod_fee,
+
+						'no_of_pax' => $no_of_pax,
+						'date_of_event' => $date_of_event,
+						'event_date_and_time' => $event_date_and_time,
+						'serving_time' => $serving_time,
 					),
 				);
 
