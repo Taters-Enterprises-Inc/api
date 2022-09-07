@@ -20,8 +20,8 @@ class Download extends CI_Controller {
         date_default_timezone_set('Asia/Manila');
         
 		if(!isset($_SESSION['userData'])){
-			show_error('Unauthorized you cannot view this page');
-			exit();
+			// show_error('Unauthorized you cannot view this page');
+			// exit();
 		}
 		$data['hash_key'] = $hash_key;
 
@@ -216,8 +216,6 @@ class Download extends CI_Controller {
 			$this->pdf->render();
 			$this->pdf->stream($hash_key);
 		}
-
-		show_error('Page is not available.');
 
     }
     
