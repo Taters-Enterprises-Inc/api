@@ -26,6 +26,12 @@ class Download extends CI_Controller {
 		$data['hash_key'] = $hash_key;
 
 		$query_result = $this->catering_model->view_order($hash_key);
+		
+		$status_detail = $this->catering_model->fetch_status_detail($hash_key);
+
+		if(!empty($status_detail)){
+			$data['status'] = $status_detail->status;
+		}
         
         $catering_start_date = $query_result['clients_info']->start_datetime;
         $str_start_datetime = strtotime($catering_start_date);
@@ -200,7 +206,7 @@ class Download extends CI_Controller {
 				'succeeding_hour_charge' => $succeeding_hour_charge,
 				'night_diff_charge' => $night_diff_charge,
 				'is_download' => true,
-				'show_terms_and_condition' => false,
+				'show_terms_and_condition' => $data['status'] == 1 ? false : true,
 			);
 			
 			$data['contract_data'] = $contract_data;

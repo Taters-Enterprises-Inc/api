@@ -3,6 +3,15 @@
 class Catering_model extends CI_Model 
 {
     
+	public function fetch_status_detail($hash_key){
+        $this->db->select('status');
+        $this->db->from('catering_transaction_tb');
+        $this->db->where('hash_key', $hash_key);
+        $query = $this->db->get();
+
+		return $query->row();
+	}
+    
     public function get_logon_type($hash_key){
         $this->db->select('logon_type');
         $this->db->from('catering_transaction_tb');

@@ -20,6 +20,13 @@ class Catering extends CI_Controller {
 				$hash = $this->input->get('hash');
 				$order_details = $this->catering_model->view_order($hash);
 				
+
+				$status_detail = $this->catering_model->fetch_status_detail($hash);
+
+				if(!empty($status_detail)){
+					$status = $status_detail->status;
+				}
+				
 				$subtotal = $order_details['clients_info']->purchase_amount;
 				$transportation_fee = $order_details['clients_info']->distance_price;
 
@@ -107,6 +114,7 @@ class Catering extends CI_Controller {
 				$response = array(
 					"message" => "Success",
 					'data' => array(
+						'status' => $status,
 						'order' => $order_details,
 						'package_selection' => $package_selection,
 
