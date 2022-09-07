@@ -97,6 +97,7 @@ class Shared extends CI_Controller {
 					'customer_address' 					=> $this->session->customer_address,
 					'userData' 							=> $this->session->userData,
 					'orders'							=> $this->session->orders,
+					'deals'								=> $this->session->deals,
 					'deals' 							=> $this->session->deals,
 					"km_radius"							=> $this->session->km_radius,
 					"km_min"							=> $this->session->km_min,

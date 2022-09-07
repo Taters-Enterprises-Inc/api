@@ -189,7 +189,6 @@ class Popclub extends CI_Controller {
 						$products['deal_promo_price'] = $deal->promo_price;
 						$products['deal_remarks'] = $post['remarks'];
 	
-						$_SESSION['orders'] = array($products);	
 					}
 	
 					$_SESSION['deals'] = array($products);	

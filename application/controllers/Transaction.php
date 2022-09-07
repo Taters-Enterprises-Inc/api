@@ -172,25 +172,32 @@ class Transaction extends CI_Controller {
                 $insert_client_details = $this->transaction_model->insert_client_details($post);
 
                 if($insert_client_details->status == true){
+                    $comp_total = 0;
 
-                    if(!empty($this->session->orders)){
-                        $comp_total = 0;
-                        foreach ($this->session->orders as $row => $val) {
-							if($val['prod_id']){
-								$comp_total += $val['prod_calc_amount'];
-							}else if($val['deal_id']){
-								$comp_total += $val['deal_promo_price'];
-							}
+                    if(isset($_SESSION['orders'])){
+                        if(!empty($_SESSION['orders'])){
+                            foreach ($_SESSION['orders'] as $row => $val) {
+                                $comp_total += $val['prod_calc_amount'];
+                            }
                         }
                     }
                     
+                    if(isset($_SESSION['deals'])){
+                        if(!empty($_SESSION['deals'])){
+                            foreach ($_SESSION['deals'] as $row => $val) {
+                                $comp_total += $val['deal_promo_price'];
+                            }
+                        }
+                    }
+
+
                     $distance_rate_id = (empty($this->session->distance_rate_id)) ? 0 : $this->session->distance_rate_id;
-					$deals = $this->session->deals;
+					$deals = $_SESSION['deals'];
                     $distance_rate_price = (empty($this->session->distance_rate_price)) ? 0 : $this->session->distance_rate_price;
 
 					if(isset($deals)){
 						foreach($deals as $deal){
-							if($deal['minimum_purchase'] <= $comp_total){
+							if(isset($deal['minimum_purchase']) && $deal['minimum_purchase'] <= $comp_total){
 								$distance_rate_price = 0;
 							}
 						}
@@ -295,12 +302,17 @@ class Transaction extends CI_Controller {
                     
                     if($query_transaction_result->status){
                         $trans_id = $query_transaction_result->id;
+
+                        $orders_session = isset($_SESSION['orders']) ? $_SESSION['orders']:  [];
+                        $deals_session = isset($_SESSION['deals']) ? $_SESSION['deals']:  [];
+
+                        $orders = array_merge($orders_session, $deals_session);
                         
-                        if(!empty($this->session->orders)){
+                        if(!empty($orders)){
                             $comp_total = 0;
 
-                            foreach ($this->session->orders as $k => $value) {
-								if($value['prod_id']){
+                            foreach ($orders as $k => $value) {
+								if(isset($value['prod_id'])){
 									$remarks = (empty($value['prod_multiflavors'])) ? $value['prod_flavor'] : $value['prod_multiflavors'];
 									$type = (isset($value['addon_base_product_id']) && ($value['addon_base_product_id']) ? 'addon' : 'main');
 	
@@ -362,16 +374,17 @@ class Transaction extends CI_Controller {
                         }
                         
                     
-                        if($query_orders_result){
-                            $sms_stat =  $this->summary_actions('confirm');
-                            // set_cookie('_teitn',$tracking_no,'86400');
-                        }
+                        // if($query_orders_result){
+                        //     $sms_stat =  $this->summary_actions('confirm');
+                        //     // set_cookie('_teitn',$tracking_no,'86400');
+                        // }
 
                     }
 
                 }
                 
                 $this->session->unset_userdata('orders');
+                // $this->session->unset_userdata('deals');
 
                 $response = array(
                     "data" => array(
