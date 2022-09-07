@@ -83,6 +83,7 @@ class Catering extends CI_Controller {
 				$service_fee = 0;
 				$service_fee_percentage = 0.1;
 				$night_diff_charge = $this->get_night_diff((int)$start_datetime,(int)$end_datetime);
+				$additional_fee = (int)$this->get_succeeding_hour_charge((int)$start_datetime, (int)$end_datetime);
 		
 				if(isset($service_fee_percentage)){
 					$service_fee = round($subtotal * $service_fee_percentage);
@@ -95,7 +96,7 @@ class Catering extends CI_Controller {
 				}
 
 				$cod_fee = $order_details['clients_info']->cod_fee;
-				$grand_total = (int)$subtotal + (int)$transportation_fee + (int)$service_fee + (int)$night_diff_charge + (int)$this->get_succeeding_hour_charge((int)$start_datetime, (int)$end_datetime) + (int)$cod_fee - (double)$voucher_amount;
+				$grand_total = (int)$subtotal + (int)$transportation_fee + (int)$service_fee + (int)$night_diff_charge  + (int)$cod_fee - (double)$voucher_amount;
 				
 				$no_of_pax = 0;
 				$package_price = 0;
@@ -171,7 +172,7 @@ class Catering extends CI_Controller {
 						'package_price' => $package_price,
 						'service_charge'=>number_format($service_fee, 2),
 						'transportation_fee' => $transportation_fee,
-						'additional_hour_fee' => $transportation_fee,
+						'additional_hour_fee' => $additional_fee,
 						'night_diff_charge' => $night_diff_charge,
 
 						'no_of_pax' => $no_of_pax,

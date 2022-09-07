@@ -33,7 +33,7 @@ class Catering_model extends CI_Model
 
         if($return_data['upload_status'] > 0){
             
-            $client_query = $this->db->select('catering_client_id')
+            $client_query = $this->db->select('client_id')
                 ->get_where('catering_transaction_tb', array('id' => $transaction_id))
                 ->result();
             $return_data['client_data'] = $client_query[0];
