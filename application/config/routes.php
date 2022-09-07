@@ -11,6 +11,7 @@ $route['shop/get_product_sku'] = 'shop/get_product_sku';
 $route['catering/products'] = 'catering/products';
 $route['catering/product'] = 'catering/product';
 $route['catering/orders'] = 'catering/orders';
+$route['catering/upload_contract'] = 'catering/upload_contract';
 
 // POPCLUB 
 $route['popclub/platform'] = 'popclub/platform';
@@ -31,6 +32,7 @@ $route['shared/session'] = 'shared/session';
 $route['shared/clear_redeems'] = 'shared/clear_redeems';
 $route['shared/clear_all_session'] = 'shared/clear_all_session';
 $route['shared/upload_payment'] = 'shared/upload_payment';
+$route['shared/catering_upload_payment'] = 'shared/catering_upload_payment';
 $route['shared/contacts'] = 'shared/contacts';
 
 // Facebook

@@ -13,6 +13,46 @@ class Catering extends CI_Controller {
 		$this->load->model('catering_model');
 		$this->load->library('images');
 	}
+	
+	public function upload_contract(){
+		
+        if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
+
+            $config['upload_path'] = './assets/upload/catering_upload_contract'; 
+
+			if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
+
+            $config['allowed_types']    = 'pdf|doc|gif|jpg|jpeg|png';   
+            $config['max_size']         = 2000; 
+            $config['max_width']        = 0;
+            $config['max_height']       = 0;
+            $config['encrypt_name']     = TRUE; 
+
+            $this->load->library('upload', $config);
+
+            if (!$this->upload->do_upload('uploaded_file')) { 
+                $error = $this->upload->display_errors();
+				$this->output->set_status_header('401');
+                echo json_encode(array( "message" => $error));
+            } else {
+                $data = $this->upload->data(); 
+                $hash_key = $_POST['hash_key'];
+
+
+                $this->catering_model->upload_contract(
+					$data,
+					$hash_key,
+				);	
+
+                header('content-type: application/json');
+                echo json_encode(array( "message" => 'Succesfully upload contract'));
+            }
+        } else {
+			$this->output->set_status_header('401');
+			echo json_encode(array( "message" => 'Failed upload contract check your file'));
+        }
+	}
+
 
 	public function orders(){
 		switch($this->input->server('REQUEST_METHOD')){

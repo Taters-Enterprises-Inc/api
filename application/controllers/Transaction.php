@@ -146,6 +146,9 @@ class Transaction extends CI_Controller {
 
                 }
                 
+                $this->session->unset_userdata('orders');
+                $this->session->unset_userdata('deals');
+                
                 $response = array(
                     "data" => array(
                         "hash" => $hash_key,
@@ -374,17 +377,17 @@ class Transaction extends CI_Controller {
                         }
                         
                     
-                        // if($query_orders_result){
-                        //     $sms_stat =  $this->summary_actions('confirm');
-                        //     // set_cookie('_teitn',$tracking_no,'86400');
-                        // }
+                        if($query_orders_result){
+                            $sms_stat =  $this->summary_actions('confirm');
+                            // set_cookie('_teitn',$tracking_no,'86400');
+                        }
 
                     }
 
                 }
                 
                 $this->session->unset_userdata('orders');
-                // $this->session->unset_userdata('deals');
+                $this->session->unset_userdata('deals');
 
                 $response = array(
                     "data" => array(

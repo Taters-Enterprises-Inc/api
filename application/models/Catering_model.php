@@ -3,6 +3,60 @@
 class Catering_model extends CI_Model 
 {
     
+    function upload_payment($data,$file_name,$tracking_no,$transaction_id,$payment_plan, $status)
+    { 
+        date_default_timezone_set('Asia/Manila');
+        $upload_time = date('Y-m-d H:i:s');
+        $file_name = $data['file_name'];
+
+        if ($payment_plan == 'half') {
+			if($status == 4 || $status == 22){
+				$this->db->set('initial_payment_proof', $file_name);
+				$this->db->set('status', 5);
+				$this->db->set('initial_payment_upload_date', $upload_time);
+			}elseif($status == 6 || $status == 23 ){
+				$this->db->set('final_payment_proof', $file_name);
+				$this->db->set('status', 7);
+				$this->db->set('final_payment_upload_date', $upload_time);
+			}
+        } elseif($payment_plan == 'full') {
+			if($status == 4 || $status == 23){
+				$this->db->set('final_payment_proof', $file_name);
+				$this->db->set('status', 7);
+				$this->db->set('final_payment_upload_date', $upload_time);
+			}
+        }
+        $this->db->where("tracking_no", $tracking_no);
+        $this->db->update("catering_transaction_tb");
+        // return ($this->db->affected_rows() != 1) ? false : true;
+        $return_data['upload_status'] = ($this->db->affected_rows() != 1) ? false : true;
+
+        if($return_data['upload_status'] > 0){
+            
+            $client_query = $this->db->select('catering_client_id')
+                ->get_where('catering_transaction_tb', array('id' => $transaction_id))
+                ->result();
+            $return_data['client_data'] = $client_query[0];
+        }
+        return $return_data;
+    }
+
+    function upload_contract($data,$hash_key)
+    { 
+
+        $file_name = $data['file_name'];
+		$this->db->set('uploaded_contract', $file_name);
+		$this->db->set('status', 3);
+
+        $this->db->where("hash_key", $hash_key);
+        $this->db->update("catering_transaction_tb");
+		
+        $return_data['upload_status'] = ($this->db->affected_rows() != 1) ? false : true;
+
+        return $return_data;
+    }
+
+    
 	public function fetch_status_detail($hash_key){
         $this->db->select('status');
         $this->db->from('catering_transaction_tb');
