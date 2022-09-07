@@ -198,11 +198,13 @@ class Cart extends CI_Controller {
                     $found_existing_free_item = false;
                     $set_value['is_free_item']      = $is_free_item;
                     $set_value['free_threshold']    = $product_details->free_threshold;
-                    foreach($_SESSION['orders'] as $key => $order){
-                        if(isset($order['is_free_item']) && $order['is_free_item'] === true){
-                            $_SESSION['orders'][$key] = $set_value;
-                            $found_existing_free_item = true;
-                            break;
+                    if(isset($_SESSION['orders'])){
+                        foreach($_SESSION['orders'] as $key => $order){
+                            if(isset($order['is_free_item']) && $order['is_free_item'] === true){
+                                $_SESSION['orders'][$key] = $set_value;
+                                $found_existing_free_item = true;
+                                break;
+                            }
                         }
                     }
                     if($found_existing_free_item === false){
