@@ -90,10 +90,16 @@ class Shop extends CI_Controller {
 				$query_logon  = $this->shop_model->get_logon_type($hash);
 				$logon_type   = $query_logon->logon_type;
 
-				if ($logon_type == 'facebook') {
-					$facebook_details = $this->shop_model->get_facebook_details($order_details['clients_info']->fb_user_id);
-					$firstname = $facebook_details[0]->first_name;
-					$lastname = $facebook_details[0]->last_name;
+				switch($logon_type){
+					case 'facebook':
+						$facebook_details = $this->shop_model->get_facebook_details($order_details['clients_info']->fb_user_id);
+						$firstname = $facebook_details[0]->first_name;
+						$lastname = $facebook_details[0]->last_name;
+						break;
+					case 'mobile':
+						$firstname = $order_details['clients_info']->fname;
+						$lastname = $order_details['clients_info']->lname;
+						break;
 				}
 
 				$store_id = $this->store_model->get_store_id_by_hash_key($hash);

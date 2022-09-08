@@ -48,7 +48,7 @@ class Shop_model extends CI_Model
         // $this->db->join('raffle_coupon_code_tb D', 'A.raffle_coupon_code = D.raffle_coupon_code' ,'left');
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
-        } else {
+        } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
         }
         $this->db->order_by('A.dateadded','DESC');

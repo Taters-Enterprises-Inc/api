@@ -15,4 +15,13 @@ class User_model extends CI_Model {
         return $query->row();
     }
     
+
+    function get_mobile_user_details($id){
+        $this->db->select('*');
+        $this->db->from('mobile_users');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        return $query->row();
+    }
+    
 }

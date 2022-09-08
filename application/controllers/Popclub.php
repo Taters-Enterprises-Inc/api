@@ -105,7 +105,6 @@ class Popclub extends CI_Controller {
 	public function redeem_deal(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
-				// Modify this to corressponding time
 				date_default_timezone_set('Asia/Singapore');
 
 				if(
@@ -192,6 +191,13 @@ class Popclub extends CI_Controller {
 					}
 	
 					$_SESSION['deals'] = array($products);	
+					$_SESSION['redeem_data'] = array(
+						'deal_id' => $deal->id,
+						'deal_hash' => $hash,
+						'date_redeemed' => $date_redeemed,
+						'expiration' => $expiration_date,
+						'redeem_code'=> $redeem_code,
+					);
 	
 					$response = array(
 						"message" => 'Successfully Redeem Code',

@@ -95,7 +95,24 @@ class Deals_model extends CI_Model
 			$this->db->insert('deals_client_tb', $data);
 			$insert_id = $this->db->insert_id();
 			$this->db->trans_complete();
-	  }
+	  } elseif(isset($_SESSION['userData']) && $_SESSION['userData']['login_type'] == 'mobile'){
+		$this->db->trans_start();
+		// $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
+		$data = array(
+			'mobile_user_id'    => $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']),
+			'email'             => ($_SESSION['userData']['email'] == "" ? "NA" : $_SESSION['userData']['email']),
+			'address'           => "NA",
+			'contact_number'    => "NA",
+			'moh'               => 1,
+			'payops'            => 0,
+			'add_name'          => $_SESSION['userData']['first_name'].' '.$_SESSION['userData']['last_name'],
+			'add_contact'       => "NA",
+			'add_address'       => "NA"
+		);
+		$this->db->insert('client_tb', $data);
+		$insert_id = $this->db->insert_id();
+	$this->db->trans_complete();
+  }
 	  return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$insert_id)), FALSE);
 	}
 	
@@ -333,6 +350,15 @@ class Deals_model extends CI_Model
 	
 		return null;
 	
+	  }
+	  
+	  //jepoy get mobile client id
+	  public function get_mobile_client_id($id){
+		  $this->db->select('id');
+		  $this->db->where('id', $id);
+		  $query = $this->db->get('mobile_users');
+		  $data = $query->result_array();
+		  return $data[0]['id'];
 	  }
 
 }

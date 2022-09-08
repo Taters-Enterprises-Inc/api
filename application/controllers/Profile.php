@@ -71,7 +71,10 @@ class Profile extends CI_Controller {
 	public function snackshop_orders(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-				if(!isset($_SESSION['userData']['oauth_uid'])){
+				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
+					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
+
+				if(!isset($logon_type)){
 
 					$response = array(
 						'message' => 'Error user not found',
@@ -81,10 +84,20 @@ class Profile extends CI_Controller {
 					echo json_encode($response);
 					return;
 				}
-
-				$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-				$snackshop_orders = $this->shop_model->get_user_order_history($get_fb_user_details->id,'facebook');
 				
+
+				switch($logon_type){
+					case 'facebook':
+						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+						$snackshop_orders = $this->shop_model->get_user_order_history($get_fb_user_details->id,'facebook');
+						break;
+					case 'mobile':
+						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+						$snackshop_orders = $this->shop_model->get_user_order_history($get_mobile_user_details->id,'mobile');
+
+						break;
+				}
+
 				$response = array(
 					'message' => 'Succesfully fetch history of orders',
 					'data' => $snackshop_orders,
