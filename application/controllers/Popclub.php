@@ -61,29 +61,19 @@ class Popclub extends CI_Controller {
 
 				foreach($redeems as $redeem){
 					$expire = date($redeem->expiration);
-					$date_redeemed = date($redeem->date_redeemed);
 
-					if(date("Y-m-d H:i:s", strtotime('-1 day')) < $date_redeemed && date("Y-m-d H:i:s", strtotime('+1 day')) > $date_redeemed && $redeem->status == 6 && $platform_selected == $redeem->platform_name){
+					/** 1 minute cool down */
+					// if($today > $expire && date("Y-m-d H:i:s") < date("Y-m-d H:i:s", strtotime('+60 seconds', strtotime($expire))) && $redeem->status == 1 && $platform_selected == $redeem->platform_name){
 
-						$response = array(
-							'message' => 'You redeem a deal for ',
-							"next_avialable_redeem" => date('Y-m-d H:i:s', strtotime("+1 day", strtotime($date_redeemed)))
-						);
+					// 	$response = array(
+					// 		'message' => 'You redeem a deal for ',
+					// 		"redeem_cooldown" => date("Y-m-d H:i:s", strtotime('+60 seconds', strtotime($expire))) 
+					// 	);
 					
-						header('content-type: application/json');
-						echo json_encode($response);
-						return;
-					}else if($today > $expire && date("Y-m-d H:i:s") < date("Y-m-d H:i:s", strtotime('+60 seconds', strtotime($expire))) && $redeem->status == 1 && $platform_selected == $redeem->platform_name){
-
-						$response = array(
-							'message' => 'You redeem a deal for ',
-							"redeem_cooldown" => date("Y-m-d H:i:s", strtotime('+60 seconds', strtotime($expire))) 
-						);
-					
-						header('content-type: application/json');
-						echo json_encode($response);
-						return;
-					}
+					// 	header('content-type: application/json');
+					// 	echo json_encode($response);
+					// 	return;
+					// }
 
 
 					if($today < $expire && $redeem->status == 1){
@@ -203,12 +193,6 @@ class Popclub extends CI_Controller {
 				
 				$deal = $this->deals_model->getDeal($hash);	
 
-				$redeems = $this->deals_model->get_redeem();
-				$today = date("Y-m-d H:i:s");
-
-				$platform_selected = $_SESSION['popclub_data']['platform'];
-
-				//get deals to insert on transaction
 				$client_details = $this->deals_model->insert_client_details();
 		
 				if ($client_details) {
