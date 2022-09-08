@@ -53,9 +53,9 @@ class Popclub extends CI_Controller {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 				date_default_timezone_set('Asia/Singapore');
+				$platform_selected = isset($_SESSION['popclub_data']) ? $_SESSION['popclub_data']['platform'] : false;
 				$deal_id = $this->input->get('deal_id');
 				$redeems = $this->deals_model->get_redeem($deal_id);
-				$platform_selected = $_SESSION['popclub_data']['platform'];
 				$latest_not_expired_redeem = null;
 				$today = date("Y-m-d H:i:s");
 
@@ -88,6 +88,84 @@ class Popclub extends CI_Controller {
 
 					if($today < $expire && $redeem->status == 1){
 						$latest_not_expired_redeem = $redeem;
+
+						$products= array(	
+							'deal_id' => $redeem->deal_id,
+							'deal_image_name' => $redeem->product_image,
+							'deal_name' => $redeem->name,
+							'description' => $redeem->description,
+							'deal_qty' => 1, 
+							'redeem_code'=> $redeem->redeem_code,
+						);
+
+						$this->session->set_userdata('redeem_data', $products);
+
+						if(isset($_SESSION['deals'])){
+							$exist = true;
+							foreach($_SESSION['deals'] as $key => $value){
+								if($value['redeem_code'] == $redeem->redeem_code){
+									$exist = false;
+									break;
+								}
+							}
+
+							if($exist) {
+								$products= array(	
+									'deal_id' => $redeem->deal_id,
+									'deal_image_name' => $redeem->product_image,
+									'deal_name' => $redeem->name,
+									'description' => $redeem->description,
+									'deal_qty' => 1, 
+									'redeem_code'=> $redeem->redeem_code,
+								);
+				
+								if($redeem->minimum_purchase != null){
+									$products['minimum_purchase'] = $redeem->minimum_purchase;
+								}else{
+									$products['deal_original_price'] = $redeem->original_price;
+									$products['deal_promo_price'] = $redeem->promo_price;
+									// $products['deal_remarks'] = $redeem->remarks;
+								}
+								$_SESSION['deals'][] = $products;
+								
+							}
+						}else {
+							
+							$products= array(	
+								'deal_id' => $redeem->deal_id,
+								'deal_image_name' => $redeem->product_image,
+								'deal_name' => $redeem->name,
+								'description' => $redeem->description,
+								'deal_qty' => 1, 
+								'redeem_code'=> $redeem->redeem_code,
+							);
+			
+							if($redeem->minimum_purchase != null){
+								$products['minimum_purchase'] = $redeem->minimum_purchase;
+							}else{
+								$products['deal_original_price'] = $redeem->original_price;
+								$products['deal_promo_price'] = $redeem->promo_price;
+								// $products['deal_remarks'] = $redeem->remarks;
+							}
+							$this->session->set_userdata('deals',array($products));
+							
+						}
+					}else{
+
+						if(isset($_SESSION['redeem_data'])){
+							if($_SESSION['redeem_data']['redeem_code'] === $redeem->redeem_code){
+								unset($_SESSION['redeem_data']);
+							}
+						}
+						if(isset($_SESSION['deals'])){
+							foreach($_SESSION['deals'] as $key => $value){
+								if($value['redeem_code'] === $redeem->redeem_code){
+									unset($_SESSION['deals'][$key]);
+									$reindexed_array = array_values($_SESSION['deals']);
+									$this->session->set_userdata('deals', $reindexed_array);
+								}
+							}
+						}
 					}
 				}
 
@@ -178,6 +256,7 @@ class Popclub extends CI_Controller {
 						'deal_name' => $deal->name,
 						'description' => $deal->description,
 						'deal_qty' => 1, 
+						'redeem_code'=> $redeem_code,
 					);
 					
 			

@@ -25,6 +25,7 @@ class Deals_model extends CI_Model
 				B.product_image,
 				B.description,
 				B.original_price,
+				B.minimum_purchase,
 				B.promo_price,
 				C.url_name AS platform_name,
 			');
