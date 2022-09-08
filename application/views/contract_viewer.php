@@ -116,8 +116,8 @@
 			<tr>
 				<td style=" text-align: center; font-weight: bold; color: red"><?= $package->quantity?></td>	
 				<td style="font-weight: bold; text-align: center"><?= $package->name?></td>	
-				<td style=" text-align: right"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span> <?= $package->product_price?></td>	
-				<td style=" text-align: right"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span> <?= $package->calc_price?></td>	
+				<td style=" text-align: right"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= number_format($package->product_price ,2,'.',',') ?></td>	
+				<td style=" text-align: right"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= number_format($package->calc_price ,2,'.',',')?></td>	
 			</tr>
 
 			<?php if(!empty($package->flavors)):?>
@@ -164,14 +164,14 @@
 			<td></td>
 			<td></td>
 			<td>Package Price:</td>
-			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span> <?= $package_price?></td>
+			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= $package_price?></td>
 		</tr>
 		
 		<tr>
 			<td></td>
 			<td></td>
 			<td>10% Service Charge:</td>
-			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span> <?= $service_charge?></td>
+			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= number_format($service_fee,2,'.',',')?></td>
 		</tr>
 
 		<tr style="background-color: black; color: white; text-align: center;">
@@ -181,19 +181,19 @@
 			<td ></td>	
 			<td >Transportation Fee:</td>	
 			<td ></td>	
-			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span> <?= number_format($transportation_fee,2,'.',',')?></td>	
+			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= number_format($transportation_fee,2,'.',',')?></td>	
 		</tr>
 		<tr>
 			<td ></td>	
 			<td >Additional Hour Fee:</td>	
 			<td ></td>	
-			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span> <?= number_format($succeeding_hour_charge,2,'.',',')?></td>	
+			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= number_format($succeeding_hour_charge,2,'.',',')?></td>	
 		</tr>
 		<tr>
 			<td ></td>	
 			<td >Night Differential Fee:</td>		
 			<td ></td>	
-			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span> <?= number_format($night_diff_charge,2,'.',',')?></td>
+			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= number_format($night_diff_charge,2,'.',',')?></td>
 		</tr>
 		
 		<tr>
@@ -207,7 +207,7 @@
 			<td ></td>	
 			<td ></td>	
 			<td style="color: red;font-weight: bold; text-align: center">Package Total:</td>	
-			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span> <?= number_format($grand_total,2,'.',',')?></td>	
+			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= number_format($grand_total,2,'.',',')?></td>	
 		</tr>
 		
 		<tr>

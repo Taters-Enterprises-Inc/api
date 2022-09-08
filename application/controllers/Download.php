@@ -153,8 +153,8 @@ class Download extends CI_Controller {
 				}
 				$package_price += $order->calc_price;
 
-				$order->product_price = number_format($order->product_price  ,2,'.',',');
-				$order->calc_price = number_format($order->calc_price  ,2,'.',',');
+				$order->product_price = $order->product_price;
+				$order->calc_price = $order->calc_price;
 
 				$package_selection[$key] = $order;
 				$remarks = explode("<br/>",$order->remarks); 
@@ -200,7 +200,7 @@ class Download extends CI_Controller {
 				'tracking_number' => $query_result['clients_info']->tracking_no,
 				'package_selection' => $package_selection,
 				'package_price' => $package_price,
-				'service_charge' => number_format($service_fee, 2),
+				'service_fee' => $service_fee,
 				'transportation_fee' => $transportation_fee,
 				'grand_total' => $grand_total,
 				'succeeding_hour_charge' => $succeeding_hour_charge,

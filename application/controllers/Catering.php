@@ -111,10 +111,11 @@ class Catering extends CI_Controller {
 						$no_of_pax += $order->quantity;
 					}
 					$package_price += $order->calc_price;
+
+					$order->product_price = $order->product_price;
+					$order->calc_price = $order->calc_price;
 	
-					$order->product_price = number_format($order->product_price  ,2,'.',',');
-					$order->calc_price = number_format($order->calc_price  ,2,'.',',');
-	
+					
 					$package_selection[$key] = $order;
 					$remarks = explode("<br/>",$order->remarks); 
 	
@@ -131,7 +132,7 @@ class Catering extends CI_Controller {
 					array_pop($package_selection[$key]->flavors);
 				}
 
-				$package_price = number_format($package_price ,2,'.',',');	
+				$package_price = $package_price;	
 				
 				$start_date = date('l jS  F Y', $order_details['clients_info']->start_datetime);
 				$end_date = date('l jS  F Y', $order_details['clients_info']->end_datetime);
@@ -170,7 +171,6 @@ class Catering extends CI_Controller {
 						
 						'grand_total' => $grand_total,
 						'package_price' => $package_price,
-						'service_charge'=>number_format($service_fee, 2),
 						'transportation_fee' => $transportation_fee,
 						'additional_hour_fee' => $additional_fee,
 						'night_diff_charge' => $night_diff_charge,
