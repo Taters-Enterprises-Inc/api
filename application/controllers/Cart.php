@@ -102,7 +102,7 @@ class Cart extends CI_Controller {
                     "product_date"=>$product_date,
                     "suggested_products"=>$suggested_products,
                     "product_images"=>$product_images,
-                    "_SESSION"=>  $_SESSION['orders'][$id]
+                    "cart_item"=>  $_SESSION['orders'][$id]
                 );
         
                 $response = array("message"=>"successfully fetch data","data"=>$data);
@@ -112,16 +112,15 @@ class Cart extends CI_Controller {
                 break;
             case "PUT":
                 $put = json_decode(file_get_contents("php://input"), true);
-                $order_item = $_SESSION['orders'][$put['product_id']];
 
                 $_SESSION['orders'][$put['product_id']]['prod_qty'] = $put['quantity'];
-                $_SESSION['orders'][$put['product_id']]['prod_size_id'] = $put['currentFlavor'];
-                $_SESSION['orders'][$put['product_id']]['prod_flavor_id'] = $put['currentSize'];
+                $_SESSION['orders'][$put['product_id']]['prod_size_id'] = $put['currentSize'];
+                $_SESSION['orders'][$put['product_id']]['prod_flavor_id'] = $put['currentFlavor'];
                 $_SESSION['orders'][$put['product_id']]['prod_flavor'] = $put['flavorName'];
                 $_SESSION['orders'][$put['product_id']]['prod_size'] = $put['sizeName'];
                 $_SESSION['orders'][$put['product_id']]['prod_calc_amount'] = $put['total_amount'];
-
-                $response = array("message"=>"Edit Successfully ","data"=> array("order"=>$_SESSION['orders'][$put['product_id']]['prod_flavor_id'] ,"f"=>$put['currentFlavor']));
+                $_SESSION['orders'][$put['product_id']]['prod_multiflavors'] =$put['prod_multiflavors'];
+                $response = array("message"=>"Edit Successfully" );
                 header('content-type: application/json');
                 echo json_encode($response);
             
