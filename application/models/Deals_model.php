@@ -262,8 +262,10 @@ class Deals_model extends CI_Model
 			A.description,
 			A.available_start_time,
 			A.available_end_time,
+			A.available_days,
 			A.status,
 			A.hash,
+			A.seconds_before_expiration,
 			C.name AS category_name,
 		';
 
