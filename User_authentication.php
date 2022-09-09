@@ -67,6 +67,8 @@ class User_Authentication extends CI_Controller {
 		// Remove user data from session
 		$this->session->unset_userdata('userData');
         $this->session->unset_userdata('orders');
+        $this->session->unset_userdata('deals');
+        $this->session->unset_userdata('redeem_data');
 
         $response = array(
             'message' => "Successfully logout user"

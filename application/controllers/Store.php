@@ -138,8 +138,10 @@ class Store extends CI_Controller {
 	public function reset(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-				$this->session->unset_userdata('cache_data');
-				$this->session->unset_userdata('orders');
+				if( !isset($_SESSION['deals']) || !($_SESSION['redeem_data'])){
+					$this->session->unset_userdata('cache_data');
+					$this->session->unset_userdata('orders');
+				}
 				
 				$response = array(
 					'message' => 'Reset user selection'
