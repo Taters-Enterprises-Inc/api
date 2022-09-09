@@ -3,11 +3,21 @@
 class Deals_model extends CI_Model 
 {
 	public function get_redeem($deal_id = null){
-		$fb_user_id = $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']);
+		if($_SESSION['userData'] === null){
+			return;
+		}
 
-		$this->db->select('id');
-		$this->db->from('deals_client_tb');
-		$this->db->where('fb_user_id', $fb_user_id);
+		if(isset($_SESSION['userData']['oauth_uid'])){
+			$fb_user_id = $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']);
+			$this->db->select('id');
+			$this->db->from('deals_client_tb');
+			$this->db->where('fb_user_id', $fb_user_id);
+		}else if (isset($userData['mobile_user_id'])){
+			$this->db->select('id');
+			$this->db->from('deals_client_tb');
+			$this->db->where('mobile_user_id', $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']));
+		}
+
 		$clients_query = $this->db->get();
 		$clients = $clients_query->result();
 
@@ -110,7 +120,7 @@ class Deals_model extends CI_Model
 			'add_contact'       => "NA",
 			'add_address'       => "NA"
 		);
-		$this->db->insert('client_tb', $data);
+		$this->db->insert('deals_client_tb', $data);
 		$insert_id = $this->db->insert_id();
 	$this->db->trans_complete();
   }
