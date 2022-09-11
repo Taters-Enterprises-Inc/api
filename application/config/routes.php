@@ -43,6 +43,7 @@ $route['facebook/logout'] = 'user_authentication/logout';
 
 // Mobile Users
 $route['mobile_users/login_mobile_user'] = 'mobile_users/login_mobile_user';
+$route['mobile_users/registration'] = 'mobile_users/registration';
 
 // Profile
 $route['profile/snackshop-orders'] = 'profile/snackshop_orders';

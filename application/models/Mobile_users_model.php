@@ -10,13 +10,13 @@ class Mobile_users_model extends CI_Model {
     public function registration($user_data, $temp_password){
         $data = array(
 			'ip_address ' => $this->input->ip_address(),
-			'username' 	  => $user_data['mobile_number'],
+			'username' 	  => $user_data['phoneNumber'],
             'email' 	  => $user_data['email'],
 			'password'    => password_hash($temp_password,PASSWORD_DEFAULT),
 			'created_on'  => time(),
-			'first_name'  => $user_data['first_name'],
-			'last_name'   => $user_data['last_name'],
-			'phone'   	  => $user_data['mobile_number'],
+			'first_name'  => $user_data['firstName'],
+			'last_name'   => $user_data['lastName'],
+			'phone'   	  => $user_data['phoneNumber'],
             'test_field'  => $temp_password
 		);
 

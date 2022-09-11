@@ -14,6 +14,56 @@ class Mobile_users extends CI_Controller
   {
     parent::__construct();
     $this->load->model('mobile_users_model');
+    $this->load->library('form_validation');
+  }
+  
+
+  private function send_sms($to, $code, $type)
+  {
+    require FCPATH . 'vendor/autoload.php';
+
+    $dotenv = Dotenv\Dotenv::createImmutable(FCPATH);
+    $dotenv->load();
+
+    $api_key = $_ENV['SMS_API_KEY'];
+    $api_sec =  $_ENV['SMS_API_SEC'];
+    $sender_name = $_ENV['SMS_SENDER_NAME'];
+
+    switch ($type) {
+      case 'temp_pass';
+        $text = 'Congratulations your registration was successful! please use this temporary password to access your account ' . $code;
+        break;
+      case 'pass_reset';
+        $text = 'Please dont share this to anyone, your OTP for password reset is ' . $code;
+        break;
+    }
+
+    $new_text = urlencode($text);
+
+    $url = 'https://rest-portal.promotexter.com/sms/send?apiKey=' . $api_key . '&apiSecret=' . $api_sec . '&from=' . $sender_name . '&to=' . $to . '&text=' . $new_text;
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+    // curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+      $msg = "Error: " . curl_error($ch);
+      $status = FALSE;
+    } else {
+      $jsonArrayResponse = json_decode($result, TRUE);
+      curl_close($ch);
+      $status = ($jsonArrayResponse['status'] == 'ok') ? TRUE : FALSE;
+      $msg = ($status) ? "Sending Successful" : "Sending Failed";
+    }
+
+    // header('content-type: application/json');
+    // echo json_encode(array("status"=>$status,'message' => $msg));
+
+    // return $status;
   }
   
   // handle mobile user logins (for normal customers and store staffs)
@@ -120,6 +170,50 @@ class Mobile_users extends CI_Controller
   
         echo json_encode($response);
         return;
+    }
+  }
+
+  public function registration(){
+    switch($this->input->server("REQUEST_METHOD")){
+      case 'POST':
+        $this->form_validation->set_error_delimiters('', '');
+        $this->form_validation->set_rules('firstName', 'First Name', 'required|min_length[1]|max_length[20]|trim');
+        $this->form_validation->set_rules('lastName', 'Last Name', 'required|min_length[1]|max_length[20]|trim');
+        $this->form_validation->set_rules('phoneNumber', 'Mobile Number', 'required|is_unique[mobile_users.username]', array(
+          'is_unique'  => '{field} already registered, please try different number.'
+        ));
+        $this->form_validation->set_rules('email', 'Email Address', 'required|valid_email');
+
+    
+        if ($this->form_validation->run() == FALSE) {
+          $message = "";
+
+          foreach ($_POST as $key => $value) {
+            if ($key !== 'form_action') {
+              $message = $message . form_error($key);
+            }
+          }
+
+          $this->output->set_status_header('401');
+          header('content-type: application/json');
+          $output = array(
+            "message"    =>  $message
+          );
+          echo json_encode($output);
+        } else {
+          $temp_password = substr(md5(uniqid(mt_rand(), true)), 0, 8);
+          if ($this->mobile_users_model->registration($_POST, $temp_password) == true) {
+            $this->send_sms($_POST['phoneNumber'], $temp_password, 'temp_pass');
+          }
+          
+          header('content-type: application/json');
+          $output = array(
+            "message"    =>  'Successfully registered user!',
+          );
+          echo json_encode($output);
+        }
+
+        break;
     }
   }
 }
