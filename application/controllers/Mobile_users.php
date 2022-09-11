@@ -365,4 +365,61 @@ class Mobile_users extends CI_Controller
         break;
     }
   }
+  
+  public function change_password()
+  {
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+        $this->form_validation->set_rules('newPassword', 'New Password', 'trim|required|min_length[6]|max_length[20]');
+        $this->form_validation->set_rules('confirmNewPassword', 'Confirm Password', 'trim|required|min_length[6]|max_length[20]|matches[newPassword]', array(
+          'matches'  => "{field} doesn't match"
+        ));
+    
+        $message = array();
+        if ($this->form_validation->run() === TRUE) {
+    
+          foreach ($_POST as $key => $value) {
+            if ($key !== 'form_action') {
+              $message[$key] = form_error($key);
+            }
+          }
+          $mobile_number    = $_POST['phoneNumber'];
+          $new_pass         = $_POST['newPassword'];
+    
+          $new_password = password_hash($new_pass, PASSWORD_DEFAULT);
+          $reset_pass   = $this->mobile_users_model->reset_password($mobile_number, $new_password);
+          if ($reset_pass == true) {
+            header('content-type: application/json');
+            $response = array(
+              'message' => 'Reset password success'
+            );
+            echo json_encode($response);
+          } else {
+            $this->output->set_status_header('401');
+            header('content-type: application/json');
+            $response = array(
+              'message' => 'Reset password fails'
+            );
+            echo json_encode($response);
+          }
+        } else {
+          $message = "";
+
+          foreach ($_POST as $key => $value) {
+            if ($key !== 'form_action') {
+              $message = $message . form_error($key);
+            }
+          }
+          
+          $this->output->set_status_header('401');
+          header('content-type: application/json');
+          $output = array(
+            "message"    =>  $message
+          );
+    
+          echo json_encode($output);
+        }
+      break;
+    }
+  }
 }
