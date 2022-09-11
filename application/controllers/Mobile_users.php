@@ -223,6 +223,7 @@ class Mobile_users extends CI_Controller
             "message"    =>  $message
           );
           echo json_encode($output);
+          return;
         } else {
           $temp_password = substr(md5(uniqid(mt_rand(), true)), 0, 8);
           if ($this->mobile_users_model->registration($_POST, $temp_password) == true) {
@@ -234,8 +235,8 @@ class Mobile_users extends CI_Controller
             "message"    =>  'Successfully registered user!',
           );
           echo json_encode($output);
+          return;
         }
-
         break;
     }
   }
@@ -279,6 +280,7 @@ class Mobile_users extends CI_Controller
                   "message"    =>  'an error occured while generating forgot password code'
                 );
                 echo json_encode($response);
+                return;
               }
             } else {
               $remaining_time = $forgot_password_code_validity - $current_time;
@@ -292,6 +294,7 @@ class Mobile_users extends CI_Controller
                 "message"    =>  $message
               );
               echo json_encode($response);
+              return;
             }
 
           } else {
@@ -303,6 +306,7 @@ class Mobile_users extends CI_Controller
               "message"    =>  $message
             );
             echo json_encode($response);
+            return;
           }
         } else {
           $message = "";
@@ -347,20 +351,25 @@ class Mobile_users extends CI_Controller
                 'message' =>'OTP verification completed!'
               );
               echo json_encode($response);
+              return;
             } else {
               
-            $this->output->set_status_header('401');
+              $this->output->set_status_header('401');
               header('content-type: application/json');
               $response = array(
                 'message' =>'OTP does not match!'
               );
+              echo json_encode($response);
+              return;
             }
           } else {
             $this->output->set_status_header('401');
-              header('content-type: application/json');
-              $response = array(
-                'message' =>'OTP expired!'
-              );
+            header('content-type: application/json');
+            $response = array(
+              'message' =>'OTP expired!'
+            );
+            echo json_encode($response);
+            return;
           }
         break;
     }
@@ -394,6 +403,7 @@ class Mobile_users extends CI_Controller
               'message' => 'Reset password success'
             );
             echo json_encode($response);
+            return;
           } else {
             $this->output->set_status_header('401');
             header('content-type: application/json');
@@ -401,6 +411,7 @@ class Mobile_users extends CI_Controller
               'message' => 'Reset password fails'
             );
             echo json_encode($response);
+            return;
           }
         } else {
           $message = "";
@@ -418,6 +429,7 @@ class Mobile_users extends CI_Controller
           );
     
           echo json_encode($output);
+          return;
         }
       break;
     }
