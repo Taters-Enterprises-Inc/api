@@ -44,6 +44,8 @@ $route['facebook/logout'] = 'user_authentication/logout';
 // Mobile Users
 $route['mobile_users/login_mobile_user'] = 'mobile_users/login_mobile_user';
 $route['mobile_users/registration'] = 'mobile_users/registration';
+$route['mobile_users/mobile_generate_forgot_pass_code'] = 'mobile_users/mobile_generate_forgot_pass_code';
+$route['mobile_users/validate_otp_code'] = 'mobile_users/validate_otp_code';
 
 // Profile
 $route['profile/snackshop-orders'] = 'profile/snackshop_orders';

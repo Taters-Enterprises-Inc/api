@@ -71,13 +71,17 @@ class Mobile_users extends CI_Controller
   {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
-				$post = json_decode(file_get_contents("php://input"), true);
-        $mobile_number = $post['mobile_num'];
+        $this->form_validation->set_rules('phoneNumber', 'Mobile Number', 'required|regex_match[/^[0-9]{11}$/]');
+        $this->form_validation->set_rules('login_password', 'Password', 'required');
+        
+      if ($this->form_validation->run() === TRUE) { 
+        $mobile_number = $_POST['phoneNumber'];
+
         $query_result = $this->mobile_users_model->verify_login($mobile_number);
-  
+    
         // if $query_result has contents
         if (!empty($query_result)) {
-          if (password_verify($post['login_password'], $query_result[0]->password)) {
+          if (password_verify($_POST['login_password'], $query_result[0]->password)) {
             $validation_status = 'success';
             $user_data = array();
             $user_data['login_type']      = 'mobile';
@@ -86,15 +90,15 @@ class Mobile_users extends CI_Controller
             $user_data['last_name']       = $query_result[0]->last_name;
             $user_data['email']           = $query_result[0]->email;
             $user_data['mobile_number']   = $query_result[0]->phone;
-  
+
             // for mobile users as store staff
             $store_user_id = $query_result[0]->store_user_id;
-  
+
             if ($store_user_id) {  
               $user_data['store_user_id'] = $store_user_id;
               $store_name_and_region_id = $this->store_model->get_store_name_and_region_id($store_user_id);
               $region_id = $store_name_and_region_id[0]->region_id;
-  
+
               // set timezone to PST
               date_default_timezone_set('Asia/Manila');
               $hash_key = md5(date('Y-m-d H:i:s'));
@@ -111,10 +115,10 @@ class Mobile_users extends CI_Controller
       
               set_cookie('__teisid', $hash_key, '86400');
               $now = date("h:i A");
-  
+
               if ($store_user_id == 107) $arr = array('11','12','15');
               else $arr = array();
-  
+
               // check surcharge if enabled
               $check_surcharge = $this->store_model->check_surcharge($store_user_id);
               $surcharge = $check_surcharge[0]->enable_surcharge;
@@ -143,11 +147,11 @@ class Mobile_users extends CI_Controller
               $this->session->set_userdata('cache_data', $cache_data);
               $_SESSION['customer_address'] = $store_name_and_region_id[0]->name;
               $_SESSION['moh'] = 1;   // '1' signifies mode of handling (moh) as 'pick-up'
-  
+
               $store_option = $this->store_model->fetch_store_option();
               $this->session->set_userdata('store_option', $store_option);
             }
-  
+
             // set user's data on current session
             $this->session->set_userdata('userData', $user_data);
           } 
@@ -162,6 +166,7 @@ class Mobile_users extends CI_Controller
           echo json_encode(array( "message" => 'The Mobile Number is not in the database'));
           return;
         }
+     
   
         header('content-type: application/json');
         $response = array(
@@ -170,6 +175,24 @@ class Mobile_users extends CI_Controller
   
         echo json_encode($response);
         return;
+      } else {
+        $message = "";
+
+        foreach ($_POST as $key => $value) {
+          if ($key !== 'form_action') {
+            $message = $message . form_error($key);
+          }
+        }
+
+        $this->output->set_status_header('401');
+        header('content-type: application/json');
+        $output = array(
+          "message"    =>  $message
+        );
+  
+        echo json_encode($output);
+        return;
+      }
     }
   }
 
@@ -213,6 +236,132 @@ class Mobile_users extends CI_Controller
           echo json_encode($output);
         }
 
+        break;
+    }
+  }
+  
+  public function mobile_generate_forgot_pass_code()
+  {
+    switch($this->input->server("REQUEST_METHOD")){
+      case 'POST':
+        $this->form_validation->set_rules('phoneNumber', 'Mobile number', 'required|regex_match[/^[0-9]{11}$/]');
+        
+        if ($this->form_validation->run() === TRUE) {
+          
+          $mobile_number = $_POST['phoneNumber'];
+          $check_if_mobile_exist = $this->mobile_users_model->verify_login($mobile_number);
+
+          if (!empty($check_if_mobile_exist)) {
+
+            $forgot_password_code_validity  = strtotime($check_if_mobile_exist[0]->forgot_password_time);
+            $current_time                   = strtotime(date('Y-m-d H:i:s'));
+
+            if ($current_time > $forgot_password_code_validity) {
+
+              $mobile_user_id           = $check_if_mobile_exist[0]->id;
+              $code                     = substr(md5(uniqid(mt_rand(), true)), 0, 8);
+              $code_validity            = date('Y-m-d H:i:s', strtotime("+15 minutes"));
+              $set_password_reset_code  = $this->mobile_users_model->generate_forgot_password_code($mobile_user_id, $code, $code_validity);
+              //check if reset code is set
+              if ($set_password_reset_code == true) {
+                $this->send_sms($mobile_number, $code, 'pass_reset');
+                
+                header('content-type: application/json');
+                $response = array(
+                  "message"    =>  'forgot password code successfully generated'
+                );
+          
+                echo json_encode($response);
+              } else {
+                $this->output->set_status_header('401');
+                header('content-type: application/json');
+                $response = array(
+                  "message"    =>  'an error occured while generating forgot password code'
+                );
+                echo json_encode($response);
+              }
+            } else {
+              $remaining_time = $forgot_password_code_validity - $current_time;
+              $interval = date('i', $remaining_time);
+              $status = 'error';
+              $message = "You still have an active password reset code, Please try again later - Time remaining: $interval minute(s)";
+              
+              $this->output->set_status_header('401');
+              header('content-type: application/json');
+              $response = array(
+                "message"    =>  $message
+              );
+              echo json_encode($response);
+            }
+
+          } else {
+            $message = 'mobile number not registered';
+
+            $this->output->set_status_header('401');
+            header('content-type: application/json');
+            $response = array(
+              "message"    =>  $message
+            );
+            echo json_encode($response);
+          }
+        } else {
+          $message = "";
+
+          foreach ($_POST as $key => $value) {
+            if ($key !== 'form_action') {
+              $message = $message . form_error($key);
+            }
+          }
+          
+          $this->output->set_status_header('401');
+          header('content-type: application/json');
+          $output = array(
+            "message"    =>  $message
+          );
+    
+          echo json_encode($output);
+          return;
+        }
+    }
+  }
+
+  
+  public function validate_otp_code()
+  {
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+          $mobile_number    = $_POST['phoneNumber'];
+          $otp_code         = $_POST['otpCode'];
+      
+          $mobile_user_details            = $this->mobile_users_model->verify_login($mobile_number);
+          $forgot_password_code_validity  = strtotime($mobile_user_details[0]->forgot_password_time);
+          $current_time                   = strtotime(date('Y-m-d H:i:s'));
+          $valid_otp_code                 = $mobile_user_details[0]->forgot_password_code;
+      
+          if ($current_time < $forgot_password_code_validity) {
+            if ($valid_otp_code == $otp_code) {
+              
+      
+              header('content-type: application/json');
+              $response = array(
+                'message' =>'OTP verification completed!'
+              );
+              echo json_encode($response);
+            } else {
+              
+            $this->output->set_status_header('401');
+              header('content-type: application/json');
+              $response = array(
+                'message' =>'OTP does not match!'
+              );
+            }
+          } else {
+            $this->output->set_status_header('401');
+              header('content-type: application/json');
+              $response = array(
+                'message' =>'OTP expired!'
+              );
+          }
         break;
     }
   }
