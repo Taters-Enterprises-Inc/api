@@ -240,6 +240,7 @@ class Deals_model extends CI_Model
 			$this->db->select('*');
 			$this->db->from('product_variant_options_tb');
 			$this->db->where('product_variant_id',$product_variant_id);
+			$this->db->where('status',1);
 			$query = $this->db->get();
 			return $query->result();
 		  }
