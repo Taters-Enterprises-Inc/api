@@ -141,6 +141,7 @@ class Store extends CI_Controller {
 				if( !isset($_SESSION['deals']) || !($_SESSION['redeem_data'])){
 					$this->session->unset_userdata('cache_data');
 					$this->session->unset_userdata('orders');
+					$this->session->unset_userdata('customer_address');
 				}
 				
 				$response = array(
