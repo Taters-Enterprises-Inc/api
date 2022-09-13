@@ -12,10 +12,11 @@ class Deals_model extends CI_Model
 			$this->db->select('id');
 			$this->db->from('deals_client_tb');
 			$this->db->where('fb_user_id', $fb_user_id);
-		}else if (isset($userData['mobile_user_id'])){
+		}else if (isset($_SESSION['userData']['mobile_user_id'])){
+			$mobile_user_id = $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']);
 			$this->db->select('id');
 			$this->db->from('deals_client_tb');
-			$this->db->where('mobile_user_id', $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']));
+			$this->db->where('mobile_user_id', $mobile_user_id);
 		}
 
 		$clients_query = $this->db->get();

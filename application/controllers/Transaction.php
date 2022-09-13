@@ -393,6 +393,10 @@ class Transaction extends CI_Controller {
                     $this->session->unset_userdata('deals');
                 }
 
+                if(isset($_SESSION['redeem_data'])){
+                    $this->session->unset_userdata('redeem_data');
+                }
+
                 $response = array(
                     "data" => array(
                         "hash" => $hash_key,

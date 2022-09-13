@@ -409,14 +409,12 @@ class Popclub extends CI_Controller {
 							$product_variant->options = $this->deals_model->getProductVariantOptions($product_variant->id);
 						}	
 
-						if(!empty($product_variants)){
-							array_push($deal_products, array(
-								'option_id' => $value->product_variant_options_id,
-								'quantity' => $value->quantity,
-								'product_variants' => $product_variants,
-								'product' => $product,
-							));
-						}
+						array_push($deal_products, array(
+							'option_id' => $value->product_variant_options_id,
+							'quantity' => $value->quantity,
+							'product_variants' => $product_variants,
+							'product' => $product,
+						));
 					}
 			
 					$response = array(
