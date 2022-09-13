@@ -120,7 +120,8 @@ class Cart extends CI_Controller {
                 $_SESSION['orders'][$put['product_id']]['prod_flavor'] = $put['flavorName'];
                 $_SESSION['orders'][$put['product_id']]['prod_size'] = $put['sizeName'];
                 $_SESSION['orders'][$put['product_id']]['prod_calc_amount'] = $put['total_amount'];
-
+                $_SESSION['orders'][$put['product_id']]['prod_multiflavors'] = $put['prod_multiflavors'];
+// 
                 $response = array("message"=>"Edit Successfully ","data"=> array("order"=>$_SESSION['orders'][$put['product_id']]['prod_flavor_id'] ,"f"=>$put['currentFlavor']));
                 header('content-type: application/json');
                 echo json_encode($response);
