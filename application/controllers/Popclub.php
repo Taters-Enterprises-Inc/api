@@ -277,7 +277,7 @@ class Popclub extends CI_Controller {
 						$_SESSION['deals'] = array($products);	
 					}
 
-					$_SESSION['redeem_data'] = array($products);
+					$_SESSION['redeem_data'] = $products;
 	
 					$response = array(
 						"message" => 'Successfully Redeem Code',
