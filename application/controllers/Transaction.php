@@ -15,6 +15,7 @@ class Transaction extends CI_Controller {
 		$this->load->model('transaction_model');
 		$this->load->model('shop_model');
 		$this->load->model('catering_model');
+		$this->load->model('deals_model');
 	}
 
     public function get_facebook_client_id($oauth_id){
@@ -394,6 +395,7 @@ class Transaction extends CI_Controller {
                 }
 
                 if(isset($_SESSION['redeem_data'])){
+                    $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
                     $this->session->unset_userdata('redeem_data');
                 }
 

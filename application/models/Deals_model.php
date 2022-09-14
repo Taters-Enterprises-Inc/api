@@ -2,6 +2,13 @@
 
 class Deals_model extends CI_Model 
 {
+	public function complete_redeem_deal($id){
+        $this->db->set('status',6);
+        $this->db->where('id', $id);
+        $this->db->update('deals_redeems_tb');
+        $this->db->trans_complete();
+	}
+
 	public function get_redeem($deal_id = null){
 		if($_SESSION['userData'] === null){
 			return;
@@ -26,11 +33,13 @@ class Deals_model extends CI_Model
 
 		foreach($clients as $client){
 			$this->db->select('
+				A.id,
 				A.deal_id,
 				A.redeem_code,
 				A.expiration,
 				A.dateadded AS date_redeemed,
 				A.status,
+				A.remarks,
 				B.name,
 				B.hash AS deal_hash,
 				B.product_image,
@@ -44,6 +53,7 @@ class Deals_model extends CI_Model
 			$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
 			$this->db->join('dotcom_deals_platform C', 'C.id = A.platform_id');
 			$this->db->where('A.client_id', $client->id);
+			$this->db->where('A.status', 1);
 
 			if($deal_id !== null){
 				$this->db->where('A.deal_id', $deal_id);
@@ -59,6 +69,7 @@ class Deals_model extends CI_Model
 
 		return $deals_redeems;
 	}
+
   	//inset order data
 	public function insert_client_orders($data)
 	{
@@ -183,7 +194,6 @@ class Deals_model extends CI_Model
 		  $this->db->select('*');
 		  $this->db->from('dotcom_deals_product_tb');
 		  $this->db->where('deal_id',$deals_id);
-		  $this->db->where('product_variant_options_id is NOT NULL');
 		  $query = $this->db->get();
 		  return $query->result();
 		}
@@ -193,17 +203,21 @@ class Deals_model extends CI_Model
 	}
 	
 	function getDealProductVariantsWithSelectedOption($product_id=null, $selected_option=null){
-		if($product_id !== null && $selected_option !== null){
-			
-			$this->db->select('*');
-			$this->db->from('product_variant_options_tb');
-			$this->db->where('id',$selected_option);
-			$query_product_variant_option = $this->db->get();
-			$product_variant_option = $query_product_variant_option->row();
+		if($product_id !== null ){
+
+			if($selected_option !== null){
+				$this->db->select('*');
+				$this->db->from('product_variant_options_tb');
+				$this->db->where('id',$selected_option);
+				$query_product_variant_option = $this->db->get();
+				$product_variant_option = $query_product_variant_option->row();
+			}
 
 			$this->db->select('*');
 			$this->db->from('product_variants_tb');
-			$this->db->where('id !=',$product_variant_option->product_variant_id);
+			if($selected_option !== null){
+				$this->db->where('id !=',$product_variant_option->product_variant_id);
+			}
 			$this->db->where('product_id',$product_id);
 			$query = $this->db->get();
 			return $query->result();

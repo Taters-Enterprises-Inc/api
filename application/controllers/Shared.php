@@ -196,6 +196,7 @@ class Shared extends CI_Controller {
 
 	public function clear_redeems(){
 		unset($_SESSION['redeem_data']);
+		unset($_SESSION['deals']);
 		echo "<pre>";
 		print_r($_SESSION);
 	}
