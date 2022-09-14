@@ -40,6 +40,7 @@ class Deals_model extends CI_Model
 				A.dateadded AS date_redeemed,
 				A.status,
 				A.remarks,
+				A.platform_id,
 				B.name,
 				B.hash AS deal_hash,
 				B.product_image,
@@ -47,11 +48,9 @@ class Deals_model extends CI_Model
 				B.original_price,
 				B.minimum_purchase,
 				B.promo_price,
-				C.url_name AS platform_name,
 			');
 			$this->db->from('deals_redeems_tb A');
 			$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
-			$this->db->join('dotcom_deals_platform C', 'C.id = A.platform_id');
 			$this->db->where('A.client_id', $client->id);
 			$this->db->where('A.status', 1);
 
@@ -104,20 +103,20 @@ class Deals_model extends CI_Model
 	public function insert_client_details(){
 	  if (isset($_SESSION['userData']['oauth_uid'])) {
 		$this->db->trans_start();
-			$data = array(
-				'fb_user_id'        => $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']),
-				'email'             => ($_SESSION['userData']['email'] == "" ? "NA" : $_SESSION['userData']['email']),
-				'address'           => "NA",
-				'contact_number'    => "NA",
-				'moh'               => 1,
-				'payops'            => 0,
-				'add_name'          => $_SESSION['userData']['first_name'].' '.$_SESSION['userData']['last_name'],
-				'add_contact'       => "NA",
-				'add_address'       => "NA"
-			);
-			$this->db->insert('deals_client_tb', $data);
-			$insert_id = $this->db->insert_id();
-			$this->db->trans_complete();
+		$data = array(
+			'fb_user_id'        => $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']),
+			'email'             => ($_SESSION['userData']['email'] == "" ? "NA" : $_SESSION['userData']['email']),
+			'address'           => "NA",
+			'contact_number'    => "NA",
+			'moh'               => 1,
+			'payops'            => 0,
+			'add_name'          => $_SESSION['userData']['first_name'].' '.$_SESSION['userData']['last_name'],
+			'add_contact'       => "NA",
+			'add_address'       => "NA"
+		);
+		$this->db->insert('deals_client_tb', $data);
+		$insert_id = $this->db->insert_id();
+		$this->db->trans_complete();
 	  } elseif(isset($_SESSION['userData']) && $_SESSION['userData']['login_type'] == 'mobile'){
 		$this->db->trans_start();
 		// $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
@@ -134,8 +133,8 @@ class Deals_model extends CI_Model
 		);
 		$this->db->insert('deals_client_tb', $data);
 		$insert_id = $this->db->insert_id();
-	$this->db->trans_complete();
-  }
+		$this->db->trans_complete();
+		}
 	  return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$insert_id)), FALSE);
 	}
 	
@@ -153,7 +152,6 @@ class Deals_model extends CI_Model
 		$query = $this->db->get();
 		return $query->result();
 	}
-
 
 	public function getDeal($hash=null){
 		if($hash !== null){
@@ -176,7 +174,7 @@ class Deals_model extends CI_Model
 			A.status,
 			A.hash,
 			C.name as category_name,
-			C.dotcom_deals_platform_id AS platform_id
+			C.dotcom_deals_platform_id AS platform_id,
 		  ');
 		  $this->db->from('dotcom_deals_tb A');
 		  $this->db->join('dotcom_deals_platform_combination B', 'B.deal_id = A.id');
