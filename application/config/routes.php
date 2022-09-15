@@ -74,6 +74,13 @@ $route['download/contract/(:any)'] = 'download/contract/$1';
 //Image
 $route['load-image/(:any)'] = 'image/load_image/$1';	
 
+//Auth
+$route['auth/login'] = 'auth/login';
+
+//Admin
+$route['admin/session'] = 'admin/session';
+
+
 //Others
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
