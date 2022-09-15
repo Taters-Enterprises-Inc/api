@@ -18,7 +18,6 @@ $route['popclub/platform'] = 'popclub/platform';
 $route['popclub/category'] = 'popclub/category';
 
 $route['popclub/redeem'] = 'popclub/redeem';
-$route['popclub/delete_redeem'] = 'popclub/delete_redeem';
 $route['popclub/redeems'] = 'popclub/redeems';
 $route['popclub/redeem_deal'] = 'popclub/redeem_deal';
 $route['popclub/popclub_data'] = 'popclub/popclub_data';

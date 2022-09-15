@@ -1,7 +1,21 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
+/*
+  1 - New
+  4 - Declined
+  5 - Forfeited
+  6 - Completed
+*/
+
 class Deals_model extends CI_Model 
 {
+	public function forfeit_redeem_deal($id){
+        $this->db->set('status',5);
+        $this->db->where('id', $id);
+        $this->db->update('deals_redeems_tb');
+        $this->db->trans_complete();
+	}
+
 	public function complete_redeem_deal($id){
         $this->db->set('status',6);
         $this->db->where('id', $id);

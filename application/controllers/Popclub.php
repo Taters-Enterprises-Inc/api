@@ -13,28 +13,6 @@ class Popclub extends CI_Controller {
 		$this->load->model('deals_model');
 	}
 
-	public function delete_redeem(){
-		switch($this->input->server('REQUEST_METHOD')){
-			case 'POST':
-				$post = json_decode(file_get_contents("php://input"), true);
-				$deal_hash = $post['deal_hash'];
-
-				foreach($_SESSION['redeem_data'] as $key => $redeem_data){
-					if($deal_hash === $redeem_data['deal_hash']){
-						unset($_SESSION['redeem_data'][$key]);
-					}
-				}
-
-				$response = array(
-					'message' => 'Successfully delete redeem',
-				);
-			
-				header('content-type: application/json');
-				echo json_encode($response);
-				break;
-		}
-	}
-
 	public function redeems(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
@@ -61,20 +39,6 @@ class Popclub extends CI_Controller {
 
 				foreach($redeems as $redeem){
 					$expire = date($redeem->expiration);
-
-					/** 1 minute cool down */
-					// if($today > $expire && date("Y-m-d H:i:s") < date("Y-m-d H:i:s", strtotime('+60 seconds', strtotime($expire))) && $redeem->status == 1 && $platform_selected == $redeem->platform_name){
-
-					// 	$response = array(
-					// 		'message' => 'You redeem a deal for ',
-					// 		"redeem_cooldown" => date("Y-m-d H:i:s", strtotime('+60 seconds', strtotime($expire))) 
-					// 	);
-					
-					// 	header('content-type: application/json');
-					// 	echo json_encode($response);
-					// 	return;
-					// }
-
 
 					if($today < $expire && $redeem->status == 1){	
 						$latest_not_expired_redeem = $redeem;
@@ -186,6 +150,26 @@ class Popclub extends CI_Controller {
 				header('content-type: application/json');
 				echo json_encode($response);
 				break;
+			case 'DELETE':
+					if(!isset($_SESSION['redeem_data'])){
+						$this->output->set_status_header(401);
+						echo json_encode(array('message'=>'No redeem found'));
+						return;
+					}
+				
+					$reedem_id = $_SESSION['redeem_data']['id'];
+					
+					$this->deals_model->forfeit_redeem_deal($reedem_id);
+					unset($_SESSION['redeem_data']);
+					
+					$response = array(
+						'message' => 'Redeem deal forfeited',
+					);
+				
+					header('content-type: application/json');
+					echo json_encode($response);
+					return;
+					
 		}
 	}
 
