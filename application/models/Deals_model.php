@@ -2,6 +2,13 @@
 
 class Deals_model extends CI_Model 
 {
+	public function complete_redeem_deal($id){
+        $this->db->set('status',6);
+        $this->db->where('id', $id);
+        $this->db->update('deals_redeems_tb');
+        $this->db->trans_complete();
+	}
+
 	public function get_redeem($deal_id = null){
 		if($_SESSION['userData'] === null){
 			return;
@@ -12,10 +19,11 @@ class Deals_model extends CI_Model
 			$this->db->select('id');
 			$this->db->from('deals_client_tb');
 			$this->db->where('fb_user_id', $fb_user_id);
-		}else if (isset($userData['mobile_user_id'])){
+		}else if (isset($_SESSION['userData']['mobile_user_id'])){
+			$mobile_user_id = $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']);
 			$this->db->select('id');
 			$this->db->from('deals_client_tb');
-			$this->db->where('mobile_user_id', $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']));
+			$this->db->where('mobile_user_id', $mobile_user_id);
 		}
 
 		$clients_query = $this->db->get();
@@ -25,11 +33,14 @@ class Deals_model extends CI_Model
 
 		foreach($clients as $client){
 			$this->db->select('
+				A.id,
 				A.deal_id,
 				A.redeem_code,
 				A.expiration,
 				A.dateadded AS date_redeemed,
 				A.status,
+				A.remarks,
+				A.platform_id,
 				B.name,
 				B.hash AS deal_hash,
 				B.product_image,
@@ -37,12 +48,11 @@ class Deals_model extends CI_Model
 				B.original_price,
 				B.minimum_purchase,
 				B.promo_price,
-				C.url_name AS platform_name,
 			');
 			$this->db->from('deals_redeems_tb A');
 			$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
-			$this->db->join('dotcom_deals_platform C', 'C.id = A.platform_id');
 			$this->db->where('A.client_id', $client->id);
+			$this->db->where('A.status', 1);
 
 			if($deal_id !== null){
 				$this->db->where('A.deal_id', $deal_id);
@@ -58,6 +68,7 @@ class Deals_model extends CI_Model
 
 		return $deals_redeems;
 	}
+
   	//inset order data
 	public function insert_client_orders($data)
 	{
@@ -92,20 +103,20 @@ class Deals_model extends CI_Model
 	public function insert_client_details(){
 	  if (isset($_SESSION['userData']['oauth_uid'])) {
 		$this->db->trans_start();
-			$data = array(
-				'fb_user_id'        => $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']),
-				'email'             => ($_SESSION['userData']['email'] == "" ? "NA" : $_SESSION['userData']['email']),
-				'address'           => "NA",
-				'contact_number'    => "NA",
-				'moh'               => 1,
-				'payops'            => 0,
-				'add_name'          => $_SESSION['userData']['first_name'].' '.$_SESSION['userData']['last_name'],
-				'add_contact'       => "NA",
-				'add_address'       => "NA"
-			);
-			$this->db->insert('deals_client_tb', $data);
-			$insert_id = $this->db->insert_id();
-			$this->db->trans_complete();
+		$data = array(
+			'fb_user_id'        => $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']),
+			'email'             => ($_SESSION['userData']['email'] == "" ? "NA" : $_SESSION['userData']['email']),
+			'address'           => "NA",
+			'contact_number'    => "NA",
+			'moh'               => 1,
+			'payops'            => 0,
+			'add_name'          => $_SESSION['userData']['first_name'].' '.$_SESSION['userData']['last_name'],
+			'add_contact'       => "NA",
+			'add_address'       => "NA"
+		);
+		$this->db->insert('deals_client_tb', $data);
+		$insert_id = $this->db->insert_id();
+		$this->db->trans_complete();
 	  } elseif(isset($_SESSION['userData']) && $_SESSION['userData']['login_type'] == 'mobile'){
 		$this->db->trans_start();
 		// $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
@@ -122,8 +133,8 @@ class Deals_model extends CI_Model
 		);
 		$this->db->insert('deals_client_tb', $data);
 		$insert_id = $this->db->insert_id();
-	$this->db->trans_complete();
-  }
+		$this->db->trans_complete();
+		}
 	  return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$insert_id)), FALSE);
 	}
 	
@@ -141,7 +152,6 @@ class Deals_model extends CI_Model
 		$query = $this->db->get();
 		return $query->result();
 	}
-
 
 	public function getDeal($hash=null){
 		if($hash !== null){
@@ -164,7 +174,7 @@ class Deals_model extends CI_Model
 			A.status,
 			A.hash,
 			C.name as category_name,
-			C.dotcom_deals_platform_id AS platform_id
+			C.dotcom_deals_platform_id AS platform_id,
 		  ');
 		  $this->db->from('dotcom_deals_tb A');
 		  $this->db->join('dotcom_deals_platform_combination B', 'B.deal_id = A.id');
@@ -182,7 +192,6 @@ class Deals_model extends CI_Model
 		  $this->db->select('*');
 		  $this->db->from('dotcom_deals_product_tb');
 		  $this->db->where('deal_id',$deals_id);
-		  $this->db->where('product_variant_options_id is NOT NULL');
 		  $query = $this->db->get();
 		  return $query->result();
 		}
@@ -192,17 +201,21 @@ class Deals_model extends CI_Model
 	}
 	
 	function getDealProductVariantsWithSelectedOption($product_id=null, $selected_option=null){
-		if($product_id !== null && $selected_option !== null){
-			
-			$this->db->select('*');
-			$this->db->from('product_variant_options_tb');
-			$this->db->where('id',$selected_option);
-			$query_product_variant_option = $this->db->get();
-			$product_variant_option = $query_product_variant_option->row();
+		if($product_id !== null ){
+
+			if($selected_option !== null){
+				$this->db->select('*');
+				$this->db->from('product_variant_options_tb');
+				$this->db->where('id',$selected_option);
+				$query_product_variant_option = $this->db->get();
+				$product_variant_option = $query_product_variant_option->row();
+			}
 
 			$this->db->select('*');
 			$this->db->from('product_variants_tb');
-			$this->db->where('id !=',$product_variant_option->product_variant_id);
+			if($selected_option !== null){
+				$this->db->where('id !=',$product_variant_option->product_variant_id);
+			}
 			$this->db->where('product_id',$product_id);
 			$query = $this->db->get();
 			return $query->result();

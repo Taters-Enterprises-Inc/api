@@ -15,6 +15,7 @@ class Transaction extends CI_Controller {
 		$this->load->model('transaction_model');
 		$this->load->model('shop_model');
 		$this->load->model('catering_model');
+		$this->load->model('deals_model');
 	}
 
     public function get_facebook_client_id($oauth_id){
@@ -197,12 +198,13 @@ class Transaction extends CI_Controller {
                     $distance_rate_id = (empty($this->session->distance_rate_id)) ? 0 : $this->session->distance_rate_id;
                     $distance_rate_price = (empty($this->session->distance_rate_price)) ? 0 : $this->session->distance_rate_price;
 
-					if(isset($_SESSION['deals'])){
-						foreach($_SESSION['deals'] as $deal){
-							if(isset($deal['minimum_purchase']) && $deal['minimum_purchase'] <= $comp_total){
-								$distance_rate_price = 0;
-							}
-						}
+					if(isset($_SESSION['redeem_data'])){
+                        if(isset($_SESSION['redeem_data']['minimum_purchase']) && $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total){
+                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
+                            $this->session->unset_userdata('redeem_data');
+                            
+                            $distance_rate_price = 0;
+                        }
 					}
 
                     $payops = $post['payops'];
@@ -391,8 +393,13 @@ class Transaction extends CI_Controller {
 
                 if(isset($_SESSION['deals'])){
                     $this->session->unset_userdata('deals');
-                }
 
+                    if(isset($_SESSION['redeem_data'])){
+                        $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
+                        $this->session->unset_userdata('redeem_data');
+                    }
+                }
+                
                 $response = array(
                     "data" => array(
                         "hash" => $hash_key,
