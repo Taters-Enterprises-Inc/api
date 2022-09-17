@@ -78,6 +78,7 @@ $route['auth/login'] = 'auth/login';
 
 //Admin
 $route['admin/session'] = 'admin/session';
+$route['admin/shop'] = 'admin/shop';
 
 
 //Others
