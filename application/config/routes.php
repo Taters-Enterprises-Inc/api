@@ -78,6 +78,8 @@ $route['auth/login'] = 'auth/login';
 
 //Admin
 $route['admin/session'] = 'admin/session';
+
+$route['admin/shop/(:any)'] = 'admin/shop_order/$1';
 $route['admin/shop'] = 'admin/shop';
 
 

@@ -2,6 +2,30 @@
 
 class Admin_model extends CI_Model 
 {
+    public function getSnackshopOrder($tracking_no){
+        $this->db->select("
+            A.id,
+            A.status,
+            A.dateadded,
+            A.tracking_no,
+            A.purchase_amount,
+            A.invoice_num,
+            concat(B.fname,' ',B.lname) as client_name,
+            B.payops,
+            B.contact_number,
+            B.email,
+            B.address,
+            B.add_address,
+            C.name as store_name
+        ");
+        $this->db->from('transaction_tb A');
+        $this->db->join('client_tb B', 'B.id = A.client_id');
+        $this->db->join('store_tb C', 'C.store_id = A.store');
+        $this->db->where('A.tracking_no', $tracking_no);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
     public function getSnackshopOrders($row_no, $row_per_page, $status){
         $this->db->select("
             A.id,

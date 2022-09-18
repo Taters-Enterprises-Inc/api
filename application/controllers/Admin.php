@@ -25,10 +25,26 @@ class Admin extends CI_Controller
 		$this->load->model('admin_model');
 	}
 
+  public function shop_order($trackingNo){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $order = $this->admin_model->getSnackshopOrder($trackingNo);
+
+        $response = array(
+          "message" => 'Successfully fetch snackshop order',
+          "data" => $order,
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
   public function shop(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
-        $per_page = $this->input->get('per_page') ?? 5;
+        $per_page = $this->input->get('per_page') ?? 25;
         $page_no = $this->input->get('page_no') ?? 0;
         $status = $this->input->get('status') ?? null;
 
