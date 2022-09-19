@@ -77,6 +77,77 @@ class Admin extends CI_Controller
     }
   }
 
+  public function popclub_complete_redeem($redeemCode){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        // $redeem = $this->admin_model->getPopclubRedeem($redeemCode);
+        // $redeem->items = $this->admin_model->getPopclubRedeemItems($redeem->id);
+
+        $this->admin_model->completeRedeem($redeemCode);
+
+        $response = array(
+          "message" => 'Successfully completed the redeem',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
+  public function popclub_redeem($redeemCode){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $redeem = $this->admin_model->getPopclubRedeem($redeemCode);
+        $redeem->items = $this->admin_model->getPopclubRedeemItems($redeem->id);
+
+        $response = array(
+          "message" => 'Successfully fetch popclub redeem',
+          "data" => $redeem,
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
+  public function popclub(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $status = $this->input->get('status') ?? null;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'dateadded';
+        $search = $this->input->get('search');
+
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+
+        $orders_count = $this->admin_model->getPopclubRedeemsCount($status, $search);
+        $orders = $this->admin_model->getPopclubRedeems($page_no, $per_page, $status, $order_by, $order, $search);
+
+        $pagination = array(
+          "total_rows" => $orders_count,
+          "per_page" => $per_page,
+        );
+
+        $response = array(
+          "message" => 'Successfully fetch popclub redeems',
+          "data" => array(
+            "pagination" => $pagination,
+            "orders" => $orders
+          ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
   public function session(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':

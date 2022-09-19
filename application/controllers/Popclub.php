@@ -228,9 +228,10 @@ class Popclub extends CI_Controller {
 						$order_data[] = array(
 							'redeems_id'  => $query_transaction_result->id,
 							'deal_id'         => $deal->id,
-							'price'			  => $deal->original_price,
+							'price'			  => $deal->promo_price,
 							'quantity'	      => 1,
 							'status'	      => 0,
+							'remarks'		  => $post['remarks'] === NULL? '' : $post['remarks'],
 						);
 					}
 		

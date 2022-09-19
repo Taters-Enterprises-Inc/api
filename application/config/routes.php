@@ -81,6 +81,9 @@ $route['admin/session'] = 'admin/session';
 
 $route['admin/shop/(:any)'] = 'admin/shop_order/$1';
 $route['admin/shop'] = 'admin/shop';
+$route['admin/popclub/(:any)/complete'] = 'admin/popclub_complete_redeem/$1';
+$route['admin/popclub/(:any)'] = 'admin/popclub_redeem/$1';
+$route['admin/popclub'] = 'admin/popclub';
 
 
 //Others
