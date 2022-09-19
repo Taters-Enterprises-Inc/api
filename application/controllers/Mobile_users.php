@@ -71,6 +71,7 @@ class Mobile_users extends CI_Controller
   {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
+        $this->form_validation->set_error_delimiters('', '');
         $this->form_validation->set_rules('phoneNumber', 'Mobile Number', 'required|regex_match[/^[0-9]{11}$/]');
         $this->form_validation->set_rules('login_password', 'Password', 'required');
         
