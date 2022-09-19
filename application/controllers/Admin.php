@@ -47,13 +47,16 @@ class Admin extends CI_Controller
         $per_page = $this->input->get('per_page') ?? 25;
         $page_no = $this->input->get('page_no') ?? 0;
         $status = $this->input->get('status') ?? null;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'dateadded';
+        $search = $this->input->get('search');
 
         if($page_no != 0){
           $page_no = ($page_no - 1) * $per_page;
         }
 
-        $orders_count = $this->admin_model->getSnackshopOrdersCount($status);
-        $orders = $this->admin_model->getSnackshopOrders($page_no, $per_page, $status);
+        $orders_count = $this->admin_model->getSnackshopOrdersCount($status, $search);
+        $orders = $this->admin_model->getSnackshopOrders($page_no, $per_page, $status, $order_by, $order, $search);
 
         $pagination = array(
           "total_rows" => $orders_count,

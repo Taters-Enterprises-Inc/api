@@ -26,7 +26,7 @@ class Admin_model extends CI_Model
         $query = $this->db->get();
         return $query->row();
     }
-    public function getSnackshopOrders($row_no, $row_per_page, $status){
+    public function getSnackshopOrders($row_no, $row_per_page, $status, $order_by,  $order, $search){
         $this->db->select("
             A.id,
             A.status,
@@ -44,19 +44,41 @@ class Admin_model extends CI_Model
         
         if($status)
             $this->db->where('A.status', $status);
+
+        if($search){
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like('A.invoice_num', $search);
+        }
             
         $this->db->limit($row_per_page, $row_no);
-        $this->db->order_by('id', 'DESC');
+        $this->db->order_by($order_by, $order);
 
         $query = $this->db->get();
         return $query->result();
     }
 
-    public function getSnackshopOrdersCount($status){
+    public function getSnackshopOrdersCount($status, $search){
         $this->db->select('count(*) as all_count');
+            
+        $this->db->from('transaction_tb A');
+        $this->db->join('client_tb B', 'B.id = A.client_id');
+        $this->db->join('store_tb C', 'C.store_id = A.store');
+
         if($status)
-            $this->db->where('status', $status);
-        $this->db->from('transaction_tb');
+            $this->db->where('A.status', $status);
+            
+        if($search){
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like('A.invoice_num', $search);
+        }
         $query = $this->db->get();
         return $query->row()->all_count;
     }
