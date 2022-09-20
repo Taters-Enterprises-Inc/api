@@ -325,7 +325,7 @@ class Popclub extends CI_Controller {
 		$store_id = $this->session->cache_data['store_id'];
 
 		if($platform == 'store-visit'){
-			$deals = $this->deals_model->getDeals($platform,$category, true);
+			$deals = $this->deals_model->getDeals($platform,$category, true, $store_id);
 		}else{
 			$deals = $this->deals_model->getDeals($platform,$category, true, $store_id);
 		}
