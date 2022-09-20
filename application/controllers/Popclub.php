@@ -332,6 +332,7 @@ class Popclub extends CI_Controller {
 
 		$current_datetime = date("Y-m-d H:i:s");
 		$not_available_deals = array();
+		$available_deals = array();
 
 		foreach($deals as $deal){
 			if(isset($deal->available_start_time) && isset($deal->available_end_time)){
@@ -340,12 +341,16 @@ class Popclub extends CI_Controller {
 
 				if($current_datetime > $available_end_time){
 					$not_available_deals[] = $deal;
+				}else{
+					$available_deals[] = $deal;
 				}
+			}else{
+				$available_deals[] = $deal;
 			}
 		}
 		
 		$response = array(
-			'data' => $not_available_deals,
+			'data' => array_merge($available_deals,$not_available_deals),
 			'message' => 'Successfully fetch deals'
 		);
 		
