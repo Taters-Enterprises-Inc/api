@@ -25,6 +25,41 @@ class Admin extends CI_Controller
 		$this->load->model('admin_model');
 	}
 
+  public function users(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $order = $this->input->get('order') ?? 'asc';
+        $order_by = $this->input->get('order_by') ?? 'id';
+        $search = $this->input->get('search');
+        
+        $users_count =  $this->admin_model->getUsersCount($search);
+        $users = $this->admin_model->getUsers($page_no, $per_page, $order_by, $order, $search);
+
+        // foreach($users as $user){
+        //   $user->groups = $this->admin_model->getGroups($user->id);
+        // }
+
+        $pagination = array(
+          "total_rows" => $users_count,
+          "per_page" => $per_page,
+        );
+
+        $response = array(
+          "message" => 'Successfully fetch snackshop orders',
+          "data" => array(
+            "pagination" => $pagination,
+            "users" => $users
+          ),
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+
+  }
+
   public function shop_order($trackingNo){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
@@ -80,9 +115,6 @@ class Admin extends CI_Controller
   public function popclub_complete_redeem($redeemCode){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
-        // $redeem = $this->admin_model->getPopclubRedeem($redeemCode);
-        // $redeem->items = $this->admin_model->getPopclubRedeemItems($redeem->id);
-
         $this->admin_model->completeRedeem($redeemCode);
 
         $response = array(

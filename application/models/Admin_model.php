@@ -2,12 +2,60 @@
 
 class Admin_model extends CI_Model 
 {
-    /* DEALS
-      1 - New
-      4 - Declined
-      5 - Forfeited
-      6 - Completed
-    */
+    public function getUsersCount($search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('users A');
+
+        if($search){
+            $this->db->like('A.first_name', $search);
+            $this->db->or_like('A.last_name', $search);
+            $this->db->or_like('A.email', $search);
+        }
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getGroups($user_id){
+        
+        $this->db->select("
+            B.name,
+            B.description,
+        ");
+
+        $this->db->from('users_groups A');
+        $this->db->join('groups B', 'B.id = A.group_id');
+        $this->db->where('A.user_id',$user_id);
+        
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getUsers($row_no, $row_per_page, $order_by,  $order, $search){
+        $this->db->select("
+            A.id,
+            A.first_name,
+            A.last_name,
+            A.email
+        ");
+
+        $this->db->from('users A');
+
+        if($search){
+            $this->db->like('A.first_name', $search);
+            $this->db->or_like('A.last_name', $search);
+            $this->db->or_like('A.email', $search);
+        }
+            
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
 
     public function completeRedeem($redeem_code){
 		$this->db->set('status', 6);
@@ -64,11 +112,10 @@ class Admin_model extends CI_Model
             $this->db->where('A.status', $status);
             
         if($search){
-            $this->db->like('A.tracking_no', $search);
-            $this->db->or_like('B.fname', $search);
+            $this->db->like('A.redeem_code', $search);
+            $this->db->or_like('B.add_name', $search);
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
-            $this->db->or_like('A.invoice_num', $search);
             $this->db->or_like('A.invoice_num', $search);
         }
         $query = $this->db->get();
@@ -83,7 +130,6 @@ class Admin_model extends CI_Model
             A.redeem_code,
             A.expiration,
             A.purchase_amount,
-            A.invoice_num,
             B.add_name as client_name,
             B.payops,
             C.name as store_name
@@ -96,12 +142,10 @@ class Admin_model extends CI_Model
             $this->db->where('A.status', $status);
 
         if($search){
-            $this->db->like('A.tracking_no', $search);
-            $this->db->or_like('B.fname', $search);
+            $this->db->like('A.redeem_code', $search);
+            $this->db->or_like('B.add_name', $search);
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
-            $this->db->or_like('A.invoice_num', $search);
-            $this->db->or_like('A.invoice_num', $search);
         }
             
         $this->db->limit($row_per_page, $row_no);
