@@ -5,6 +5,8 @@ header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
+date_default_timezone_set('Asia/Singapore');
+
 class Popclub extends CI_Controller {
 
 	public function __construct()
@@ -30,7 +32,6 @@ class Popclub extends CI_Controller {
 	public function redeem(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-				date_default_timezone_set('Asia/Singapore');
 				$platform_selected = isset($_SESSION['popclub_data']) ? $_SESSION['popclub_data']['platform'] : false;
 				$deal_id = $this->input->get('deal_id');
 				$redeems = $this->deals_model->get_redeem($deal_id);
@@ -176,7 +177,6 @@ class Popclub extends CI_Controller {
 	public function redeem_deal(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
-				date_default_timezone_set('Asia/Singapore');
 
 				if(
 					(!isset($_SESSION['cache_data']) && 
@@ -329,9 +329,23 @@ class Popclub extends CI_Controller {
 		}else{
 			$deals = $this->deals_model->getDeals($platform,$category, true, $store_id);
 		}
+
+		$current_datetime = date("Y-m-d H:i:s");
+		$not_available_deals = array();
+
+		foreach($deals as $deal){
+			if(isset($deal->available_start_time) && isset($deal->available_end_time)){
+				$available_start_time = date("Y-m-d H:i:s", strtotime($deal->available_start_time));
+				$available_end_time = date("Y-m-d H:i:s", strtotime($deal->available_end_time));
+
+				if($current_datetime > $available_end_time){
+					$not_available_deals[] = $deal;
+				}
+			}
+		}
 		
 		$response = array(
-			'data' => $deals,
+			'data' => $not_available_deals,
 			'message' => 'Successfully fetch deals'
 		);
 		
