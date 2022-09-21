@@ -136,4 +136,39 @@ class Profile extends CI_Controller {
 				return;
 		}
 	}
+
+	public function session(){
+		switch($this->input->server('REQUEST_METHOD')){
+		  case 'GET':
+			$data = array(
+				'userData' => $this->session->userData,
+			);
+
+
+			if($this->session->userData == ""){
+
+					
+			$this->output->set_status_header(401);
+			header('content-type: application/json');
+			echo json_encode(array("message" => 'No user session'));
+			exit();
+		  
+
+				
+			}else{
+	  
+			$response = array(
+			  "message" => 'Successfully fetch User Session',
+			  "data" => $data,
+			);
+	  
+			header('content-type: application/json');
+			echo json_encode($response);
+			return;
+		}
+		}
+	  }
+	
+
+
 }

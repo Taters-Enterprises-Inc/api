@@ -51,6 +51,8 @@ $route['mobile_users/change_password'] = 'mobile_users/change_password';
 $route['profile/snackshop-orders'] = 'profile/snackshop_orders';
 $route['profile/catering-bookings'] = 'profile/catering_bookings';
 $route['profile/contact/(:num)'] = 'profile/contact/$1';
+$route['profile/session'] = 'profile/session';
+
 
 // Store
 $route['store'] = 'store';
