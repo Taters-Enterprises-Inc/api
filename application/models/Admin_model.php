@@ -2,6 +2,45 @@
 
 class Admin_model extends CI_Model 
 {
+    function getStores()
+    {
+        $this->db->select('
+            store_id,
+            name,
+        ');
+        $this->db->from('store_tb');
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getGroups(){
+        $this->db->select("
+            id,
+            name,
+            description,
+        ");
+
+        $this->db->from('groups');
+        
+        $query = $this->db->get();
+        return $query->result();
+
+    }
+    public function getUser($user_id){
+        $this->db->select('
+            A.id,
+            A.first_name,
+            A.last_name,
+            A.phone,
+            A.company,
+        ');
+
+        $this->db->from('users A');
+        $this->db->where('A.id', $user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
     public function getUsersCount($search){
         $this->db->select('count(*) as all_count');
             
@@ -17,9 +56,10 @@ class Admin_model extends CI_Model
         return $query->row()->all_count;
     }
 
-    public function getGroups($user_id){
+    public function getUserGroups($user_id){
         
         $this->db->select("
+            B.id,
             B.name,
             B.description,
         ");
@@ -36,6 +76,7 @@ class Admin_model extends CI_Model
     public function getUsers($row_no, $row_per_page, $order_by,  $order, $search){
         $this->db->select("
             A.id,
+            A.active,
             A.first_name,
             A.last_name,
             A.email

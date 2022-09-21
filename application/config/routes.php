@@ -75,8 +75,13 @@ $route['load-image/(:any)'] = 'image/load_image/$1';
 
 //Auth
 $route['auth/login'] = 'auth/login';
+$route['auth/logout'] = 'auth/logout';
+$route['auth/create-user'] = 'auth/create_user';
+$route['auth/edit-user/(:any)'] = 'auth/edit_user/$1';
+$route['auth/create-group'] = 'auth/create_group';
 
 //Admin
+$route['admin/stores'] = 'admin/stores';
 $route['admin/session'] = 'admin/session';
 $route['admin/shop/(:any)'] = 'admin/shop_order/$1';
 $route['admin/shop'] = 'admin/shop';
@@ -84,6 +89,8 @@ $route['admin/popclub/(:any)/complete'] = 'admin/popclub_complete_redeem/$1';
 $route['admin/popclub/(:any)'] = 'admin/popclub_redeem/$1';
 $route['admin/popclub'] = 'admin/popclub';
 $route['admin/users'] = 'admin/users';
+$route['admin/user/(:any)'] = 'admin/user/$1';
+$route['admin/groups'] = 'admin/groups';
 
 //Others
 $route['404_override'] = '';

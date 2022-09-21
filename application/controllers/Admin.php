@@ -13,8 +13,8 @@ class Admin extends CI_Controller
 	{
 		parent::__construct();
 
-    if (!$this->ion_auth->logged_in()){
-      $this->output->set_status_header('401');
+    if ($this->ion_auth->logged_in() === false){
+      $this->output->set_status_header(401);
       header('content-type: application/json');
       echo json_encode(array("message" => 'Unauthorized user'));
       exit();
@@ -23,7 +23,79 @@ class Admin extends CI_Controller
 
 		$this->load->helper('url');
 		$this->load->model('admin_model');
+		$this->load->model('user_model');
 	}
+
+  public function stores(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $user_id = $this->input->get('user_id');
+
+        if($user_id){
+          $stores =  $this->user_model->get_store_group_order_set($user_id);
+        }else{
+          $stores = $this->admin_model->getStores();
+        }
+
+        $response = array(
+          "message" => 'Successfully fetch user stores',
+          "data" => $stores,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+        
+      case 'POST': 
+				$stores = json_decode($_POST['stores'], true);
+
+        $this->user_model->add_store_group($_POST['user_id'],$stores);
+
+        $response = array(
+          "message" => 'Successfully update user stores',
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+  public function groups(){
+    
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+
+        $groups =  $this->admin_model->getGroups();
+
+        $response = array(
+          "message" => 'Successfully fetch snackshop user',
+          "data" => $groups,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
+  public function user($user_id){
+    
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+
+        $user =  $this->admin_model->getUser($user_id);
+        $user->groups = $this->admin_model->getUserGroups($user->id);
+
+        $response = array(
+          "message" => 'Successfully fetch snackshop user',
+          "data" => $user,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
 
   public function users(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -37,9 +109,9 @@ class Admin extends CI_Controller
         $users_count =  $this->admin_model->getUsersCount($search);
         $users = $this->admin_model->getUsers($page_no, $per_page, $order_by, $order, $search);
 
-        // foreach($users as $user){
-        //   $user->groups = $this->admin_model->getGroups($user->id);
-        // }
+        foreach($users as $user){
+          $user->groups = $this->admin_model->getUserGroups($user->id);
+        }
 
         $pagination = array(
           "total_rows" => $users_count,
