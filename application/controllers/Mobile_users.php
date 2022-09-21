@@ -17,7 +17,6 @@ class Mobile_users extends CI_Controller
     $this->load->library('form_validation');
   }
   
-
   private function send_sms($to, $code, $type)
   {
     require FCPATH . 'vendor/autoload.php';
@@ -55,6 +54,8 @@ class Mobile_users extends CI_Controller
       $status = FALSE;
     } else {
       $jsonArrayResponse = json_decode($result, TRUE);
+
+    print_r($jsonArrayResponse);
       curl_close($ch);
       $status = ($jsonArrayResponse['status'] == 'ok') ? TRUE : FALSE;
       $msg = ($status) ? "Sending Successful" : "Sending Failed";
@@ -65,7 +66,7 @@ class Mobile_users extends CI_Controller
 
     // return $status;
   }
-  
+
   // handle mobile user logins (for normal customers and store staffs)
   public function login_mobile_user()
   {
@@ -181,6 +182,7 @@ class Mobile_users extends CI_Controller
 
         foreach ($_POST as $key => $value) {
           if ($key !== 'form_action') {
+            $this->form_validation->set_error_delimiters('', '');
             $message = $message . form_error($key);
           }
         }
@@ -328,6 +330,43 @@ class Mobile_users extends CI_Controller
           return;
         }
     }
+  }
+
+  public function mobile_resend_forgot_pass_code(){
+    switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+        $mobile_number    = $_POST['phoneNumber'];
+       
+        
+        $mobile_user_details            = $this->mobile_users_model->verify_login($mobile_number);
+        $forgot_password_code_validity  = strtotime($mobile_user_details[0]->forgot_password_time);
+        $current_time                   = strtotime(date('Y-m-d H:i:s'));
+        $otp_code                 = $mobile_user_details[0]->forgot_password_code;
+
+        
+        if ($current_time < $forgot_password_code_validity) {
+
+          $this->send_sms($mobile_number, $otp_code, 'pass_reset');
+                
+          header('content-type: application/json');
+          $response = array(
+            "message"    =>  'otp code successfully resent'
+          );
+            echo json_encode($response);
+            return;
+        } 
+        else {
+            $this->output->set_status_header('401');
+            header('content-type: application/json');
+
+            $response = array(
+              "message"    =>  'Your opt code is expired.'
+            );
+            echo json_encode($response);
+            return;
+        }
+    }
+
   }
 
   
