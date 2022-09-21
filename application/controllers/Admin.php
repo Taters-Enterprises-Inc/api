@@ -8,7 +8,6 @@ date_default_timezone_set('Asia/Manila');
 
 class Admin extends CI_Controller
 {
-
 	public function __construct()
 	{
 		parent::__construct();
@@ -60,6 +59,7 @@ class Admin extends CI_Controller
         return;
     }
   }
+
   public function groups(){
     
     switch($this->input->server('REQUEST_METHOD')){
@@ -136,6 +136,7 @@ class Admin extends CI_Controller
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
         $order = $this->admin_model->getSnackshopOrder($trackingNo);
+        $order->items = $this->admin_model->getSnackshopOrderItems($order->id);
 
         $response = array(
           "message" => 'Successfully fetch snackshop order',
@@ -273,5 +274,4 @@ class Admin extends CI_Controller
         return;
     }
   }
-
 }

@@ -26,6 +26,7 @@ class Admin_model extends CI_Model
         return $query->result();
 
     }
+
     public function getUser($user_id){
         $this->db->select('
             A.id,
@@ -41,6 +42,7 @@ class Admin_model extends CI_Model
         $query = $this->db->get();
         return $query->row();
     }
+
     public function getUsersCount($search){
         $this->db->select('count(*) as all_count');
             
@@ -116,6 +118,7 @@ class Admin_model extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
+
     public function getPopclubRedeem($redeem_code){
         $this->db->select("
             A.id,
@@ -196,6 +199,22 @@ class Admin_model extends CI_Model
         return $query->result();
     }
 
+    public function getSnackshopOrderItems($transaction_id){
+        $this->db->select("
+            A.price,
+            A.quantity,
+            A.remarks,
+            B.name,
+            B.description,
+        ");
+        $this->db->from('order_items A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->where('A.transaction_id', $transaction_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     public function getSnackshopOrder($tracking_no){
         $this->db->select("
             A.id,
@@ -220,6 +239,7 @@ class Admin_model extends CI_Model
         $query = $this->db->get();
         return $query->row();
     }
+
     public function getSnackshopOrders($row_no, $row_per_page, $status, $order_by,  $order, $search){
         $this->db->select("
             A.id,
@@ -227,6 +247,7 @@ class Admin_model extends CI_Model
             A.dateadded,
             A.tracking_no,
             A.purchase_amount,
+            A.distance_price,
             A.invoice_num,
             concat(B.fname,' ',B.lname) as client_name,
             B.payops,
