@@ -201,11 +201,13 @@ class Admin_model extends CI_Model
 
     public function getSnackshopOrderItems($transaction_id){
         $this->db->select("
-            A.price,
+            A.product_price,
             A.quantity,
             A.remarks,
+            A.product_label,
             B.name,
             B.description,
+            B.add_details,
         ");
         $this->db->from('order_items A');
         $this->db->join('products_tb B', 'B.id = A.product_id');
@@ -223,7 +225,14 @@ class Admin_model extends CI_Model
             A.tracking_no,
             A.purchase_amount,
             A.invoice_num,
-            concat(B.fname,' ',B.lname) as client_name,
+
+            A.discount,
+            A.reseller_discount,
+            A.giftcard_discount,
+            A.distance_price,
+            A.cod_fee,
+
+            B.add_name as client_name,
             B.payops,
             B.contact_number,
             B.email,
@@ -249,6 +258,13 @@ class Admin_model extends CI_Model
             A.purchase_amount,
             A.distance_price,
             A.invoice_num,
+            
+            A.discount,
+            A.reseller_discount,
+            A.giftcard_discount,
+            A.distance_price,
+            A.cod_fee,
+
             concat(B.fname,' ',B.lname) as client_name,
             B.payops,
             C.name as store_name
