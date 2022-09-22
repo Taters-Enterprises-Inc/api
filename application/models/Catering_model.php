@@ -29,10 +29,17 @@ class Catering_model extends CI_Model
     public function getUserCateringBookingHistory($type, $id, $row_no, $row_per_page, $order_by,  $order, $search){
 
         $this->db->select('
+            A.status,
             A.dateadded,
             A.tracking_no,
+            
             A.purchase_amount,
-            A.status,
+            A.service_fee,
+            A.night_diff_fee,
+            A.additional_hour_charge,
+            A.cod_fee,
+            A.distance_price,
+
             A.hash_key,
         ');
 
