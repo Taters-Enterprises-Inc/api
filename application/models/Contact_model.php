@@ -11,6 +11,17 @@ class Contact_model extends CI_Model
         }
     }
 
+    public function mobile_user_add_contact($data){
+        $insert = $this->db->insert('mobile_user_contact', $data);
+        if ($insert) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+ 
+
     public function update_contact($id,$fb_id,$data){
         $this->db->where('id', $id);
         $this->db->where('fb_id', $fb_id);
@@ -28,6 +39,13 @@ class Contact_model extends CI_Model
         $this->db->select('*');
         $this->db->where('fb_id', $fb_id);
         $query = $this->db->get('fb_user_contact');
+        return $query->result();
+    }
+
+    public function get_mobile_user_contact($mobile_id){
+        $this->db->select('*');
+        $this->db->where('mobile_id', $mobile_id);
+        $query = $this->db->get('mobile_user_contact');
         return $query->result();
     }
 
