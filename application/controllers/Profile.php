@@ -71,6 +71,12 @@ class Profile extends CI_Controller {
 	public function snackshop_orders(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
+				$per_page = $this->input->get('per_page') ?? 25;
+				$page_no = $this->input->get('page_no') ?? 0;
+				$order = $this->input->get('order') ?? 'desc';
+				$order_by = $this->input->get('order_by') ?? 'dateadded';
+				$search = $this->input->get('search');
+		
 				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
 					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
 
@@ -84,27 +90,54 @@ class Profile extends CI_Controller {
 					echo json_encode($response);
 					return;
 				}
-				
 
 				switch($logon_type){
 					case 'facebook':
 						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-						$snackshop_orders = $this->shop_model->get_user_order_history($get_fb_user_details->id,'facebook');
-						break;
+						$snackshop_orders_count = $this->shop_model->getUserOrderHistoryCount('facebook',$get_fb_user_details->id, $search);
+						$snackshop_orders = $this->shop_model->getUserOrderHistory('facebook',$get_fb_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						
+
+						$pagination = array(
+							"total_rows" => $snackshop_orders_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Succesfully fetch history of orders',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "orders" => $snackshop_orders
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						return;
 					case 'mobile':
 						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
-						$snackshop_orders = $this->shop_model->get_user_order_history($get_mobile_user_details->id,'mobile');
+						$snackshop_orders_count = $this->shop_model->getUserOrderHistoryCount('mobile',$get_mobile_user_details->id, $search);
+						$snackshop_orders = $this->shop_model->getUserOrderHistory('mobile',$get_mobile_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						
 
-						break;
+						$pagination = array(
+							"total_rows" => $snackshop_orders_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Succesfully fetch history of orders',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "orders" => $snackshop_orders
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						return;
 				}
 
-				$response = array(
-					'message' => 'Succesfully fetch history of orders',
-					'data' => $snackshop_orders,
-				);
-
-				header('content-type: application/json');
-				echo json_encode($response);
 				return;
 		}
 	}
@@ -112,7 +145,17 @@ class Profile extends CI_Controller {
 	public function catering_bookings(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-				if(!isset($_SESSION['userData']['oauth_uid'])){
+				$per_page = $this->input->get('per_page') ?? 25;
+				$page_no = $this->input->get('page_no') ?? 0;
+				$order = $this->input->get('order') ?? 'desc';
+				$order_by = $this->input->get('order_by') ?? 'dateadded';
+				$search = $this->input->get('search');
+
+				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
+					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
+
+					
+				if(!isset($logon_type)){
 
 					$response = array(
 						'message' => 'Error user not found',
@@ -122,17 +165,53 @@ class Profile extends CI_Controller {
 					echo json_encode($response);
 					return;
 				}
-
-				$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-				$catering_bookings = $this->catering_model->get_user_booking_history($get_fb_user_details->id,'facebook');
 				
-				$response = array(
-					'message' => 'Succesfully fetch history of orders',
-					'data' => $catering_bookings,
-				);
 
-				header('content-type: application/json');
-				echo json_encode($response);
+
+				switch($logon_type){
+					case 'facebook':
+						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+						$catering_bookings_count = $this->catering_model->getUserCateringBookingHistoryCount('facebook',$get_fb_user_details->id, $search);
+						$catering_bookings = $this->catering_model->getUserCateringBookingHistory('facebook',$get_fb_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						
+						$pagination = array(
+							"total_rows" => $catering_bookings_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Succesfully fetch history of bookings',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "bookings" => $catering_bookings
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						return;
+					case 'mobile':
+						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+						$catering_bookings_count = $this->catering_model->getUserCateringBookingHistoryCount('mobile',$get_mobile_user_details->id, $search);
+						$catering_bookings = $this->catering_model->getUserCateringBookingHistory('mobile',$get_mobile_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						
+						$pagination = array(
+							"total_rows" => $catering_bookings_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Succesfully fetch history of bookings',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "bookings" => $catering_bookings
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						return;
+				}
 				return;
 		}
 	}

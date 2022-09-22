@@ -423,7 +423,6 @@ class Admin_model extends CI_Model
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
-            $this->db->or_like('A.invoice_num', $search);
         }
             
         $this->db->limit($row_per_page, $row_no);
