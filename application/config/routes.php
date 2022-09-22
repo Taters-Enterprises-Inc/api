@@ -88,6 +88,7 @@ $route['admin/reference-num'] = 'admin/reference_num';
 $route['admin/admin-privilege'] = 'admin/admin_privilege';
 
 $route['admin/catering'] = 'admin/catering';
+$route['admin/catering/(:any)'] = 'admin/catering_order/$1';
 
 $route['admin/shop-update-status'] = 'admin/shop_update_status';
 $route['admin/shop/(:any)'] = 'admin/shop_order/$1';

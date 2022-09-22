@@ -25,6 +25,7 @@ class Admin extends CI_Controller
 		$this->load->model('user_model');
 	}
 
+
   public function admin_privilege(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
@@ -290,6 +291,24 @@ class Admin extends CI_Controller
             "pagination" => $pagination,
             "orders" => $orders
           ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+  
+  
+  public function catering_order($trackingNo){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $order = $this->admin_model->getCateringBooking($trackingNo);
+        $order->items = $this->admin_model->getCateringBookingItems($order->id);
+
+        $response = array(
+          "message" => 'Successfully fetch snackshop order',
+          "data" => $order,
         );
   
         header('content-type: application/json');

@@ -2,8 +2,7 @@
 
 class Admin_model extends CI_Model 
 {
-    function check_admin_password($request,$password,$transaction_id,$store_id,$status)
-    {
+    function check_admin_password($request,$password,$transaction_id,$store_id,$status){
         $this->db->select("password");
         $this->db->from('users');
         $this->db->where('id', 1);
@@ -62,6 +61,7 @@ class Admin_model extends CI_Model
             return ($this->db->affected_rows()) ? 1 : 0;
         }
     }
+
     function update_on_click($transaction_id,$trans_action){
 
         $this->db->set('on_click',$trans_action);
@@ -71,8 +71,7 @@ class Admin_model extends CI_Model
         return $this->db->affected_rows() ? 1 : 0;
     }
 
-    function update_status($transaction_id,$status)
-    {   
+    function update_status($transaction_id,$status){   
         if ($status == 3) {
             $raffle_code = "RC".substr(md5(uniqid(mt_rand(), true)), 0, 6);
             $this->db->set('application_status',1);
@@ -106,8 +105,7 @@ class Admin_model extends CI_Model
 
     }
     
-    function validate_ref_num($transaction_id, $ref_num)
-    {   
+    function validate_ref_num($transaction_id, $ref_num){   
         $this->db->select('id');
         $this->db->from('transaction_tb');
         $this->db->where('reference_num', $ref_num);
@@ -125,8 +123,7 @@ class Admin_model extends CI_Model
         }   
     }
 
-    function uploadPayment($id,$data,$file_name)
-    {
+    function uploadPayment($id,$data,$file_name){
         $file_name = $data['file_name'];
         $this->db->set('payment_proof', $file_name);
         $this->db->set('status', 2);
@@ -135,8 +132,7 @@ class Admin_model extends CI_Model
         return ($this->db->affected_rows()) ? 1 : 0;
     }
 
-    function getStores()
-    {
+    function getStores(){
         $this->db->select('
             store_id,
             name,
@@ -379,6 +375,66 @@ class Admin_model extends CI_Model
         ");
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'B.id = A.client_id');
+        $this->db->join('store_tb C', 'C.store_id = A.store');
+        $this->db->where('A.tracking_no', $tracking_no);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function getCateringBookingItems($transaction_id){
+        $this->db->select("
+            A.product_price,
+            A.quantity,
+            A.remarks,
+            A.product_label,
+            B.name,
+            B.description,
+            B.add_details,
+        ");
+        $this->db->from('catering_order_items A');
+        $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
+        $this->db->where('A.transaction_id', $transaction_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getCateringBooking($tracking_no){
+        $this->db->select("
+            A.id,
+            A.status,
+            A.dateadded,
+            A.serving_time,
+            A.tracking_no,
+            A.invoice_num,
+
+            A.purchase_amount,
+            A.service_fee,
+            A.night_diff_fee,
+            A.additional_hour_charge,
+            A.cod_fee,
+            A.distance_price,
+
+            A.initial_payment,
+            A.initial_payment_proof,
+
+            A.final_payment,
+            A.final_payment_proof,
+
+            
+            A.reference_num,
+            A.store,
+
+            B.add_name as client_name,
+            B.payops,
+            B.email,
+            B.contact_number,
+            B.add_address,
+            C.name as store_name
+        ");
+        $this->db->from('catering_transaction_tb A');
+        $this->db->join('catering_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         $this->db->where('A.tracking_no', $tracking_no);
 
