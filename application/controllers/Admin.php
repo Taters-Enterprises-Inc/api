@@ -25,6 +25,121 @@ class Admin extends CI_Controller
 		$this->load->model('user_model');
 	}
 
+  public function admin_privilege(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST': 
+
+        $password = $this->input->post('password');
+        
+        $transaction_id = $this->input->post('trans_id');
+
+        $store_id = $this->input->post('store_id');
+        $status = $this->input->post('status');
+        
+        $request = isset($store_id) ? 'store_transfer' : (isset($status) ? 'change_status' : null);
+        
+        $fetch_data = $this->admin_model->check_admin_password(
+          $request,
+          $password,
+          $transaction_id,
+          $store_id,
+          $status
+        );
+            
+        if ($fetch_data == 1) {
+          header('content-type: application/json');
+          echo json_encode(array( "message" => "Update success!"));
+        }else{
+          $this->output->set_status_header('401');
+          echo json_encode(array( "message" => $fetch_data));
+        }
+
+        return;
+    }
+  }
+
+  public function shop_update_status()
+  {
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST': 
+            $trans_id = (int) $this->input->post('trans_id');
+            $status = $this->input->post('status');
+            $fetch_data = $this->admin_model->update_status($trans_id, $status);
+
+            $update_on_click = $this->admin_model->update_on_click($trans_id, $_POST['status']);
+            if ($status == 3) $generate_invoice = $this->admin_model->generate_invoice_num($trans_id);
+
+            if ($status == 3) $tagname = "Confirm";
+            elseif ($status == 4) $tagname = "Declined";
+            elseif ($status == 6) $tagname = "Complete";
+            elseif ($status == 7) $tagname = "Reject";
+            elseif ($status == 8) $tagname = "Prepare";
+            elseif ($status == 9) $tagname = "Dispatched";
+
+            if ($fetch_data == 1) {
+              header('content-type: application/json');
+              echo json_encode(array( "message" => 'Successfully update status!'));
+            } else {
+              $this->output->set_status_header('401');
+              echo json_encode(array( "message" => 'Failed update status!'));
+            }
+          return;
+    }
+  }
+  
+  public function reference_num()
+  {
+    $trans_id = $this->input->post('trans_id');
+    $ref_num = $this->input->post('ref_num');
+    $fetch_data = $this->admin_model->validate_ref_num($trans_id, $ref_num);
+
+    if ($fetch_data == 1) {
+      header('content-type: application/json');
+      echo json_encode(array( "message" => 'Validation successful'));
+    } else {
+      $this->output->set_status_header('401');
+      echo json_encode(array( "message" => 'Invalid Reference number'));
+    }
+  }
+
+
+  
+  public function payment()
+  {
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST': 
+
+          $config['upload_path']          = './assets/upload/proof_payment/';
+          $config['allowed_types']        = 'jpeg|jpg|png';
+          $config['max_size']             = 2000;
+          $config['max_width']            = 0;
+          $config['max_height']           = 0;
+          $config['encrypt_name']         = TRUE;
+
+          $this->load->library('upload', $config);
+
+          $trans_id = $_POST['trans_id'];
+
+          if (!$this->upload->do_upload('payment_file')) { // Upload validation
+            // Failed-Upload
+            $error = $this->upload->display_errors();
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $error));
+          } else {
+            // File-Uploaded-Successfull
+            $data = $this->upload->data(); // Get file details
+            $file_name = $data['file_name'];
+
+            $this->admin_model->uploadPayment($trans_id, $data, $file_name);
+
+            header('content-type: application/json');
+            echo json_encode(array( "message" => 'Succesfully upload payment'));
+          }
+
+        break;
+    }
+  }
+
   public function stores(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
@@ -256,6 +371,7 @@ class Admin extends CI_Controller
   public function session(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
+
         $data = array(
           "identity" => $this->session->identity,
           "email" => $this->session->email,
@@ -263,7 +379,11 @@ class Admin extends CI_Controller
           "old_last_login" => $this->session->old_last_login,
           "last_check" => $this->session->last_check,
         );
-  
+
+        if(!isset($this->session->user_details)){
+          $data['user_details'] = $this->admin_model->getUser($this->session->user_id);
+          $data['user_details']->groups = $this->admin_model->getUserGroups($this->session->user_id);
+        }
         $response = array(
           "message" => 'Successfully fetch admin session',
           "data" => $data,

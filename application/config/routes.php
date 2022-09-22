@@ -83,6 +83,10 @@ $route['auth/create-group'] = 'auth/create_group';
 //Admin
 $route['admin/stores'] = 'admin/stores';
 $route['admin/session'] = 'admin/session';
+$route['admin/payment'] = 'admin/payment';
+$route['admin/reference-num'] = 'admin/reference_num';
+$route['admin/admin-privilege'] = 'admin/admin_privilege';
+$route['admin/shop-update-status'] = 'admin/shop_update_status';
 $route['admin/shop/(:any)'] = 'admin/shop_order/$1';
 $route['admin/shop'] = 'admin/shop';
 $route['admin/popclub/(:any)/complete'] = 'admin/popclub_complete_redeem/$1';
