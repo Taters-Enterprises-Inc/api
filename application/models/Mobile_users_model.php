@@ -31,7 +31,7 @@ class Mobile_users_model extends CI_Model {
         $insert = $this->db->insert('mobile_user_contact', $dataContact);
 
 
-        if ($status || $insert) {
+        if ($status && $insert) {
             return true;
         } else {
             return false;
