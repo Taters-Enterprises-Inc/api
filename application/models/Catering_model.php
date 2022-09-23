@@ -3,6 +3,72 @@
 class Catering_model extends CI_Model 
 {
     
+    public function getUserCateringBookingHistoryCount($type, $id, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('catering_transaction_tb A');
+        $this->db->join('catering_client_tb B', 'A.client_id = B.id' ,'left');
+        
+        if ($type == 'mobile') {
+            $this->db->where('B.mobile_user_id', $id);
+        } else if($type == 'facebook') {
+            $this->db->where('B.fb_user_id', $id);
+        }
+            
+        if($search){
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getUserCateringBookingHistory($type, $id, $row_no, $row_per_page, $order_by,  $order, $search){
+
+        $this->db->select('
+            A.status,
+            A.dateadded,
+            A.tracking_no,
+            
+            A.purchase_amount,
+            A.service_fee,
+            A.night_diff_fee,
+            A.additional_hour_charge,
+            A.cod_fee,
+            A.distance_price,
+
+            A.hash_key,
+        ');
+
+        $this->db->from('catering_transaction_tb A');
+        $this->db->join('catering_client_tb B', 'A.client_id = B.id' ,'left');
+
+        if ($type == 'mobile') {
+            $this->db->where('B.mobile_user_id', $id);
+        } else if($type == 'facebook') {
+            $this->db->where('B.fb_user_id', $id);
+        }
+
+        $this->db->order_by('A.dateadded','DESC');
+        
+        if($search){
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+        }
+            
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    
     function upload_payment($data,$file_name,$tracking_no,$transaction_id,$payment_plan, $status)
     { 
         date_default_timezone_set('Asia/Manila');
@@ -56,7 +122,6 @@ class Catering_model extends CI_Model
         return $return_data;
     }
 
-    
 	public function fetch_status_detail($hash_key){
         $this->db->select('status');
         $this->db->from('catering_transaction_tb');
@@ -249,7 +314,6 @@ class Catering_model extends CI_Model
         return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
     }
     
-    //jepoy get mobile client id
     public function get_mobile_client_id($id){
         $this->db->select('id');
         $this->db->where('id', $id);
@@ -258,7 +322,6 @@ class Catering_model extends CI_Model
         return $data[0]['id'];
     }
 
-    
     public function get_facebook_client_id($oauth_id){
         $this->db->select('id');
         $this->db->where('oauth_uid', $oauth_id);
@@ -314,7 +377,6 @@ class Catering_model extends CI_Model
         return $query->row();
     }
     
-
     function get_package_prices($id){
         $this->db->select('*');
         $this->db->from('catering_package_prices_tb');
@@ -466,24 +528,4 @@ class Catering_model extends CI_Model
         return $reindex;
     }
     
-    public function get_user_booking_history($id,$type){
-        $this->db->select('
-            A.dateadded,
-            A.tracking_no,
-            A.purchase_amount,
-            A.status,
-            A.hash_key,
-        ');
-        $this->db->from('catering_transaction_tb A');
-        $this->db->join('catering_client_tb B', 'A.client_id = B.id' ,'left');
-        // $this->db->join('raffle_coupon_code_tb D', 'A.raffle_coupon_code = D.raffle_coupon_code' ,'left');
-        if ($type == 'mobile') {
-            $this->db->where('B.mobile_user_id', $id);
-        } else {
-            $this->db->where('B.fb_user_id', $id);
-        }
-        $this->db->order_by('A.dateadded','DESC');
-        $query = $this->db->get();
-        return $query->result();
-    }
 }

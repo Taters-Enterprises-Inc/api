@@ -87,12 +87,18 @@ $route['admin/session'] = 'admin/session';
 $route['admin/payment'] = 'admin/payment';
 $route['admin/reference-num'] = 'admin/reference_num';
 $route['admin/admin-privilege'] = 'admin/admin_privilege';
+
+$route['admin/catering'] = 'admin/catering';
+$route['admin/catering/(:any)'] = 'admin/catering_order/$1';
+
 $route['admin/shop-update-status'] = 'admin/shop_update_status';
 $route['admin/shop/(:any)'] = 'admin/shop_order/$1';
 $route['admin/shop'] = 'admin/shop';
+
 $route['admin/popclub/(:any)/complete'] = 'admin/popclub_complete_redeem/$1';
 $route['admin/popclub/(:any)'] = 'admin/popclub_redeem/$1';
 $route['admin/popclub'] = 'admin/popclub';
+
 $route['admin/users'] = 'admin/users';
 $route['admin/user/(:any)'] = 'admin/user/$1';
 $route['admin/groups'] = 'admin/groups';
