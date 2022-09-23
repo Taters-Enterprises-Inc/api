@@ -72,6 +72,8 @@ $route['download/contract/(:any)'] = 'download/contract/$1';
 
 //Image
 $route['load-image/(:any)'] = 'image/load_image/$1';	
+$route['load-image-catering/(:any)'] = 'image/load_catering_image/$1';	
+$route['load-image-catering-contract/(:any)'] = 'image/load_catering_image_contract/$1';
 
 //Auth
 $route['auth/login'] = 'auth/login';
@@ -87,6 +89,7 @@ $route['admin/payment'] = 'admin/payment';
 $route['admin/reference-num'] = 'admin/reference_num';
 $route['admin/admin-privilege'] = 'admin/admin_privilege';
 
+$route['admin/catering-update-status'] = 'admin/catering_update_status';
 $route['admin/catering'] = 'admin/catering';
 $route['admin/catering/(:any)'] = 'admin/catering_order/$1';
 

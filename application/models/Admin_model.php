@@ -2,6 +2,23 @@
 
 class Admin_model extends CI_Model 
 {
+    
+    function get_fname_lname_email($id){
+        $this->db->select('first_name,last_name,email');
+        $this->db->from('fb_users');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        return $query->row(); 
+    }
+
+    function get_fname_lname_email_mobile($id){
+        $this->db->select('first_name,last_name,email');
+        $this->db->from('mobile_users');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        return $query->row(); 
+    }
+
     function check_admin_password($request,$password,$transaction_id,$store_id,$status){
         $this->db->select("password");
         $this->db->from('users');
@@ -40,7 +57,7 @@ class Admin_model extends CI_Model
         }
     }
 
-    function generate_invoice_num($transaction_id){
+    function generate_shop_invoice_num($transaction_id){
         $curr_year = date("yy");
         $data = array(
             'year' => $curr_year,
@@ -62,7 +79,7 @@ class Admin_model extends CI_Model
         }
     }
 
-    function update_on_click($transaction_id,$trans_action){
+    function update_shop_on_click($transaction_id,$trans_action){
 
         $this->db->set('on_click',$trans_action);
         $this->db->where('id', $transaction_id);
@@ -71,7 +88,46 @@ class Admin_model extends CI_Model
         return $this->db->affected_rows() ? 1 : 0;
     }
 
-    function update_status($transaction_id,$status){   
+    function generate_catering_invoice_num($id){
+        $curr_year = date("yy");
+        $data = array(
+            'year' => $curr_year,
+            'dateadded'         => date('Y-m-d H:i:s'),
+            'transaction_id'    => $id
+        );
+        $this->db->insert('catering_invoice_tb', $data);
+        $insert_id = $this->db->insert_id();
+        $return_data['id'] = $insert_id;
+        $return_data['status'] = ($this->db->affected_rows()) ? TRUE : FALSE;
+        if($return_data['status'] == TRUE){
+            $gen = '%06d';
+            $inv = sprintf($gen, $insert_id);
+            $invoice_num = date("y").'-'.$inv;
+            $this->db->set('invoice_num', $invoice_num);
+            $this->db->where('id', $id);
+            $this->db->update('catering_transaction_tb');
+            return ($this->db->affected_rows()) ? 1 : 0;
+        }
+    }
+
+    function update_catering_on_click($id,$trans_action){
+
+        $this->db->set('on_click',$trans_action);
+        $this->db->where('id', $id);
+        $this->db->update('catering_transaction_tb');
+
+        return $this->db->affected_rows() ? 1 : 0;
+        // return $form_data;  
+    }
+
+    function update_catering_status($id,$action){           
+        $this->db->set('status', $action);
+        $this->db->where('id', $id);
+        $this->db->update('catering_transaction_tb');
+        return ($this->db->affected_rows()) ? 1 : 0;
+    }
+
+    function update_shop_status($transaction_id,$status){   
         if ($status == 3) {
             $raffle_code = "RC".substr(md5(uniqid(mt_rand(), true)), 0, 6);
             $this->db->set('application_status',1);
@@ -408,6 +464,13 @@ class Admin_model extends CI_Model
             A.serving_time,
             A.tracking_no,
             A.invoice_num,
+            A.logon_type,
+            A.serving_time,
+            A.start_datetime,
+            A.end_datetime,
+            A.message,
+            A.event_class,
+            A.company_name,
 
             A.purchase_amount,
             A.service_fee,
@@ -416,21 +479,30 @@ class Admin_model extends CI_Model
             A.cod_fee,
             A.distance_price,
 
+            A.payment_plan,
+
+            A.uploaded_contract,
+            
             A.initial_payment,
             A.initial_payment_proof,
 
             A.final_payment,
             A.final_payment_proof,
+            
 
             
             A.reference_num,
             A.store,
 
+            B.fb_user_id,
+            B.mobile_user_id,
+
             B.add_name as client_name,
+            B.add_address,
             B.payops,
             B.email,
+            B.add_contact,
             B.contact_number,
-            B.add_address,
             C.name as store_name
         ");
         $this->db->from('catering_transaction_tb A');

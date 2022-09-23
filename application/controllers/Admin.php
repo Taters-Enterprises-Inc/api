@@ -59,16 +59,45 @@ class Admin extends CI_Controller
     }
   }
 
+
+  public function catering_update_status()
+  {
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST': 
+            $trans_id = (int) $this->input->post('trans_id');
+            $status = $this->input->post('status');
+            $fetch_data = $this->admin_model->update_catering_status($trans_id, $status);
+
+            $update_on_click = $this->admin_model->update_catering_on_click($trans_id, $status);
+            if ($status == 2) $generate_invoice = $this->admin_model->generate_catering_invoice_num($trans_id);
+
+            if ($status == 2) $tagname = "Confirm";
+            elseif ($status == 4) $tagname = "Contract Verified";
+            elseif ($status == 6) $tagname = "Initial Payment Verified";
+            elseif ($status == 8) $tagname = "Final Payment Verified";
+
+            if ($fetch_data == 1) {
+              header('content-type: application/json');
+              echo json_encode(array( "message" => 'Successfully update status!'));
+            } else {
+              $this->output->set_status_header('401');
+              echo json_encode(array( "message" => 'Failed update status!'));
+            }
+          return;
+    }
+
+  }
+
   public function shop_update_status()
   {
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
             $trans_id = (int) $this->input->post('trans_id');
             $status = $this->input->post('status');
-            $fetch_data = $this->admin_model->update_status($trans_id, $status);
+            $fetch_data = $this->admin_model->update_shop_status($trans_id, $status);
 
-            $update_on_click = $this->admin_model->update_on_click($trans_id, $_POST['status']);
-            if ($status == 3) $generate_invoice = $this->admin_model->generate_invoice_num($trans_id);
+            $update_on_click = $this->admin_model->update_shop_on_click($trans_id, $_POST['status']);
+            if ($status == 3) $generate_invoice = $this->admin_model->generate_shop_invoice_num($trans_id);
 
             if ($status == 3) $tagname = "Confirm";
             elseif ($status == 4) $tagname = "Declined";
@@ -306,6 +335,17 @@ class Admin extends CI_Controller
         $order = $this->admin_model->getCateringBooking($trackingNo);
         $order->items = $this->admin_model->getCateringBookingItems($order->id);
 
+        
+        if ($order->logon_type == 'facebook') {
+          $account_info = $this->admin_model->get_fname_lname_email($order->fb_user_id);
+          $order->account_name = $account_info->first_name . " " . $account_info->last_name;
+          $order->account_email = $account_info->email;
+        } else {
+          $account_info = $this->admin_model->get_fname_lname_email_mobile($order->mobile_user_id);
+          $order->account_name = $account_info->first_name . " " . $account_info->last_name;
+          $order->account_email = $account_info->email;
+        }
+
         $response = array(
           "message" => 'Successfully fetch snackshop order',
           "data" => $order,
@@ -431,6 +471,8 @@ class Admin extends CI_Controller
           "user_id" => $this->session->user_id,
           "old_last_login" => $this->session->old_last_login,
           "last_check" => $this->session->last_check,
+          "is_admin" => $this->ion_auth->in_group(1),
+          "is_catering_admin" => $this->ion_auth->in_group(14),
         );
 
         if(!isset($this->session->user_details)){
