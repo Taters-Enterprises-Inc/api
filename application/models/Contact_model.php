@@ -6,25 +6,18 @@ use PHPUnit\Framework\MockObject\Builder\Identity;
 
 class Contact_model extends CI_Model 
 {
-    public function add_contact($data){
-        $insert = $this->db->insert('fb_user_contact', $data);
+    public function add_contact($data, $isFbUser){
+        if($isFbUser)
+            $insert = $this->db->insert('fb_user_contact', $data);
+        else
+            $insert = $this->db->insert('mobile_user_contact', $data);
+
         if ($insert) {
             return true;
         } else {
             return false;
         }
-    }
-
-    public function mobile_user_add_contact($data){
-        $insert = $this->db->insert('mobile_user_contact', $data);
-        if ($insert) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
- 
+    } 
 
     public function update_contact($id,$user_id,$data, $isFbUser){
         $this->db->where('id', $id);
@@ -49,6 +42,7 @@ class Contact_model extends CI_Model
         }
         $this->db->trans_complete();
     }
+
     public function get_user_contact($fb_id){
         $this->db->select('*');
         $this->db->where('fb_id', $fb_id);

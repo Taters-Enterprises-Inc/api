@@ -29,6 +29,7 @@ class Shared extends CI_Controller {
 					$contacts = $this->contact_model->get_mobile_user_contact($get_mobile_user_details->id);
 				}
 
+
 				$response = array(
 					'message' => 'Successfully add contact',
 					'data' => $contacts,
@@ -44,25 +45,25 @@ class Shared extends CI_Controller {
 				if(isset($_SESSION['userData']['oauth_uid'])){
 
 					$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-					
+					$isFbUser = true;
 					$data = array(
 						'fb_id' => $get_fb_user_details->id,
 						'contact' => $post['contact']
 					);
 
-					$this->contact_model->add_contact($data);
 
 				}else{
 					$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
-
+					$isFbUser = false;
 					$data = array(
 						'mobile_id' => $get_mobile_user_details->id,
 						'contact' => $post['contact']
 					);
 
-					$this->contact_model->mobile_user_add_contact($data);
 				}
-	
+
+				$this->contact_model->add_contact($data, $isFbUser);
+
 				$response = array(
 					'message' => 'Successfully add contact',
 				);
