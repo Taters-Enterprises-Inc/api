@@ -1,4 +1,8 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
+<?php
+
+use PHPUnit\Framework\MockObject\Builder\Identity;
+
+ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Contact_model extends CI_Model 
 {
@@ -22,17 +26,27 @@ class Contact_model extends CI_Model
 
  
 
-    public function update_contact($id,$fb_id,$data){
+    public function update_contact($id,$user_id,$data, $isFbUser){
         $this->db->where('id', $id);
-        $this->db->where('fb_id', $fb_id);
-        $this->db->update('fb_user_contact',$data);
+        if($isFbUser){
+            $this->db->where('fb_id', $user_id);
+            $this->db->update('fb_user_contact',$data); 
+        }else{
+            $this->db->where('mobile_id', $user_id);
+            $this->db->update('mobile_user_contact',$data);
+        }
         $this->db->trans_complete();
     }
 
-    public function delete_contact($id,$fb_id){
+    public function delete_contact($id,$user_id,$isFbUser){
         $this->db->where('id', $id);
-        $this->db->where('fb_id', $fb_id);
-        $this->db->delete('fb_user_contact');
+        if($isFbUser){
+            $this->db->where('fb_id', $user_id);
+            $this->db->delete('fb_user_contact');
+        }else{
+            $this->db->where('mobile_id', $user_id);
+            $this->db->delete('mobile_user_contact');
+        }
         $this->db->trans_complete();
     }
     public function get_user_contact($fb_id){
