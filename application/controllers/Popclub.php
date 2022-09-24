@@ -68,7 +68,7 @@ class Popclub extends CI_Controller {
 						if(isset($_SESSION['deals'])){
 							$exist = true;
 							foreach($_SESSION['deals'] as $key => $value){
-								if($value['redeem_code'] == $redeem->redeem_code){
+								if($value['id'] == $redeem->id){
 									$exist = false;
 									break;
 								}
@@ -127,13 +127,13 @@ class Popclub extends CI_Controller {
 					}else{
 
 						if(isset($_SESSION['redeem_data'])){
-							if($_SESSION['redeem_data']['redeem_code'] === $redeem->redeem_code){
+							if($_SESSION['redeem_data']['id'] === $redeem->id){
 								unset($_SESSION['redeem_data']);
 							}
 						}
 						if(isset($_SESSION['deals'])){
 							foreach($_SESSION['deals'] as $key => $value){
-								if($value['redeem_code'] === $redeem->redeem_code){
+								if($value['id'] === $redeem->id){
 									unset($_SESSION['deals'][$key]);
 									$reindexed_array = array_values($_SESSION['deals']);
 									$this->session->set_userdata('deals', $reindexed_array);
@@ -160,8 +160,19 @@ class Popclub extends CI_Controller {
 				
 					$reedem_id = $_SESSION['redeem_data']['id'];
 					
+					if(isset($_SESSION['deals'])){
+						foreach($_SESSION['deals'] as $key => $value){
+							if($value['id'] === $reedem_id){
+								unset($_SESSION['deals'][$key]);
+								$reindexed_array = array_values($_SESSION['deals']);
+								$this->session->set_userdata('deals', $reindexed_array);
+							}
+						}
+					}
+					
 					$this->deals_model->forfeit_redeem_deal($reedem_id);
 					unset($_SESSION['redeem_data']);
+					
 					
 					$response = array(
 						'message' => 'Redeem deal forfeited',

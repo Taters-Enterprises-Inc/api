@@ -147,6 +147,7 @@ class Store_model extends CI_Model
 			C.name AS region_name, 
 			C.sequence,
 			D.name as nameofstore,
+			E.name as menu_name,
     		IFNULL(D.contact_number, "No contact number") as contactno,
     		D.operating_hours as operatinghours, 
 			D.map_link as maplink, 
@@ -157,6 +158,7 @@ class Store_model extends CI_Model
         $this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
         $this->db->join('region_tb C', 'C.id = B.region_id');
         $this->db->join('dotcom_stores D', 'D.store_id = A.store_id');
+        $this->db->join('store_menu_tb E', 'E.id = A.store_menu_type_id');
 
 		switch($service){
 			case 'SNACKSHOP':
@@ -177,10 +179,11 @@ class Store_model extends CI_Model
 			$region_data[$value->region_id]['stores'][] = array(
 			  'store_id'         => $value->store_id,
 			  'store_name'       => $value->store_name,
+			  'menu_name'        => $value->menu_name,
 			  'store_address'    => $value->address,
 			  'store_distance'   => $value->distance,
-			  'latitude'   		=> $value->distance,
-			  'longitude'   	=> $value->distance,
+			  'latitude'   		 => $value->distance,
+			  'longitude'   	 => $value->distance,
 			  'menu_type'        => $value->menu_type,
 			  'store_image'      => $value->store_image,
 			  'region_store_id'  => $value->region_store_id,
