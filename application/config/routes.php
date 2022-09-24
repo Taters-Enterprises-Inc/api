@@ -48,6 +48,7 @@ $route['mobile_users/validate_otp_code'] = 'mobile_users/validate_otp_code';
 $route['mobile_users/change_password'] = 'mobile_users/change_password';
 
 // Profile
+$route['profile/popclub-redeems'] = 'profile/popclub_redeems';
 $route['profile/snackshop-orders'] = 'profile/snackshop_orders';
 $route['profile/catering-bookings'] = 'profile/catering_bookings';
 $route['profile/contact/(:num)'] = 'profile/contact/$1';

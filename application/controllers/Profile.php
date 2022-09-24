@@ -12,6 +12,7 @@ class Profile extends CI_Controller {
 		parent::__construct();
 		$this->load->model('shop_model');
 		$this->load->model('catering_model');
+		$this->load->model('deals_model');
 		$this->load->model('user_model');
 		$this->load->model('contact_model');
 	}
@@ -214,5 +215,84 @@ class Profile extends CI_Controller {
 				}
 				return;
 		}
+	}
+
+	public function popclub_redeems(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$per_page = $this->input->get('per_page') ?? 25;
+				$page_no = $this->input->get('page_no') ?? 0;
+				$order = $this->input->get('order') ?? 'desc';
+				$order_by = $this->input->get('order_by') ?? 'dateadded';
+				$search = $this->input->get('search');
+				
+				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
+					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
+				
+					
+				if(!isset($logon_type)){
+
+					$response = array(
+						'message' => 'Error user not found',
+					);
+
+					header('content-type: application/json');
+					echo json_encode($response);
+					return;
+				}
+				
+
+				switch($logon_type){
+					case 'facebook':
+						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+						$popclub_redeems_count = $this->deals_model->getUserPopclubRedeemHistoryCount('facebook',$get_fb_user_details->id, $search);
+						$popclub_redeems = $this->deals_model->getUserPopclubRedeemHistory('facebook',$get_fb_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						
+
+						$pagination = array(
+							"total_rows" => $popclub_redeems_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Succesfully fetch history of orders',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "redeems" => $popclub_redeems
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						return;
+					case 'mobile':
+						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+						$popclub_redeems_count = $this->deals_model->getUserPopclubRedeemHistoryCount('mobile',$get_mobile_user_details->id, $search);
+						$popclub_redeems = $this->deals_model->getUserPopclubRedeemHistory('mobile',$get_mobile_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						
+
+						$pagination = array(
+							"total_rows" => $popclub_redeems_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Succesfully fetch history of orders',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "redeems" => $popclub_redeems
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						return;
+				}
+
+
+				return;
+
+		}
+
 	}
 }

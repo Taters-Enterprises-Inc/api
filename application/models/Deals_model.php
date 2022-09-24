@@ -9,6 +9,67 @@
 
 class Deals_model extends CI_Model 
 {
+	
+    public function getUserPopclubRedeemHistoryCount($type, $id, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('deals_redeems_tb A');
+        $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
+        
+        if ($type == 'mobile') {
+            $this->db->where('B.mobile_user_id', $id);
+        } else if($type == 'facebook') {
+            $this->db->where('B.fb_user_id', $id);
+        }
+
+            
+        if($search){
+            $this->db->like('A.redeem_code', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getUserPopclubRedeemHistory($type, $id, $row_no, $row_per_page, $order_by,  $order, $search){
+
+        $this->db->select('
+			A.status,
+            A.dateadded,
+            A.redeem_code,
+			A.expiration,
+            A.purchase_amount,
+            A.hash_key,
+        ');
+
+        $this->db->from('deals_redeems_tb A');
+        $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
+
+        if ($type == 'mobile') {
+            $this->db->where('B.mobile_user_id', $id);
+        } else if($type == 'facebook') {
+            $this->db->where('B.fb_user_id', $id);
+        }
+
+        $this->db->order_by('A.dateadded','DESC');
+        
+        if($search){
+            $this->db->like('A.redeem_code', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('B.lname', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+        }
+            
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
 	public function forfeit_redeem_deal($id){
         $this->db->set('status',5);
         $this->db->where('id', $id);
