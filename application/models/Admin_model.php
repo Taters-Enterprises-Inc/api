@@ -3,6 +3,53 @@
 class Admin_model extends CI_Model 
 {
     
+    function getStoreDealsCount( $store_id, $status, $search) {
+        $this->db->select('count(*) as all_count');
+
+        $this->db->from('deals_region_da_log A');
+        $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+        
+        if($status)
+            $this->db->where('A.status', $status);
+
+        if($search){
+            $this->db->like('B.name', $search);
+        }
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    function updateStoreDeal($id, $status){
+		$this->db->set('status', $status);
+        $this->db->where("id", $id);
+        $this->db->update("deals_region_da_log");
+    }
+
+    function getStoreDeals($row_no, $row_per_page, $store_id, $status, $order_by, $order, $search) {
+        $this->db->select('A.id, B.alias, B.name');
+        $this->db->from('deals_region_da_log A');
+        $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        
+        $this->db->where('A.status', $status);
+
+        if($search){
+            $this->db->like('B.name', $search);
+        }
+            
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        return $this->db->get()->result();
+    }
+
+    
     function get_fname_lname_email($id){
         $this->db->select('first_name,last_name,email');
         $this->db->from('fb_users');

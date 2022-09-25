@@ -8,23 +8,65 @@ date_default_timezone_set('Asia/Manila');
 
 class Admin extends CI_Controller
 {
-	public function __construct()
-	{
+
+	public function __construct(){
 		parent::__construct();
 
     if ($this->ion_auth->logged_in() === false){
-      $this->output->set_status_header(401);
-      header('content-type: application/json');
-      echo json_encode(array("message" => 'Unauthorized user'));
       exit();
     }
-
 
 		$this->load->helper('url');
 		$this->load->model('admin_model');
 		$this->load->model('user_model');
 	}
 
+  public function deal_availability(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $store_id = $this->input->get('store_id');
+        $status = $this->input->get('status') ?? 0;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'id';
+        $search = $this->input->get('search');
+
+        $deals_count = $this->admin_model->getStoreDealsCount($store_id, $status, $search);
+        $deals = $this->admin_model->getStoreDeals($page_no, $per_page, $store_id, $status, $order_by, $order, $search);
+
+        $pagination = array(
+          "total_rows" => $deals_count,
+          "per_page" => $per_page,
+        );
+
+        $response = array(
+          "message" => 'Successfully fetch deals',
+          "data" => array(
+            "pagination" => $pagination,
+            "deals" => $deals
+          ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+        
+      case 'PUT': 
+        $put = json_decode(file_get_contents("php://input"), true);
+
+        $this->admin_model->updateStoreDeal($put['id'], $put['status']);
+
+        $response = array(
+          "message" => 'Successfully update status',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+
+  }
 
   public function admin_privilege(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -59,9 +101,7 @@ class Admin extends CI_Controller
     }
   }
 
-
-  public function catering_update_status()
-  {
+  public function catering_update_status(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
             $trans_id = (int) $this->input->post('trans_id');
@@ -88,8 +128,7 @@ class Admin extends CI_Controller
 
   }
 
-  public function shop_update_status()
-  {
+  public function shop_update_status(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
             $trans_id = (int) $this->input->post('trans_id');
@@ -117,8 +156,7 @@ class Admin extends CI_Controller
     }
   }
   
-  public function reference_num()
-  {
+  public function reference_num(){
     $trans_id = $this->input->post('trans_id');
     $ref_num = $this->input->post('ref_num');
     $fetch_data = $this->admin_model->validate_ref_num($trans_id, $ref_num);
@@ -132,8 +170,7 @@ class Admin extends CI_Controller
     }
   }
   
-  public function payment()
-  {
+  public function payment(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
 
@@ -327,7 +364,6 @@ class Admin extends CI_Controller
         return;
     }
   }
-  
   
   public function catering_order($trackingNo){
     switch($this->input->server('REQUEST_METHOD')){
