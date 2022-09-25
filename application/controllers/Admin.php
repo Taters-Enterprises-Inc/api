@@ -508,6 +508,7 @@ class Admin extends CI_Controller
           "old_last_login" => $this->session->old_last_login,
           "last_check" => $this->session->last_check,
           "is_admin" => $this->ion_auth->in_group(1),
+          "is_csr" => $this->ion_auth->in_group(10),
           "is_catering_admin" => $this->ion_auth->in_group(14),
         );
 
