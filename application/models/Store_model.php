@@ -167,6 +167,9 @@ class Store_model extends CI_Model
 			case 'CATERING':
 				$this->db->where('A.catering_status', 1);
 				break;
+			case 'POPCLUB':
+				$this->db->where('A.popclub_status', 1);
+				break;
 		}
 
 		$this->db->order_by('distance', 'ASC');
