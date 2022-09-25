@@ -3,22 +3,76 @@
 class Admin_model extends CI_Model 
 {
     
+    public function get_categories() {
+        $this->db->select("id, category_name name");
+        $this->db->from("category_tb");
+        $this->db->order_by('name', 'ASC');
+        return $this->db->get()->result();
+    }
+
+    function getStoreProductCount($store_id, $category_id, $status, $search) {
+        $this->db->select('count(*) as all_count');
+
+        $this->db->from('region_da_log A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->join('category_tb C', 'C.id = B.category');
+
+        if($search){
+            $this->db->like('B.name', $search);
+            $this->db->or_like('C.category_name', $search);
+        }
+
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+
+        if($category_id) $this->db->where('C.id', $category_id);
+        
+        if($status)
+            $this->db->where('A.status', $status);
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    function getStoreProducts($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
+        $this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');
+        $this->db->from('region_da_log A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->join('category_tb C', 'C.id = B.category');
+
+        if($search){
+            $this->db->like('B.name', $search);
+            $this->db->or_like('C.category_name', $search);
+        }
+            
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        if($category_id !== "6") $this->db->where('C.id', $category_id);
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        return $this->db->get()->result();
+    }
+
     function getStoreDealsCount( $store_id, $status, $search) {
         $this->db->select('count(*) as all_count');
 
         $this->db->from('deals_region_da_log A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
 
+        if($search){
+            $this->db->like('B.name', $search);
+            $this->db->or_like('B.alias', $search);
+        }
+
         $this->db->where('B.status', 1);
         $this->db->where('A.store_id', $store_id);
-        $this->db->where('A.status', $status);
         
         if($status)
             $this->db->where('A.status', $status);
-
-        if($search){
-            $this->db->like('B.name', $search);
-        }
             
         $query = $this->db->get();
         return $query->row()->all_count;
@@ -29,20 +83,28 @@ class Admin_model extends CI_Model
         $this->db->where("id", $id);
         $this->db->update("deals_region_da_log");
     }
+    
+    function updateStoreProduct($id, $status){
+		$this->db->set('status', $status);
+        $this->db->where("id", $id);
+        $this->db->update("region_da_log");
+    }
 
     function getStoreDeals($row_no, $row_per_page, $store_id, $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.alias, B.name');
+        $this->db->select('A.id, B.alias, B.name, A.store_id');
         $this->db->from('deals_region_da_log A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+
+        if($search){
+            $this->db->like('B.name', $search);
+            $this->db->or_like('B.alias', $search);
+        }
+            
         $this->db->where('B.status', 1);
         $this->db->where('A.store_id', $store_id);
         
         $this->db->where('A.status', $status);
 
-        if($search){
-            $this->db->like('B.name', $search);
-        }
-            
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
         
@@ -345,8 +407,10 @@ class Admin_model extends CI_Model
             A.price,
             A.quantity,
             A.remarks,
+            B.alias,
         ");
         $this->db->from('deals_order_items A');
+        $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
         $this->db->where('A.redeems_id', $redeem_id);
 
         $query = $this->db->get();
@@ -385,9 +449,6 @@ class Admin_model extends CI_Model
         $this->db->from('deals_redeems_tb A');
         $this->db->join('deals_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
-
-        if($status)
-            $this->db->where('A.status', $status);
             
         if($search){
             $this->db->like('A.redeem_code', $search);
@@ -396,6 +457,10 @@ class Admin_model extends CI_Model
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
         }
+
+        if($status)
+            $this->db->where('A.status', $status);
+
         $query = $this->db->get();
         return $query->row()->all_count;
     }
@@ -416,8 +481,6 @@ class Admin_model extends CI_Model
         $this->db->join('deals_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         
-        if($status)
-            $this->db->where('A.status', $status);
 
         if($search){
             $this->db->like('A.redeem_code', $search);
@@ -426,6 +489,9 @@ class Admin_model extends CI_Model
             $this->db->or_like('A.purchase_amount', $search);
         }
             
+        if($status)
+            $this->db->where('A.status', $status);
+
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
 
@@ -570,8 +636,6 @@ class Admin_model extends CI_Model
         $this->db->join('catering_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         
-        if($status)
-            $this->db->where('A.status', $status);
             
         if($search){
             $this->db->like('A.tracking_no', $search);
@@ -580,6 +644,10 @@ class Admin_model extends CI_Model
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
         }
+        
+        if($status)
+            $this->db->where('A.status', $status);
+
         $query = $this->db->get();
         return $query->row()->all_count;
     }
@@ -612,8 +680,6 @@ class Admin_model extends CI_Model
         $this->db->join('catering_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         
-        if($status)
-            $this->db->where('A.status', $status);
 
         if($search){
             $this->db->like('A.tracking_no', $search);
@@ -622,6 +688,9 @@ class Admin_model extends CI_Model
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
         }
+        
+        if($status)
+            $this->db->where('A.status', $status);
             
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
@@ -658,8 +727,6 @@ class Admin_model extends CI_Model
         $this->db->join('client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         
-        if($status)
-            $this->db->where('A.status', $status);
 
         if($search){
             $this->db->like('A.tracking_no', $search);
@@ -668,6 +735,9 @@ class Admin_model extends CI_Model
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
         }
+
+        if($status)
+            $this->db->where('A.status', $status);
             
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
@@ -683,17 +753,18 @@ class Admin_model extends CI_Model
         $this->db->join('client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
 
-        if($status)
-            $this->db->where('A.status', $status);
-            
         if($search){
             $this->db->like('A.tracking_no', $search);
             $this->db->or_like('B.fname', $search);
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
-            
         }
+
+        if($status)
+            $this->db->where('A.status', $status);
+
+
         $query = $this->db->get();
         return $query->row()->all_count;
     }

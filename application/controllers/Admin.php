@@ -21,6 +21,8 @@ class Admin extends CI_Controller
 		$this->load->model('user_model');
 	}
 
+
+
   public function deal_availability(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
@@ -56,6 +58,54 @@ class Admin extends CI_Controller
         $put = json_decode(file_get_contents("php://input"), true);
 
         $this->admin_model->updateStoreDeal($put['id'], $put['status']);
+
+        $response = array(
+          "message" => 'Successfully update status',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+
+  }
+  
+  public function product_availability(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $store_id = $this->input->get('store_id');
+        $category_id = $this->input->get('category_id') ?? "6";
+        $status = $this->input->get('status') ?? 0;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'id';
+        $search = $this->input->get('search');
+
+        $products_count = $this->admin_model->getStoreProductCount($store_id, $category_id, $status, $search);
+        $products = $this->admin_model->getStoreProducts($page_no, $per_page, $store_id, $category_id, $status, $order_by, $order, $search);
+
+        $pagination = array(
+          "total_rows" => $products_count,
+          "per_page" => $per_page,
+        );
+
+        $response = array(
+          "message" => 'Successfully fetch products',
+          "data" => array(
+            "pagination" => $pagination,
+            "products" => $products
+          ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+        
+      case 'PUT': 
+        $put = json_decode(file_get_contents("php://input"), true);
+
+        $this->admin_model->updateStoreProduct($put['id'], $put['status']);
 
         $response = array(
           "message" => 'Successfully update status',
@@ -202,6 +252,23 @@ class Admin extends CI_Controller
           }
 
         break;
+    }
+  }
+
+  public function product_categories(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+
+        $product_categories = $this->admin_model->get_categories();
+
+        $response = array(
+          "message" => 'Successfully fetch user stores',
+          "data" => $product_categories,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
     }
   }
 

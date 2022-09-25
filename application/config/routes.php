@@ -104,6 +104,8 @@ $route['admin/popclub/(:any)'] = 'admin/popclub_redeem/$1';
 $route['admin/popclub'] = 'admin/popclub';
 
 $route['admin/availability/deal'] = 'admin/deal_availability';
+$route['admin/availability/product'] = 'admin/product_availability';
+$route['admin/product-categories'] = 'admin/product_categories';
 
 $route['admin/users'] = 'admin/users';
 $route['admin/user/(:any)'] = 'admin/user/$1';

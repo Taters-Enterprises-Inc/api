@@ -284,6 +284,7 @@ class Deals_model extends CI_Model
 		  $this->db->select('
 			A.id,
 			A.name,
+			A.alias,
 			A.product_image,
 			A.original_price,
 			A.promo_price,
