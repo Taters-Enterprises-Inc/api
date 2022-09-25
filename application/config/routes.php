@@ -23,9 +23,10 @@ $route['popclub/redeem_deal'] = 'popclub/redeem_deal';
 $route['popclub/popclub_data'] = 'popclub/popclub_data';
 $route['popclub/check_product_variant_deals'] = 'popclub/check_product_variant_deals';
 
+$route['popclub/redeem-validators'] = 'popclub/redeem_validators';
+
 $route['popclub/deal/(:any)'] = 'popclub/deal/$1';
 $route['popclub/(:any)'] = 'popclub/deals/$1';
-
 //Shared
 $route['shared/session'] = 'shared/session';
 $route['shared/clear_redeems'] = 'shared/clear_redeems';

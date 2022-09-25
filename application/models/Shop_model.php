@@ -135,7 +135,7 @@ class Shop_model extends CI_Model
         $this->db->select('hash_key');
         $this->db->from('transaction_tb');
         $this->db->where('hash_key', $hash_key);
-        $this->db->where('status !=', 4);
+        // $this->db->where('status !=', 4);
         // $this->db->where('status !=', 6);
         $check_hash = $this->db->get();
         $result = $check_hash->result();

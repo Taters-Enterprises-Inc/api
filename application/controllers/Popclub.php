@@ -15,6 +15,54 @@ class Popclub extends CI_Controller {
 		$this->load->model('deals_model');
 	}
 
+	public function redeem_validators(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$redeems = $this->deals_model->getUserRedeems();
+				$today = date("Y-m-d H:i:s");
+
+				$max_forfeit = 3;
+				$forfeit_count = 0;
+				
+				foreach($redeems as $redeem){
+					$expire = date($redeem->expiration);
+					$date_redeemed = date($redeem->date_redeemed);
+
+					$is_the_same_day = date("Y-m-d H:i:s", strtotime('-1 day')) < $date_redeemed && 
+					date("Y-m-d H:i:s", strtotime('+1 day')) > $date_redeemed;
+
+					if($is_the_same_day && $redeem->status === 5 ){
+						$forfeit_count++;
+					}
+
+					if($is_the_same_day &&
+						($redeem->status == 6 || ( $redeem->status == 1 && $today >= $expire) || $forfeit_count >= $max_forfeit)
+					){
+						$response = array(
+							"message" => "You can't redeem this code " . $redeem->id,
+							"data" => array(
+								"next_available_redeem" => date('Y-m-d H:i:s', strtotime("+1 day", strtotime($date_redeemed)))
+							),
+						);
+					
+						header('content-type: application/json');
+						echo json_encode($response);
+						return;
+					} 
+				}
+
+
+				$response = array(
+					'message' => 'Successfully fetch redeems',
+				);
+			
+				header('content-type: application/json');
+				echo json_encode($response);
+				return;
+
+		}
+	}
+
 	public function redeems(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
@@ -32,7 +80,6 @@ class Popclub extends CI_Controller {
 	public function redeem(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-				$platform_selected = isset($_SESSION['popclub_data']) ? $_SESSION['popclub_data']['platform'] : false;
 				$deal_id = $this->input->get('deal_id');
 				$redeems = $this->deals_model->get_redeem($deal_id);
 				$latest_not_expired_redeem = null;
@@ -344,16 +391,23 @@ class Popclub extends CI_Controller {
 		$current_datetime = date("Y-m-d H:i:s");
 		$not_available_deals = array();
 		$available_deals = array();
+		$day_of_the_week = date('l');
 
 		foreach($deals as $deal){
 			if(isset($deal->available_start_time) && isset($deal->available_end_time)){
 				$available_start_time = date("Y-m-d H:i:s", strtotime($deal->available_start_time));
 				$available_end_time = date("Y-m-d H:i:s", strtotime($deal->available_end_time));
 
-				if($current_datetime > $available_end_time){
+				if($current_datetime > $available_end_time || $available_start_time > $current_datetime){
 					$not_available_deals[] = $deal;
 				}else{
 					$available_deals[] = $deal;
+				}
+			}else if(isset($deal->available_days)){
+				if(str_contains($deal->available_days, $day_of_the_week)){
+					$available_deals[] = $deal;
+				}else{
+					$not_available_deals[] = $deal;
 				}
 			}else{
 				$available_deals[] = $deal;
