@@ -167,8 +167,11 @@ class Store_model extends CI_Model
 			case 'CATERING':
 				$this->db->where('A.catering_status', 1);
 				break;
-			case 'POPCLUB':
+			case 'POPCLUB-STORE-VISIT':
 				$this->db->where('A.popclub_walk_in_status', 1);
+				break;
+			case 'POPCLUB-ONLINE-DELIVERY':
+				$this->db->where('A.popclub_online_delivery_status', 1);
 				break;
 		}
 

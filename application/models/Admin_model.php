@@ -22,7 +22,7 @@ class Admin_model extends CI_Model
         $this->db->update("store_tb");
     }
     
-    function getSettingStoresCount($status, $search) {
+    function getSettingStoresCount($search) {
         $this->db->select('count(*) as all_count');
 
         $this->db->from('store_tb A');
@@ -33,14 +33,12 @@ class Admin_model extends CI_Model
             $this->db->or_like('B.name', $search);
         }
             
-        if($status)
-            $this->db->where('A.status', $status);
             
         $query = $this->db->get();
         return $query->row()->all_count;
     }
 
-    function getSettingStores($row_no, $row_per_page, $status, $order_by, $order, $search) {
+    function getSettingStores($row_no, $row_per_page, $order_by, $order, $search) {
         $this->db->select('
             A.store_id,
             A.name,
@@ -59,8 +57,6 @@ class Admin_model extends CI_Model
             $this->db->or_like('B.name', $search);
         }
             
-        if($status)
-            $this->db->where('A.status', $status);
 
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);

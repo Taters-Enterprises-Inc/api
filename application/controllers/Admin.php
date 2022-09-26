@@ -44,12 +44,11 @@ class Admin extends CI_Controller
         $per_page = $this->input->get('per_page') ?? 25;
         $page_no = $this->input->get('page_no') ?? 0;
         $order = $this->input->get('order') ?? 'desc';
-        $status = $this->input->get('status');
         $order_by = $this->input->get('order_by') ?? 'store_id';
         $search = $this->input->get('search');
 
-        $stores_count = $this->admin_model->getSettingStoresCount($status, $search);
-        $stores = $this->admin_model->getSettingStores($page_no, $per_page, $status, $order_by, $order, $search);
+        $stores_count = $this->admin_model->getSettingStoresCount($search);
+        $stores = $this->admin_model->getSettingStores($page_no, $per_page, $order_by, $order, $search);
 
         $pagination = array(
           "total_rows" => $stores_count,
