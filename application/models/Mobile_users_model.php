@@ -20,14 +20,23 @@ class Mobile_users_model extends CI_Model {
             'test_field'  => $temp_password
 		);
 
+        $status = $this->db->insert('mobile_users', $data);
+        $id = $this->db->insert_id();        
 
-        if ($this->db->insert('mobile_users', $data)) {
-            $status = true;
-            return $status;
+        $dataContact = array(
+            'mobile_id' => $id,
+            'contact' => $user_data['phoneNumber']
+        );
+        
+        $insert = $this->db->insert('mobile_user_contact', $dataContact);
+
+
+        if ($status && $insert) {
+            return true;
         } else {
-            $status = false;
-            return $status;
-        }
+            return false;
+        }    
+        
     }
 
     function verify_login($mobile_number) 

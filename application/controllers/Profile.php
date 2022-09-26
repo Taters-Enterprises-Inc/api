@@ -21,22 +21,33 @@ class Profile extends CI_Controller {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'PUT':
 
-				if(!isset($_SESSION['userData']['oauth_uid'])){
+				$post = json_decode(file_get_contents("php://input"), true);
+
+				if(isset($_SESSION['userData']['oauth_uid'])){
+
+					$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+					$user_id = $get_fb_user_details->id;
+					$isFbUser = true;
+					
+				}else if(isset($_SESSION['userData']['mobile_user_id'])){
+
+					$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+					$user_id = $get_mobile_user_details->id;
+					$isFbUser = false;
+
+
+				}else{
 					$this->output->set_status_header(401);
 					echo json_encode(array('message'=>'User not found...'));
 					return;
 				}
 				
-				$post = json_decode(file_get_contents("php://input"), true);
-
-				$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-				$fb_id = $get_fb_user_details->id;
 
 				$data = array(
 					'contact' => $post['contact'],
 				);
 
-				$this->contact_model->update_contact($id,$fb_id,$data);
+				$this->contact_model->update_contact($id,$user_id,$data,$isFbUser);
 
 				$response = array(
 					'message' => 'Contact updated.'
@@ -48,16 +59,26 @@ class Profile extends CI_Controller {
 
 			case 'DELETE':
 
-				if(!isset($_SESSION['userData']['oauth_uid'])){
+				if(isset($_SESSION['userData']['oauth_uid'])){
+
+					$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+					$user_id = $get_fb_user_details->id;
+					$isFbUser = true;
+					
+				}else if(isset($_SESSION['userData']['mobile_user_id'])){
+
+					$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+					$user_id = $get_mobile_user_details->id;
+					$isFbUser = false;
+
+
+				}else{
 					$this->output->set_status_header(401);
 					echo json_encode(array('message'=>'User not found...'));
 					return;
 				}
 
-				$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-				$fb_id = $get_fb_user_details->id;
-
-				$this->contact_model->delete_contact($id,$fb_id);
+				$this->contact_model->delete_contact($id,$user_id,$isFbUser);
 
 				$response = array(
 					'message' => 'Contact deleted.'

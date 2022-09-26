@@ -19,8 +19,16 @@ class Shared extends CI_Controller {
     public function contacts(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-				$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-				$contacts = $this->contact_model->get_user_contact($get_fb_user_details->id);
+				if(isset($_SESSION['userData']['oauth_uid'])){
+
+					$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+					$contacts = $this->contact_model->get_user_contact($get_fb_user_details->id);
+
+				}else{
+					$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+					$contacts = $this->contact_model->get_mobile_user_contact($get_mobile_user_details->id);
+				}
+
 
 				$response = array(
 					'message' => 'Successfully add contact',
@@ -30,16 +38,31 @@ class Shared extends CI_Controller {
 				header('content-type: application/json');
 				echo json_encode($response);
 				break;
+
 			case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);
-				$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-				
-				$data = array(
-					'fb_id' => $get_fb_user_details->id,
-					'contact' => $post['contact']
-				);
-	
-				$this->contact_model->add_contact($data);
+
+				if(isset($_SESSION['userData']['oauth_uid'])){
+
+					$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+					$isFbUser = true;
+					$data = array(
+						'fb_id' => $get_fb_user_details->id,
+						'contact' => $post['contact']
+					);
+
+
+				}else{
+					$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+					$isFbUser = false;
+					$data = array(
+						'mobile_id' => $get_mobile_user_details->id,
+						'contact' => $post['contact']
+					);
+
+				}
+
+				$this->contact_model->add_contact($data, $isFbUser);
 
 				$response = array(
 					'message' => 'Successfully add contact',
