@@ -3,6 +3,71 @@
 class Admin_model extends CI_Model 
 {
     
+    function updateSettingStore($store_id, $name_of_field_status, $status){
+        switch($name_of_field_status){
+            case 'status':
+                $this->db->set('status', $status);
+                break;
+            case 'catering_status':
+                $this->db->set('catering_status', $status);
+                break;
+            case 'popclub_walk_in_status':
+                $this->db->set('popclub_walk_in_status', $status);
+                break;
+            case 'popclub_online_delivery_status':
+                $this->db->set('popclub_online_delivery_status', $status);
+                break;
+        }
+        $this->db->where("store_id", $store_id);
+        $this->db->update("store_tb");
+    }
+    
+    function getSettingStoresCount($status, $search) {
+        $this->db->select('count(*) as all_count');
+
+        $this->db->from('store_tb A');
+        $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
+
+        if($search){
+            $this->db->like('A.name', $search);
+            $this->db->or_like('B.name', $search);
+        }
+            
+        if($status)
+            $this->db->where('A.status', $status);
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    function getSettingStores($row_no, $row_per_page, $status, $order_by, $order, $search) {
+        $this->db->select('
+            A.store_id,
+            A.name,
+            A.status,
+            A.catering_status,
+            A.popclub_walk_in_status,
+            A.popclub_online_delivery_status,
+            B.name as menu_name,
+        ');
+
+        $this->db->from('store_tb A');
+        $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
+
+        if($search){
+            $this->db->like('A.name', $search);
+            $this->db->or_like('B.name', $search);
+        }
+            
+        if($status)
+            $this->db->where('A.status', $status);
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        return $this->db->get()->result();
+    }
+    
     public function get_categories() {
         $this->db->select("id, category_name name");
         $this->db->from("category_tb");

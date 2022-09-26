@@ -23,6 +23,8 @@ class Popclub extends CI_Controller {
 
 				$max_forfeit = 3;
 				$forfeit_count = 0;
+				$unable_redeems = array();
+				$forfeit_array_counter_array = array();
 				
 				foreach($redeems as $redeem){
 					$expire = date($redeem->expiration);
@@ -32,25 +34,35 @@ class Popclub extends CI_Controller {
 					date("Y-m-d H:i:s", strtotime('+1 day')) > $date_redeemed;
 
 					if($is_the_same_day && $redeem->status === 5 ){
-						$forfeit_count++;
+						if(!isset($forfeit_array_counter_array[$redeem->deal_id])){
+							$forfeit_array_counter_array[$redeem->deal_id] = 1;
+						}else{
+							$forfeit_array_counter_array[$redeem->deal_id]++;
+						}
 					}
 
 					if($is_the_same_day &&
-						($redeem->status == 6 || ( $redeem->status == 1 && $today >= $expire) || $forfeit_count >= $max_forfeit)
+						($redeem->status == 6 || ( $redeem->status == 1 && $today >= $expire) || $forfeit_array_counter_array[$redeem->deal_id] >= 3) 
 					){
-						$response = array(
-							"message" => "You can't redeem this code " . $redeem->id,
-							"data" => array(
-								"next_available_redeem" => date('Y-m-d H:i:s', strtotime("+1 day", strtotime($date_redeemed)))
-							),
+						$unable_redeems[] = array(
+							"deal_id" => $redeem->deal_id,
+							"next_available_redeem" => date('Y-m-d H:i:s', strtotime("+1 day", strtotime($date_redeemed)))
 						);
-					
-						header('content-type: application/json');
-						echo json_encode($response);
-						return;
 					} 
 				}
 
+				if(!empty($unable_redeems)){
+					
+					$response = array(
+						"message" => "You can't redeem this code ",
+						"data" => $unable_redeems,
+					);
+					header('content-type: application/json');
+					echo json_encode($response);
+					return;
+
+				}
+					
 
 				$response = array(
 					'message' => 'Successfully fetch redeems',

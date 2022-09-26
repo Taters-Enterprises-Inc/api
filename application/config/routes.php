@@ -86,6 +86,7 @@ $route['auth/create-group'] = 'auth/create_group';
 
 //Admin
 $route['admin/stores'] = 'admin/stores';
+$route['admin/store'] = 'admin/store';
 $route['admin/session'] = 'admin/session';
 $route['admin/payment'] = 'admin/payment';
 $route['admin/reference-num'] = 'admin/reference_num';
@@ -110,6 +111,7 @@ $route['admin/product-categories'] = 'admin/product_categories';
 $route['admin/users'] = 'admin/users';
 $route['admin/user/(:any)'] = 'admin/user/$1';
 $route['admin/groups'] = 'admin/groups';
+$route['admin/setting/stores'] = 'admin/setting_stores';
 
 //Others
 $route['404_override'] = '';

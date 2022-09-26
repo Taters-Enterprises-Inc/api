@@ -21,7 +21,67 @@ class Admin extends CI_Controller
 		$this->load->model('user_model');
 	}
 
+  public function store(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'PUT':
+        $put = json_decode(file_get_contents("php://input"), true);
 
+        $this->admin_model->updateSettingStore($put['store_id'], $put['name_of_field_status'], $put['status']);
+
+        $response = array(
+          "message" => 'Successfully update status',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
+  public function setting_stores(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $order = $this->input->get('order') ?? 'desc';
+        $status = $this->input->get('status');
+        $order_by = $this->input->get('order_by') ?? 'store_id';
+        $search = $this->input->get('search');
+
+        $stores_count = $this->admin_model->getSettingStoresCount($status, $search);
+        $stores = $this->admin_model->getSettingStores($page_no, $per_page, $status, $order_by, $order, $search);
+
+        $pagination = array(
+          "total_rows" => $stores_count,
+          "per_page" => $per_page,
+        );
+
+        $response = array(
+          "message" => 'Successfully fetch stores',
+          "data" => array(
+            "pagination" => $pagination,
+            "stores" => $stores
+          ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+      case 'PUT':
+        $put = json_decode(file_get_contents("php://input"), true);
+
+        $this->admin_model->updateSettingStore($put['id'], $put['name_of_field_status'], $put['status']);
+
+        $response = array(
+          "message" => 'Successfully update status',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+
+  }
 
   public function deal_availability(){
     switch($this->input->server('REQUEST_METHOD')){
