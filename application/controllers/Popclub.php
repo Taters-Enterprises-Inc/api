@@ -14,42 +14,46 @@ class Popclub extends CI_Controller {
 		parent::__construct();
 		$this->load->model('deals_model');
 	}
+	private function unable_redeems(){
+		$redeems = $this->deals_model->getUserRedeems();
+		$today = date("Y-m-d H:i:s");
+		
+		$unable_redeems = array();
+		$forfeit_array_counter_array = array();
+		
+		foreach($redeems as $redeem){
+			$expire = date($redeem->expiration);
+			$date_redeemed = date($redeem->date_redeemed);
+
+			$is_the_same_day = date("Y-m-d H:i:s", strtotime('-1 day')) < $date_redeemed && 
+			date("Y-m-d H:i:s", strtotime('+1 day')) > $date_redeemed;
+
+			if($is_the_same_day && $redeem->status === 5 ){
+				if(!isset($forfeit_array_counter_array[$redeem->deal_id])){
+					$forfeit_array_counter_array[$redeem->deal_id] = 1;
+				}else{
+					$forfeit_array_counter_array[$redeem->deal_id]++;
+				}
+			}
+
+			if($is_the_same_day &&
+				($redeem->status == 6 || ( $redeem->status == 1 && $today >= $expire) || (isset($forfeit_array_counter_array[$redeem->deal_id]) && $forfeit_array_counter_array[$redeem->deal_id] >= 3)) 
+			){
+				$unable_redeems[] = array(
+					"deal_id" => $redeem->deal_id,
+					"next_available_redeem" => date('Y-m-d H:i:s', strtotime("+1 day", strtotime($date_redeemed)))
+				);
+			} 
+		}
+
+		return $unable_redeems;
+	}
 
 	public function redeem_validators(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-				$redeems = $this->deals_model->getUserRedeems();
-				$today = date("Y-m-d H:i:s");
 
-				$max_forfeit = 3;
-				$forfeit_count = 0;
-				$unable_redeems = array();
-				$forfeit_array_counter_array = array();
-				
-				foreach($redeems as $redeem){
-					$expire = date($redeem->expiration);
-					$date_redeemed = date($redeem->date_redeemed);
-
-					$is_the_same_day = date("Y-m-d H:i:s", strtotime('-1 day')) < $date_redeemed && 
-					date("Y-m-d H:i:s", strtotime('+1 day')) > $date_redeemed;
-
-					if($is_the_same_day && $redeem->status === 5 ){
-						if(!isset($forfeit_array_counter_array[$redeem->deal_id])){
-							$forfeit_array_counter_array[$redeem->deal_id] = 1;
-						}else{
-							$forfeit_array_counter_array[$redeem->deal_id]++;
-						}
-					}
-
-					if($is_the_same_day &&
-						($redeem->status == 6 || ( $redeem->status == 1 && $today >= $expire) || $forfeit_array_counter_array[$redeem->deal_id] >= 3) 
-					){
-						$unable_redeems[] = array(
-							"deal_id" => $redeem->deal_id,
-							"next_available_redeem" => date('Y-m-d H:i:s', strtotime("+1 day", strtotime($date_redeemed)))
-						);
-					} 
-				}
+				$unable_redeems = $this->unable_redeems();
 
 				if(!empty($unable_redeems)){
 					
@@ -405,7 +409,23 @@ class Popclub extends CI_Controller {
 		$available_deals = array();
 		$day_of_the_week = date('l');
 
+		$unable_redeems = $this->unable_redeems();
+
 		foreach($deals as $deal){
+			if(!empty($unable_redeems)){
+				$is_contain = false;
+				foreach($unable_redeems as $unable_redeem){
+					if($unable_redeem['deal_id'] === $deal->id){
+						$is_contain = true;
+						break;
+					}
+				}
+				if($is_contain){
+					$not_available_deals[] = $deal;
+					continue;
+				}
+			}
+
 			if(isset($deal->available_start_time) && isset($deal->available_end_time)){
 				$available_start_time = date("Y-m-d H:i:s", strtotime($deal->available_start_time));
 				$available_end_time = date("Y-m-d H:i:s", strtotime($deal->available_end_time));
