@@ -11,8 +11,8 @@ class Deals_model extends CI_Model
 {
 	
 	public function getUserRedeems(){
-		if($_SESSION['userData'] === null){
-			return;
+		if(!isset($_SESSION['userData'])){
+			return[];
 		}
 
 		if(isset($_SESSION['userData']['oauth_uid'])){
