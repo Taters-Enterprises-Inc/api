@@ -64,6 +64,51 @@ class Admin_model extends CI_Model
         return $this->db->get()->result();
     }
     
+    public function get_order_summary($id)
+    { 
+        $table = "client_tb A";
+        $select_column = array("A.fname", "A.lname", "A.email","A.address", "A.contact_number","A.moh","A.payops","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","B.table_number","A.moh","A.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","Z.delivery_rate AS delivery_rate","Z.moh_notes AS moh_notes","Z.moh_setup AS moh_setup","B.payment_proof","A.add_name","A.add_contact","A.add_address","V.discount_value","V.voucher_code");
+        $join_A = "A.id = B.client_id";
+        $this->db->select($select_column);  
+        $this->db->from($table);
+        $this->db->join('transaction_tb B', $join_A ,'left');
+        $this->db->join('store_tb Z', 'Z.store_id = B.store' ,'left');
+        $this->db->join('voucher_logs_tb V', 'V.transaction_id = B.id' ,'left');
+        $this->db->where('B.id', $id);
+        $query_info = $this->db->get();
+        $info = $query_info->result();
+
+        $this->db->from('products_tb P');
+        $this->db->select('*');
+        $this->db->join('order_items O', 'P.id = O.product_id' ,'left');
+        $this->db->where('O.transaction_id', $id);
+        $query_orders = $this->db->get();
+        $orders = $query_orders->result();
+
+        $this->db->from('personnel_tb');
+        $this->db->select('name,contact_number');
+        $this->db->where('reference_code', $info[0]->moh);
+        $this->db->where('assigned_store', $info[0]->store);
+        $query_orders = $this->db->get();
+        $personnel = $query_orders->result();
+
+        $this->db->from('bank_account_tb');
+        $this->db->select('*');
+        $this->db->where('store_id', $info[0]->store);
+        $this->db->where('indicator', $info[0]->payops);
+        $query_orders = $this->db->get();
+        $bank = $query_orders->result();
+
+        $join_data['clients_info'] = $info[0];
+        $join_data['order_details'] = $orders;
+        $join_data['personnel'] = $personnel[0];
+        $join_data['bank'] = $bank[0];
+
+        // print_r($join_data);
+        return $join_data;
+    }
+
+    
     public function get_categories() {
         $this->db->select("id, category_name name");
         $this->db->from("category_tb");

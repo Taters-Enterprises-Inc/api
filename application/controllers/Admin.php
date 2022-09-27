@@ -689,4 +689,21 @@ class Admin extends CI_Controller
         return;
     }
   }
+  
+  public function print_asdoc($id)
+  {
+    $query_result = $this->admin_model->get_order_summary($id);
+    $data['info'] = $query_result['clients_info'];
+    $data['orders'] = $query_result['order_details'];
+
+    /** Downlaod as word-doc */
+    $print = $this->load->view('/report/invoice_print', $data, TRUE);
+
+    header("Content-Type: application/vnd.ms-word");
+    header("Expires: 0");
+    header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+    header("content-disposition: attachment;filename=Report.doc");
+
+    echo $print;
+  }
 }

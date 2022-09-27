@@ -28,7 +28,7 @@ class Popclub extends CI_Controller {
 			$is_the_same_day = date("Y-m-d H:i:s", strtotime('-1 day')) < $date_redeemed && 
 			date("Y-m-d H:i:s", strtotime('+1 day')) > $date_redeemed;
 
-			if($is_the_same_day && $redeem->status === 5 ){
+			if($is_the_same_day && ($redeem->status === 5 || ( $redeem->status == 1 && $today >= $expire) ) ){
 				if(!isset($forfeit_array_counter_array[$redeem->deal_id])){
 					$forfeit_array_counter_array[$redeem->deal_id] = 1;
 				}else{
@@ -37,7 +37,7 @@ class Popclub extends CI_Controller {
 			}
 
 			if($is_the_same_day &&
-				($redeem->status == 6 || ( $redeem->status == 1 && $today >= $expire) || (isset($forfeit_array_counter_array[$redeem->deal_id]) && $forfeit_array_counter_array[$redeem->deal_id] >= 3)) 
+				($redeem->status == 6 || (isset($forfeit_array_counter_array[$redeem->deal_id]) && $forfeit_array_counter_array[$redeem->deal_id] >= 3)) 
 			){
 				$unable_redeems[] = array(
 					"deal_id" => $redeem->deal_id,

@@ -97,6 +97,7 @@ $route['admin/catering-update-status'] = 'admin/catering_update_status';
 $route['admin/catering'] = 'admin/catering';
 $route['admin/catering/(:any)'] = 'admin/catering_order/$1';
 
+$route['admin/print_asdoc/(:num)'] = 'admin/print_asdoc/$1';
 $route['admin/shop-update-status'] = 'admin/shop_update_status';
 $route['admin/shop/(:any)'] = 'admin/shop_order/$1';
 $route['admin/shop'] = 'admin/shop';
