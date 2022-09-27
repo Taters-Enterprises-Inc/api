@@ -22,10 +22,14 @@ class Shop extends CI_Controller {
 			case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);
 
-				if(isset($post['prod_flavor']) || isset($post['prod_size'])){
-					$variant[] = (int)$post['prod_flavor'];
+				if(isset($post['prod_size'])){
 					$variant[] = (int)$post['prod_size'];
 				}
+				
+				if(isset($post['prod_flavor'])){
+					$variant[] = (int)$post['prod_flavor'];
+				}
+
 				if(isset($post['selected_drink'])){
 					$drink_id = (int)$post['selected_drink'];
 					if($drink_id == 232){
