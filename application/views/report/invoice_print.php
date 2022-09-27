@@ -44,7 +44,6 @@
     <!-- title row -->
     <div class="row">
       <div class="col-12">
-        <h2 class="page-header"><?php echo $info->addon_base_product;?>
             Taters Enterprises
             <small class="float-right"><?php echo date('F d, Y', strtotime($info->dateadded));?></small>
         </h2>
@@ -108,7 +107,7 @@
     <!-- /.row -->
     
     <div class="border-top"></div>
-    <div class="row mb-2">
+    <div class="mb-2 row">
       <?php if($info->moh == 2):?>
         <div class="col-5">
           <h5>Delivery Information</h5>
@@ -119,7 +118,7 @@
       <?php endif;?>
     </div>
     <hr>
-    <div class="row mb-2">
+    <div class="mb-2 row">
       <div class="col-7">
           <b>Note:</b> <?php echo ($info->moh == 1) ? 'Delivery and/or Pick-up of items from Monday to Sunday (except holidays) between 10:00 am to 5:00 pm.<br>Delivery and/or Pick-up of product would be 1-2 days after the payment has been uploaded.' : 'Delivery and/or Pick-up of items from Monday to Sunday (except holidays) between 10:00 am to 5:00 pm.<br>Delivery and/or Pick-up of product would be 1-2 days after the payment has been uploaded.<br>You will be charged with a delivery fee depending on your location. <br>Delivery fee is already included in the Grand Total. Our Sales Representative will reach out to you via sms once orders are now ready for delivery/pick-up.';?>
       </div>
@@ -150,7 +149,7 @@
                       <td style="text-align: center;"><?php echo $ctr;?></td>
                       <td>
                         <?php if($value->product_label == ""): ?>
-                          <?php echo $value->name;?><br><span class="text-secondary text-xs"><?php echo $value->add_details;?></span>
+                          <?php echo $value->name;?><br><span class="text-xs text-secondary"><?php echo $value->add_details;?></span>
                             <?php if($value->addon_base_product != null):?>
                               <br>
                               <b>Add-on for:</b>
@@ -161,7 +160,7 @@
                               <b>FREE</b>
                             <?php endif;?>
                         <?php else: ?>
-                          <?php echo $value->product_label.' '. $value->name;?><br><span class="text-secondary text-xs"><?php echo $value->add_details;?></span>
+                          <?php echo $value->product_label.' '. $value->name;?><br><span class="text-xs text-secondary"><?php echo $value->add_details;?></span>
                           <?php if($value->addon_base_product != null):?>
                               <br>
                               <b>Add-on for:</b>
@@ -287,7 +286,7 @@
                               </div>
                               <div class="timeline-footer">
                                 <span class=""><i class="fas fa-user"></i> '.$value->user_name.'</span>
-                                <span class="time float-right"><i class="fas fa-clock"></i> '.$value->dateadded.'</span>
+                                <span class="float-right time"><i class="fas fa-clock"></i> '.$value->dateadded.'</span>
                               </div>
                             </div>
                             <hr>
@@ -299,7 +298,7 @@
           }
         ?>
         </b>
-        <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;"></p>
+        <p class="shadow-none text-muted well well-sm" style="margin-top: 10px;"></p>
       </div>
       <!-- /.col -->
       <!-- <div class="col-6 d-none"> -->
@@ -333,10 +332,10 @@
       <!-- /.col -->
     </div>
 
-    <div class="row mt-5">
+    <div class="mt-5 row">
       <div class="col-12">
         <div class="table-responsive">
-            <table class="table table-sm border border-dark">
+            <table class="table border table-sm border-dark">
               <tr>
                 <th style="width:50%">Prepared by:</th>
                 <th>Received in good order and condition by:</th>

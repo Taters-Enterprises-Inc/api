@@ -706,4 +706,14 @@ class Admin extends CI_Controller
 
     echo $print;
   }
+  
+  public function print_view($id)
+  {
+    $query_result = $this->admin_model->get_order_summary($id);
+    $data['info'] = $query_result['clients_info'];
+    $data['orders'] = $query_result['order_details'];
+
+    $this->load->view('/report/invoice_print', $data);
+  }
+
 }
