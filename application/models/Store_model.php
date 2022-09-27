@@ -152,7 +152,7 @@ class Store_model extends CI_Model
         $this->db->from('store_tb A');
         $this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
         $this->db->join('region_tb C', 'C.id = B.region_id');
-        $this->db->join('dotcom_stores D', 'D.store_id = A.store_id');
+        // $this->db->join('dotcom_stores D', 'D.store_id = A.store_id');
         $this->db->join('store_menu_tb E', 'E.id = A.store_menu_type_id');
 
 		switch($service){
