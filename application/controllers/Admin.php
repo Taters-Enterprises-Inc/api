@@ -47,9 +47,13 @@ class Admin extends CI_Controller
         $order_by = $this->input->get('order_by') ?? 'store_id';
         $search = $this->input->get('search');
 
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+
         $stores_count = $this->admin_model->getSettingStoresCount($search);
         $stores = $this->admin_model->getSettingStores($page_no, $per_page, $order_by, $order, $search);
-
+        
         $pagination = array(
           "total_rows" => $stores_count,
           "per_page" => $per_page,
@@ -92,6 +96,10 @@ class Admin extends CI_Controller
         $order = $this->input->get('order') ?? 'desc';
         $order_by = $this->input->get('order_by') ?? 'id';
         $search = $this->input->get('search');
+
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
 
         $deals_count = $this->admin_model->getStoreDealsCount($store_id, $status, $search);
         $deals = $this->admin_model->getStoreDeals($page_no, $per_page, $store_id, $status, $order_by, $order, $search);
@@ -140,6 +148,10 @@ class Admin extends CI_Controller
         $order = $this->input->get('order') ?? 'desc';
         $order_by = $this->input->get('order_by') ?? 'id';
         $search = $this->input->get('search');
+
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
 
         $products_count = $this->admin_model->getStoreProductCount($store_id, $category_id, $status, $search);
         $products = $this->admin_model->getStoreProducts($page_no, $per_page, $store_id, $category_id, $status, $order_by, $order, $search);
@@ -411,6 +423,10 @@ class Admin extends CI_Controller
         $order = $this->input->get('order') ?? 'asc';
         $order_by = $this->input->get('order_by') ?? 'id';
         $search = $this->input->get('search');
+
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
         
         $users_count =  $this->admin_model->getUsersCount($search);
         $users = $this->admin_model->getUsers($page_no, $per_page, $order_by, $order, $search);
