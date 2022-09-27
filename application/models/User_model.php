@@ -22,6 +22,18 @@ class User_model extends CI_Model {
             $insert_id[] = $this->db->insert_id();
         }
       }
+      
+    function get_store_group_order($user_id)
+    {
+        $this->db->select('a.store_id, b.name, c.name as menu_name');
+        $this->db->from('users_store_groups a');
+        $this->db->join('store_tb b', 'b.store_id = a.store_id' ,'left');
+        $this->db->join('store_menu_tb c', 'c.id = b.store_menu_type_id');
+        $this->db->where('a.user_id', $user_id);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
 
     function get_store_group_order_set($user_id)
     {

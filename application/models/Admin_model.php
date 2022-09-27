@@ -504,7 +504,7 @@ class Admin_model extends CI_Model
         return $query->row();
     }
     
-    public function getPopclubRedeemsCount($status, $search){
+    public function getPopclubRedeemsCount($status, $search, $store){
         $this->db->select('count(*) as all_count');
             
         $this->db->from('deals_redeems_tb A');
@@ -522,11 +522,14 @@ class Admin_model extends CI_Model
         if($status)
             $this->db->where('A.status', $status);
 
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+
         $query = $this->db->get();
         return $query->row()->all_count;
     }
     
-    public function getPopclubRedeems($row_no, $row_per_page, $status, $order_by,  $order, $search){
+    public function getPopclubRedeems($row_no, $row_per_page, $status, $order_by,  $order, $search, $store){
         $this->db->select("
             A.id,
             A.status,
@@ -552,6 +555,9 @@ class Admin_model extends CI_Model
             
         if($status)
             $this->db->where('A.status', $status);
+
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
 
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
@@ -690,7 +696,7 @@ class Admin_model extends CI_Model
         return $query->row();
     }
     
-    public function getCateringBookingsCount($status, $search){
+    public function getCateringBookingsCount($status, $search, $store){
         $this->db->select('count(*) as all_count');
             
         $this->db->from('catering_transaction_tb A');
@@ -709,11 +715,14 @@ class Admin_model extends CI_Model
         if($status)
             $this->db->where('A.status', $status);
 
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+
         $query = $this->db->get();
         return $query->row()->all_count;
     }
 
-    public function getCateringBookings($row_no, $row_per_page, $status, $order_by,  $order, $search){
+    public function getCateringBookings($row_no, $row_per_page, $status, $order_by,  $order, $search, $store){
         $this->db->select("
             A.id,
             A.status,
@@ -753,6 +762,9 @@ class Admin_model extends CI_Model
         if($status)
             $this->db->where('A.status', $status);
             
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
 
@@ -760,7 +772,7 @@ class Admin_model extends CI_Model
         return $query->result();
     }
     
-    public function getSnackshopOrders($row_no, $row_per_page, $status, $order_by,  $order, $search){
+    public function getSnackshopOrders($row_no, $row_per_page, $status, $order_by,  $order, $search, $store){
         $this->db->select("
             A.id,
             A.status,
@@ -788,6 +800,7 @@ class Admin_model extends CI_Model
         $this->db->join('client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         
+        
 
         if($search){
             $this->db->like('A.tracking_no', $search);
@@ -800,6 +813,9 @@ class Admin_model extends CI_Model
         if($status)
             $this->db->where('A.status', $status);
             
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+            
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
 
@@ -807,7 +823,7 @@ class Admin_model extends CI_Model
         return $query->result();
     }
 
-    public function getSnackshopOrdersCount($status, $search){
+    public function getSnackshopOrdersCount($status, $search, $store){
         $this->db->select('count(*) as all_count');
             
         $this->db->from('transaction_tb A');
@@ -825,6 +841,8 @@ class Admin_model extends CI_Model
         if($status)
             $this->db->where('A.status', $status);
 
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
 
         $query = $this->db->get();
         return $query->row()->all_count;
