@@ -15,6 +15,8 @@ class Profile extends CI_Controller {
 		$this->load->model('deals_model');
 		$this->load->model('user_model');
 		$this->load->model('contact_model');
+		$this->load->library('form_validation');
+
 	}
 
 	public function contact($id){
@@ -22,40 +24,58 @@ class Profile extends CI_Controller {
 			case 'PUT':
 
 				$post = json_decode(file_get_contents("php://input"), true);
+				$this->form_validation->set_data($post);
 
-				if(isset($_SESSION['userData']['oauth_uid'])){
+				$this->form_validation->set_rules( 'contact' , 'Mobile Number', 'required|is_unique[mobile_user_contact.contact]');
 
-					$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-					$user_id = $get_fb_user_details->id;
-					$isFbUser = true;
+
+				if ($this->form_validation->run() === FALSE) { 
+
 					
-				}else if(isset($_SESSION['userData']['mobile_user_id'])){
-
-					$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
-					$user_id = $get_mobile_user_details->id;
-					$isFbUser = false;
-
+					$this->output->set_status_header('401');
+					echo json_encode(array( "message" => 'Mobile already registered, please try different number.'));
+					return;
 
 				}else{
-					$this->output->set_status_header(401);
-					echo json_encode(array('message'=>'User not found...'));
+
+
+					if(isset($_SESSION['userData']['oauth_uid'])){
+
+						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+						$user_id = $get_fb_user_details->id;
+						$isFbUser = true;
+						
+					}else if(isset($_SESSION['userData']['mobile_user_id'])){
+	
+						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+						$user_id = $get_mobile_user_details->id;
+						$isFbUser = false;
+	
+	
+					}else{
+						$this->output->set_status_header(401);
+						echo json_encode(array('message'=>'User not found...'));
+						return;
+					}
+					
+					$data = array(
+						'contact' => $post['contact'],
+					);
+	
+					$this->contact_model->update_contact($id,$user_id,$data,$isFbUser);
+	
+					$response = array(
+						'message' => 'Contact updated.'
+					);
+	
+					header('content-type: application/json');
+					echo json_encode($response);
 					return;
+
+
 				}
-				
+				break;
 
-				$data = array(
-					'contact' => $post['contact'],
-				);
-
-				$this->contact_model->update_contact($id,$user_id,$data,$isFbUser);
-
-				$response = array(
-					'message' => 'Contact updated.'
-				);
-
-				header('content-type: application/json');
-				echo json_encode($response);
-				return;
 
 			case 'DELETE':
 
