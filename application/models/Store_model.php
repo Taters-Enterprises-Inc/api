@@ -145,18 +145,13 @@ class Store_model extends CI_Model
 			B.region_store_id, 
 			C.name AS region_name, 
 			C.sequence,
-			D.name as nameofstore,
 			E.name as menu_name,
-    		IFNULL(D.contact_number, "No contact number") as contactno,
-    		D.operating_hours as operatinghours, 
-			D.map_link as maplink, 
 			( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
 		');
 
         $this->db->from('store_tb A');
         $this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
         $this->db->join('region_tb C', 'C.id = B.region_id');
-        $this->db->join('dotcom_stores D', 'D.store_id = A.store_id');
         $this->db->join('store_menu_tb E', 'E.id = A.store_menu_type_id');
 
 		switch($service){
