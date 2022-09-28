@@ -44,7 +44,7 @@ class Shared extends CI_Controller {
 				$post = json_decode(file_get_contents("php://input"), true);
 				$this->form_validation->set_data($post);
 
-				$this->form_validation->set_rules( 'contact' , 'Mobile Number', 'required|is_unique[mobile_user_contact.contact]');
+				$this->form_validation->set_rules( 'contact' , 'Mobile Number', 'required|is_unique[mobile_user_contact.contact]|is_unique[fb_user_contact.contact]');
 
 				if ($this->form_validation->run() === FALSE) { 
 		
