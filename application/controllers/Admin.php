@@ -585,6 +585,21 @@ class Admin extends CI_Controller
     }
   }
   
+  public function popclub_decline_redeem($redeemCode){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $this->admin_model->declineRedeem($redeemCode);
+
+        $response = array(
+          "message" => 'Successfully declined the redeem',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
   public function popclub_complete_redeem($redeemCode){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 

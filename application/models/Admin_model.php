@@ -507,6 +507,13 @@ class Admin_model extends CI_Model
         $this->db->where('redeem_code', $redeem_code);
         $this->db->update("deals_redeems_tb");
     }
+
+    
+    public function declineRedeem($redeem_code){
+		$this->db->set('status', 4);
+        $this->db->where('redeem_code', $redeem_code);
+        $this->db->update("deals_redeems_tb");
+    }
     
     public function getPopclubRedeemItems($redeem_id){
         $this->db->select("
