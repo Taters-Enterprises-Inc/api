@@ -648,7 +648,8 @@ class Admin_model extends CI_Model
             A.reference_num,
             A.store,
 
-            B.add_name as client_name,
+            concat(B.fname,' ',B.lname) as client_name,
+            B.add_name,
             B.payops,
             B.contact_number,
             B.email,
@@ -839,6 +840,8 @@ class Admin_model extends CI_Model
 
             concat(B.fname,' ',B.lname) as client_name,
             B.payops,
+            B.add_name,
+            B.add_address,
             C.name as store_name
         ");
         $this->db->from('transaction_tb A');

@@ -32,19 +32,22 @@ class Transaction_model extends CI_Model {
     public function insert_client_details($post)
     {  
         if (isset($_SESSION['userData']['oauth_uid'])) {
+            $facebook_client_details = $this->get_facebook_client($_SESSION['userData']['oauth_uid']);
 
             $this->db->trans_start();
             // $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
             $data = array(
-                'fb_user_id'        => $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']),
-                'email'             => $post['eMail'],
+                'fb_user_id'        => $facebook_client_details->id,
+                'email'             => $facebook_client_details->email,
                 'address'           => $post['address'],
                 'contact_number'    => $post['phoneNumber'],
+                'fname'             => $facebook_client_details->first_name,
+                'lname'             => $facebook_client_details->last_name,
                 'moh'               => 2,
                 'payops'            => $post['payops'],
                 'add_name'          => $post['firstName'].' '.$post['lastName'],
                 'add_contact'       => $post['phoneNumber'],
-                'add_address'       => $post['address']
+                'add_address'       => $post['full_address'],
             );
             $this->db->insert('client_tb', $data);
             $insert_id = $this->db->insert_id();
@@ -52,19 +55,20 @@ class Transaction_model extends CI_Model {
 
         } elseif(isset($_SESSION['userData']) && $_SESSION['userData']['login_type'] == 'mobile'){
                 $this->db->trans_start();
+                $mobile_client_details = $this->get_mobile_client($_SESSION['userData']['mobile_user_id']);
                 // $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
                 $data = array(
-                    'mobile_user_id'    => $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']),
-                    'fname'             => $post['firstName'],
-                    'lname'             => $post['lastName'],
-                    'email'             => $post['eMail'],
+                    'mobile_user_id'    => $mobile_client_details->id,
+                    'fname'             => $mobile_client_details->first_name,
+                    'lname'             => $mobile_client_details->last_name,
+                    'email'             => $mobile_client_details->email,
                     'address'           => $post['address'],
                     'contact_number'    => $post['phoneNumber'],
                     'moh'               => 2,
                     'payops'            => $post['payops'],
                     'add_name'          => $post['firstName'].' '.$post['lastName'],
                     'add_contact'       => $post['phoneNumber'],
-                    'add_address'       => $post['address']
+                    'add_address'       => $post['full_address']
                 );
                 $this->db->insert('client_tb', $data);
                 $insert_id = $this->db->insert_id();
@@ -111,6 +115,14 @@ class Transaction_model extends CI_Model {
         return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
     }
     
+    public function get_facebook_client($oauth_id){
+        $this->db->select('id, first_name, last_name, email');
+        $this->db->where('oauth_uid', $oauth_id);
+        $query = $this->db->get('fb_users');
+        $data = $query->row();
+        return $data;
+    }
+    
     //jepoy get facebook client id
     public function get_facebook_client_id($oauth_id){
         $this->db->select('id');
@@ -120,6 +132,15 @@ class Transaction_model extends CI_Model {
         return $data[0]['id'];
     }
     
+    //jepoy get mobile client id
+    public function get_mobile_client($id){
+        $this->db->select('id, first_name, last_name, email');
+        $this->db->where('id', $id);
+        $query = $this->db->get('mobile_users');
+        $data = $query->row();
+        return $data;
+    }
+
     //jepoy get mobile client id
     public function get_mobile_client_id($id){
         $this->db->select('id');
