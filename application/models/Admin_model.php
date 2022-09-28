@@ -631,9 +631,28 @@ class Admin_model extends CI_Model
         $this->db->from('order_items A');
         $this->db->join('products_tb B', 'B.id = A.product_id');
         $this->db->where('A.transaction_id', $transaction_id);
+        $products_query = $this->db->get();
+        $products = $products_query->result();
 
-        $query = $this->db->get();
-        return $query->result();
+
+
+
+        $this->db->select("
+            A.product_price,
+            A.quantity,
+            A.remarks,
+            A.product_label,
+            B.name,
+            B.description,
+            B.add_details,
+        ");
+        $this->db->from('deals_order_items A');
+        $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+        $this->db->where('A.redeems_id', $transaction_id);
+        $deals_query = $this->db->get();
+        $deals = $deals_query->result();
+        
+		return array_merge($products, $deals);
     }
 
     public function getSnackshopOrder($tracking_no){
