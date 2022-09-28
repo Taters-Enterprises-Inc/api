@@ -14,6 +14,7 @@ class Shared extends CI_Controller {
 		$this->load->model('contact_model');
 		$this->load->model('catering_model');
 		$this->load->model('user_model');
+		$this->load->library('form_validation');
 	}
 
     public function contacts(){
@@ -41,36 +42,53 @@ class Shared extends CI_Controller {
 
 			case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);
+				$this->form_validation->set_data($post);
 
-				if(isset($_SESSION['userData']['oauth_uid'])){
+				$this->form_validation->set_rules( 'contact' , 'Mobile Number', 'required|is_unique[mobile_user_contact.contact]|is_unique[fb_user_contact.contact]');
 
-					$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-					$isFbUser = true;
-					$data = array(
-						'fb_id' => $get_fb_user_details->id,
-						'contact' => $post['contact']
-					);
-
+				if ($this->form_validation->run() === FALSE) { 
+		
+						$this->output->set_status_header('401');
+						echo json_encode(array( "message" => 'Mobile already registered, please try different number.'));
+						return;
 
 				}else{
-					$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
-					$isFbUser = false;
-					$data = array(
-						'mobile_id' => $get_mobile_user_details->id,
-						'contact' => $post['contact']
-					);
+
+						if(isset($_SESSION['userData']['oauth_uid'])){
+
+							$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+							$isFbUser = true;
+							$data = array(
+								'fb_id' => $get_fb_user_details->id,
+								'contact' => $post['contact']
+							);
+		
+		
+						}else{
+							$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+							$isFbUser = false;
+							$data = array(
+								'mobile_id' => $get_mobile_user_details->id,
+								'contact' => $post['contact']
+							);
+
+							
+		
+						}
+
+						
+						$this->contact_model->add_contact($data, $isFbUser);
+		
+						$response = array(
+							'message' => 'Successfully add contact',
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
 
 				}
 
-				$this->contact_model->add_contact($data, $isFbUser);
-
-				$response = array(
-					'message' => 'Successfully add contact',
-				);
-
-				header('content-type: application/json');
-				echo json_encode($response);
-				break;
+			break;
 		}
     }
 	
