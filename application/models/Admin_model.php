@@ -643,6 +643,7 @@ class Admin_model extends CI_Model
             A.quantity,
             A.remarks,
             B.name,
+            B.alias,
             B.description,
         ");
         $this->db->from('deals_order_items A');
