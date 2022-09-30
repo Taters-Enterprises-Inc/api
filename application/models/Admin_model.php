@@ -84,6 +84,20 @@ class Admin_model extends CI_Model
         $this->db->where('O.transaction_id', $id);
         $query_orders = $this->db->get();
         $orders = $query_orders->result();
+        
+        $this->db->select("
+            A.product_price,
+            A.quantity,
+            A.remarks,
+            B.name,
+            B.alias,
+            B.description,
+        ");
+        $this->db->from('deals_order_items A');
+        $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+        $this->db->where('A.redeems_id', $id);
+        $deals_query = $this->db->get();
+        $deals = $deals_query->result();
 
         $this->db->from('personnel_tb');
         $this->db->select('name,contact_number');
@@ -100,7 +114,7 @@ class Admin_model extends CI_Model
         $bank = $query_orders->result();
 
         $join_data['clients_info'] = $info[0];
-        $join_data['order_details'] = $orders;
+        $join_data['order_details'] = array_merge($orders, $deals);
         $join_data['personnel'] = $personnel[0];
         $join_data['bank'] = $bank[0];
 
