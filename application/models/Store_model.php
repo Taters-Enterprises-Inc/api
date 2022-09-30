@@ -56,61 +56,57 @@ class Store_model extends CI_Model
 
     public function fetch_ncr()
     {
-    	$this->db->select('dotcom_stores.name as nameofstore, dotcom_stores.address as address,
-    					   IFNULL(dotcom_stores.contact_number, "No contact number") as contactno,
-    					   dotcom_stores.operating_hours as operatinghours, dotcom_stores.map_link as maplink, store_tb.store_image');
-    	$this->db->from('dotcom_stores');
-    	$this->db->join('dotcom_locale_tb', 'dotcom_stores.locale = dotcom_locale_tb.id' ,'right');
-    	$this->db->join('store_tb', 'store_tb.store_id = dotcom_stores.store_id');
-    	$this->db->where('dotcom_stores.status', 1);
+        $this->db->select('store_tb.name as nameofstore, store_tb.address as address,
+                                           IFNULL(store_tb.contact_number, "No contact number") as contactno,
+                                           store_tb.operating_hours as operatinghours, store_tb.map_link as maplink, store_tb.store_image');
+        $this->db->from('store_tb');
+        $this->db->join('dotcom_locale_tb', 'store_tb.locale = dotcom_locale_tb.id' ,'right');
+        $this->db->where('store_tb.branch_status', 1);
         $this->db->where('dotcom_locale_tb.id', 1);
-        $this->db->order_by('dotcom_stores.name');
-    	$query = $this->db->get();
+        $this->db->order_by('store_tb.name');
+        $query = $this->db->get();
         return $query->result();
     }
 
     public function fetch_luzon()
     {
-    	$this->db->select('dotcom_stores.name as nameofstore, dotcom_stores.address as address,
-    					   IFNULL(dotcom_stores.contact_number, "No contact number") as contactno,
-    					   dotcom_stores.operating_hours as operatinghours, dotcom_stores.map_link as maplink, store_tb.store_image');
-    	$this->db->from('dotcom_stores');
-    	$this->db->join('dotcom_locale_tb', 'dotcom_stores.locale = dotcom_locale_tb.id' ,'right');
-    	$this->db->join('store_tb', 'store_tb.store_id = dotcom_stores.store_id');
-    	$this->db->where('dotcom_stores.status', 1);
+        $this->db->select('store_tb.name as nameofstore, store_tb.address as address,
+                                           IFNULL(store_tb.contact_number, "No contact number") as contactno,
+                                           store_tb.operating_hours as operatinghours, store_tb.map_link as maplink, store_tb.store_image');
+        $this->db->from('store_tb');
+        $this->db->join('dotcom_locale_tb', 'store_tb.locale = dotcom_locale_tb.id' ,'right');
+        $this->db->where('store_tb.branch_status', 1);
         $this->db->where('dotcom_locale_tb.id', 2);
-        $this->db->order_by('dotcom_stores.name');
-    	$query = $this->db->get();
+        $this->db->order_by('store_tb.name');
+        $query = $this->db->get();
         return $query->result();
     }
 
     public function fetch_visayas()
     {
-    	$this->db->select('dotcom_stores.name as nameofstore, dotcom_stores.address as address,
-    					   IFNULL(dotcom_stores.contact_number, "No contact number") as contactno,
-    					   dotcom_stores.operating_hours as operatinghours, dotcom_stores.map_link as maplink, store_tb.store_image');
-    	$this->db->from('dotcom_stores');
-    	$this->db->join('dotcom_locale_tb', 'dotcom_stores.locale = dotcom_locale_tb.id' ,'right');
-    	$this->db->join('store_tb', 'store_tb.store_id = dotcom_stores.store_id');
-    	$this->db->where('dotcom_stores.status', 1);
+        $this->db->select('store_tb.name as nameofstore, store_tb.address as address,
+                                           IFNULL(store_tb.contact_number, "No contact number") as contactno,
+                                           store_tb.operating_hours as operatinghours, store_tb.map_link as maplink, store_tb.store_image');
+        $this->db->from('store_tb');
+        $this->db->join('dotcom_locale_tb', 'store_tb.locale = dotcom_locale_tb.id' ,'right');
+        $this->db->where('store_tb.branch_status', 1);
         $this->db->where('dotcom_locale_tb.id', 3);
-        $this->db->order_by('dotcom_stores.name');
-    	$query = $this->db->get();
+        $this->db->order_by('store_tb.name');
+        $query = $this->db->get();
         return $query->result();
     }
-	
+
     public function fetch_mindanao()
     {
-    	$this->db->select('dotcom_stores.name as nameofstore, dotcom_stores.address as address,
-    					   IFNULL(dotcom_stores.contact_number, "No contact number") as contactno,
-    					   dotcom_stores.operating_hours as operatinghours, dotcom_stores.map_link as maplink, store_tb.store_image');
-    	$this->db->from('dotcom_stores');
-    	$this->db->join('dotcom_locale_tb', 'dotcom_stores.locale = dotcom_locale_tb.id' ,'right');
-    	$this->db->join('store_tb', 'store_tb.store_id = dotcom_stores.store_id');
-    	$this->db->where('dotcom_stores.status', 1);
+        $this->db->select('store_tb.name as nameofstore, store_tb.address as address,
+                                           IFNULL(store_tb.contact_number, "No contact number") as contactno,
+                                           store_tb.operating_hours as operatinghours, store_tb.map_link as maplink, store_tb.store_image');
+        $this->db->from('store_tb');
+        $this->db->join('dotcom_locale_tb', 'store_tb.locale = dotcom_locale_tb.id' ,'right');
+        $this->db->where('store_tb.branch_status', 1);
         $this->db->where('dotcom_locale_tb.id', 4);
-        $this->db->order_by('dotcom_stores.name');
-    	$query = $this->db->get();
+        $this->db->order_by('store_tb.name');
+        $query = $this->db->get();
         return $query->result();
     }
 
@@ -148,11 +144,10 @@ class Store_model extends CI_Model
 					B.region_store_id, 
 					C.name AS region_name, 
 					C.sequence,
-					D.name as nameofstore,
 					E.name as menu_name,
-					IFNULL(D.contact_number, "No contact number") as contactno,
-					D.operating_hours as operatinghours, 
-					D.map_link as maplink, 
+					A.contact_number as contactno,
+					A.operating_hours as operatinghours, 
+					A.map_link as maplink, 
 					( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
 				');
 		
@@ -160,9 +155,8 @@ class Store_model extends CI_Model
 				$this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
 				$this->db->join('region_tb C', 'C.id = B.region_id');
 				$this->db->join('store_menu_tb E', 'E.id = A.store_menu_type_id');
-				$this->db->join('dotcom_stores D', 'D.store_id = A.store_id');
 
-				$this->db->where('A.status', 1);
+				$this->db->where('A.branch_status', 1);
 				$this->db->order_by('distance', 'ASC');
 				$query = $this->db->get();  
 				$query_data = $query->result();
@@ -186,7 +180,7 @@ class Store_model extends CI_Model
 					  'closing_time'     => $value->closing,
 					  'disable_delivery' => $value->disable_delivery,
 					  'disable_pickup'   => $value->disable_pickup,
-					  'nameofstore'   => $value->nameofstore,
+					  'nameofstore'   => $value->store_name,
 					  'contactno'   => $value->contactno,
 					  'address'   => $value->address,
 					  'operatinghours'   => $value->operatinghours,
