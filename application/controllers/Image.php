@@ -22,9 +22,8 @@ class Image extends CI_Controller {
 
 		header('Content-type: ' . $ctype);
 		// $url = img_url().$file_name;
-		// $url = upload_url().'payment_proof/'.$file_name;
-		$url = 'https://site.test/staging/api/assets/upload/proof_payment/'.$file_name;
-		
+		$url = upload_url().'proof_payment/'.$file_name;
+	
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_HEADER, false);
@@ -50,8 +49,6 @@ class Image extends CI_Controller {
 		}
 
 		header('Content-type: ' . $ctype);
-		// $url = img_url().$file_name;
-		// $url = upload_url().'payment_proof/'.$file_name;
 		$url = upload_url().'catering_proof_payment/'.$file_name;
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -74,12 +71,11 @@ class Image extends CI_Controller {
 			case "jpeg":
 			case "jpg": $ctype="image/jpeg"; break;
 			case "svg": $ctype="image/svg+xml"; break;
+			case "pdf": $ctype="application/pdf"; break;
 			default:
 		}
 
 		header('Content-type: ' . $ctype);
-		// $url = img_url().$file_name;
-		// $url = upload_url().'payment_proof/'.$file_name;
 		$url = upload_url().'catering_upload_contract/'.$file_name;
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -88,8 +84,9 @@ class Image extends CI_Controller {
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 		$res = curl_exec($ch);
 		$rescode = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
-		curl_close($ch) ;
+		// curl_close($ch) ;
 		echo $res;
+		// echo 'test';
 	}
 
 }

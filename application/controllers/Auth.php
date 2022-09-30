@@ -17,10 +17,65 @@ class Auth extends CI_Controller{
         $this->load->library('form_validation');
         $this->load->helper(['url', 'language']);
 
-        $this->form_validation->set_error_delimiters($this->config->item('error_start_delimiter', 'ion_auth'), $this->config->item('error_end_delimiter', 'ion_auth'));
+        $this->form_validation->set_error_delimiters('', '');
+        $this->ion_auth->set_message_delimiters('', '');
 
         $this->lang->load('auth');
     }
+	
+	public function create_group()
+	{
+		$this->data['title'] = $this->lang->line('create_group_title');
+
+		if (!$this->ion_auth->logged_in() || !$this->ion_auth->is_admin()) {
+			$this->output->set_status_header('401');
+			header('content-type: application/json');
+			echo json_encode(array("message" => 'Unauthorized user'));
+			return;
+		}
+
+		$this->form_validation->set_error_delimiters('', '');
+		$this->form_validation->set_rules('group_name', $this->lang->line('create_group_validation_name_label'), 'trim|required|alpha_dash');
+
+		if ($this->form_validation->run() === TRUE) {
+			$new_group_id = $this->ion_auth->create_group($this->input->post('group_name'), $this->input->post('description'));
+			if ($new_group_id) {
+				
+				header('content-type: application/json');
+				echo json_encode(array("message" =>  $this->ion_auth->messages()));
+				return;
+			} else {
+
+				$this->output->set_status_header(401);
+				header('content-type: application/json');
+				echo json_encode(array("message" => validation_errors()));
+				return;
+			}
+		}
+
+		// display the create group form
+		// set the flash data error message if there is one
+		$this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
+
+		$this->data['group_name'] = [
+			'name'  => 'group_name',
+			'id'    => 'group_name',
+			'type'  => 'text',
+			'value' => $this->form_validation->set_value('group_name'),
+		];
+		$this->data['description'] = [
+			'name'  => 'description',
+			'id'    => 'description',
+			'type'  => 'text',
+			'value' => $this->form_validation->set_value('description'),
+		];
+
+		$this->output->set_status_header('401');
+		header('content-type: application/json');
+		echo json_encode(array("message" => validation_errors()));
+		return;
+
+	}
     
     public function login(){
         switch($this->input->server('REQUEST_METHOD')){
@@ -55,6 +110,262 @@ class Auth extends CI_Controller{
                 break;
         }
     }
+	
+	
+	public function edit_user($id)
+	{
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+				$post = json_decode(file_get_contents("php://input"), true);
+				$this->data['title'] = $this->lang->line('edit_user_heading');
+
+				if (!$this->ion_auth->logged_in() || (!$this->ion_auth->is_admin() && !($this->ion_auth->user()->row()->id == $id))) {
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode(array("message" => 'Unauthorized user'));
+					return;
+				}
+				$user = $this->ion_auth->user($id)->row();
+				$groups = $this->ion_auth->groups()->result_array();
+				$currentGroups = $this->ion_auth->get_users_groups($id)->result();
+				
+
+				// validate form input
+				$this->form_validation->set_error_delimiters('', '');
+				$this->form_validation->set_rules('first_name', $this->lang->line('edit_user_validation_fname_label'), 'trim|required');
+				$this->form_validation->set_rules('last_name', $this->lang->line('edit_user_validation_lname_label'), 'trim|required');
+				$this->form_validation->set_rules('phone', $this->lang->line('edit_user_validation_phone_label'), 'trim');
+				$this->form_validation->set_rules('company', $this->lang->line('edit_user_validation_company_label'), 'trim');
+				
+
+				if (isset($_POST) && !empty($_POST)) {
+					// update the password if it was posted
+					if ($this->input->post('password')) {
+						$this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[password_confirm]');
+						$this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
+					}
+
+					if ($this->form_validation->run() === TRUE) {
+						$data = [
+							'first_name' => $this->input->post('first_name'),
+							'last_name' => $this->input->post('last_name'),
+							'company' => $this->input->post('company'),
+							'phone' => $this->input->post('phone'),
+						];
+
+						// update the password if it was posted
+						if ($this->input->post('password')) {
+							$data['password'] = $this->input->post('password');
+						}
+
+						// Only allow updating groups if user is admin
+						if ($this->ion_auth->is_admin()) {
+							// Update the groups user belongs to
+							$this->ion_auth->remove_from_group('', $id);
+
+							$groupData = $this->input->post('groups');
+							if (isset($groupData) && !empty($groupData)) {
+								foreach ($groupData as $grp) {
+									$this->ion_auth->add_to_group($grp, $id);
+								}
+							}
+						}
+
+						// check to see if we are updating the user
+						if ($this->ion_auth->update($user->id, $data)) {
+							
+							header('content-type: application/json');
+							echo json_encode(array("message" =>  $this->ion_auth->messages()));
+							return;
+						} else {
+
+							$this->output->set_status_header('401');
+							header('content-type: application/json');
+							echo json_encode(array("message" => validation_errors()));
+							return;
+						}
+					}
+				}
+				
+
+				// display the edit user form
+				$this->data['csrf'] = $this->_get_csrf_nonce();
+
+				// set the flash data error message if there is one
+				$this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
+
+				// pass the user to the view
+				$this->data['user'] = $user;
+				$this->data['groups'] = $groups;
+				$this->data['currentGroups'] = $currentGroups;
+
+				$this->data['first_name'] = [
+					'name'  => 'first_name',
+					'id'    => 'first_name',
+					'type'  => 'text',
+					'value' => $this->form_validation->set_value('first_name', $user->first_name),
+				];
+				$this->data['last_name'] = [
+					'name'  => 'last_name',
+					'id'    => 'last_name',
+					'type'  => 'text',
+					'value' => $this->form_validation->set_value('last_name', $user->last_name),
+				];
+				$this->data['company'] = [
+					'name'  => 'company',
+					'id'    => 'company',
+					'type'  => 'text',
+					'value' => $this->form_validation->set_value('company', $user->company),
+				];
+				$this->data['phone'] = [
+					'name'  => 'phone',
+					'id'    => 'phone',
+					'type'  => 'text',
+					'value' => $this->form_validation->set_value('phone', $user->phone),
+				];
+				$this->data['password'] = [
+					'name' => 'password',
+					'id'   => 'password',
+					'type' => 'password'
+				];
+				$this->data['password_confirm'] = [
+					'name' => 'password_confirm',
+					'id'   => 'password_confirm',
+					'type' => 'password'
+				];
+				$this->output->set_status_header('401');
+				header('content-type: application/json');
+				echo json_encode(array("message" => validation_errors()));
+				return;
+		}
+
+	}
+    
+	public function create_user()
+	{
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+				$this->data['title'] = $this->lang->line('create_user_heading');
+
+				if (!$this->ion_auth->logged_in() || !$this->ion_auth->is_admin()) {
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode(array("message" => 'Unauthorized user'));
+					return;
+				}
+		
+		
+				// validate form input
+				$this->form_validation->set_error_delimiters('', '');
+				$this->form_validation->set_rules('first_name', $this->lang->line('create_user_validation_fname_label'), 'trim|required');
+				$this->form_validation->set_rules('last_name', $this->lang->line('create_user_validation_lname_label'), 'trim|required');
+				$this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'trim|required|valid_email|is_unique[users.email]');
+				$this->form_validation->set_rules('phone', $this->lang->line('create_user_validation_phone_label'), 'trim');
+				$this->form_validation->set_rules('company', $this->lang->line('create_user_validation_company_label'), 'trim');
+				$this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[password_confirm]');
+				$this->form_validation->set_rules('password_confirm', $this->lang->line('create_user_validation_password_confirm_label'), 'required');
+		
+				if ($this->form_validation->run() === TRUE) {
+					$email = strtolower($this->input->post('email'));
+					$password = $this->input->post('password');
+		
+					$additional_data = [
+						'first_name' => $this->input->post('first_name'),
+						'last_name' => $this->input->post('last_name'),
+						'company' => $this->input->post('company'),
+						'phone' => $this->input->post('phone'),
+					];
+				}
+				if ($this->form_validation->run() === TRUE && $this->ion_auth->register($email, $password, $email, $additional_data)) {
+					// check to see if we are creating the user
+					// redirect them back to the admin page
+					header('content-type: application/json');
+					echo json_encode(array("message" =>  $this->ion_auth->messages()));
+					redirect("auth", 'refresh');
+				} else {
+					// display the create user form
+					// set the flash data error message if there is one
+					$this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
+		
+					$this->data['first_name'] = [
+						'name' => 'first_name',
+						'id' => 'first_name',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('first_name'),
+					];
+					$this->data['last_name'] = [
+						'name' => 'last_name',
+						'id' => 'last_name',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('last_name'),
+					];
+					$this->data['identity'] = [
+						'name' => 'identity',
+						'id' => 'identity',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('identity'),
+					];
+					$this->data['email'] = [
+						'name' => 'email',
+						'id' => 'email',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('email'),
+					];
+					$this->data['company'] = [
+						'name' => 'company',
+						'id' => 'company',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('company'),
+					];
+					$this->data['phone'] = [
+						'name' => 'phone',
+						'id' => 'phone',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('phone'),
+					];
+					$this->data['password'] = [
+						'name' => 'password',
+						'id' => 'password',
+						'type' => 'password',
+						'value' => $this->form_validation->set_value('password'),
+					];
+					$this->data['password_confirm'] = [
+						'name' => 'password_confirm',
+						'id' => 'password_confirm',
+						'type' => 'password',
+						'value' => $this->form_validation->set_value('password_confirm'),
+					];
+		
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode(array("message" => validation_errors()));
+				}
+				return;
+			
+		}
+	}
+	
+	public function _get_csrf_nonce()
+	{
+		$this->load->helper('string');
+		$key = random_string('alnum', 8);
+		$value = random_string('alnum', 20);
+		$this->session->set_flashdata('csrfkey', $key);
+		$this->session->set_flashdata('csrfvalue', $value);
+
+		return [$key => $value];
+	}
+
+
+	public function _valid_csrf_nonce()
+	{
+		$csrfkey = $this->input->post($this->session->flashdata('csrfkey'));
+		if ($csrfkey && $csrfkey === $this->session->flashdata('csrfvalue')) {
+			return TRUE;
+		}
+		return FALSE;
+	}
+
     
 	public function logout()
 	{

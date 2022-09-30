@@ -5,6 +5,8 @@ header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
+date_default_timezone_set('Asia/Singapore');
+
 class Popclub extends CI_Controller {
 
 	public function __construct()
@@ -12,26 +14,68 @@ class Popclub extends CI_Controller {
 		parent::__construct();
 		$this->load->model('deals_model');
 	}
+	private function unable_redeems(){
+		$redeems = $this->deals_model->getUserRedeems();
+		$today = date("Y-m-d H:i:s");
+		
+		$unable_redeems = array();
+		$forfeit_array_counter_array = array();
+		
+		foreach($redeems as $redeem){
+			$expire = date($redeem->expiration);
+			$date_redeemed = date($redeem->date_redeemed);
 
-	public function delete_redeem(){
-		switch($this->input->server('REQUEST_METHOD')){
-			case 'POST':
-				$post = json_decode(file_get_contents("php://input"), true);
-				$deal_hash = $post['deal_hash'];
+			$is_the_same_day = date("Y-m-d H:i:s", strtotime('-1 day')) < $date_redeemed && 
+			date("Y-m-d H:i:s", strtotime('+1 day')) > $date_redeemed;
 
-				foreach($_SESSION['redeem_data'] as $key => $redeem_data){
-					if($deal_hash === $redeem_data['deal_hash']){
-						unset($_SESSION['redeem_data'][$key]);
-					}
+			if($is_the_same_day && ($redeem->status === 5 || ( $redeem->status == 1 && $today >= $expire) ) ){
+				if(!isset($forfeit_array_counter_array[$redeem->deal_id])){
+					$forfeit_array_counter_array[$redeem->deal_id] = 1;
+				}else{
+					$forfeit_array_counter_array[$redeem->deal_id]++;
 				}
+			}
+
+			if($is_the_same_day &&
+				($redeem->status == 6 || (isset($forfeit_array_counter_array[$redeem->deal_id]) && $forfeit_array_counter_array[$redeem->deal_id] >= 3)) 
+			){
+				$unable_redeems[] = array(
+					"deal_id" => $redeem->deal_id,
+					"next_available_redeem" => date('Y-m-d H:i:s', strtotime("+1 day", strtotime($date_redeemed)))
+				);
+			} 
+		}
+
+		return $unable_redeems;
+	}
+
+	public function redeem_validators(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+
+				$unable_redeems = $this->unable_redeems();
+
+				if(!empty($unable_redeems)){
+					
+					$response = array(
+						"message" => "You can't redeem this code ",
+						"data" => $unable_redeems,
+					);
+					header('content-type: application/json');
+					echo json_encode($response);
+					return;
+
+				}
+					
 
 				$response = array(
-					'message' => 'Successfully delete redeem',
+					'message' => 'Successfully fetch redeems',
 				);
 			
 				header('content-type: application/json');
 				echo json_encode($response);
-				break;
+				return;
+
 		}
 	}
 
@@ -52,8 +96,6 @@ class Popclub extends CI_Controller {
 	public function redeem(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-				date_default_timezone_set('Asia/Singapore');
-				$platform_selected = isset($_SESSION['popclub_data']) ? $_SESSION['popclub_data']['platform'] : false;
 				$deal_id = $this->input->get('deal_id');
 				$redeems = $this->deals_model->get_redeem($deal_id);
 				$latest_not_expired_redeem = null;
@@ -61,20 +103,6 @@ class Popclub extends CI_Controller {
 
 				foreach($redeems as $redeem){
 					$expire = date($redeem->expiration);
-
-					/** 1 minute cool down */
-					// if($today > $expire && date("Y-m-d H:i:s") < date("Y-m-d H:i:s", strtotime('+60 seconds', strtotime($expire))) && $redeem->status == 1 && $platform_selected == $redeem->platform_name){
-
-					// 	$response = array(
-					// 		'message' => 'You redeem a deal for ',
-					// 		"redeem_cooldown" => date("Y-m-d H:i:s", strtotime('+60 seconds', strtotime($expire))) 
-					// 	);
-					
-					// 	header('content-type: application/json');
-					// 	echo json_encode($response);
-					// 	return;
-					// }
-
 
 					if($today < $expire && $redeem->status == 1){	
 						$latest_not_expired_redeem = $redeem;
@@ -103,7 +131,7 @@ class Popclub extends CI_Controller {
 						if(isset($_SESSION['deals'])){
 							$exist = true;
 							foreach($_SESSION['deals'] as $key => $value){
-								if($value['redeem_code'] == $redeem->redeem_code){
+								if($value['id'] == $redeem->id){
 									$exist = false;
 									break;
 								}
@@ -162,13 +190,13 @@ class Popclub extends CI_Controller {
 					}else{
 
 						if(isset($_SESSION['redeem_data'])){
-							if($_SESSION['redeem_data']['redeem_code'] === $redeem->redeem_code){
+							if($_SESSION['redeem_data']['id'] === $redeem->id){
 								unset($_SESSION['redeem_data']);
 							}
 						}
 						if(isset($_SESSION['deals'])){
 							foreach($_SESSION['deals'] as $key => $value){
-								if($value['redeem_code'] === $redeem->redeem_code){
+								if($value['id'] === $redeem->id){
 									unset($_SESSION['deals'][$key]);
 									$reindexed_array = array_values($_SESSION['deals']);
 									$this->session->set_userdata('deals', $reindexed_array);
@@ -186,13 +214,43 @@ class Popclub extends CI_Controller {
 				header('content-type: application/json');
 				echo json_encode($response);
 				break;
+			case 'DELETE':
+					if(!isset($_SESSION['redeem_data'])){
+						$this->output->set_status_header(401);
+						echo json_encode(array('message'=>'No redeem found'));
+						return;
+					}
+				
+					$reedem_id = $_SESSION['redeem_data']['id'];
+					
+					if(isset($_SESSION['deals'])){
+						foreach($_SESSION['deals'] as $key => $value){
+							if($value['id'] === $reedem_id){
+								unset($_SESSION['deals'][$key]);
+								$reindexed_array = array_values($_SESSION['deals']);
+								$this->session->set_userdata('deals', $reindexed_array);
+							}
+						}
+					}
+					
+					$this->deals_model->forfeit_redeem_deal($reedem_id);
+					unset($_SESSION['redeem_data']);
+					
+					
+					$response = array(
+						'message' => 'Redeem deal forfeited',
+					);
+				
+					header('content-type: application/json');
+					echo json_encode($response);
+					return;
+					
 		}
 	}
 
 	public function redeem_deal(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
-				date_default_timezone_set('Asia/Singapore');
 
 				if(
 					(!isset($_SESSION['cache_data']) && 
@@ -244,9 +302,10 @@ class Popclub extends CI_Controller {
 						$order_data[] = array(
 							'redeems_id'  => $query_transaction_result->id,
 							'deal_id'         => $deal->id,
-							'price'			  => $deal->original_price,
+							'price'			  => $deal->promo_price,
 							'quantity'	      => 1,
 							'status'	      => 0,
+							'remarks'		  => $post['remarks'] === NULL? '' : $post['remarks'],
 						);
 					}
 		
@@ -340,13 +399,55 @@ class Popclub extends CI_Controller {
 		$store_id = $this->session->cache_data['store_id'];
 
 		if($platform == 'store-visit'){
-			$deals = $this->deals_model->getDeals($platform,$category, true);
+			$deals = $this->deals_model->getDeals($platform,$category, true, $store_id);
 		}else{
 			$deals = $this->deals_model->getDeals($platform,$category, true, $store_id);
 		}
+
+		$current_datetime = date("Y-m-d H:i:s");
+		$not_available_deals = array();
+		$available_deals = array();
+		$day_of_the_week = date('l');
+
+		$unable_redeems = $this->unable_redeems();
+
+		foreach($deals as $deal){
+			if(!empty($unable_redeems)){
+				$is_contain = false;
+				foreach($unable_redeems as $unable_redeem){
+					if($unable_redeem['deal_id'] === $deal->id){
+						$is_contain = true;
+						break;
+					}
+				}
+				if($is_contain){
+					$not_available_deals[] = $deal;
+					continue;
+				}
+			}
+
+			if(isset($deal->available_start_time) && isset($deal->available_end_time)){
+				$available_start_time = date("Y-m-d H:i:s", strtotime($deal->available_start_time));
+				$available_end_time = date("Y-m-d H:i:s", strtotime($deal->available_end_time));
+
+				if($current_datetime > $available_end_time || $available_start_time > $current_datetime){
+					$not_available_deals[] = $deal;
+				}else{
+					$available_deals[] = $deal;
+				}
+			}else if(isset($deal->available_days)){
+				if(str_contains($deal->available_days, $day_of_the_week)){
+					$available_deals[] = $deal;
+				}else{
+					$not_available_deals[] = $deal;
+				}
+			}else{
+				$available_deals[] = $deal;
+			}
+		}
 		
 		$response = array(
-			'data' => $deals,
+			'data' => array_merge($available_deals,$not_available_deals),
 			'message' => 'Successfully fetch deals'
 		);
 		

@@ -1,7 +1,139 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
+/*
+  1 - New
+  4 - Declined
+  5 - Forfeited
+  6 - Completed
+*/
+
 class Deals_model extends CI_Model 
 {
+	
+	public function getUserRedeems(){
+		if(!isset($_SESSION['userData'])){
+			return[];
+		}
+
+		if(isset($_SESSION['userData']['oauth_uid'])){
+			$fb_user_id = $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']);
+			$this->db->select('id');
+			$this->db->from('deals_client_tb');
+			$this->db->where('fb_user_id', $fb_user_id);
+		}else if (isset($_SESSION['userData']['mobile_user_id'])){
+			$mobile_user_id = $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']);
+			$this->db->select('id');
+			$this->db->from('deals_client_tb');
+			$this->db->where('mobile_user_id', $mobile_user_id);
+		}
+
+		$clients_query = $this->db->get();
+		$clients = $clients_query->result();
+
+		$deals_redeems = array();
+
+		foreach($clients as $client){
+			$this->db->select('
+				A.id,
+				A.deal_id,
+				A.redeem_code,
+				A.expiration,
+				A.dateadded AS date_redeemed,
+				A.status,
+				A.remarks,
+				A.platform_id,
+				B.name,
+				B.hash AS deal_hash,
+				B.product_image,
+				B.description,
+				B.original_price,
+				B.minimum_purchase,
+				B.promo_price,
+			');
+
+			$this->db->from('deals_redeems_tb A');
+			$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+			$this->db->where('A.client_id', $client->id);
+
+			$redeems_query = $this->db->get();
+			$result =  $redeems_query->result();
+			if(!empty($result)){
+				$deals_redeems = array_merge($deals_redeems,$result);
+			}
+		}
+
+
+		return $deals_redeems;
+	}
+	
+    public function getUserPopclubRedeemHistoryCount($type, $id, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('deals_redeems_tb A');
+        $this->db->join('deals_client_tb B', 'A.client_id = B.id' ,'left');
+        
+        if ($type == 'mobile') {
+            $this->db->where('B.mobile_user_id', $id);
+        } else if($type == 'facebook') {
+            $this->db->where('B.fb_user_id', $id);
+        }
+
+            
+        if($search){
+            $this->db->like('A.redeem_code', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getUserPopclubRedeemHistory($type, $id, $row_no, $row_per_page, $order_by,  $order, $search){
+
+        $this->db->select('
+			A.status,
+            A.dateadded,
+            A.redeem_code,
+			A.expiration,
+            A.purchase_amount,
+            A.hash_key,
+        ');
+
+        $this->db->from('deals_redeems_tb A');
+        $this->db->join('deals_client_tb B', 'B.id = A.client_id' ,'left');
+
+        if ($type == 'mobile') {
+            $this->db->where('B.mobile_user_id', $id);
+        } else if($type == 'facebook') {
+            $this->db->where('B.fb_user_id', $id);
+        }
+
+        $this->db->order_by('A.dateadded','DESC');
+        
+        if($search){
+            $this->db->like('A.redeem_code', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('B.lname', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+        }
+            
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+	public function forfeit_redeem_deal($id){
+        $this->db->set('status',5);
+        $this->db->where('id', $id);
+        $this->db->update('deals_redeems_tb');
+        $this->db->trans_complete();
+	}
+
 	public function complete_redeem_deal($id){
         $this->db->set('status',6);
         $this->db->where('id', $id);
@@ -69,18 +201,14 @@ class Deals_model extends CI_Model
 		return $deals_redeems;
 	}
 
-  	//inset order data
-	public function insert_client_orders($data)
-	{
+	public function insert_client_orders($data){
 		$this->db->trans_start();
 		$this->db->insert_batch('deals_order_items', $data);
 		$this->db->trans_complete();
 		return  $this->db->trans_status();
 	}
 
-	//insert transaction data
-	public function insert_redeem_transaction($data)
-	{   
+	public function insert_redeem_transaction($data){   
 		$this->db->trans_start();
 		$this->db->insert('deals_redeems_tb', $data);
 		$insert_id = $this->db->insert_id();
@@ -90,7 +218,6 @@ class Deals_model extends CI_Model
 		return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
 	}
   
-	//get client id
 	public function get_facebook_client_id($oauth_id){
 	  $this->db->select('id');
 	  $this->db->where('oauth_uid', $oauth_id);
@@ -99,7 +226,6 @@ class Deals_model extends CI_Model
 	  return $data[0]['id'];
 	}
 
-	//insert client 
 	public function insert_client_details(){
 	  if (isset($_SESSION['userData']['oauth_uid'])) {
 		$this->db->trans_start();
@@ -158,6 +284,7 @@ class Deals_model extends CI_Model
 		  $this->db->select('
 			A.id,
 			A.name,
+			A.alias,
 			A.product_image,
 			A.original_price,
 			A.promo_price,

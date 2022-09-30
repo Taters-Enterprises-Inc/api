@@ -29,8 +29,37 @@ class Shop_model extends CI_Model
         $query_logon_type = $this->db->get();
         return $query_logon_type->row();
     }
+    
+    public function getUserOrderHistoryCount($type, $id, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('transaction_tb A');
+        $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
+        $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
+        $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
+        
+        if ($type == 'mobile') {
+            $this->db->where('B.mobile_user_id', $id);
+        } else if($type == 'facebook') {
+            $this->db->where('B.fb_user_id', $id);
+        }
 
-    public function get_user_order_history($id,$type){
+            
+        if($search){
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like('A.invoice_num', $search);
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getUserOrderHistory($type, $id, $row_no, $row_per_page, $order_by,  $order, $search){
+
         $this->db->select('
             A.dateadded,
             A.tracking_no,
@@ -41,17 +70,30 @@ class Shop_model extends CI_Model
             C.application_status,
             A.hash_key,
         ');
+
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
-        // $this->db->join('raffle_coupon_code_tb D', 'A.raffle_coupon_code = D.raffle_coupon_code' ,'left');
+
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
         }
+
         $this->db->order_by('A.dateadded','DESC');
+        
+        if($search){
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+        }
+            
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
         $query = $this->db->get();
         return $query->result();
     }
@@ -93,7 +135,7 @@ class Shop_model extends CI_Model
         $this->db->select('hash_key');
         $this->db->from('transaction_tb');
         $this->db->where('hash_key', $hash_key);
-        $this->db->where('status !=', 4);
+        // $this->db->where('status !=', 4);
         // $this->db->where('status !=', 6);
         $check_hash = $this->db->get();
         $result = $check_hash->result();
