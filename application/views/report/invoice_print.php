@@ -1,8 +1,8 @@
 <!-- <?php 
-  //echo '<pre>';
-  //print_r($info);
-  //exit();
-?> --> 
+  // echo '<pre>';
+  // print_r($info);
+  // exit();
+?>  -->
 
 <!DOCTYPE html>
 <html>
@@ -204,7 +204,7 @@
               <?php //if($info->moh == 2) { ?>
                 <tr>
                   <th colspan="5" style="text-align:left;"><span >Total:</span></th>
-                  <td style="text-align: right;"><span>₱</span><span style="padding-left: 70%;"><?php echo number_format($info->purchase_amount,2);?></span></td>
+                  <td style="text-align: right;"><span>₱</span><span style="padding-left: 30%; padding-right: 80%;"><?php echo number_format($info->purchase_amount,2);?></span></td>
                 </tr>
                 <?php if($info->reseller_id == 0){ ?>
                   <?php 
@@ -217,22 +217,22 @@
                   ?>
                   <tr>
                     <th colspan="5" style="text-align:left;"><span >Voucher Discount:</span></th>
-                    <td style="text-align: right;"><span>₱</span><span style="padding-left: 70%;"><?php echo number_format($vdata,2);?></span></td>
+                    <td style="text-align: right;"><span>₱</span><span style="padding-left: 30%; padding-right: 80%;"><?php echo number_format($vdata,2);?></span></td>
                   </tr>
                   <tr>  
                     <th colspan="5" style="text-align:left;"><span >SubTotal:</span></th>
-                    <td style="text-align: right;"><span>₱</span><span style="padding-left: 70%;"><?php echo number_format($info->purchase_amount - $vdata ,2);?></span></td>
+                    <td style="text-align: right;"><span>₱</span><span style="padding-left: 30%; padding-right: 80%;"><?php echo number_format($info->purchase_amount - $vdata ,2);?></span></td>
                   </tr>
                   <?php if($info->moh == 2 && $info->cod_fee != 0){ ?>
                     <tr>  
                       <th colspan="5" style="text-align:left;"><span >COD Additional Charges:</span></th>
-                      <td style="text-align: right;"><span>₱</span><span style="padding-left: 70%;"><?php echo number_format($info->cod_fee,2);?></span></td>
+                      <td style="text-align: right;"><span>₱</span><span style="padding-left: 30%; padding-right: 80%;"><?php echo number_format($info->cod_fee,2);?></span></td>
                     </tr>
                   <?php } ?>
                   <tr>
                     <th colspan="5" style="text-align:left;"><span >Delivery Fee:</span></th>
                     <?php $distance_fee = (isset($info->distance_price) && $info->moh == 2) ? $info->distance_price : 0; ?>
-                    <td style="text-align: right;"><span>₱</span><span style="padding-left: 70%;"><?php echo number_format($distance_fee,2);?></span></td>
+                    <td style="text-align: right;"><span>₱</span><span style="padding-left: 30%; padding-right: 80%;"><?php echo number_format($distance_fee,2);?></span></td>
                 <?php }else{ ?>
                   <?php 
                     $vdata2 = $info->reseller_discount;
@@ -249,7 +249,7 @@
               <?php if($info->reseller_id == 0){ ?>
                 <tr>
                   <th colspan="5" style="text-align:left;"><span >Grand Total:</span></th>
-                  <td style="text-align: right;"><span>₱</span><span style="padding-left: 70%;"><?php echo number_format(($info->purchase_amount + $distance_fee + $info->cod_fee) - $vdata,2);?></span></td>
+                  <td style="text-align: right;"><span>₱</span><span style="padding-left: 30%; padding-right: 80%;"><?php echo number_format(($info->purchase_amount + $distance_fee + $info->cod_fee) - $vdata,2);?></span></td>
                 </tr>
               <?php } else { ?>
                 <tr>

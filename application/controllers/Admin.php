@@ -705,14 +705,29 @@ class Admin extends CI_Controller
     }
   }
   
-  public function print_asdoc($id)
+  public function print_asdoc($id, $isCatering)
   {
-    $query_result = $this->admin_model->get_order_summary($id);
-    $data['info'] = $query_result['clients_info'];
-    $data['orders'] = $query_result['order_details'];
 
-    /** Downlaod as word-doc */
-    $print = $this->load->view('/report/invoice_print', $data, TRUE);
+    if($isCatering == "true"){
+      $query_result = $this->admin_model->getCateringBooking($id);
+      $query_result->items = $this->admin_model->getCateringBookingItems($query_result->id);
+  
+      $data['info'] = $query_result;  
+      $data['orders'] =  $query_result->items;
+
+      $print = $this->load->view('/report/catering_invoice_print', $data, TRUE);
+
+
+    }else{
+      $query_result = $this->admin_model->get_order_summary($id);
+      $data['info'] = $query_result['clients_info'];
+      $data['orders'] = $query_result['order_details'];
+  
+      /** Downlaod as word-doc */
+      $print = $this->load->view('/report/invoice_print', $data, TRUE);
+
+
+    }
 
     header("Content-Type: application/vnd.ms-word");
     header("Expires: 0");
@@ -722,13 +737,28 @@ class Admin extends CI_Controller
     echo $print;
   }
   
-  public function print_view($id)
+  public function print_view($id, $isCatering)
   {
+    if($isCatering == "true"){
+    $query_result = $this->admin_model->getCateringBooking($id);
+    $query_result->items = $this->admin_model->getCateringBookingItems($query_result->id);
+
+    $data['info'] = $query_result;  
+    $data['orders'] =  $query_result->items;
+
+    return $this->load->view('/report/catering_invoice_print', $data);
+
+  }else {
     $query_result = $this->admin_model->get_order_summary($id);
     $data['info'] = $query_result['clients_info'];
     $data['orders'] = $query_result['order_details'];
 
-    $this->load->view('/report/invoice_print', $data);
+    return $this->load->view('/report/invoice_print', $data);
+  }
+
+
+
+   
   }
 
 }
