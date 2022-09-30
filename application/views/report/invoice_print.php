@@ -37,7 +37,7 @@
     }
   </style>
 </head>
-<body onload="window.print();">
+<body onload="window.print()">
 <div class="wrapper">
   <!-- Main content -->
   <section class="invoice">
@@ -142,15 +142,21 @@
             <tbody>
             <?php $ctr = 1; $total_val=0;?>
             <?php foreach ($orders as $key => $value): ?>
-                    <?php $price = ($value->promo_id == 0) ? $value->product_price : $value->promo_price;?>
+                    <?php $price = ( isset($value->promo_id ) && $value->promo_id == 0) ? $value->product_price : (isset($value->promo_id)  ?  $value->promo_price : $value->product_price);?>
                     <?php $row_sum = $price * $value->quantity;?>
-                    <?php if($value->promo_id != 0){$have_promo=1;}?>
+                    <?php if( isset($value->promo_id ) && $value->promo_id != 0){$have_promo=1;}?>
                     <tr>
                       <td style="text-align: center;"><?php echo $ctr;?></td>
                       <td>
-                        <?php if($value->product_label == ""): ?>
-                          <?php echo $value->name;?><br><span class="text-xs text-secondary"><?php echo $value->add_details;?></span>
-                            <?php if($value->addon_base_product != null):?>
+                        <?php if(!isset($value->product_label)): ?>
+                          <?php if(isset($value->alias)):?>
+                            <span span class="text-xs text-secondary"><?php echo $value->alias;?></span><br>
+                          <?php endif;?>
+                          <?php echo $value->name;?><br>
+                          <?php if(isset($value->add_details)):?>
+                            <span span class="text-xs text-secondary"><?php echo $value->add_details;?></span>
+                          <?php endif;?>
+                            <?php if(isset($value->addon_base_product)):?>
                               <br>
                               <b>Add-on for:</b>
                               <?php echo $value->addon_base_product_name;?>
@@ -171,7 +177,10 @@
                               <b>FREE</b>
                             <?php endif;?>
                         <?php endif; ?>
-                        <?php echo ($value->promo_id == 0) ? '' : '<span class="badge badge-pill badge-warning">Promo Item</span>';?>
+                        
+                        <?php if(isset($value->promo_id)): ?>
+                          <?php echo ($value->promo_id == 0) ? '' : '<span class="badge badge-pill badge-warning">Promo Item</span>';?>
+                        <?php endif;?>
                       </td>
                       <?php
                         $selected_flavors = json_decode($value->remarks);
@@ -191,8 +200,11 @@
                       <td style="text-align: center;"><?php echo $flavors;?></td>
                       <td style="text-align: center;"><?php echo $value->quantity;?></td>
                       <td style="text-align: right;">
-                        <?php echo ($value->promo_id == 0) ? '' : '<s class="text-success">'.number_format($value->price,2).'</s><br>';?>
-                        <?php echo  number_format($price,2);?>
+                        <?php if(isset($value->promo_id)):?>
+                          <?php echo ( $value->promo_id == 0) ? '' : '<s class="text-success">'.number_format($value->price,2).'</s><br>';?>
+                        <?php else:?>
+                          <?php echo  number_format($price,2);?>
+                        <?php endif;?>
                       </td>
                       <td style="text-align: right;"><?php echo number_format($row_sum,2);?></td>
                     </tr>
