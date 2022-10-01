@@ -127,7 +127,7 @@ class Cart extends CI_Controller {
                 echo json_encode($response);
             
             break;
-            case 'DELETE':
+            case "DELETE":
 				    $item_index = $this->input->get('item-index');
                     
                     if(isset($_SESSION['orders'])){
