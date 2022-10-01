@@ -739,6 +739,7 @@ class Admin_model extends CI_Model
             A.message,
             A.event_class,
             A.company_name,
+            A.remarks,
 
             A.purchase_amount,
             A.service_fee,
@@ -757,8 +758,6 @@ class Admin_model extends CI_Model
             A.final_payment,
             A.final_payment_proof,
             
-
-            
             A.reference_num,
             A.store,
 
@@ -766,12 +765,19 @@ class Admin_model extends CI_Model
             B.mobile_user_id,
 
             B.add_name as client_name,
+            B.fname,
+            B.lname,
             B.add_address,
             B.payops,
             B.email,
             B.add_contact,
             B.contact_number,
-            C.name as store_name
+
+            C.name as store_name,
+            C.address as store_address,
+            C.contact_person as store_person,
+            C.contact_number as store_contact,
+            C.email as store_email
         ");
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'B.id = A.client_id');
@@ -779,9 +785,14 @@ class Admin_model extends CI_Model
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();
+
+        // $queryData['info'] = $query->result();
+        
         return $query->row();
     }
-    
+
+
+
     public function getCateringBookingsCount($status, $search, $store){
         $this->db->select('count(*) as all_count');
             
