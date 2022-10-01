@@ -539,6 +539,7 @@ class Admin_model extends CI_Model
             A.quantity,
             A.remarks,
             B.alias,
+            B.description
         ");
         $this->db->from('deals_order_items A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
