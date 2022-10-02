@@ -50,9 +50,16 @@ class Admin extends CI_Controller
         if($page_no != 0){
           $page_no = ($page_no - 1) * $per_page;
         }
+        
+        $store_id_array = array();
+        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)) {
+          $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+          foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+        }
+        
 
-        $stores_count = $this->admin_model->getSettingStoresCount($search);
-        $stores = $this->admin_model->getSettingStores($page_no, $per_page, $order_by, $order, $search);
+        $stores_count = $this->admin_model->getSettingStoresCount($search, $store_id_array);
+        $stores = $this->admin_model->getSettingStores($page_no, $per_page, $order_by, $order, $search, $store_id_array);
         
         $pagination = array(
           "total_rows" => $stores_count,

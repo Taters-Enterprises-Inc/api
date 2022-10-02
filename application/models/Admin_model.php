@@ -17,12 +17,15 @@ class Admin_model extends CI_Model
             case 'popclub_online_delivery_status':
                 $this->db->set('popclub_online_delivery_status', $status);
                 break;
+            case 'branch_status':
+                $this->db->set('branch_status', $status);
+                break;
         }
         $this->db->where("store_id", $store_id);
         $this->db->update("store_tb");
     }
     
-    function getSettingStoresCount($search) {
+    function getSettingStoresCount($search, $store) {
         $this->db->select('count(*) as all_count');
 
         $this->db->from('store_tb A');
@@ -34,11 +37,14 @@ class Admin_model extends CI_Model
         }
             
             
+        if(!empty($store))
+            $this->db->where_in('A.store_id', $store);
+            
         $query = $this->db->get();
         return $query->row()->all_count;
     }
 
-    function getSettingStores($row_no, $row_per_page, $order_by, $order, $search) {
+    function getSettingStores($row_no, $row_per_page, $order_by, $order, $search, $store) {
         $this->db->select('
             A.store_id,
             A.name,
@@ -46,6 +52,9 @@ class Admin_model extends CI_Model
             A.catering_status,
             A.popclub_walk_in_status,
             A.popclub_online_delivery_status,
+            A.branch_status,
+            A.available_start_time,
+            A.available_end_time,
             B.name as menu_name,
         ');
 
@@ -57,6 +66,8 @@ class Admin_model extends CI_Model
             $this->db->or_like('B.name', $search);
         }
             
+        if(!empty($store))
+            $this->db->where_in('A.store_id', $store);
 
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
