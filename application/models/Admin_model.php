@@ -183,8 +183,9 @@ class Admin_model extends CI_Model
 
         $this->db->where('B.status', 1);
         $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
 
-        if($category_id) $this->db->where('C.id', $category_id);
+        if($category_id !== "6") $this->db->where('C.id', $category_id);
         
         if($status)
             $this->db->where('A.status', $status);
