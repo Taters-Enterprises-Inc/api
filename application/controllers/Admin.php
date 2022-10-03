@@ -21,8 +21,47 @@ class Admin extends CI_Controller
 		$this->load->model('user_model');
 	}
 
+  public function store_operating_hours(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'PUT':
+        $put = json_decode(file_get_contents("php://input"), true);
+        $store_id = $put['store_id'];
+        $available_start_time =  $put['available_start_time'];
+        $available_end_time =  $put['available_end_time'];
+
+        $this->admin_model->updateSettingStoreOperatingHours(
+          $store_id,
+          $available_start_time,
+          $available_end_time,
+        );
+
+        $response = array(
+          "message" => 'Successfully update operating hours',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+
+  }
+
   public function store(){
     switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $store_id = $this->input->get('store_id');
+        
+        $store = $this->admin_model->getStore($store_id);
+
+        $response = array(
+          "data" => $store,
+          "message" => 'Successfully update status',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
       case 'PUT':
         $put = json_decode(file_get_contents("php://input"), true);
 

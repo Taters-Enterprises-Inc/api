@@ -88,6 +88,7 @@ $route['auth/create-group'] = 'auth/create_group';
 //Admin
 $route['admin/stores'] = 'admin/stores';
 $route['admin/store'] = 'admin/store';
+$route['admin/store-operating-hours'] = 'admin/store_operating_hours';
 $route['admin/session'] = 'admin/session';
 $route['admin/payment'] = 'admin/payment';
 $route['admin/reference-num'] = 'admin/reference_num';

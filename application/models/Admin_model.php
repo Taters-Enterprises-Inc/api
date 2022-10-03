@@ -3,6 +3,34 @@
 class Admin_model extends CI_Model 
 {
     
+    function updateSettingStoreOperatingHours(
+        $store_id,
+        $available_start_time,
+        $available_end_time
+    ){
+        $this->db->set('available_start_time', $available_start_time);
+        $this->db->set('available_end_time', $available_end_time);
+        $this->db->where("store_id", $store_id);
+        $this->db->update("store_tb");
+    }
+
+    function getStore($store_id){
+        $this->db->select('
+            A.store_id,
+            A.name,
+            A.available_start_time,
+            A.available_end_time,
+            B.name as menu_name,
+        ');
+
+        $this->db->from('store_tb A');
+        $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
+        $this->db->where('A.store_id', $store_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+    
     function updateSettingStore($store_id, $name_of_field_status, $status){
         switch($name_of_field_status){
             case 'status':
