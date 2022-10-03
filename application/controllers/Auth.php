@@ -19,6 +19,7 @@ class Auth extends CI_Controller{
 
         $this->form_validation->set_error_delimiters('', '');
         $this->ion_auth->set_message_delimiters('', '');
+        $this->ion_auth->set_error_delimiters('', '');
 
         $this->lang->load('auth');
     }
