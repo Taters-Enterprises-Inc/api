@@ -91,7 +91,7 @@ class Admin extends CI_Controller
         }
         
         $store_id_array = array();
-        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)) {
+        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
           $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
           foreach ($store_id as $value) $store_id_array[] = $value->store_id;
         }
@@ -532,7 +532,7 @@ class Admin extends CI_Controller
         }
 
         $store_id_array = array();
-        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)) {
+        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
           $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
           foreach ($store_id as $value) $store_id_array[] = $value->store_id;
         }
@@ -603,7 +603,7 @@ class Admin extends CI_Controller
         }
 
         $store_id_array = array();
-        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)) {
+        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
           $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
           foreach ($store_id as $value) $store_id_array[] = $value->store_id;
         }
@@ -693,7 +693,7 @@ class Admin extends CI_Controller
         }
         
         $store_id_array = array();
-        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)) {
+        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
           $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
           foreach ($store_id as $value) $store_id_array[] = $value->store_id;
         }
