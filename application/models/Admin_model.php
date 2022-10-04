@@ -628,6 +628,7 @@ class Admin_model extends CI_Model
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
         }
 
         if($status)
@@ -662,6 +663,7 @@ class Admin_model extends CI_Model
             $this->db->or_like('B.add_name', $search);
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
         }
             
         if($status)
@@ -848,6 +850,7 @@ class Admin_model extends CI_Model
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
         }
         
         if($status)
@@ -895,6 +898,7 @@ class Admin_model extends CI_Model
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
         }
         
         if($status)
@@ -948,6 +952,7 @@ class Admin_model extends CI_Model
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
         }
 
         if($status)
@@ -976,6 +981,7 @@ class Admin_model extends CI_Model
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
         }
 
         if($status)
