@@ -118,7 +118,7 @@ class Store_model extends CI_Model
 				break;
 		}
 		
-			
+		$this->db->order_by('locale', 'ASC');
 		$this->db->order_by('distance', 'ASC');
 		$query = $this->db->get();  
 		$query_data = $query->result();
