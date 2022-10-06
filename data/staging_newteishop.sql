@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 06, 2022 at 05:03 AM
+-- Generation Time: Oct 06, 2022 at 11:38 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -7307,7 +7307,7 @@ CREATE TABLE `mobile_users` (
 --
 
 CREATE TABLE `mobile_user_contact` (
-  `id` int(11) DEFAULT NULL,
+  `id` int(11) NOT NULL,
   `mobile_id` int(11) NOT NULL,
   `contact` varchar(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -33234,6 +33234,12 @@ ALTER TABLE `mobile_users`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `mobile_user_contact`
+--
+ALTER TABLE `mobile_user_contact`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `municipality_tb`
 --
 ALTER TABLE `municipality_tb`
@@ -33934,6 +33940,12 @@ ALTER TABLE `login_attempts`
 -- AUTO_INCREMENT for table `mobile_users`
 --
 ALTER TABLE `mobile_users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `mobile_user_contact`
+--
+ALTER TABLE `mobile_user_contact`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
