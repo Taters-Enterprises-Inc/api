@@ -1,6 +1,5 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
 //Shop
 $route['shop/product'] = 'shop/product';
 $route['shop/products'] = 'shop/products';
@@ -116,6 +115,10 @@ $route['admin/users'] = 'admin/users';
 $route['admin/user/(:any)'] = 'admin/user/$1';
 $route['admin/groups'] = 'admin/groups';
 $route['admin/setting/stores'] = 'admin/setting_stores';
+
+//extract csv
+$route['admin/export_csv'] = 'admin/export_csv';
+
 
 //Others
 $route['404_override'] = '';

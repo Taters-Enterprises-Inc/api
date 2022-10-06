@@ -731,4 +731,40 @@ class Admin extends CI_Controller
     $this->load->view('/report/invoice_print', $data);
   }
 
+  public function export_csv(){
+    $filename = 'users_'.date('Ymd').'.csv'; 
+    header("Content-Description: File Transfer"); 
+    header("Content-Disposition: attachment; filename=$filename"); 
+    header("Content-Type: application/csv; ");
+    $pages_array=[
+      [
+          "Username" => "James1",
+          "Name" => "James1",
+          "Gender" => "James1",
+          "Email" => "James1"
+        ],
+        [
+          "Username" => "James2",
+          "Name" => "James2",
+          "Gender" => "James2",
+          "Email" => "James2"
+          ]
+        ];
+        
+        
+        $file = fopen('php://output', 'w');
+        $header = array("Username","Name","Gender","Email"); 
+        fputcsv($file, $header);
+        
+    foreach ($pages_array as $key=>$line){ 
+      fputcsv($file,$line); 
+    }
+    fclose($file); 
+     exit; 
+   
+    
+  }
+
+
 }
+

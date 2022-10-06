@@ -203,6 +203,7 @@ class Shared extends CI_Controller {
 					"cash_delivery"						=> $this->session->cash_delivery,
 				);
 		
+				
 				$response = array(
 					'message' => 'Successfully fetch session',
 					'data' => $data,
