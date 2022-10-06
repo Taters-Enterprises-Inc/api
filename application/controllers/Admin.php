@@ -21,8 +21,47 @@ class Admin extends CI_Controller
 		$this->load->model('user_model');
 	}
 
+  public function store_operating_hours(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'PUT':
+        $put = json_decode(file_get_contents("php://input"), true);
+        $store_id = $put['store_id'];
+        $available_start_time =  $put['available_start_time'];
+        $available_end_time =  $put['available_end_time'];
+
+        $this->admin_model->updateSettingStoreOperatingHours(
+          $store_id,
+          $available_start_time,
+          $available_end_time,
+        );
+
+        $response = array(
+          "message" => 'Successfully update operating hours',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+
+  }
+
   public function store(){
     switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $store_id = $this->input->get('store_id');
+        
+        $store = $this->admin_model->getStore($store_id);
+
+        $response = array(
+          "data" => $store,
+          "message" => 'Successfully update status',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
       case 'PUT':
         $put = json_decode(file_get_contents("php://input"), true);
 
@@ -50,9 +89,16 @@ class Admin extends CI_Controller
         if($page_no != 0){
           $page_no = ($page_no - 1) * $per_page;
         }
+        
+        $store_id_array = array();
+        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
+          $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+          foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+        }
+        
 
-        $stores_count = $this->admin_model->getSettingStoresCount($search);
-        $stores = $this->admin_model->getSettingStores($page_no, $per_page, $order_by, $order, $search);
+        $stores_count = $this->admin_model->getSettingStoresCount($search, $store_id_array);
+        $stores = $this->admin_model->getSettingStores($page_no, $per_page, $order_by, $order, $search, $store_id_array);
         
         $pagination = array(
           "total_rows" => $stores_count,
@@ -486,7 +532,7 @@ class Admin extends CI_Controller
         }
 
         $store_id_array = array();
-        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)) {
+        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
           $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
           foreach ($store_id as $value) $store_id_array[] = $value->store_id;
         }
@@ -557,7 +603,7 @@ class Admin extends CI_Controller
         }
 
         $store_id_array = array();
-        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)) {
+        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
           $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
           foreach ($store_id as $value) $store_id_array[] = $value->store_id;
         }
@@ -647,7 +693,7 @@ class Admin extends CI_Controller
         }
         
         $store_id_array = array();
-        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)) {
+        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
           $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
           foreach ($store_id as $value) $store_id_array[] = $value->store_id;
         }
@@ -705,14 +751,29 @@ class Admin extends CI_Controller
     }
   }
   
-  public function print_asdoc($id)
+  public function print_asdoc($id, $isCatering)
   {
-    $query_result = $this->admin_model->get_order_summary($id);
-    $data['info'] = $query_result['clients_info'];
-    $data['orders'] = $query_result['order_details'];
 
-    /** Downlaod as word-doc */
-    $print = $this->load->view('/report/invoice_print', $data, TRUE);
+    if($isCatering == "true"){
+      $query_result = $this->admin_model->getCateringBooking($id);
+      $query_result->items = $this->admin_model->getCateringBookingItems($query_result->id);
+  
+      $data['info'] = $query_result;  
+      $data['orders'] =  $query_result->items;
+
+      $print = $this->load->view('/report/catering_invoice_print', $data, TRUE);
+
+
+    }else{
+      $query_result = $this->admin_model->get_order_summary($id);
+      $data['info'] = $query_result['clients_info'];
+      $data['orders'] = $query_result['order_details'];
+  
+      /** Downlaod as word-doc */
+      $print = $this->load->view('/report/invoice_print', $data, TRUE);
+
+
+    }
 
     header("Content-Type: application/vnd.ms-word");
     header("Expires: 0");
@@ -722,13 +783,28 @@ class Admin extends CI_Controller
     echo $print;
   }
   
-  public function print_view($id)
+  public function print_view($id, $isCatering)
   {
+    if($isCatering == "true"){
+    $query_result = $this->admin_model->getCateringBooking($id);
+    $query_result->items = $this->admin_model->getCateringBookingItems($query_result->id);
+
+    $data['info'] = $query_result;  
+    $data['orders'] =  $query_result->items;
+
+    return $this->load->view('/report/catering_invoice_print', $data);
+
+  }else {
     $query_result = $this->admin_model->get_order_summary($id);
     $data['info'] = $query_result['clients_info'];
     $data['orders'] = $query_result['order_details'];
 
-    $this->load->view('/report/invoice_print', $data);
+    return $this->load->view('/report/invoice_print', $data);
+  }
+
+
+
+   
   }
 
   public function export_csv(){

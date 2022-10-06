@@ -15,6 +15,10 @@ class Mobile_users extends CI_Controller
     parent::__construct();
     $this->load->model('mobile_users_model');
     $this->load->library('form_validation');
+    
+    $this->form_validation->set_error_delimiters('', '');
+    $this->ion_auth->set_message_delimiters('', '');
+    $this->ion_auth->set_error_delimiters('', '');
   }
   
   private function send_sms($to, $code, $type)

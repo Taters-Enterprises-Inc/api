@@ -67,305 +67,92 @@ class Store_model extends CI_Model
 		$longitude = 0,
 		$service='SNACKSHOP'
 	){
+		$this->db->select('
+			A.id,
+			A.name AS store_name, 
+			A.address, 
+			A.lat, 
+			A.lng, 
+			A.store_id, 
+			A.region_store_combination_id, 
+			A.menu_type, 
+			A.store_image, 
+			A.opening, 
+			A.closing, 
+			A.disable_pickup, 
+			A.disable_delivery, 
+			A.available_start_time,
+			A.available_end_time,
+			B.region_id,
+			B.region_store_id,
+			E.name as menu_name,
+			F.locale_name,
+			F.id as locale_id,
+			A.contact_number as contactno,
+			A.operating_hours as operatinghours, 
+			A.map_link as maplink, 
+			( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
+		');
+
+		$this->db->from('store_tb A');
+		$this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
+		$this->db->join('region_tb C', 'C.id = B.region_id');
+		$this->db->join('store_menu_tb E', 'E.id = A.store_menu_type_id');
+		$this->db->join('dotcom_locale_tb F', 'F.id = A.locale');
 
 		switch($service){
 			case 'BRANCHES':
-				$this->db->select('
-					A.id,
-					A.name AS store_name, 
-					A.address, 
-					A.lat, 
-					A.lng, 
-					A.store_id, 
-					A.region_store_combination_id, 
-					A.menu_type, 
-					A.store_image, 
-					A.opening, 
-					A.closing, 
-					A.disable_pickup, 
-					A.disable_delivery, 
-					E.name as menu_name,
-					F.locale_name,
-					F.id as locale_id,
-					A.contact_number as contactno,
-					A.operating_hours as operatinghours, 
-					A.map_link as maplink, 
-					( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
-				');
-		
-				$this->db->from('store_tb A');
-				$this->db->join('store_menu_tb E', 'E.id = A.store_menu_type_id');
-				$this->db->join('dotcom_locale_tb F', 'F.id = A.locale');
-
 				$this->db->where('A.branch_status', 1);
-				$this->db->order_by('distance', 'ASC');
-				$query = $this->db->get();  
-				$query_data = $query->result();
-				$region_data = array();
-			
-				foreach ($query_data as $key => $value) {
-					$region_data[$value->locale_id]['region_name']  = $value->locale_name;
-					$region_data[$value->locale_id]['stores'][] = array(
-					  'store_id'         => $value->store_id,
-					  'store_name'       => $value->store_name,
-					  'menu_name'        => $value->menu_name,
-					  'store_address'    => $value->address,
-					  'store_distance'   => $value->distance,
-					  'latitude'   		 => $value->distance,
-					  'longitude'   	 => $value->distance,
-					  'menu_type'        => $value->menu_type,
-					  'store_image'      => $value->store_image,
-					//   'region_store_id'  => $value->region_store_id,
-					  'action'           => 'delivery',
-					  'opening_time'     => $value->opening,
-					  'closing_time'     => $value->closing,
-					  'disable_delivery' => $value->disable_delivery,
-					  'disable_pickup'   => $value->disable_pickup,
-					  'nameofstore'   => $value->store_name,
-					  'contactno'   => $value->contactno,
-					  'address'   => $value->address,
-					  'operatinghours'   => $value->operatinghours,
-					  'maplink'   => $value->maplink
-					);  
-				}
-			  
-				$reindex_data = array_values($region_data);
-				return $reindex_data;
+				break;
 			case 'SNACKSHOP':
-				$this->db->select('
-					A.id,
-					A.name AS store_name, 
-					A.address, 
-					A.lat, 
-					A.lng, 
-					A.store_id, 
-					A.region_store_combination_id, 
-					A.menu_type, 
-					A.store_image, 
-					A.opening, 
-					A.closing, 
-					A.disable_pickup, 
-					A.disable_delivery, 
-					B.region_id, 
-					B.region_store_id, 
-					C.name AS region_name, 
-					C.sequence,
-					E.name as menu_name,
-					( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
-				');
-		
-				$this->db->from('store_tb A');
-				$this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
-				$this->db->join('region_tb C', 'C.id = B.region_id');
-				$this->db->join('store_menu_tb E', 'E.id = A.store_menu_type_id');
-
 				$this->db->where('A.status', 1);
-				$this->db->order_by('distance', 'ASC');
-				$query = $this->db->get();  
-				$query_data = $query->result();
-				$region_data = array();
-			
-				foreach ($query_data as $key => $value) {
-					$region_data[$value->region_id]['region_name']  = $value->region_name;
-					$region_data[$value->region_id]['stores'][] = array(
-					  'store_id'         => $value->store_id,
-					  'store_name'       => $value->store_name,
-					  'menu_name'        => $value->menu_name,
-					  'store_address'    => $value->address,
-					  'store_distance'   => $value->distance,
-					  'latitude'   		 => $value->distance,
-					  'longitude'   	 => $value->distance,
-					  'menu_type'        => $value->menu_type,
-					  'store_image'      => $value->store_image,
-					  'region_store_id'  => $value->region_store_id,
-					  'action'           => 'delivery',
-					  'opening_time'     => $value->opening,
-					  'closing_time'     => $value->closing,
-					  'disable_delivery' => $value->disable_delivery,
-					  'disable_pickup'   => $value->disable_pickup,
-					  'address'   => $value->address,
-					);  
-				}
-			  
-				$reindex_data = array_values($region_data);
-				return $reindex_data;
+				break;
 			case 'CATERING':
-				$this->db->select('
-					A.id,
-					A.name AS store_name, 
-					A.address, 
-					A.lat, 
-					A.lng, 
-					A.store_id, 
-					A.region_store_combination_id, 
-					A.menu_type, 
-					A.store_image, 
-					A.opening, 
-					A.closing, 
-					A.disable_pickup, 
-					A.disable_delivery, 
-					B.region_id, 
-					B.region_store_id, 
-					C.name AS region_name, 
-					C.sequence,
-					E.name as menu_name,
-					( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
-				');
-		
-				$this->db->from('store_tb A');
-				$this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
-				$this->db->join('region_tb C', 'C.id = B.region_id');
-				$this->db->join('store_menu_tb E', 'E.id = A.store_menu_type_id');
-				
 				$this->db->where('A.catering_status', 1);
-				$this->db->order_by('distance', 'ASC');
-				$query = $this->db->get();  
-				$query_data = $query->result();
-				$region_data = array();
-			
-				foreach ($query_data as $key => $value) {
-					$region_data[$value->region_id]['region_name']  = $value->region_name;
-					$region_data[$value->region_id]['stores'][] = array(
-					  'store_id'         => $value->store_id,
-					  'store_name'       => $value->store_name,
-					  'menu_name'        => $value->menu_name,
-					  'store_address'    => $value->address,
-					  'store_distance'   => $value->distance,
-					  'latitude'   		 => $value->distance,
-					  'longitude'   	 => $value->distance,
-					  'menu_type'        => $value->menu_type,
-					  'store_image'      => $value->store_image,
-					  'region_store_id'  => $value->region_store_id,
-					  'action'           => 'delivery',
-					  'opening_time'     => $value->opening,
-					  'closing_time'     => $value->closing,
-					  'disable_delivery' => $value->disable_delivery,
-					  'disable_pickup'   => $value->disable_pickup,
-					  'address'   => $value->address,
-					);  
-				}
-			  
-				$reindex_data = array_values($region_data);
-				return $reindex_data;
+				break;
 			case 'POPCLUB-STORE-VISIT':
-				$this->db->select('
-					A.id,
-					A.name AS store_name, 
-					A.address, 
-					A.lat, 
-					A.lng, 
-					A.store_id, 
-					A.region_store_combination_id, 
-					A.menu_type, 
-					A.store_image, 
-					A.opening, 
-					A.closing, 
-					A.disable_pickup, 
-					A.disable_delivery, 
-					B.region_id, 
-					B.region_store_id, 
-					C.name AS region_name, 
-					C.sequence,
-					E.name as menu_name,
-					( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
-				');
-		
-				$this->db->from('store_tb A');
-				$this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
-				$this->db->join('region_tb C', 'C.id = B.region_id');
-				$this->db->join('store_menu_tb E', 'E.id = A.store_menu_type_id');
-				
 				$this->db->where('A.popclub_walk_in_status', 1);
-				$this->db->order_by('distance', 'ASC');
-				$query = $this->db->get();  
-				$query_data = $query->result();
-				$region_data = array();
-			
-				foreach ($query_data as $key => $value) {
-					$region_data[$value->region_id]['region_name']  = $value->region_name;
-					$region_data[$value->region_id]['stores'][] = array(
-					  'store_id'         => $value->store_id,
-					  'store_name'       => $value->store_name,
-					  'menu_name'        => $value->menu_name,
-					  'store_address'    => $value->address,
-					  'store_distance'   => $value->distance,
-					  'latitude'   		 => $value->distance,
-					  'longitude'   	 => $value->distance,
-					  'menu_type'        => $value->menu_type,
-					  'store_image'      => $value->store_image,
-					  'region_store_id'  => $value->region_store_id,
-					  'action'           => 'delivery',
-					  'opening_time'     => $value->opening,
-					  'closing_time'     => $value->closing,
-					  'disable_delivery' => $value->disable_delivery,
-					  'disable_pickup'   => $value->disable_pickup,
-					  'address'   => $value->address,
-					);  
-				}
-			  
-				$reindex_data = array_values($region_data);
-				return $reindex_data;
+				break;
 			case 'POPCLUB-ONLINE-DELIVERY':
-				$this->db->select('
-					A.id,
-					A.name AS store_name, 
-					A.address, 
-					A.lat, 
-					A.lng, 
-					A.store_id, 
-					A.region_store_combination_id, 
-					A.menu_type, 
-					A.store_image, 
-					A.opening, 
-					A.closing, 
-					A.disable_pickup, 
-					A.disable_delivery, 
-					B.region_id, 
-					B.region_store_id, 
-					C.name AS region_name, 
-					C.sequence,
-					E.name as menu_name,
-					( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
-				');
-		
-				$this->db->from('store_tb A');
-				$this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
-				$this->db->join('region_tb C', 'C.id = B.region_id');
-				$this->db->join('store_menu_tb E', 'E.id = A.store_menu_type_id');
-				
 				$this->db->where('A.popclub_online_delivery_status', 1);
-				$this->db->order_by('distance', 'ASC');
-				$query = $this->db->get();  
-				$query_data = $query->result();
-				$region_data = array();
-			
-				foreach ($query_data as $key => $value) {
-					$region_data[$value->region_id]['region_name']  = $value->region_name;
-					$region_data[$value->region_id]['stores'][] = array(
-					  'store_id'         => $value->store_id,
-					  'store_name'       => $value->store_name,
-					  'menu_name'        => $value->menu_name,
-					  'store_address'    => $value->address,
-					  'store_distance'   => $value->distance,
-					  'latitude'   		 => $value->distance,
-					  'longitude'   	 => $value->distance,
-					  'menu_type'        => $value->menu_type,
-					  'store_image'      => $value->store_image,
-					  'region_store_id'  => $value->region_store_id,
-					  'action'           => 'delivery',
-					  'opening_time'     => $value->opening,
-					  'closing_time'     => $value->closing,
-					  'disable_delivery' => $value->disable_delivery,
-					  'disable_pickup'   => $value->disable_pickup,
-					  'address'   => $value->address,
-					);  
-				}
-			  
-				$reindex_data = array_values($region_data);
-				return $reindex_data;
+				break;
 		}
-
 		
+		$this->db->order_by('locale', 'ASC');
+		$this->db->order_by('distance', 'ASC');
+		$query = $this->db->get();  
+		$query_data = $query->result();
+		$region_data = array();
+		foreach ($query_data as $key => $value) {
+			$region_data[$value->locale_id]['region_name']  = $value->locale_name;
+			$region_data[$value->locale_id]['stores'][] = array(
+			  'store_id'         => $value->store_id,
+			  'store_name'       => $value->store_name,
+			  'menu_name'        => $value->menu_name,
+			  'store_address'    => $value->address,
+			  'store_distance'   => $value->distance,
+			  'latitude'   		 => $value->distance,
+			  'longitude'   	 => $value->distance,
+			  'menu_type'        => $value->menu_type,
+			  'store_image'      => $value->store_image,
+			  'region_store_id'  => $value->region_store_id,
+			  'action'           => 'delivery',
+			  'opening_time'     => $value->opening,
+			  'closing_time'     => $value->closing,
+			  'disable_delivery' => $value->disable_delivery,
+			  'disable_pickup'   => $value->disable_pickup,
+			  'nameofstore'   => $value->store_name,
+			  'contactno'   => $value->contactno,
+			  'address'   => $value->address,
+			  'operatinghours'   => $value->operatinghours,
+			  'maplink'   => $value->maplink,
+			  'available_start_time' => $value->available_start_time,
+			  'available_end_time' => $value->available_end_time,
+			);  
+		}
+	  
+		$reindex_data = array_values($region_data);
+		return $reindex_data;		
 	}
 
 }

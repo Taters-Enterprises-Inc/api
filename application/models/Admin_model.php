@@ -3,6 +3,34 @@
 class Admin_model extends CI_Model 
 {
     
+    function updateSettingStoreOperatingHours(
+        $store_id,
+        $available_start_time,
+        $available_end_time
+    ){
+        $this->db->set('available_start_time', $available_start_time);
+        $this->db->set('available_end_time', $available_end_time);
+        $this->db->where("store_id", $store_id);
+        $this->db->update("store_tb");
+    }
+
+    function getStore($store_id){
+        $this->db->select('
+            A.store_id,
+            A.name,
+            A.available_start_time,
+            A.available_end_time,
+            B.name as menu_name,
+        ');
+
+        $this->db->from('store_tb A');
+        $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
+        $this->db->where('A.store_id', $store_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+    
     function updateSettingStore($store_id, $name_of_field_status, $status){
         switch($name_of_field_status){
             case 'status':
@@ -17,28 +45,36 @@ class Admin_model extends CI_Model
             case 'popclub_online_delivery_status':
                 $this->db->set('popclub_online_delivery_status', $status);
                 break;
+            case 'branch_status':
+                $this->db->set('branch_status', $status);
+                break;
         }
         $this->db->where("store_id", $store_id);
         $this->db->update("store_tb");
     }
     
-    function getSettingStoresCount($search) {
+    function getSettingStoresCount($search, $store) {
         $this->db->select('count(*) as all_count');
 
         $this->db->from('store_tb A');
         $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
-
+            
+        if(!empty($store))
+            $this->db->where_in('A.store_id', $store);
+    
         if($search){
+            $this->db->group_start();
             $this->db->like('A.name', $search);
             $this->db->or_like('B.name', $search);
+            $this->db->group_end();
         }
-            
+                
             
         $query = $this->db->get();
         return $query->row()->all_count;
     }
 
-    function getSettingStores($row_no, $row_per_page, $order_by, $order, $search) {
+    function getSettingStores($row_no, $row_per_page, $order_by, $order, $search, $store) {
         $this->db->select('
             A.store_id,
             A.name,
@@ -46,17 +82,24 @@ class Admin_model extends CI_Model
             A.catering_status,
             A.popclub_walk_in_status,
             A.popclub_online_delivery_status,
+            A.branch_status,
+            A.available_start_time,
+            A.available_end_time,
             B.name as menu_name,
         ');
 
         $this->db->from('store_tb A');
         $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
-
+            
+        if(!empty($store))
+            $this->db->where_in('A.store_id', $store);
+        
         if($search){
+            $this->db->group_start();
             $this->db->like('A.name', $search);
             $this->db->or_like('B.name', $search);
+            $this->db->group_end();
         }
-            
 
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
@@ -144,8 +187,9 @@ class Admin_model extends CI_Model
 
         $this->db->where('B.status', 1);
         $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
 
-        if($category_id) $this->db->where('C.id', $category_id);
+        if($category_id !== "6") $this->db->where('C.id', $category_id);
         
         if($status)
             $this->db->where('A.status', $status);
@@ -539,6 +583,7 @@ class Admin_model extends CI_Model
             A.quantity,
             A.remarks,
             B.alias,
+            B.description
         ");
         $this->db->from('deals_order_items A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
@@ -580,20 +625,23 @@ class Admin_model extends CI_Model
         $this->db->from('deals_redeems_tb A');
         $this->db->join('deals_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
-            
-        if($search){
-            $this->db->like('A.redeem_code', $search);
-            $this->db->or_like('B.add_name', $search);
-            $this->db->or_like('C.name', $search);
-            $this->db->or_like('A.purchase_amount', $search);
-            $this->db->or_like('A.invoice_num', $search);
-        }
 
         if($status)
             $this->db->where('A.status', $status);
 
         if(!empty($store))
             $this->db->where_in('A.store', $store);
+            
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.redeem_code', $search);
+            $this->db->or_like('B.add_name', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
 
         $query = $this->db->get();
         return $query->row()->all_count;
@@ -615,19 +663,22 @@ class Admin_model extends CI_Model
         $this->db->join('deals_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         
-
-        if($search){
-            $this->db->like('A.redeem_code', $search);
-            $this->db->or_like('B.add_name', $search);
-            $this->db->or_like('C.name', $search);
-            $this->db->or_like('A.purchase_amount', $search);
-        }
             
         if($status)
             $this->db->where('A.status', $status);
 
         if(!empty($store))
             $this->db->where_in('A.store', $store);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.redeem_code', $search);
+            $this->db->or_like('B.add_name', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
 
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
@@ -739,6 +790,7 @@ class Admin_model extends CI_Model
             A.message,
             A.event_class,
             A.company_name,
+            A.remarks,
 
             A.purchase_amount,
             A.service_fee,
@@ -757,8 +809,6 @@ class Admin_model extends CI_Model
             A.final_payment,
             A.final_payment_proof,
             
-
-            
             A.reference_num,
             A.store,
 
@@ -766,12 +816,19 @@ class Admin_model extends CI_Model
             B.mobile_user_id,
 
             B.add_name as client_name,
+            B.fname,
+            B.lname,
             B.add_address,
             B.payops,
             B.email,
             B.add_contact,
             B.contact_number,
-            C.name as store_name
+
+            C.name as store_name,
+            C.address as store_address,
+            C.contact_person as store_person,
+            C.contact_number as store_contact,
+            C.email as store_email
         ");
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'B.id = A.client_id');
@@ -779,9 +836,14 @@ class Admin_model extends CI_Model
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();
+
+        // $queryData['info'] = $query->result();
+        
         return $query->row();
     }
-    
+
+
+
     public function getCateringBookingsCount($status, $search, $store){
         $this->db->select('count(*) as all_count');
             
@@ -796,6 +858,7 @@ class Admin_model extends CI_Model
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
         }
         
         if($status)
@@ -836,20 +899,22 @@ class Admin_model extends CI_Model
         $this->db->join('catering_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         
-
-        if($search){
-            $this->db->like('A.tracking_no', $search);
-            $this->db->or_like('B.add_name', $search);
-            $this->db->or_like('C.name', $search);
-            $this->db->or_like('A.purchase_amount', $search);
-            $this->db->or_like('A.invoice_num', $search);
-        }
-        
         if($status)
             $this->db->where('A.status', $status);
             
         if(!empty($store))
             $this->db->where_in('A.store', $store);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.add_name', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
 
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
@@ -888,22 +953,24 @@ class Admin_model extends CI_Model
         $this->db->join('client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         
-        
-
-        if($search){
-            $this->db->like('A.tracking_no', $search);
-            $this->db->or_like('B.fname', $search);
-            $this->db->or_like('C.name', $search);
-            $this->db->or_like('A.purchase_amount', $search);
-            $this->db->or_like('A.invoice_num', $search);
-        }
 
         if($status)
             $this->db->where('A.status', $status);
             
         if(!empty($store))
             $this->db->where_in('A.store', $store);
-            
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
 
@@ -918,19 +985,22 @@ class Admin_model extends CI_Model
         $this->db->join('client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
 
-        if($search){
-            $this->db->like('A.tracking_no', $search);
-            $this->db->or_like('B.fname', $search);
-            $this->db->or_like('C.name', $search);
-            $this->db->or_like('A.purchase_amount', $search);
-            $this->db->or_like('A.invoice_num', $search);
-        }
-
         if($status)
             $this->db->where('A.status', $status);
 
         if(!empty($store))
             $this->db->where_in('A.store', $store);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.fname', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
 
         $query = $this->db->get();
         return $query->row()->all_count;
