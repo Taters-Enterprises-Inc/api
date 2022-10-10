@@ -138,6 +138,7 @@ class Admin extends CI_Controller
         $per_page = $this->input->get('per_page') ?? 25;
         $page_no = $this->input->get('page_no') ?? 0;
         $store_id = $this->input->get('store_id');
+        $category_id = $this->input->get('category_id');
         $status = $this->input->get('status') ?? 0;
         $order = $this->input->get('order') ?? 'desc';
         $order_by = $this->input->get('order_by') ?? 'id';
@@ -147,8 +148,8 @@ class Admin extends CI_Controller
           $page_no = ($page_no - 1) * $per_page;
         }
 
-        $deals_count = $this->admin_model->getStoreDealsCount($store_id, $status, $search);
-        $deals = $this->admin_model->getStoreDeals($page_no, $per_page, $store_id, $status, $order_by, $order, $search);
+        $deals_count = $this->admin_model->getStoreDealsCount($store_id, $category_id, $status, $search);
+        $deals = $this->admin_model->getStoreDeals($page_no, $per_page, $store_id, $category_id, $status, $order_by, $order, $search);
 
         $pagination = array(
           "total_rows" => $deals_count,
@@ -189,7 +190,7 @@ class Admin extends CI_Controller
         $per_page = $this->input->get('per_page') ?? 25;
         $page_no = $this->input->get('page_no') ?? 0;
         $store_id = $this->input->get('store_id');
-        $category_id = $this->input->get('category_id') ?? "6";
+        $category_id = $this->input->get('category_id');
         $status = $this->input->get('status') ?? 0;
         $order = $this->input->get('order') ?? 'desc';
         $order_by = $this->input->get('order_by') ?? 'id';
@@ -243,11 +244,12 @@ class Admin extends CI_Controller
         $per_page = $this->input->get('per_page') ?? 25;
         $page_no = $this->input->get('page_no') ?? 0;
         $store_id = $this->input->get('store_id');
-        $category_id = $this->input->get('category_id') ?? "6";
+        $category_id = $this->input->get('category_id');
         $status = $this->input->get('status') ?? 0;
         $order = $this->input->get('order') ?? 'desc';
         $order_by = $this->input->get('order_by') ?? 'id';
         $search = $this->input->get('search');
+
 
         if($page_no != 0){
           $page_no = ($page_no - 1) * $per_page;

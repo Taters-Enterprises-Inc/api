@@ -166,9 +166,8 @@ class Admin_model extends CI_Model
     }
 
     public function get_deal_categories() {
-        $this->db->select("id, category_name as name");
-        $this->db->from("category_tb");
-        $this->db->order_by('name', 'ASC');
+        $this->db->select("id, name");
+        $this->db->from("dotcom_deals_category");
         return $this->db->get()->result();
     }
     
@@ -176,14 +175,12 @@ class Admin_model extends CI_Model
     public function get_package_categories() {
         $this->db->select("id, category_name as name");
         $this->db->from("catering_category_tb");
-        $this->db->order_by('name', 'ASC');
         return $this->db->get()->result();
     }
 
     public function get_product_categories() {
         $this->db->select("id, category_name as name");
         $this->db->from("category_tb");
-        $this->db->order_by('name', 'ASC');
         return $this->db->get()->result();
     }
 
@@ -203,7 +200,7 @@ class Admin_model extends CI_Model
         $this->db->where('A.store_id', $store_id);
         $this->db->where('A.status', $status);
 
-        if($category_id !== "6") $this->db->where('C.id', $category_id);
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
         
         if($status)
             $this->db->where('A.status', $status);
@@ -229,7 +226,7 @@ class Admin_model extends CI_Model
         $this->db->where('A.store_id', $store_id);
         $this->db->where('A.status', $status);
 
-        if($category_id !== "6") $this->db->where('C.id', $category_id);
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
         
         if($status)
             $this->db->where('A.status', $status);
@@ -254,7 +251,7 @@ class Admin_model extends CI_Model
         $this->db->where('A.store_id', $store_id);
         $this->db->where('A.status', $status);
 
-        if($category_id !== "6") $this->db->where('C.id', $category_id);
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
 
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
@@ -277,7 +274,7 @@ class Admin_model extends CI_Model
         $this->db->where('A.store_id', $store_id);
         $this->db->where('A.status', $status);
 
-        if($category_id !== "6") $this->db->where('C.id', $category_id);
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
 
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
@@ -285,7 +282,7 @@ class Admin_model extends CI_Model
         return $this->db->get()->result();
     }
 
-    function getStoreDealsCount( $store_id, $status, $search) {
+    function getStoreDealsCount($store_id, $category_id, $status, $search) {
         $this->db->select('count(*) as all_count');
 
         $this->db->from('deals_region_da_log A');
@@ -300,6 +297,8 @@ class Admin_model extends CI_Model
 
         $this->db->where('B.status', 1);
         $this->db->where('A.store_id', $store_id);
+        
+        if(isset($category_id)) $this->db->where('A.platform_category_id', $category_id);
         
         if($status)
             $this->db->where('A.status', $status);
@@ -326,7 +325,7 @@ class Admin_model extends CI_Model
         $this->db->update("region_da_log");
     }
 
-    function getStoreDeals($row_no, $row_per_page, $store_id, $status, $order_by, $order, $search) {
+    function getStoreDeals($row_no, $row_per_page, $store_id, $category_id, $status, $order_by, $order, $search) {
         $this->db->select('A.id, B.alias, B.name, A.store_id');
         $this->db->from('deals_region_da_log A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
@@ -340,6 +339,8 @@ class Admin_model extends CI_Model
             
         $this->db->where('B.status', 1);
         $this->db->where('A.store_id', $store_id);
+        
+        if(isset($category_id)) $this->db->where('A.platform_category_id', $category_id);
         
         $this->db->where('A.status', $status);
 
