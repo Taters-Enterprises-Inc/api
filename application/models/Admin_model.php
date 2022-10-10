@@ -403,8 +403,7 @@ class Admin_model extends CI_Model
         
         if(isset($category_id)) $this->db->where('A.platform_category_id', $category_id);
         
-        if($status)
-            $this->db->where('A.status', $status);
+        $this->db->where('A.status', $status);
             
         $query = $this->db->get();
         return $query->row()->all_count;
