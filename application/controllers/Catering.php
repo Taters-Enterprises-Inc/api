@@ -146,12 +146,19 @@ class Catering extends CI_Controller {
 				$query_logon  = $this->catering_model->get_logon_type($hash);
 				$logon_type   = $query_logon->logon_type;
 
-				if ($logon_type == 'facebook') {
-					$facebook_details = $this->catering_model->get_facebook_details($order_details['clients_info']->fb_user_id);
-					$firstname = $facebook_details->first_name;
-					$lastname = $facebook_details->last_name;
-				}
+				switch($logon_type){
+					case 'facebook':
+						$facebook_details = $this->catering_model->get_facebook_details($order_details['clients_info']->fb_user_id);
+						$firstname = $facebook_details->first_name;
+						$lastname = $facebook_details->last_name;
 
+						break;
+					case 'mobile':
+						$mobile_details = $this->catering_model->get_mobile_details($order_details['clients_info']->mobile_user_id);
+						$firstname = $mobile_details->first_name;
+						$lastname = $mobile_details->last_name;
+						break;
+				}
 
 				$response = array(
 					"message" => "Success",

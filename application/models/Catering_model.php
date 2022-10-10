@@ -146,6 +146,15 @@ class Catering_model extends CI_Model
         $query = $this->db->get();
         return $query->row();
     }
+    
+    public function get_mobile_details($id){
+        $this->db->select("*");
+        $this->db->from('mobile_users');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        return $query->row();
+    }
+
 
     public function view_order($hash_key)
     {   
@@ -158,7 +167,7 @@ class Catering_model extends CI_Model
         
         if(!empty($result)){
             $table = "catering_client_tb A";
-            $select_column = array("A.fb_user_id","A.fname", "A.lname", "A.email","A.address", "A.contact_number","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.company_name", "B.message", "B.serving_time", "B.event_class","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.discount","B.payment_plan","B.initial_payment","B.final_payment","B.final_payment_proof","B.contract","B.uploaded_contract","B.start_datetime","B.end_datetime","B.night_diff_fee","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","A.add_name","A.add_contact","A.add_address");
+            $select_column = array("A.fb_user_id", "A.mobile_user_id","A.fname", "A.lname", "A.email","A.address", "A.contact_number","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.company_name", "B.message", "B.serving_time", "B.event_class","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.discount","B.payment_plan","B.initial_payment","B.final_payment","B.final_payment_proof","B.contract","B.uploaded_contract","B.start_datetime","B.end_datetime","B.night_diff_fee","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","A.add_name","A.add_contact","A.add_address");
             $join_A = "A.id = B.client_id";
             $this->db->select($select_column);  
             $this->db->from($table);
