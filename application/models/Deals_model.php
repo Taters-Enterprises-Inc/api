@@ -80,11 +80,13 @@ class Deals_model extends CI_Model
 
             
         if($search){
+            $this->db->group_start();
             $this->db->like('A.redeem_code', $search);
             $this->db->or_like('B.fname', $search);
-            $this->db->or_like('C.name', $search);
+            $this->db->or_like('B.lname', $search);
             $this->db->or_like('A.purchase_amount', $search);
-            $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
         }
 
         $query = $this->db->get();
@@ -114,10 +116,13 @@ class Deals_model extends CI_Model
         $this->db->order_by('A.dateadded','DESC');
         
         if($search){
+            $this->db->group_start();
             $this->db->like('A.redeem_code', $search);
             $this->db->or_like('B.fname', $search);
             $this->db->or_like('B.lname', $search);
             $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
         }
             
         $this->db->limit($row_per_page, $row_no);
