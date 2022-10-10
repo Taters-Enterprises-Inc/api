@@ -111,7 +111,11 @@ $route['admin/popclub'] = 'admin/popclub';
 
 $route['admin/availability/deal'] = 'admin/deal_availability';
 $route['admin/availability/product'] = 'admin/product_availability';
+$route['admin/availability/package'] = 'admin/package_availability';
+
+$route['admin/deal-categories'] = 'admin/deal_categories';
 $route['admin/product-categories'] = 'admin/product_categories';
+$route['admin/package-categories'] = 'admin/package_categories';
 
 $route['admin/users'] = 'admin/users';
 $route['admin/user/(:any)'] = 'admin/user/$1';

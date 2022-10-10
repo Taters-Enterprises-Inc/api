@@ -235,6 +235,60 @@ class Admin extends CI_Controller
 
   }
 
+  
+  
+  public function package_availability(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $store_id = $this->input->get('store_id');
+        $category_id = $this->input->get('category_id') ?? "6";
+        $status = $this->input->get('status') ?? 0;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'id';
+        $search = $this->input->get('search');
+
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+
+        $packages_count = $this->admin_model->getStorePackageCount($store_id, $category_id, $status, $search);
+        $packages = $this->admin_model->getStorePackages($page_no, $per_page, $store_id, $category_id, $status, $order_by, $order, $search);
+
+        $pagination = array(
+          "total_rows" => $packages_count,
+          "per_page" => $per_page,
+        );
+
+        $response = array(
+          "message" => 'Successfully fetch packages',
+          "data" => array(
+            "pagination" => $pagination,
+            "packages" => $packages
+          ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+
+        case 'PUT': 
+          $put = json_decode(file_get_contents("php://input"), true);
+  
+          $this->admin_model->updateStorePackage($put['id'], $put['status']);
+  
+          $response = array(
+            "message" => 'Successfully update status',
+          );
+    
+          header('content-type: application/json');
+          echo json_encode($response);
+          return;
+    }
+
+  }
+
   public function admin_privilege(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
@@ -372,11 +426,45 @@ class Admin extends CI_Controller
     }
   }
 
+  public function deal_categories(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+
+        $deal_categories = $this->admin_model->get_deal_categories();
+
+        $response = array(
+          "message" => 'Successfully fetch user stores',
+          "data" => $deal_categories,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
+  public function package_categories(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+
+        $package_categories = $this->admin_model->get_package_categories();
+
+        $response = array(
+          "message" => 'Successfully fetch user stores',
+          "data" => $package_categories,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
   public function product_categories(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
 
-        $product_categories = $this->admin_model->get_categories();
+        $product_categories = $this->admin_model->get_product_categories();
 
         $response = array(
           "message" => 'Successfully fetch user stores',
@@ -738,7 +826,12 @@ class Admin extends CI_Controller
 
         $data['user_details'] = $this->admin_model->getUser($this->session->user_id);
         $data['user_details']->groups = $this->admin_model->getUserGroups($this->session->user_id);
-        $data['user_details']->stores = $this->user_model->get_store_group_order($this->session->user_id);
+
+        if($this->ion_auth->in_group(1) || $this->ion_auth->in_group(10)){
+          $data['user_details']->stores = $this->user_model->get_all_store();
+        }else{
+          $data['user_details']->stores = $this->user_model->get_store_group_order($this->session->user_id);
+        }
 
         $response = array(
           "message" => 'Successfully fetch admin session',

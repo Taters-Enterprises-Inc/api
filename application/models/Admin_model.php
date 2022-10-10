@@ -165,9 +165,23 @@ class Admin_model extends CI_Model
         return $join_data;
     }
 
+    public function get_deal_categories() {
+        $this->db->select("id, category_name as name");
+        $this->db->from("category_tb");
+        $this->db->order_by('name', 'ASC');
+        return $this->db->get()->result();
+    }
     
-    public function get_categories() {
-        $this->db->select("id, category_name name");
+    
+    public function get_package_categories() {
+        $this->db->select("id, category_name as name");
+        $this->db->from("catering_category_tb");
+        $this->db->order_by('name', 'ASC');
+        return $this->db->get()->result();
+    }
+
+    public function get_product_categories() {
+        $this->db->select("id, category_name as name");
         $this->db->from("category_tb");
         $this->db->order_by('name', 'ASC');
         return $this->db->get()->result();
@@ -196,6 +210,56 @@ class Admin_model extends CI_Model
             
         $query = $this->db->get();
         return $query->row()->all_count;
+    }
+
+    
+    function getStorePackageCount($store_id, $category_id, $status, $search) {
+        $this->db->select('count(*) as all_count');
+
+        $this->db->from('catering_region_da_log A');
+        $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
+        $this->db->join('catering_category_tb C', 'C.id = B.category');
+
+        if($search){
+            $this->db->like('B.name', $search);
+            $this->db->or_like('C.category_name', $search);
+        }
+
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        if($category_id !== "6") $this->db->where('C.id', $category_id);
+        
+        if($status)
+            $this->db->where('A.status', $status);
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+
+    function getStorePackages($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
+        $this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');
+        $this->db->from('catering_region_da_log A');
+        $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
+        $this->db->join('catering_category_tb C', 'C.id = B.category');
+
+        if($search){
+            $this->db->like('B.name', $search);
+            $this->db->or_like('C.category_name', $search);
+        }
+            
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        if($category_id !== "6") $this->db->where('C.id', $category_id);
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        return $this->db->get()->result();
     }
 
     function getStoreProducts($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
@@ -250,6 +314,12 @@ class Admin_model extends CI_Model
         $this->db->update("deals_region_da_log");
     }
     
+    function updateStorePackage($id, $status){
+		$this->db->set('status', $status);
+        $this->db->where("id", $id);
+        $this->db->update("catering_region_da_log");
+    }
+
     function updateStoreProduct($id, $status){
 		$this->db->set('status', $status);
         $this->db->where("id", $id);
