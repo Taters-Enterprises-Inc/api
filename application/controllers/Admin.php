@@ -1130,8 +1130,7 @@ class Admin extends CI_Controller
 
   // WILL BE DEPRECATED ( V2 Backend )
   public function status_notification($transaction_id = '', $status = '', $user_id){
-    $this->load->model('shop_model');
-    $query_result = $this->shop_model->get_order_summary($transaction_id);
+    $query_result = $this->admin_model->get_order_summary($transaction_id);
     $info = $query_result['clients_info'];
 
     switch ($status) {
