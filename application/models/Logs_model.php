@@ -1,74 +1,40 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
+date_default_timezone_set('Asia/Manila');
 
 class Logs_model extends CI_Model {
-
-    var $table = 'transaction_logs_tb';
 
     public function __construct()
     {
         $this->load->database();
     }
 
-    public function insert_log($data)
+    public function insertTransactionLogs($user_id , $action, $reference_id, $details = '')
     {   
-
-        if (!$this->db->table_exists($this->table) )
-        {
-            return array('Error' => 'Table-logs does not exist!');
-            exit();
-        }
-
-        date_default_timezone_set('Asia/Manila');
-        
 		$values = array(
-            'user_id'       => $data['user'],
-            'action'        => $data['action'],
-            'details'        => $data['details'],
-            'reference_id'  => $data['reference_id'],
+            'user_id'       => $user_id,
+            'action'        => $action,
+            'details'       => $details,
+            'reference_id'  => $reference_id,
             'dateadded'     => date('Y-m-d H:i:s')
         );
 
-        $this->db->insert($this->table, $values);
-
-        if(($this->db->affected_rows() != 1))
-        {
-            $ret['id']      = null;
-            $ret['status']  = FALSE;
-        }else{
-            $ret['id']      = $this->db->insert_id();
-            $ret['status']  = TRUE;
-        }
-
-        return $ret;
+        $this->db->insert('transaction_logs_tb', $values);
     }
 
-    public function fetch_logs($conditions)
+    public function getTransactionLogs($reference_id)
     {
-        if (!$this->db->table_exists($this->table) )
-        {
-            return array('Error' => 'Table-logs does not exist!');
-            exit();
-        }
-
-        $this->db->select('*, a.dateadded AS addeddate');
-        // $this->db->join('users b', 'b.id = a.user_id','left');
+        $this->db->select('
+            A.id, 
+            A.dateadded, 
+            A.action,
+            CONCAT(B.first_name , " " , B.last_name) as user,
+            A.details
+        ');
         
-        $this->db->from($this->table.' a');
-        $this->db->join('users b', 'b.id = a.user_id','left');
-        $this->db->join('transaction_tb t', 't.id = a.reference_id','left');
-        $this->db->join('client_tb c', 'c.id = a.user_id','left');
+        $this->db->from('transaction_logs_tb A');
+        $this->db->join('users B', 'B.id = A.user_id');
 
-        if(!empty($conditions)){
-            
-            if(array_key_exists('date_start', $conditions)){
-                $this->db->where('dateadded >=', $conditions['date_start']);
-                $this->db->where('dateadded <=', $conditions['date_end']);
-                unset($conditions['date_start']);
-                unset($conditions['date_end']);
-            }
-
-            $this->db->where($conditions);
-        }
+        $this->db->where('A.reference_id', $reference_id);
 
         $query = $this->db->get();
         return $query->result();

@@ -124,6 +124,9 @@ $route['admin/user/(:any)'] = 'admin/user/$1';
 $route['admin/groups'] = 'admin/groups';
 $route['admin/setting/stores'] = 'admin/setting_stores';
 
+$route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
+
+
 //Others
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

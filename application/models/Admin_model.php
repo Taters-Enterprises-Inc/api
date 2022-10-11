@@ -483,7 +483,7 @@ class Admin_model extends CI_Model
         return $query->row(); 
     }
 
-    function check_admin_password($request,$password,$transaction_id,$store_id,$status){
+    function check_admin_password($request,$password,$transaction_id,$to_store_id,$to_status_id){
         $this->db->select("password");
         $this->db->from('users');
         $this->db->where('id', 1);
@@ -496,8 +496,8 @@ class Admin_model extends CI_Model
 
                 if ($request == 'change_status') {
                     
-                    $this->db->set('status',$status);
-                    if ($status == 1) {
+                    $this->db->set('status',$to_status_id);
+                    if ($to_status_id == 1) {
                         $this->db->set('payment_proof','');
                     }
                     $this->db->where('id', $transaction_id);
@@ -506,7 +506,7 @@ class Admin_model extends CI_Model
                 }
                 else if ($request == 'store_transfer') {
                     
-                    $this->db->set('store', $store_id);
+                    $this->db->set('store', $to_store_id);
                     $this->db->where('id', $transaction_id);
                     $this->db->update('transaction_tb');
                     return true;
@@ -755,16 +755,16 @@ class Admin_model extends CI_Model
         return $query->result();
     }
 
-    public function completeRedeem($redeem_code){
+    public function completeRedeem($redeem_id){
 		$this->db->set('status', 6);
-        $this->db->where('redeem_code', $redeem_code);
+        $this->db->where('id', $redeem_id);
         $this->db->update("deals_redeems_tb");
     }
 
     
-    public function declineRedeem($redeem_code){
+    public function declineRedeem($redeem_id){
 		$this->db->set('status', 4);
-        $this->db->where('redeem_code', $redeem_code);
+        $this->db->where('id', $redeem_id);
         $this->db->update("deals_redeems_tb");
     }
     

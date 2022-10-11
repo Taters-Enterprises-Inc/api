@@ -21,6 +21,7 @@ class Mobile_users extends CI_Controller
     $this->ion_auth->set_error_delimiters('', '');
   }
   
+  // TO BE IMPROVED *** will create a helper with this
   private function send_sms($to, $code, $type)
   {
     require FCPATH . 'vendor/autoload.php';

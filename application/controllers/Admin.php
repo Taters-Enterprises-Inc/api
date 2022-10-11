@@ -19,7 +19,27 @@ class Admin extends CI_Controller
 		$this->load->helper('url');
 		$this->load->model('admin_model');
 		$this->load->model('user_model');
+		$this->load->model('store_model');
+		$this->load->model('logs_model');
 	}
+
+  public function snackshop_transaction_logs($reference_id){
+    
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $transaction_logs = $this->logs_model->getTransactionLogs($reference_id);
+
+        $response = array(
+          "message" => 'Successfully fetch audit',
+          "data" => $transaction_logs,
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
 
   public function store_operating_hours(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -401,23 +421,64 @@ class Admin extends CI_Controller
         
         $transaction_id = $this->input->post('trans_id');
 
-        $store_id = $this->input->post('store_id');
-        $status = $this->input->post('status');
+        $from_store_id = $this->input->post('from_store_id');
+        $to_store_id = $this->input->post('to_store_id');
+
+        $from_status_id = $this->input->post('from_status_id');
+        $to_status_id = $this->input->post('to_status_id');
         
-        $request = isset($store_id) ? 'store_transfer' : (isset($status) ? 'change_status' : null);
+        $request = isset($to_store_id) ? 'store_transfer' : (isset($to_status_id) ? 'change_status' : null);
         
+        $user_id = $this->session->user_id;
+
+        $from_store = $this->store_model->get_store_info($from_store_id);
+        $to_store = $this->store_model->get_store_info($to_store_id);
+        
+        if ($from_status_id == 1) $from_status = "New";
+        elseif ($from_status_id == 2) $from_status = "Paid";
+        elseif ($from_status_id == 3) $from_status = "Confirmed";
+        elseif ($from_status_id == 4) $from_status = "Declined";
+        elseif ($from_status_id == 5) $from_status = "Cancelled";
+        elseif ($from_status_id == 6) $from_status = "Completed";
+        elseif ($from_status_id == 7) $from_status = "Rejected";
+        elseif ($from_status_id == 8) $from_status = "Preparing";
+        elseif ($from_status_id == 9) $from_status = "For Dispatch";
+
+        if ($to_status_id == 1) $to_status = "New";
+        elseif ($to_status_id == 2) $to_status = "Paid";
+        elseif ($to_status_id == 3) $to_status = "Confirmed";
+        elseif ($to_status_id == 4) $to_status = "Declined";
+        elseif ($to_status_id == 5) $to_status = "Cancelled";
+        elseif ($to_status_id == 6) $to_status = "Completed";
+        elseif ($to_status_id == 7) $to_status = "Rejected";
+        elseif ($to_status_id == 8) $to_status = "Preparing";
+        elseif ($to_status_id == 9) $to_status = "For Dispatch";
+
+          
+
         $fetch_data = $this->admin_model->check_admin_password(
           $request,
           $password,
           $transaction_id,
-          $store_id,
-          $status
+          $to_store_id,
+          $to_status_id
         );
             
         if ($fetch_data == 1) {
+
+          if ($request == "store_transfer")
+            $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Transfer order from ' . $from_store->name . ' to ' . $to_store->name);
+          elseif ($request == "change_status")
+            $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Change order status from ' . $from_status . ' to ' . $to_status);
+    
           header('content-type: application/json');
           echo json_encode(array( "message" => "Update success!"));
         }else{
+          if ($request == "store_transfer")
+            $this->logs_model->insertTransactionLogs($user_id, 3, $transaction_id, 'Transferring order Failed');
+          elseif ($request == "change_status")
+            $this->logs_model->insertTransactionLogs($user_id, 3, $transaction_id, 'Changing order status Failed');
+
           $this->output->set_status_header('401');
           echo json_encode(array( "message" => $fetch_data));
         }
@@ -430,6 +491,7 @@ class Admin extends CI_Controller
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
             $trans_id = (int) $this->input->post('trans_id');
+            $user_id = $this->session->user_id;
             $status = $this->input->post('status');
             $fetch_data = $this->admin_model->update_catering_status($trans_id, $status);
 
@@ -442,9 +504,12 @@ class Admin extends CI_Controller
             elseif ($status == 8) $tagname = "Final Payment Verified";
 
             if ($fetch_data == 1) {
+              $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Order Success');
               header('content-type: application/json');
               echo json_encode(array( "message" => 'Successfully update status!'));
             } else {
+              $this->logs_model->insertTransactionLogs($user_id, 3, $trans_id, '' . $tagname . ' ' . 'Order Failed');
+
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => 'Failed update status!'));
             }
@@ -457,6 +522,7 @@ class Admin extends CI_Controller
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
             $trans_id = (int) $this->input->post('trans_id');
+            $user_id = $this->session->user_id;
             $status = $this->input->post('status');
             $fetch_data = $this->admin_model->update_shop_status($trans_id, $status);
 
@@ -471,9 +537,13 @@ class Admin extends CI_Controller
             elseif ($status == 9) $tagname = "Dispatched";
 
             if ($fetch_data == 1) {
+              $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Order Success');
+              $this->status_notification($trans_id, 9, $user_id);
+
               header('content-type: application/json');
               echo json_encode(array( "message" => 'Successfully update status!'));
             } else {
+              $this->logs_model->insertTransactionLogs($user_id, 3, $trans_id, '' . $tagname . ' ' . 'Order Success');
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => 'Failed update status!'));
             }
@@ -482,14 +552,19 @@ class Admin extends CI_Controller
   }
   
   public function reference_num(){
+    $user_id = $this->session->user_id;
     $trans_id = $this->input->post('trans_id');
     $ref_num = $this->input->post('ref_num');
     $fetch_data = $this->admin_model->validate_ref_num($trans_id, $ref_num);
 
     if ($fetch_data == 1) {
+
+      $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, 'Payment Validation Success');
       header('content-type: application/json');
       echo json_encode(array( "message" => 'Validation successful'));
     } else {
+      
+      $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, 'Payment Validation Failed');
       $this->output->set_status_header('401');
       echo json_encode(array( "message" => 'Invalid Reference number'));
     }
@@ -513,6 +588,10 @@ class Admin extends CI_Controller
           if (!$this->upload->do_upload('payment_file')) { // Upload validation
             // Failed-Upload
             $error = $this->upload->display_errors();
+            
+            $user_id = $this->session->user_id;
+            $this->logs_model->insertTransactionLogs($user_id, 3, $trans_id, 'File Upload Failed');
+
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $error));
           } else {
@@ -520,8 +599,10 @@ class Admin extends CI_Controller
             $data = $this->upload->data(); // Get file details
             $file_name = $data['file_name'];
 
-            $this->admin_model->uploadPayment($trans_id, $data, $file_name);
+            $user_id = $this->session->user_id;
+            $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, 'File Upload Success');
 
+            $this->admin_model->uploadPayment($trans_id, $data, $file_name);
             header('content-type: application/json');
             echo json_encode(array( "message" => 'Succesfully upload payment'));
           }
@@ -823,10 +904,13 @@ class Admin extends CI_Controller
     }
   }
   
-  public function popclub_decline_redeem($redeemCode){
+  public function popclub_decline_redeem($redeem_id){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
-        $this->admin_model->declineRedeem($redeemCode);
+        $this->admin_model->declineRedeem($redeem_id);
+
+        $user_id = $this->session->userdata('user_id');
+        $this->logs_model->insertTransactionLogs($user_id, 1, $redeem_id, '' . 'Declined' . ' ' . 'Order Success');
 
         $response = array(
           "message" => 'Successfully declined the redeem',
@@ -838,10 +922,13 @@ class Admin extends CI_Controller
     }
   }
 
-  public function popclub_complete_redeem($redeemCode){
+  public function popclub_complete_redeem($redeem_id){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
-        $this->admin_model->completeRedeem($redeemCode);
+        $this->admin_model->completeRedeem($redeem_id);
+
+        $user_id = $this->session->userdata('user_id');
+        $this->logs_model->insertTransactionLogs($user_id, 1, $redeem_id, '' . 'Complete' . ' ' . 'Order Success');
 
         $response = array(
           "message" => 'Successfully completed the redeem',
@@ -947,9 +1034,10 @@ class Admin extends CI_Controller
         return;
     }
   }
+
   
-  public function print_asdoc($id, $isCatering)
-  {
+  // TO BE IMPROVED ( V2 Backend )
+  public function print_asdoc($id, $isCatering){
 
     if($isCatering == "true"){
       $query_result = $this->admin_model->getCateringBooking($id);
@@ -980,28 +1068,117 @@ class Admin extends CI_Controller
     echo $print;
   }
   
-  public function print_view($id, $isCatering)
-  {
+  // TO BE IMPROVED ( V2 Backend )
+  public function print_view($id, $isCatering){
     if($isCatering == "true"){
-    $query_result = $this->admin_model->getCateringBooking($id);
-    $query_result->items = $this->admin_model->getCateringBookingItems($query_result->id);
+      $query_result = $this->admin_model->getCateringBooking($id);
+      $query_result->items = $this->admin_model->getCateringBookingItems($query_result->id);
 
-    $data['info'] = $query_result;  
-    $data['orders'] =  $query_result->items;
+      $data['info'] = $query_result;  
+      $data['orders'] =  $query_result->items;
 
-    return $this->load->view('/report/catering_invoice_print', $data);
+      return $this->load->view('/report/catering_invoice_print', $data);
 
-  }else {
-    $query_result = $this->admin_model->get_order_summary($id);
-    $data['info'] = $query_result['clients_info'];
-    $data['orders'] = $query_result['order_details'];
+    }else {
+      $query_result = $this->admin_model->get_order_summary($id);
+      $data['info'] = $query_result['clients_info'];
+      $data['orders'] = $query_result['order_details'];
 
-    return $this->load->view('/report/invoice_print', $data);
+      return $this->load->view('/report/invoice_print', $data);
+    }
+   
+  }
+  
+  // TO BE IMPROVED ( V2 Backend ) *** will create a helper with this
+  private function send_sms($to, $text){
+    require FCPATH . 'vendor/autoload.php';
+
+    $dotenv = Dotenv\Dotenv::createImmutable(FCPATH);
+    $dotenv->load();
+
+    $api_key = $_ENV['SMS_API_KEY'];
+    $api_sec =  $_ENV['SMS_API_SEC'];
+    $sender_name = $_ENV['SMS_SENDER_NAME'];
+    $new_text = urlencode($text);
+
+    $url = 'https://rest-portal.promotexter.com/sms/send?apiKey=' . $api_key . '&apiSecret=' . $api_sec . '&from=' . $sender_name . '&to=' . $to . '&text=' . $new_text;
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+    // curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $result = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+      $msg = "Error: " . curl_error($ch);
+      $status = FALSE;
+    } else {
+      $jsonArrayResponse = json_decode($result, TRUE);
+      curl_close($ch);
+      $status = ($jsonArrayResponse['status'] == 'ok') ? TRUE : FALSE;
+      $msg = ($status) ? "Sending Successful" : "Sending Failed";
+    }
+
+    header('content-type: application/json');
+    echo json_encode(array("status" => $status, 'message' => $msg));
+
+    return $status;
   }
 
+  // WILL BE DEPRECATED ( V2 Backend )
+  public function status_notification($transaction_id = '', $status = '', $user_id){
+    $this->load->model('shop_model');
+    $query_result = $this->shop_model->get_order_summary($transaction_id);
+    $info = $query_result['clients_info'];
 
+    switch ($status) {
+      // PAID
+      case '2':
+        break;
 
-   
+      // CONFIRMED
+      case '3':
+        break;
+
+      // DECLINE
+      case '4':
+        break;
+
+      // CANCELLED
+      case '5':
+        break;
+      
+      // COMPLETE
+      case '6':
+        break;
+
+      // REJECTED
+      case '7':
+        break;
+
+      // DISPATCH
+      case '9':
+          // SMS message
+          $sms_msg = 'Hey! Your product is now ready. Our team will get in touch with you shortly regarding the order logistics.';
+
+          $email_stat = TRUE;
+          $sms_stat = TRUE;
+          if ($info->table_number != null) {
+            if ($this->send_sms($info->contact_number, $sms_msg)) {
+              $sms_stat = TRUE;
+              $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Dispatched-sms-sent');
+            } else {
+              $sms_stat = FALSE;
+              $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Dispatched-sms-not-sent');
+            }
+          }
+          
+          return array('email_status' => $email_stat, 'sms_status' => $sms_stat);
+        break;
+    }
   }
 
 }
