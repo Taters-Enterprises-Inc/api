@@ -491,7 +491,6 @@ class Admin extends CI_Controller
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
             $trans_id = (int) $this->input->post('trans_id');
-            $user_id = $this->session->user_id;
             $status = $this->input->post('status');
             $fetch_data = $this->admin_model->update_catering_status($trans_id, $status);
 
@@ -504,12 +503,9 @@ class Admin extends CI_Controller
             elseif ($status == 8) $tagname = "Final Payment Verified";
 
             if ($fetch_data == 1) {
-              $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Order Success');
               header('content-type: application/json');
               echo json_encode(array( "message" => 'Successfully update status!'));
             } else {
-              $this->logs_model->insertTransactionLogs($user_id, 3, $trans_id, '' . $tagname . ' ' . 'Order Failed');
-
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => 'Failed update status!'));
             }
@@ -909,9 +905,6 @@ class Admin extends CI_Controller
       case 'GET': 
         $this->admin_model->declineRedeem($redeem_id);
 
-        $user_id = $this->session->userdata('user_id');
-        $this->logs_model->insertTransactionLogs($user_id, 1, $redeem_id, '' . 'Declined' . ' ' . 'Order Success');
-
         $response = array(
           "message" => 'Successfully declined the redeem',
         );
@@ -926,9 +919,6 @@ class Admin extends CI_Controller
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
         $this->admin_model->completeRedeem($redeem_id);
-
-        $user_id = $this->session->userdata('user_id');
-        $this->logs_model->insertTransactionLogs($user_id, 1, $redeem_id, '' . 'Complete' . ' ' . 'Order Success');
 
         $response = array(
           "message" => 'Successfully completed the redeem',

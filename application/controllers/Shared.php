@@ -14,6 +14,7 @@ class Shared extends CI_Controller {
 		$this->load->model('contact_model');
 		$this->load->model('catering_model');
 		$this->load->model('user_model');
+		$this->load->model('logs_model');
 		$this->load->library('form_validation');
 	}
 
@@ -122,9 +123,9 @@ class Shared extends CI_Controller {
 				
 				$user_id = $query_result['client_data']->client_id;
 				if ($query_result['upload_status'] == 1) {
-					snap($user_id, 1, $transaction_id, 'Uploading-notification-success');
+					$this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Uploading-notification-success');
 				} else {
-					snap($user_id, 1, $transaction_id, 'Uploading-notification-failed');
+					$this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Uploading-notification-failed');
 				}
 
                 header('content-type: application/json');
@@ -165,15 +166,7 @@ class Shared extends CI_Controller {
                 $payment_plan = $_POST['payment_plan'];
                 $status = $_POST['status'];
 
-                $query_result = $this->catering_model->upload_payment($data, $file_name, $tracking_no,$transaction_id,$payment_plan, $status);
-
-                $user_id = $query_result['client_data']->client_id;
-
-                if ($query_result['upload_status'] == 1) {
-                    snap($user_id, 1, $transaction_id, 'Uploading-notification-success');
-                } else {
-                    snap($user_id, 1, $transaction_id, 'Uploading-notification-failed');
-                }
+                $this->catering_model->upload_payment($data, $file_name, $tracking_no,$transaction_id,$payment_plan, $status);
 
                 header('content-type: application/json');
                 echo json_encode(array( "message" => 'Succesfully upload payment'));
