@@ -172,7 +172,7 @@ class Admin_model extends CI_Model
     }
     
     
-    public function get_package_categories() {
+    public function get_caters_package_categories() {
         $this->db->select("id, category_name as name");
         $this->db->from("catering_category_tb");
         return $this->db->get()->result();
@@ -192,8 +192,10 @@ class Admin_model extends CI_Model
         $this->db->join('category_tb C', 'C.id = B.category');
 
         if($search){
+            $this->db->group_start();
             $this->db->like('B.name', $search);
             $this->db->or_like('C.category_name', $search);
+            $this->db->group_end();
         }
 
         $this->db->where('B.status', 1);
@@ -210,7 +212,7 @@ class Admin_model extends CI_Model
     }
 
     
-    function getStorePackageCount($store_id, $category_id, $status, $search) {
+    function getStoreCatersPackageCount($store_id, $category_id, $status, $search) {
         $this->db->select('count(*) as all_count');
 
         $this->db->from('catering_region_da_log A');
@@ -218,8 +220,10 @@ class Admin_model extends CI_Model
         $this->db->join('catering_category_tb C', 'C.id = B.category');
 
         if($search){
+            $this->db->group_start();
             $this->db->like('B.name', $search);
             $this->db->or_like('C.category_name', $search);
+            $this->db->group_end();
         }
 
         $this->db->where('B.status', 1);
@@ -235,16 +239,111 @@ class Admin_model extends CI_Model
         return $query->row()->all_count;
     }
 
+    function getStoreCatersPackageAddonsCount($store_id, $status, $search) {
+        $this->db->select('count(*) as all_count');
 
-    function getStorePackages($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
+        $this->db->from('catering_package_addons_tb	 A');
+        $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
+        
+        if($status)
+            $this->db->where('A.status', $status);
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+    
+    
+    function getStoreCatersProductAddonsCount($store_id, $status, $search) {
+        $this->db->select('count(*) as all_count');
+
+        $this->db->from('catering_product_addons_tb	 A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
+        
+        if($status)
+            $this->db->where('A.status', $status);
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    function getStoreCatersProductAddons($row_no, $row_per_page, $store_id,  $status, $order_by, $order, $search) {
+        $this->db->select('A.id, B.name, A.store_id, B.add_details');
+
+        $this->db->from('catering_product_addons_tb	 A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->group_end();
+        }
+            
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        return $this->db->get()->result();
+    }
+    
+    function getStoreCatersPackageAddons($row_no, $row_per_page, $store_id,  $status, $order_by, $order, $search) {
+        $this->db->select('A.id, B.name, A.store_id, B.add_details');
+        $this->db->from('catering_package_addons_tb	 A');
+        $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->group_end();
+        }
+            
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        return $this->db->get()->result();
+    }
+
+    function getStoreCatersPackages($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
         $this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');
         $this->db->from('catering_region_da_log A');
         $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
         $this->db->join('catering_category_tb C', 'C.id = B.category');
 
         if($search){
+            $this->db->group_start();
             $this->db->like('B.name', $search);
             $this->db->or_like('C.category_name', $search);
+            $this->db->group_end();
         }
             
         $this->db->where('B.status', 1);
@@ -266,8 +365,10 @@ class Admin_model extends CI_Model
         $this->db->join('category_tb C', 'C.id = B.category');
 
         if($search){
+            $this->db->group_start();
             $this->db->like('B.name', $search);
             $this->db->or_like('C.category_name', $search);
+            $this->db->group_end();
         }
             
         $this->db->where('B.status', 1);
@@ -291,8 +392,10 @@ class Admin_model extends CI_Model
         $this->db->join('dotcom_deals_store_menu_tb D', 'D.store_menu_tb_id = C.store_menu_type_id AND D.deal_id = B.id');
 
         if($search){
+            $this->db->group_start();
             $this->db->like('B.name', $search);
             $this->db->or_like('B.alias', $search);
+            $this->db->group_end();
         }
 
         $this->db->where('B.status', 1);
@@ -300,8 +403,7 @@ class Admin_model extends CI_Model
         
         if(isset($category_id)) $this->db->where('A.platform_category_id', $category_id);
         
-        if($status)
-            $this->db->where('A.status', $status);
+        $this->db->where('A.status', $status);
             
         $query = $this->db->get();
         return $query->row()->all_count;
@@ -313,10 +415,22 @@ class Admin_model extends CI_Model
         $this->db->update("deals_region_da_log");
     }
     
-    function updateStorePackage($id, $status){
+    function updateStoreCatersPackage($id, $status){
 		$this->db->set('status', $status);
         $this->db->where("id", $id);
         $this->db->update("catering_region_da_log");
+    }
+    
+    function updateStoreCatersProductAddon($id, $status){
+		$this->db->set('status', $status);
+        $this->db->where("id", $id);
+        $this->db->update("catering_product_addons_tb");
+    }
+
+    function updateStoreCatersPackageAddon($id, $status){
+		$this->db->set('status', $status);
+        $this->db->where("id", $id);
+        $this->db->update("catering_package_addons_tb");
     }
 
     function updateStoreProduct($id, $status){
@@ -333,8 +447,10 @@ class Admin_model extends CI_Model
         $this->db->join('dotcom_deals_store_menu_tb D', 'D.store_menu_tb_id = C.store_menu_type_id AND D.deal_id = B.id');
 
         if($search){
+            $this->db->group_start();
             $this->db->like('B.name', $search);
             $this->db->or_like('B.alias', $search);
+            $this->db->group_end();
         }
             
         $this->db->where('B.status', 1);
@@ -584,9 +700,11 @@ class Admin_model extends CI_Model
         $this->db->from('users A');
 
         if($search){
+            $this->db->group_start();
             $this->db->like('A.first_name', $search);
             $this->db->or_like('A.last_name', $search);
             $this->db->or_like('A.email', $search);
+            $this->db->group_end();
         }
             
         $query = $this->db->get();
@@ -622,9 +740,11 @@ class Admin_model extends CI_Model
         $this->db->from('users A');
 
         if($search){
+            $this->db->group_start();
             $this->db->like('A.first_name', $search);
             $this->db->or_like('A.last_name', $search);
             $this->db->or_like('A.email', $search);
+            $this->db->group_end();
         }
             
         $this->db->limit($row_per_page, $row_no);
@@ -924,12 +1044,14 @@ class Admin_model extends CI_Model
         
             
         if($search){
+            $this->db->group_start();
             $this->db->like('A.tracking_no', $search);
             $this->db->or_like('B.add_name', $search);
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
             $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
         }
         
         if($status)

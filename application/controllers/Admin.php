@@ -235,10 +235,8 @@ class Admin extends CI_Controller
     }
 
   }
-
   
-  
-  public function package_availability(){
+  public function caters_package_availability(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
         $per_page = $this->input->get('per_page') ?? 25;
@@ -255,11 +253,11 @@ class Admin extends CI_Controller
           $page_no = ($page_no - 1) * $per_page;
         }
 
-        $packages_count = $this->admin_model->getStorePackageCount($store_id, $category_id, $status, $search);
-        $packages = $this->admin_model->getStorePackages($page_no, $per_page, $store_id, $category_id, $status, $order_by, $order, $search);
+        $caters_packages_count = $this->admin_model->getStoreCatersPackageCount($store_id, $category_id, $status, $search);
+        $caters_packages = $this->admin_model->getStoreCatersPackages($page_no, $per_page, $store_id, $category_id, $status, $order_by, $order, $search);
 
         $pagination = array(
-          "total_rows" => $packages_count,
+          "total_rows" => $caters_packages_count,
           "per_page" => $per_page,
         );
 
@@ -267,7 +265,7 @@ class Admin extends CI_Controller
           "message" => 'Successfully fetch packages',
           "data" => array(
             "pagination" => $pagination,
-            "packages" => $packages
+            "caters_packages" => $caters_packages
           ),
         );
   
@@ -278,7 +276,111 @@ class Admin extends CI_Controller
         case 'PUT': 
           $put = json_decode(file_get_contents("php://input"), true);
   
-          $this->admin_model->updateStorePackage($put['id'], $put['status']);
+          $this->admin_model->updateStoreCatersPackage($put['id'], $put['status']);
+  
+          $response = array(
+            "message" => 'Successfully update status',
+          );
+    
+          header('content-type: application/json');
+          echo json_encode($response);
+          return;
+    }
+
+  }
+  
+  public function caters_product_addon_availability(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $store_id = $this->input->get('store_id');
+        $status = $this->input->get('status') ?? 0;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'id';
+        $search = $this->input->get('search');
+
+
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+
+        $caters_product_addons_count = $this->admin_model->getStoreCatersProductAddonsCount($store_id,  $status, $search);
+        $caters_product_addons = $this->admin_model->getStoreCatersProductAddons($page_no, $per_page, $store_id, $status, $order_by, $order, $search);
+
+        $pagination = array(
+          "total_rows" => $caters_product_addons_count,
+          "per_page" => $per_page,
+        );
+
+        $response = array(
+          "message" => 'Successfully fetch catering product addons',
+          "data" => array(
+            "pagination" => $pagination,
+            "caters_product_addons" => $caters_product_addons
+          ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+
+        case 'PUT': 
+          $put = json_decode(file_get_contents("php://input"), true);
+  
+          $this->admin_model->updateStoreCatersProductAddon($put['id'], $put['status']);
+  
+          $response = array(
+            "message" => 'Successfully update status',
+          );
+    
+          header('content-type: application/json');
+          echo json_encode($response);
+          return;
+    }
+
+  }
+
+  public function caters_package_addon_availability(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $store_id = $this->input->get('store_id');
+        $status = $this->input->get('status') ?? 0;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'id';
+        $search = $this->input->get('search');
+
+
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+
+        $caters_package_addons_count = $this->admin_model->getStoreCatersPackageAddonsCount($store_id,  $status, $search);
+        $caters_package_addons = $this->admin_model->getStoreCatersPackageAddons($page_no, $per_page, $store_id, $status, $order_by, $order, $search);
+
+        $pagination = array(
+          "total_rows" => $caters_package_addons_count,
+          "per_page" => $per_page,
+        );
+
+        $response = array(
+          "message" => 'Successfully fetch catering package addons',
+          "data" => array(
+            "pagination" => $pagination,
+            "caters_package_addons" => $caters_package_addons
+          ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+
+        case 'PUT': 
+          $put = json_decode(file_get_contents("php://input"), true);
+  
+          $this->admin_model->updateStoreCatersPackageAddon($put['id'], $put['status']);
   
           $response = array(
             "message" => 'Successfully update status',
@@ -445,11 +547,11 @@ class Admin extends CI_Controller
     }
   }
 
-  public function package_categories(){
+  public function caters_package_categories(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
 
-        $package_categories = $this->admin_model->get_package_categories();
+        $package_categories = $this->admin_model->get_caters_package_categories();
 
         $response = array(
           "message" => 'Successfully fetch user stores',
