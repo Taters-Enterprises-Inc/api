@@ -900,10 +900,22 @@ class Admin extends CI_Controller
     }
   }
   
-  public function popclub_decline_redeem($redeem_id){
+  public function popclub_decline_redeem(){
     switch($this->input->server('REQUEST_METHOD')){
-      case 'GET': 
+      case 'POST': 
+        $redeem_id = $this->input->post('redeem_id');
+        $fb_user_id = $this->input->post('fb_user_id');
+        $mobile_user_id = $this->input->post('mobile_user_id');
+
         $this->admin_model->declineRedeem($redeem_id);
+        
+        $data = array(
+          "fb_user_id" => $fb_user_id,
+          "mobile_user_id" => $mobile_user_id,
+          "message" => "Your redeem declined, Thank you."
+        );
+
+        notify('popclub','popclub-redeem-declined', $data);
 
         $response = array(
           "message" => 'Successfully declined the redeem',
