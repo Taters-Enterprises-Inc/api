@@ -172,6 +172,7 @@ class Transaction extends CI_Controller {
 
                 $hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
                 $tracking_no = substr(md5(uniqid(mt_rand(), true)), 0, 6);
+                $store_id = $this->session->cache_data['store_id'];
 
                 $insert_client_details = $this->transaction_model->insert_client_details($post);
 
@@ -280,7 +281,7 @@ class Transaction extends CI_Controller {
                         'purchase_amount'   => $comp_total,
                         'remarks' 		    => '',
                         'status' 		    => 1,
-                        'store'             => $this->session->cache_data['store_id'],
+                        'store'             => $store_id,
                         'dateadded'         => date('Y-m-d H:i:s'),
                         'distance'          => '2',
                         'distance_id'       => $distance_rate_id,
@@ -375,41 +376,52 @@ class Transaction extends CI_Controller {
 								
 							if(!empty($order_data_deal))
 								$query_orders_result = $this->transaction_model->insert_client_orders_deal($order_data_deal);
-                        }
-                        
+                        }               
                     
                         if($query_orders_result){
                             $sms_stat =  $this->summary_actions('confirm');
                             // set_cookie('_teitn',$tracking_no,'86400');
                         }
+        
+                        if(isset($_SESSION['orders'])){
+                            $this->session->unset_userdata('orders');
+                        }
 
+                        if(isset($_SESSION['deals'])){
+                            $this->session->unset_userdata('deals');
+
+                            if(isset($_SESSION['redeem_data'])){
+                                $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
+                                $this->session->unset_userdata('redeem_data');
+                            }
+                        }
+
+                        $data = array(
+                            "store_id" => $store_id,
+                            "message" => "Jerico Villaraza ordered!"
+                        );
+
+                        notify('snackshop','order-transaction', $data);
+
+                        $response = array(
+                            "data" => array(
+                                "hash" => $hash_key,
+                            ),
+                            "message" => "Succesfully checkout order"
+                        );
+                        
+                        header('content-type: application/json');
+                        echo json_encode($response);
+
+                    }else{
+                        $this->output->set_status_header(401);
+                        echo json_encode(array('message'=>'Failed to insert transaction'));
                     }
 
+                }else{
+					$this->output->set_status_header(401);
+					echo json_encode(array('message'=>'Client details cannot be inserted'));
                 }
-                
-                if(isset($_SESSION['orders'])){
-                    $this->session->unset_userdata('orders');
-                }
-
-                if(isset($_SESSION['deals'])){
-                    $this->session->unset_userdata('deals');
-
-                    if(isset($_SESSION['redeem_data'])){
-                        $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
-                        $this->session->unset_userdata('redeem_data');
-                    }
-                }
-                
-                $response = array(
-                    "data" => array(
-                        "hash" => $hash_key,
-                    ),
-                    "message" => "Succesfully checkout order"
-                );
-                
-                header('content-type: application/json');
-                echo json_encode($response);
-
                 break;
         }
     }
