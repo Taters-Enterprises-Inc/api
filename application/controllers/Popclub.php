@@ -13,6 +13,8 @@ class Popclub extends CI_Controller {
 	{
 		parent::__construct();
 		$this->load->model('deals_model');
+		$this->load->model('transaction_model');
+		$this->load->model('client_model');
 	}
 	private function unable_redeems(){
 		$redeems = $this->deals_model->getUserRedeems();
@@ -270,16 +272,16 @@ class Popclub extends CI_Controller {
 				
 				$deal = $this->deals_model->getDeal($hash);	
 
-				$client_details = $this->deals_model->insert_client_details();
+				$client_details = $this->client_model->insertClientDetailsPopClub();
 		
-				if ($client_details) {
+				if ($client_details['status'] == true) {
 			
 					$date_redeemed = date("Y-m-d H:i:s");
 					$expiration_date = date("Y-m-d H:i:s", time()+($deal->seconds_before_expiration));
 					$redeem_code = "DC" . substr(md5(uniqid(mt_rand(), true)), 0, 6);
 					$trans_hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 		
-					$client_id = $client_details->id;
+					$client_id = $client_details['id'];
 		
 					$redeems_transaction_data = array(
 							'redeem_code' 					=> $redeem_code,
@@ -309,7 +311,7 @@ class Popclub extends CI_Controller {
 						);
 					}
 		
-					$this->deals_model->insert_client_orders($order_data);
+					$this->deals_model->insertPopClubClientOrders($order_data);
 		
 
 					$products= array(
@@ -350,6 +352,10 @@ class Popclub extends CI_Controller {
 			
 					header('content-type: application/json');
 					echo json_encode($response);
+					return;
+				}else{
+					$this->output->set_status_header(401);
+					echo json_encode(array('message'=>'Client details cannot be inserted'));
 					return;
 				}
 		

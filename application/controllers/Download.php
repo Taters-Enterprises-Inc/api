@@ -12,7 +12,7 @@ class Download extends CI_Controller {
 		parent::__construct();
 		$this->load->model('store_model');
 		$this->load->model('catering_model');
-		$this->load->model('shop_model');
+		$this->load->model('client_model');
 		$this->load->library('images');
 	}
 
@@ -40,16 +40,6 @@ class Download extends CI_Controller {
         $catering_end_date = $query_result['clients_info']->end_datetime;
         $str_end_datetime = strtotime($catering_end_date);
         $end_datetime = date($str_end_datetime);
-            
-		
-        if (isset($_SESSION['userData']['oauth_uid'])) {
-            $get_fb_id = $this->shop_model->get_facebook_client_id($_SESSION['userData']['oauth_uid']);
-
-			if($get_fb_id != $query_result['clients_info']->fb_user_id){
-				show_error('Unauthorized you cannot view this page');
-				exit();
-			}
-        }
 
 		$query_logon  = $this->catering_model->get_logon_type($hash_key);
 		$logon_type   = $query_logon->logon_type;

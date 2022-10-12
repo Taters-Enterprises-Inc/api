@@ -12,15 +12,6 @@ class Shop_model extends CI_Model
         return $data;
     }
 
-    //jepoy get facebook client id
-    public function get_facebook_client_id($oauth_id){
-        $this->db->select('id');
-        $this->db->where('oauth_uid', $oauth_id);
-        $query = $this->db->get('fb_users');
-        $data = $query->result_array();
-        return $data[0]['id'];
-    }
-
 
     public function get_logon_type($hash_key){
         $this->db->select('logon_type');
