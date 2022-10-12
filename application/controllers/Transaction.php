@@ -15,20 +15,18 @@ class Transaction extends CI_Controller {
 
         // To be removed
 		$this->load->model('shop_model');
-		$this->load->model('catering_model');
-
 		$this->load->model('deals_model');
 		$this->load->model('client_model');
 	}
     
     public function catering(){
-        
         switch($this->input->server('REQUEST_METHOD')){
             case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);
                 
                 $hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
                 $tracking_no = substr(md5(uniqid(mt_rand(), true)), 0, 6);
+                $store_id = $this->session->cache_data['store_id'];
 
                 
                 $insert_client_details = $this->client_model->insertClientDetailsCatering(
@@ -105,7 +103,7 @@ class Transaction extends CI_Controller {
                         
                     $query_transaction_result = $this->transaction_model->insertCateringTransactionDetails($transaction_data);
                     
-                    if($query_transaction_result['status']){
+                    if($query_transaction_result['status'] == true){
                         
                         if(!empty($this->session->orders)){
                             $comp_total = 0;
@@ -136,24 +134,40 @@ class Transaction extends CI_Controller {
                             }
                             $this->transaction_model->insertCateringClientOrders($order_data);
                         }
+
+                        $data = array(
+                            "store_id" => $store_id,
+                            "message" => $post['firstName'] . " " . $post['lastName'] ." book on catering!"
+                        );
+
+                        notify('catering','booking-transaction', $data);
+                        
+                
+                        $this->session->unset_userdata('orders');
+                        $this->session->unset_userdata('deals');
+                        
+                        $response = array(
+                            "data" => array(
+                                "hash" => $hash_key,
+                            ),
+                            "message" => "Succesfully checkout order"
+                        );
+                        
+                        header('content-type: application/json');
+                        echo json_encode($response);
+                        return;
+                    }else{
+                        $this->output->set_status_header(401);
+                        echo json_encode(array('message'=>'Failed to insert transaction'));
+                        return;
                     }
                     
 
+                }else{
+					$this->output->set_status_header(401);
+					echo json_encode(array('message'=>'Client details cannot be inserted'));
+                    return;
                 }
-                
-                $this->session->unset_userdata('orders');
-                $this->session->unset_userdata('deals');
-                
-                $response = array(
-                    "data" => array(
-                        "hash" => $hash_key,
-                    ),
-                    "message" => "Succesfully checkout order"
-                );
-                
-                header('content-type: application/json');
-                echo json_encode($response);
-
 
                 break;
         }
@@ -298,7 +312,7 @@ class Transaction extends CI_Controller {
 
                     $query_transaction_result = $this->transaction_model->insertSnackShopTransactionDetails($transaction_data);
                     
-                    if($query_transaction_result['status']){
+                    if($query_transaction_result['status'] == true){
                         $trans_id = $query_transaction_result['id'];
 
                         $orders_session = isset($_SESSION['orders']) ? $_SESSION['orders']:  [];
@@ -386,7 +400,7 @@ class Transaction extends CI_Controller {
 
                         $data = array(
                             "store_id" => $store_id,
-                            "message" => $post['firstName'] . " " . $post['lastName'] ." ordered!"
+                            "message" => $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!"
                         );
 
                         notify('snackshop','order-transaction', $data);

@@ -846,6 +846,8 @@ class Admin_model extends CI_Model
             A.redeem_code,
             A.expiration,
             A.purchase_amount,
+            B.mobile_user_id,
+            B.fb_user_id,
             B.add_name as client_name,
             B.payops,
             C.name as store_name

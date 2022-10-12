@@ -44,12 +44,23 @@ class Transaction_model extends CI_Model {
         return  $this->db->trans_status();
     }
     
+	public function insertPopClubTransactionDetails($data){   
+		$this->db->trans_start();
+		$this->db->insert('deals_redeems_tb', $data);
+		$insert_id = $this->db->insert_id();
+		$this->db->trans_complete();
+		
+		$id = ($this->db->trans_status() === FALSE) ? 0 : $insert_id;
+		return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
+	}
+
 	public function insertPopClubClientOrders($data){
 		$this->db->trans_start();
 		$this->db->insert_batch('deals_order_items', $data);
 		$this->db->trans_complete();
 		return  $this->db->trans_status();
 	}
+    
     
 
 }

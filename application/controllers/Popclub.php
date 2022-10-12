@@ -280,6 +280,7 @@ class Popclub extends CI_Controller {
 					$expiration_date = date("Y-m-d H:i:s", time()+($deal->seconds_before_expiration));
 					$redeem_code = "DC" . substr(md5(uniqid(mt_rand(), true)), 0, 6);
 					$trans_hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+					$store_id = $this->session->cache_data['store_id'];
 		
 					$client_id = $client_details['id'];
 		
@@ -298,7 +299,7 @@ class Popclub extends CI_Controller {
 							'store'							=> $_SESSION['cache_data']['store_id']
 					);
 					
-					$query_transaction_result = $this->deals_model->insert_redeem_transaction($redeems_transaction_data);
+					$query_transaction_result = $this->transaction_model->insertPopClubTransactionDetails($redeems_transaction_data);
 		
 					if ($query_transaction_result->status == true) {
 						$order_data[] = array(
@@ -309,50 +310,61 @@ class Popclub extends CI_Controller {
 							'status'	      => 0,
 							'remarks'		  => $post['remarks'] === NULL? '' : $post['remarks'],
 						);
-					}
-		
-					$this->deals_model->insertPopClubClientOrders($order_data);
-		
 
-					$products= array(
-						'id' => $query_transaction_result->id,
-						'deal_id' => $deal->id,
-						'deal_image_name' => $deal->product_image,
-						'deal_name' => $deal->name,
-						'description' => $deal->description,
-						'deal_qty' => 1, 
-						'redeem_code'=> $redeem_code,
-						'deal_remarks' =>$post['remarks'],
-					);
-					
-			
-					if($deal->minimum_purchase != null){
-						$products['minimum_purchase'] = $deal->minimum_purchase;
+						$this->transaction_model->insertPopClubClientOrders($order_data);
+
+						$products= array(
+							'id' => $query_transaction_result->id,
+							'deal_id' => $deal->id,
+							'deal_image_name' => $deal->product_image,
+							'deal_name' => $deal->name,
+							'description' => $deal->description,
+							'deal_qty' => 1, 
+							'redeem_code'=> $redeem_code,
+							'deal_remarks' =>$post['remarks'],
+						);
+				
+						if($deal->minimum_purchase != null){
+							$products['minimum_purchase'] = $deal->minimum_purchase;
+						}else{
+							$products['deal_original_price'] = $deal->original_price;
+							$products['deal_promo_price'] = $deal->promo_price;
+		
+						}
+	
+						if($deal->platform_id === 2 && $deal->minimum_purchase === null){
+							$_SESSION['deals'] = array($products);	
+						}
+	
+						$_SESSION['redeem_data'] = $products;
+
+						
+                        $data = array(
+                            "store_id" => $store_id,
+                            "message" => $this->session->userData['first_name'] . " " . $this->session->userData['last_name']." reedeem on popclub!"
+                        );
+
+                        notify('popclub','popclub-store-visit-transaction', $data);
+		
+						$response = array(
+							"message" => 'Successfully Redeem Code',
+							"data" => array(
+								"redeem_data" => array($products),
+								"deals" => $products,
+								"orders" => $products,
+							)
+						);
+						
+				
+						header('content-type: application/json');
+						echo json_encode($response);
+						return;
+
 					}else{
-						$products['deal_original_price'] = $deal->original_price;
-						$products['deal_promo_price'] = $deal->promo_price;
-	
+                        $this->output->set_status_header(401);
+                        echo json_encode(array('message'=>'Failed to insert transaction'));
+                        return;
 					}
-
-					if($deal->platform_id === 2 && $deal->minimum_purchase === null){
-						$_SESSION['deals'] = array($products);	
-					}
-
-					$_SESSION['redeem_data'] = $products;
-	
-					$response = array(
-						"message" => 'Successfully Redeem Code',
-						"data" => array(
-							"redeem_data" => array($products),
-							"deals" => $products,
-							"orders" => $products,
-						)
-					);
-					
-			
-					header('content-type: application/json');
-					echo json_encode($response);
-					return;
 				}else{
 					$this->output->set_status_header(401);
 					echo json_encode(array('message'=>'Client details cannot be inserted'));

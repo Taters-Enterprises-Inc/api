@@ -212,16 +212,6 @@ class Deals_model extends CI_Model
 
 		return $deals_redeems;
 	}
-
-	public function insert_redeem_transaction($data){   
-		$this->db->trans_start();
-		$this->db->insert('deals_redeems_tb', $data);
-		$insert_id = $this->db->insert_id();
-		$this->db->trans_complete();
-		
-		$id = ($this->db->trans_status() === FALSE) ? 0 : $insert_id;
-		return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
-	}
 	
 	public function getDealsPlatform(){
 	  $this->db->select('*');
