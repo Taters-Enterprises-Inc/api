@@ -39,6 +39,7 @@ class User_Authentication extends CI_Controller {
 			
 			// Check user data insert or update status
             if(!empty($userID)){
+                $userData['fb_user_id'] = $userID;
                 $data['userData'] = $userData;
 				
 				// Store the user profile info into session

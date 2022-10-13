@@ -9,35 +9,36 @@ date_default_timezone_set('Asia/Manila');
 
 class Transaction extends CI_Controller {
     
-	public function __construct()
-	{
+	public function __construct(){
 		parent::__construct();
 		$this->load->model('transaction_model');
-		$this->load->model('shop_model');
-		$this->load->model('catering_model');
-		$this->load->model('deals_model');
-	}
 
-    public function get_facebook_client_id($oauth_id){
-        $this->db->select('id');
-        $this->db->where('oauth_uid', $oauth_id);
-        $query = $this->db->get('fb_users');
-        $data = $query->result_array();
-        return $data[0]['id'];
-    }
+        // To be removed
+		$this->load->model('shop_model');
+		$this->load->model('deals_model');
+		$this->load->model('client_model');
+	}
     
     public function catering(){
-        
         switch($this->input->server('REQUEST_METHOD')){
             case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);
                 
                 $hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
                 $tracking_no = substr(md5(uniqid(mt_rand(), true)), 0, 6);
+                $store_id = $this->session->cache_data['store_id'];
 
                 
-                $insert_client_details = $this->catering_model->insert_client_details($post);
-                if($insert_client_details->status == true){
+                $insert_client_details = $this->client_model->insertClientDetailsCatering(
+                    $post['firstName'],
+                    $post['lastName'],
+                    $post['address'],
+                    $post['phoneNumber'],
+                    $post['payops'],
+                    $post['eMail']
+                );
+
+                if($insert_client_details['status'] == true){
 
                     if(!empty($this->session->orders)){
                         $comp_total = 0;
@@ -57,15 +58,6 @@ class Transaction extends CI_Controller {
                         $cod_fee = $this->session->cash_delivery;
                     }
 
-                    
-                    if (isset($this->session->userData['oauth_uid'])) {
-                        $logon_type = 'facebook';
-                    } elseif(isset($this->session->userData['mobile_user_id'])){
-                        $logon_type = 'mobile';
-                    } else {
-                        $logon_type = 'guest';
-                    }
-                    
 					$str_serving_time = strtotime($post['catering_serving_time']);
 					$serving_time = date($str_serving_time);
                     
@@ -77,7 +69,7 @@ class Transaction extends CI_Controller {
                     $str_end_datetime = strtotime($catering_end_date);
                     $end_datetime = date($str_end_datetime);
                     
-                    $client_id = $insert_client_details->id;
+                    $client_id = $insert_client_details['id'];
                     $transaction_data = array(
                         'tracking_no' 		=> $tracking_no,
                         'hash_key'          => $hash_key,
@@ -105,13 +97,13 @@ class Transaction extends CI_Controller {
                         'payment_plan'      => $post['payment_plan'],
                         'discount'          => 0,
                         'custom_message'    => '',
-                        'logon_type'        => $logon_type,
+                        'logon_type'        => $insert_client_details['logon_type'],
                     );
 
                         
-                    $query_transaction_result = $this->catering_model->insert_transaction_details($transaction_data);
+                    $query_transaction_result = $this->transaction_model->insertCateringTransactionDetails($transaction_data);
                     
-                    if($query_transaction_result->status){
+                    if($query_transaction_result['status'] == true){
                         
                         if(!empty($this->session->orders)){
                             $comp_total = 0;
@@ -121,7 +113,7 @@ class Transaction extends CI_Controller {
                                 $type = (isset($value['addon_base_product_id']) && ($value['addon_base_product_id']) ? 'addon' : 'main');
 
                                 $order_data[] = array(
-                                    'transaction_id'      => $query_transaction_result->id,
+                                    'transaction_id'      => $query_transaction_result['id'],
                                     'combination_id'      => $k,
                                     'product_id'          => $value['prod_id'],
                                     'quantity'            => $value['prod_qty'],
@@ -140,26 +132,42 @@ class Transaction extends CI_Controller {
                                     'addon_base_product'  => (isset($value['addon_base_product'])) ? $value['addon_base_product'] : '',
                                 );
                             }
-                            $query_orders_result = $this->catering_model->insert_client_orders($order_data);
+                            $this->transaction_model->insertCateringClientOrders($order_data);
                         }
+
+                        $data = array(
+                            "store_id" => $store_id,
+                            "message" => $post['firstName'] . " " . $post['lastName'] ." book on catering!"
+                        );
+
+                        notify('catering','booking-transaction', $data);
+                        
+                
+                        $this->session->unset_userdata('orders');
+                        $this->session->unset_userdata('deals');
+                        
+                        $response = array(
+                            "data" => array(
+                                "hash" => $hash_key,
+                            ),
+                            "message" => "Succesfully checkout order"
+                        );
+                        
+                        header('content-type: application/json');
+                        echo json_encode($response);
+                        return;
+                    }else{
+                        $this->output->set_status_header(401);
+                        echo json_encode(array('message'=>'Failed to insert transaction'));
+                        return;
                     }
                     
 
+                }else{
+					$this->output->set_status_header(401);
+					echo json_encode(array('message'=>'Client details cannot be inserted'));
+                    return;
                 }
-                
-                $this->session->unset_userdata('orders');
-                $this->session->unset_userdata('deals');
-                
-                $response = array(
-                    "data" => array(
-                        "hash" => $hash_key,
-                    ),
-                    "message" => "Succesfully checkout order"
-                );
-                
-                header('content-type: application/json');
-                echo json_encode($response);
-
 
                 break;
         }
@@ -172,10 +180,19 @@ class Transaction extends CI_Controller {
 
                 $hash_key = substr(md5(uniqid(mt_rand(), true)), 0, 20);
                 $tracking_no = substr(md5(uniqid(mt_rand(), true)), 0, 6);
+                $store_id = $this->session->cache_data['store_id'];
+                
+                $insert_client_details = $this->client_model->insertClientDetailsShop(
+                    $post['firstName'],
+                    $post['lastName'],
+                    $post['address'],
+                    $post['phoneNumber'],
+                    $post['payops'],
+                    $post['full_address'],
+                    $post['eMail']
+                );
 
-                $insert_client_details = $this->transaction_model->insert_client_details($post);
-
-                if($insert_client_details->status == true){
+                if($insert_client_details['status'] == true){
                     $comp_total = 0;
 
                     if(isset($_SESSION['orders'])){
@@ -257,22 +274,13 @@ class Transaction extends CI_Controller {
                         $table_number = null;
                     }
 
-
-                    
-                    if (isset($this->session->userData['oauth_uid'])) {
-                        $logon_type = 'facebook';
-                    } elseif(isset($this->session->userData['mobile_user_id'])){
-                        $logon_type = 'mobile';
-                    } else {
-                        $logon_type = 'guest';
-                    }
-
                     $payops_ref_no = '';
                     $discount_type = '';
                     $discount_ref_no = '';
                     $discount_value = '';
 
-                    $client_id = $insert_client_details->id;
+                    $client_id = $insert_client_details['id'];
+
                     $transaction_data = array(
                         'tracking_no' 		=> $tracking_no,
                         'hash_key'          => $hash_key,
@@ -280,7 +288,7 @@ class Transaction extends CI_Controller {
                         'purchase_amount'   => $comp_total,
                         'remarks' 		    => '',
                         'status' 		    => 1,
-                        'store'             => $this->session->cache_data['store_id'],
+                        'store'             => $store_id,
                         'dateadded'         => date('Y-m-d H:i:s'),
                         'distance'          => '2',
                         'distance_id'       => $distance_rate_id,
@@ -295,17 +303,17 @@ class Transaction extends CI_Controller {
                         'voucher_id'        => $voucher_id,
                         'table_number'      => $table_number,
                         'custom_message'    => '',
-                        'logon_type'        => $logon_type,
+                        'logon_type'        => $insert_client_details['logon_type'],
                         'store_payops'      => 0,
                         'store_payops_ref_no'=> $payops_ref_no,
                         'store_discount_type'=> $discount_type,
                         'store_discount_ref_no'=> $discount_ref_no
                     );
 
-                    $query_transaction_result = $this->transaction_model->insert_transaction_details($transaction_data);
+                    $query_transaction_result = $this->transaction_model->insertSnackShopTransactionDetails($transaction_data);
                     
-                    if($query_transaction_result->status){
-                        $trans_id = $query_transaction_result->id;
+                    if($query_transaction_result['status'] == true){
+                        $trans_id = $query_transaction_result['id'];
 
                         $orders_session = isset($_SESSION['orders']) ? $_SESSION['orders']:  [];
                         $deals_session = isset($_SESSION['deals']) ? $_SESSION['deals']:  [];
@@ -321,7 +329,7 @@ class Transaction extends CI_Controller {
 									$type = (isset($value['addon_base_product_id']) && ($value['addon_base_product_id']) ? 'addon' : 'main');
 	
 									$order_data_product[] = array(
-										'transaction_id'      => $query_transaction_result->id,
+										'transaction_id'      => $query_transaction_result['id'],
 										'combination_id'      => $k,
 										'product_id'          => $value['prod_id'],
 										'quantity'            => $value['prod_qty'],
@@ -359,7 +367,7 @@ class Transaction extends CI_Controller {
 									}
 								}else if($value['deal_id']){
 									$order_data_deal[] = array(
-										'redeems_id'  => $query_transaction_result->id,
+										'redeems_id'  => $query_transaction_result['id'],
 										'deal_id'         => $value['deal_id'],
 										'price'			  => $value['deal_promo_price'],
 										'product_price'   => $value['deal_promo_price'],
@@ -371,52 +379,60 @@ class Transaction extends CI_Controller {
                             }
 							
 							if(!empty($order_data_product))
-								$query_orders_result = $this->transaction_model->insert_client_orders($order_data_product);
+								$this->transaction_model->insertSnackshopClientOrders($order_data_product);
 								
 							if(!empty($order_data_deal))
-								$query_orders_result = $this->transaction_model->insert_client_orders_deal($order_data_deal);
+								$this->transaction_model->insertPopClubClientOrders($order_data_deal);
+                        }               
+        
+                        if(isset($_SESSION['orders'])){
+                            $this->session->unset_userdata('orders');
                         }
+
+                        if(isset($_SESSION['deals'])){
+                            $this->session->unset_userdata('deals');
+
+                            if(isset($_SESSION['redeem_data'])){
+                                $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
+                                $this->session->unset_userdata('redeem_data');
+                            }
+                        }
+
+                        $data = array(
+                            "store_id" => $store_id,
+                            "message" => $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!"
+                        );
+
+                        notify('snackshop','order-transaction', $data);
+
+                        $response = array(
+                            "data" => array(
+                                "hash" => $hash_key,
+                            ),
+                            "message" => "Succesfully checkout order"
+                        );
                         
-                    
-                        if($query_orders_result){
-                            $sms_stat =  $this->summary_actions('confirm');
-                            // set_cookie('_teitn',$tracking_no,'86400');
-                        }
+                        header('content-type: application/json');
+                        echo json_encode($response);
+                        return;
 
+                    }else{
+                        $this->output->set_status_header(401);
+                        echo json_encode(array('message'=>'Failed to insert transaction'));
+                        return;
                     }
 
+                }else{
+					$this->output->set_status_header(401);
+					echo json_encode(array('message'=>'Client details cannot be inserted'));
+                    return;
                 }
-                
-                if(isset($_SESSION['orders'])){
-                    $this->session->unset_userdata('orders');
-                }
-
-                if(isset($_SESSION['deals'])){
-                    $this->session->unset_userdata('deals');
-
-                    if(isset($_SESSION['redeem_data'])){
-                        $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
-                        $this->session->unset_userdata('redeem_data');
-                    }
-                }
-                
-                $response = array(
-                    "data" => array(
-                        "hash" => $hash_key,
-                    ),
-                    "message" => "Succesfully checkout order"
-                );
-                
-                header('content-type: application/json');
-                echo json_encode($response);
-
                 break;
         }
     }
 
 
-    private function summary_actions($request)
-    {
+    private function summary_actions($request){
         switch ($request) {
             case 'edit':
                 if (isset($_SESSION['transaction_id'])) {

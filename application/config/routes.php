@@ -104,8 +104,8 @@ $route['admin/shop-update-status'] = 'admin/shop_update_status';
 $route['admin/shop/(:any)'] = 'admin/shop_order/$1';
 $route['admin/shop'] = 'admin/shop';
 
-$route['admin/popclub/(:any)/complete'] = 'admin/popclub_complete_redeem/$1';
-$route['admin/popclub/(:any)/decline'] = 'admin/popclub_decline_redeem/$1';
+$route['admin/popclub/complete-redeem'] = 'admin/popclub_complete_redeem';
+$route['admin/popclub/decline-redeem'] = 'admin/popclub_decline_redeem';
 $route['admin/popclub/(:any)'] = 'admin/popclub_redeem/$1';
 $route['admin/popclub'] = 'admin/popclub';
 
@@ -125,7 +125,6 @@ $route['admin/groups'] = 'admin/groups';
 $route['admin/setting/stores'] = 'admin/setting_stores';
 
 $route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
-
 
 //Others
 $route['404_override'] = '';
