@@ -179,6 +179,7 @@ class Deals_model extends CI_Model
 			$this->db->select('
 				A.id,
 				A.deal_id,
+				A.store,
 				A.redeem_code,
 				A.expiration,
 				A.dateadded AS date_redeemed,
@@ -208,7 +209,6 @@ class Deals_model extends CI_Model
 				$deals_redeems = array_merge($deals_redeems,$result);
 			}
 		}
-
 
 		return $deals_redeems;
 	}
