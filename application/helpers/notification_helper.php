@@ -12,7 +12,7 @@ if ( ! function_exists('notify'))
         $dotenv->load();
         
         $options = array(
-            'cluster' => $_ENV['PUSHER_CLUSTERR'],
+            'cluster' => $_ENV['PUSHER_CLUSTER'],
             'useTLS' => true
         );
         $pusher = new Pusher\Pusher(
