@@ -417,6 +417,9 @@ class Admin extends CI_Controller
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
 
+        $fb_user_id = $this->input->post('fb_user_id');
+        $mobile_user_id = $this->input->post('mobile_user_id');
+
         $password = $this->input->post('password');
         
         $transaction_id = $this->input->post('trans_id');
@@ -466,10 +469,28 @@ class Admin extends CI_Controller
             
         if ($fetch_data == 1) {
 
-          if ($request == "store_transfer")
+          if ($request == "store_transfer"){
             $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Transfer order from ' . $from_store->name . ' to ' . $to_store->name);
-          elseif ($request == "change_status")
+            
+            $data = array(
+                "fb_user_id" => $fb_user_id,
+                "mobile_user_id" => $mobile_user_id,
+                "message" => 'Your order has been transfered from '. $from_store->name . ' to ' . $to_store->name,
+            );
+
+            notify('snackshop','snackshop-order-changed', $data);
+          }
+          elseif ($request == "change_status"){
             $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Change order status from ' . $from_status . ' to ' . $to_status);
+            
+            $data = array(
+                "fb_user_id" => $fb_user_id,
+                "mobile_user_id" => $mobile_user_id,
+                "message" => 'Your order status changed '. $from_store->name . ' to ' . $to_store->name,
+            );
+
+            notify('snackshop','snackshop-order-changed', $data);
+          }
     
           header('content-type: application/json');
           echo json_encode(array( "message" => "Update success!"));
@@ -493,6 +514,8 @@ class Admin extends CI_Controller
             $trans_id = (int) $this->input->post('trans_id');
             $status = $this->input->post('status');
             $fetch_data = $this->admin_model->update_catering_status($trans_id, $status);
+            $fb_user_id = $this->input->post('fb_user_id');
+            $mobile_user_id = $this->input->post('mobile_user_id');
 
             $update_on_click = $this->admin_model->update_catering_on_click($trans_id, $status);
             if ($status == 2) $generate_invoice = $this->admin_model->generate_catering_invoice_num($trans_id);
@@ -503,6 +526,14 @@ class Admin extends CI_Controller
             elseif ($status == 8) $tagname = "Final Payment Verified";
 
             if ($fetch_data == 1) {
+              
+              $data = array(
+                "fb_user_id" => $fb_user_id,
+                "mobile_user_id" => $mobile_user_id,
+                "message" => $tagname,
+              );
+
+              notify('catering','catering-booking-updated', $data);
               header('content-type: application/json');
               echo json_encode(array( "message" => 'Successfully update status!'));
             } else {
@@ -521,6 +552,8 @@ class Admin extends CI_Controller
             $user_id = $this->session->user_id;
             $status = $this->input->post('status');
             $fetch_data = $this->admin_model->update_shop_status($trans_id, $status);
+            $fb_user_id = $this->input->post('fb_user_id');
+            $mobile_user_id = $this->input->post('mobile_user_id');
 
             $update_on_click = $this->admin_model->update_shop_on_click($trans_id, $_POST['status']);
             if ($status == 3) $generate_invoice = $this->admin_model->generate_shop_invoice_num($trans_id);
@@ -535,6 +568,15 @@ class Admin extends CI_Controller
             if ($fetch_data == 1) {
               $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Order Success');
               $this->status_notification($trans_id, 9, $user_id);
+              
+              $data = array(
+                  "fb_user_id" => $fb_user_id,
+                  "mobile_user_id" => $mobile_user_id,
+                  "status" => $status,
+              );
+
+              notify('snackshop','snackshop-order-update', $data);
+
 
               header('content-type: application/json');
               echo json_encode(array( "message" => 'Successfully update status!'));
