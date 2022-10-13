@@ -8,14 +8,17 @@ if ( ! function_exists('notify'))
 
         require FCPATH . 'vendor/autoload.php';
         
+        $dotenv = Dotenv\Dotenv::createImmutable(FCPATH);
+        $dotenv->load();
+        
         $options = array(
-            'cluster' => 'ap1',
+            'cluster' => $_ENV['PUSHER_CLUSTERR'],
             'useTLS' => true
         );
         $pusher = new Pusher\Pusher(
-            '8a62b17c8a9baa690edb',
-            '0e16bc6f7b22f371826b',
-            '1188170',
+            $_ENV['PUSHER_KEY'],
+            $_ENV['PUSHER_SECRET'],
+            $_ENV['PUSHER_APP_ID'],
             $options
         );
         $pusher->trigger($subscribe_to, $channel, $data);
