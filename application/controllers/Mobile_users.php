@@ -24,7 +24,6 @@ class Mobile_users extends CI_Controller
   // TO BE IMPROVED *** will create a helper with this
   private function send_sms($to, $code, $type)
   {
-    require FCPATH . 'vendor/autoload.php';
 
     $dotenv = Dotenv\Dotenv::createImmutable(FCPATH);
     $dotenv->load();
