@@ -17,6 +17,7 @@ class Transaction extends CI_Controller {
 		$this->load->model('shop_model');
 		$this->load->model('deals_model');
 		$this->load->model('client_model');
+        $this->load->model('notification_model');
 	}
     
     public function catering(){
@@ -398,12 +399,23 @@ class Transaction extends CI_Controller {
                             }
                         }
 
-                        $data = array(
-                            "store_id" => $store_id,
-                            "message" => $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!"
-                        );
+                        $message = $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!";
 
-                        notify('snackshop','order-transaction', $data);
+                        $notification_details = array(
+                            "store_to_notify" => $store_id,
+                            "fb_user_who_fired_event" => $this->session->userData['fb_user_id'],
+                            "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'],
+                            "dateadded" => date('Y-m-d H:i:s'),
+                        );
+                        $this->notification_model->insertNotification($notification_details,1, $message);
+                        
+
+                        $realtime_notification = array(
+                            "store_id" => $store_id,
+                            "message" => $message,
+                        );
+                        notify('snackshop','order-transaction', $realtime_notification);
+                        
 
                         $response = array(
                             "data" => array(
