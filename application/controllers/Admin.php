@@ -1148,7 +1148,6 @@ class Admin extends CI_Controller
   
   // TO BE IMPROVED ( V2 Backend ) *** will create a helper with this
   private function send_sms($to, $text){
-    require FCPATH . 'vendor/autoload.php';
 
     $dotenv = Dotenv\Dotenv::createImmutable(FCPATH);
     $dotenv->load();
