@@ -93,6 +93,7 @@ $route['admin/session'] = 'admin/session';
 $route['admin/payment'] = 'admin/payment';
 $route['admin/reference-num'] = 'admin/reference_num';
 $route['admin/admin-privilege'] = 'admin/admin_privilege';
+$route['admin/admin-catering-privilege'] = 'admin/admin_catering_privilege';
 
 $route['admin/catering-update-status'] = 'admin/catering_update_status';
 $route['admin/catering'] = 'admin/catering';
@@ -125,7 +126,7 @@ $route['admin/groups'] = 'admin/groups';
 $route['admin/setting/stores'] = 'admin/setting_stores';
 
 $route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
-
+$route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_logs/$1';
 //Others
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
