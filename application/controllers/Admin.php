@@ -21,7 +21,45 @@ class Admin extends CI_Controller
 		$this->load->model('user_model');
 		$this->load->model('store_model');
 		$this->load->model('logs_model');
+		$this->load->model('notification_model');
 	}
+
+  public function notifications(){
+    
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+        $stores = array();
+
+        if (
+            !$this->ion_auth->in_group(4) && 
+            !$this->ion_auth->in_group(5) && 
+            !$this->ion_auth->in_group(1) && 
+            !$this->ion_auth->in_group(3)
+        ) {
+            $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+            foreach ($store_id as $value) $stores[] = $value->store_id;
+        }
+
+
+        $response = array(
+            "data" => array(
+              "all" => array(
+                'notifications'=> $this->notification_model->getNotifications($stores, null),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($stores, null),
+              ),
+              "snackshop_order" => array(
+                'notifications'=> $this->notification_model->getNotifications($stores, 1),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($stores, 1),
+              ),
+            ),
+            "message" => "Succesfully fetch notification"
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+      }
+  }
 
 
   public function catering_transaction_logs($reference_id){

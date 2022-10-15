@@ -11,9 +11,8 @@ class Transaction extends CI_Controller {
     
 	public function __construct(){
 		parent::__construct();
+        
 		$this->load->model('transaction_model');
-
-        // To be removed
 		$this->load->model('shop_model');
 		$this->load->model('deals_model');
 		$this->load->model('client_model');
@@ -401,13 +400,20 @@ class Transaction extends CI_Controller {
 
                         $message = $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!";
 
-                        $notification_details = array(
+                        $notification_event_data = array(
+                            "notification_event_type_id" => 1,
+                            "transaction_tb_id" => $trans_id,
+                            "text" => $message
+                        );
+
+                        $notifications_data = array(
                             "store_to_notify" => $store_id,
-                            "fb_user_who_fired_event" => $this->session->userData['fb_user_id'],
-                            "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'],
+                            "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                            "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
                             "dateadded" => date('Y-m-d H:i:s'),
                         );
-                        $this->notification_model->insertNotification($notification_details,1, $message);
+
+                        $this->notification_model->insertNotification($notification_event_data, $notifications_data);
                         
 
                         $realtime_notification = array(
