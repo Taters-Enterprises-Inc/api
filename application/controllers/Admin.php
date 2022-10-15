@@ -23,6 +23,25 @@ class Admin extends CI_Controller
 		$this->load->model('logs_model');
 	}
 
+
+  public function catering_transaction_logs($reference_id){
+    
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $transaction_logs = $this->logs_model->getCateringTransactionLogs($reference_id);
+
+        $response = array(
+          "message" => 'Successfully fetch audit',
+          "data" => $transaction_logs,
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
   public function snackshop_transaction_logs($reference_id){
     
     switch($this->input->server('REQUEST_METHOD')){
@@ -412,6 +431,108 @@ class Admin extends CI_Controller
     }
 
   }
+  
+
+  public function admin_catering_privilege(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST': 
+
+        $fb_user_id = $this->input->post('fb_user_id');
+        $mobile_user_id = $this->input->post('mobile_user_id');
+
+        $password = $this->input->post('password');
+        
+        $transaction_id = $this->input->post('trans_id');
+
+        $from_store_id = $this->input->post('from_store_id');
+        $to_store_id = $this->input->post('to_store_id');
+
+        $from_status_id = $this->input->post('from_status_id');
+        $to_status_id = $this->input->post('to_status_id');
+        
+        $request = isset($to_store_id) ? 'store_transfer' : (isset($to_status_id) ? 'change_status' : null);
+        
+        $user_id = $this->session->user_id;
+
+        $from_store = $this->store_model->get_store_info($from_store_id);
+        $to_store = $this->store_model->get_store_info($to_store_id);
+        
+        if ($from_status_id == 1) $from_status = "Waiting for booking confirmation";
+        elseif ($from_status_id == 2) $from_status = "Booking Confirmed";
+        elseif ($from_status_id == 3) $from_status = "Contract Uploaded";
+        elseif ($from_status_id == 4) $from_status = "Contract Verified";
+        elseif ($from_status_id == 5) $from_status = "Initial Payment Uploaded";
+        elseif ($from_status_id == 6) $from_status = "Initial Payment Verified";
+        elseif ($from_status_id == 7) $from_status = "Final Payment Uploaded";
+        elseif ($from_status_id == 8) $from_status = "Final payment verified";
+        elseif ($from_status_id == 20) $from_status = "Booking denied";
+        elseif ($from_status_id == 21) $from_status = "Contract denied";
+        elseif ($from_status_id == 22) $from_status = "Initial Payment denied";
+        elseif ($from_status_id == 23) $from_status = "Final Payment denied";
+
+        if ($to_status_id == 1) $to_status = "Waiting for booking confirmation";
+        elseif ($to_status_id == 2) $to_status = "Booking Confirmed";
+        elseif ($to_status_id == 3) $to_status = "Contract Uploaded";
+        elseif ($to_status_id == 4) $to_status = "Contract Verified";
+        elseif ($to_status_id == 5) $to_status = "Initial Payment Uploaded";
+        elseif ($to_status_id == 6) $to_status = "Initial Payment Verified";
+        elseif ($to_status_id == 7) $to_status = "Final Payment Uploaded";
+        elseif ($to_status_id == 8) $to_status = "Final payment verified";
+        elseif ($to_status_id == 20) $to_status = "Booking denied";
+        elseif ($to_status_id == 21) $to_status = "Contract denied";
+        elseif ($to_status_id == 22) $to_status = "Initial Payment denied";
+        elseif ($to_status_id == 23) $to_status = "Final Payment denied";
+
+          
+
+        $fetch_data = $this->admin_model->updateStoreOrStatusCateringTransaction(
+          $request,
+          $password,
+          $transaction_id,
+          $to_store_id,
+          $to_status_id
+        );
+            
+        if ($fetch_data == 1) {
+
+          if ($request == "store_transfer"){
+            $this->logs_model->insertCateringTransactionLogs($user_id, 1, $transaction_id, 'Transfer booking from ' . $from_store->name . ' to ' . $to_store->name);
+            
+            $data = array(
+                "fb_user_id" => $fb_user_id,
+                "mobile_user_id" => $mobile_user_id,
+                "message" => 'Your booking has been transfered from '. $from_store->name . ' to ' . $to_store->name,
+            );
+
+            notify('catering','catering-booking-changed', $data);
+          }
+          elseif ($request == "change_status"){
+            $this->logs_model->insertCateringTransactionLogs($user_id, 1, $transaction_id, 'Change booking status from ' . $from_status . ' to ' . $to_status);
+            
+            $data = array(
+                "fb_user_id" => $fb_user_id,
+                "mobile_user_id" => $mobile_user_id,
+                "message" => 'Your order status changed '. $from_store->name . ' to ' . $to_store->name,
+            );
+
+            notify('catering','catering-booking-changed', $data);
+          }
+    
+          header('content-type: application/json');
+          echo json_encode(array( "message" => "Update success!"));
+        }else{
+          if ($request == "store_transfer")
+            $this->logs_model->insertCateringTransactionLogs($user_id, 3, $transaction_id, 'Transferring booking Failed');
+          elseif ($request == "change_status")
+            $this->logs_model->insertCateringTransactionLogs($user_id, 3, $transaction_id, 'Changing booking status Failed');
+
+          $this->output->set_status_header('401');
+          echo json_encode(array( "message" => $fetch_data));
+        }
+
+        return;
+    }
+  }
 
   public function admin_privilege(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -459,7 +580,7 @@ class Admin extends CI_Controller
 
           
 
-        $fetch_data = $this->admin_model->check_admin_password(
+        $fetch_data = $this->admin_model->updateStoreOrStatusSnackshopTransaction(
           $request,
           $password,
           $transaction_id,
@@ -526,6 +647,7 @@ class Admin extends CI_Controller
             elseif ($status == 8) $tagname = "Final Payment Verified";
 
             if ($fetch_data == 1) {
+              $this->logs_model->insertCateringTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Booking Success');
               
               $data = array(
                 "fb_user_id" => $fb_user_id,
@@ -537,6 +659,7 @@ class Admin extends CI_Controller
               header('content-type: application/json');
               echo json_encode(array( "message" => 'Successfully update status!'));
             } else {
+              $this->logs_model->insertTransactionLogs($user_id, 3, $trans_id, '' . $tagname . ' ' . 'Booking Success');
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => 'Failed update status!'));
             }
@@ -605,47 +728,6 @@ class Admin extends CI_Controller
       $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, 'Payment Validation Failed');
       $this->output->set_status_header('401');
       echo json_encode(array( "message" => 'Invalid Reference number'));
-    }
-  }
-  
-  public function payment(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'POST': 
-
-          $config['upload_path']          = './assets/upload/proof_payment/';
-          $config['allowed_types']        = 'jpeg|jpg|png';
-          $config['max_size']             = 2000;
-          $config['max_width']            = 0;
-          $config['max_height']           = 0;
-          $config['encrypt_name']         = TRUE;
-
-          $this->load->library('upload', $config);
-
-          $trans_id = $_POST['trans_id'];
-
-          if (!$this->upload->do_upload('payment_file')) { // Upload validation
-            // Failed-Upload
-            $error = $this->upload->display_errors();
-            
-            $user_id = $this->session->user_id;
-            $this->logs_model->insertTransactionLogs($user_id, 3, $trans_id, 'File Upload Failed');
-
-            $this->output->set_status_header('401');
-            echo json_encode(array( "message" => $error));
-          } else {
-            // File-Uploaded-Successfull
-            $data = $this->upload->data(); // Get file details
-            $file_name = $data['file_name'];
-
-            $user_id = $this->session->user_id;
-            $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, 'File Upload Success');
-
-            $this->admin_model->uploadPayment($trans_id, $data, $file_name);
-            header('content-type: application/json');
-            echo json_encode(array( "message" => 'Succesfully upload payment'));
-          }
-
-        break;
     }
   }
 

@@ -483,7 +483,57 @@ class Admin_model extends CI_Model
         return $query->row(); 
     }
 
-    function check_admin_password($request,$password,$transaction_id,$to_store_id,$to_status_id){
+    function updateStoreOrStatusCateringTransaction($request,$password,$transaction_id,$to_store_id,$to_status_id){
+        $this->db->select("password");
+        $this->db->from('users');
+        $this->db->where('id', 1);
+        $query = $this->db->get();
+
+        if ($query->num_rows() == 1) {
+            $row = $query->row();
+
+            if (password_verify($password, $row->password)) {
+
+                if ($request == 'change_status') {
+                    
+                    $this->db->set('status',$to_status_id);
+
+                    switch($to_status_id){
+                        case 1:
+                            $this->db->set('uploaded_contract','');
+                            $this->db->set('initial_payment_proof','');
+                            $this->db->set('final_payment_proof','');
+                            break;
+                        case 4:
+                            $this->db->set('initial_payment_proof','');
+                            $this->db->set('final_payment_proof','');
+                            break;
+                        case 6:
+                            $this->db->set('final_payment_proof','');
+                            break;
+                    }
+                    $this->db->where('id', $transaction_id);
+                    $this->db->update('catering_transaction_tb');
+                    return true;
+                }
+                else if ($request == 'store_transfer') {
+                    
+                    $this->db->set('store', $to_store_id);
+                    $this->db->where('id', $transaction_id);
+                    $this->db->update('catering_transaction_tb');
+                    return true;
+                }
+            }
+            else {
+                return "Wrong Password";
+            } 
+        } 
+        else {
+            return false;
+        }
+    }
+
+    function updateStoreOrStatusSnackshopTransaction($request,$password,$transaction_id,$to_store_id,$to_status_id){
         $this->db->select("password");
         $this->db->from('users');
         $this->db->where('id', 1);
