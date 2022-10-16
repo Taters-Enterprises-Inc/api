@@ -7,14 +7,16 @@ class Notification_model extends CI_Model {
         $this->load->database();
     }
 
-    public function insertNotification(
-        $notification_event_data,
-        $notifications_data
+    public function insertAndGetNotificationEvent(
+        $notification_event_data
     ){
         $this->db->insert('notification_events',$notification_event_data);
+        return $this->db->insert_id();
+    }
 
-        $notifications_data['notification_event_id'] = $this->db->insert_id();
-
+    public function insertNotification(
+        $notifications_data
+    ){
         $this->db->insert('notifications', $notifications_data);
     }
 
@@ -25,7 +27,7 @@ class Notification_model extends CI_Model {
     }
 
     public function getNotifications(
-        $stores,
+        $user_id,
         $notification_event_type_id,
         $is_unseen
     ){
@@ -44,12 +46,13 @@ class Notification_model extends CI_Model {
         if($is_unseen){
             $this->db->where('A.dateseen', NULL);
         }
-        
-        if(!empty($store))
-            $this->db->where_in('A.store', $store);
 
         if(isset($notification_event_type_id)){
             $this->db->where('B.notification_event_type_id',$notification_event_type_id);
+        }
+
+        if(isset($user_id)){
+            $this->db->where('user_to_notify', $user_id);
         }
 
         $this->db->order_by('A.id','DESC');
@@ -60,7 +63,7 @@ class Notification_model extends CI_Model {
     }
 
     public function getUnseenNotificationsCount(
-        $stores,
+        $user_id,
         $notification_event_type_id
     ){
         $this->db->select('count(*) as all_count');
@@ -69,12 +72,11 @@ class Notification_model extends CI_Model {
         $this->db->join('notification_events B', 'B.id = A.notification_event_id');
         $this->db->where('A.dateseen', NULL);
         
-        if(!empty($store))
-            $this->db->where_in('A.store', $store);
-
-        
         if(isset($notification_event_type_id)){
             $this->db->where('B.notification_event_type_id',$notification_event_type_id);
+        }
+        if(isset($user_id)){
+            $this->db->where('user_to_notify', $user_id);
         }
         
         $query = $this->db->get();

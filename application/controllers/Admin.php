@@ -44,30 +44,20 @@ class Admin extends CI_Controller
     
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-        $stores = array();
 
-        if (
-            !$this->ion_auth->in_group(4) && 
-            !$this->ion_auth->in_group(5) && 
-            !$this->ion_auth->in_group(1) && 
-            !$this->ion_auth->in_group(3)
-        ) {
-            $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-            foreach ($store_id as $value) $stores[] = $value->store_id;
-        }
-
+        $user_id = $this->session->user_id;
 
         $response = array(
             "data" => array(
               "all" => array(
-                'notifications'=> $this->notification_model->getNotifications($stores, null, false),
-                "unseen_notifications" => $this->notification_model->getNotifications($stores, null, true),
-                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($stores, null),
+                'notifications'=> $this->notification_model->getNotifications($user_id, null, false),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, null),
               ),
               "snackshop_order" => array(
-                'notifications'=> $this->notification_model->getNotifications($stores, 1, false),
-                "unseen_notifications" => $this->notification_model->getNotifications($stores, null, true),
-                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($stores, 1),
+                'notifications'=> $this->notification_model->getNotifications($user_id, 1, false),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 1),
               ),
             ),
             "message" => "Succesfully fetch notification"
@@ -78,7 +68,6 @@ class Admin extends CI_Controller
         return;
       }
   }
-
 
   public function catering_transaction_logs($reference_id){
     
@@ -184,16 +173,20 @@ class Admin extends CI_Controller
         if($page_no != 0){
           $page_no = ($page_no - 1) * $per_page;
         }
-        
-        $store_id_array = array();
-        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
-          $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-          foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-        }
-        
 
-        $stores_count = $this->admin_model->getSettingStoresCount($search, $store_id_array);
-        $stores = $this->admin_model->getSettingStores($page_no, $per_page, $order_by, $order, $search, $store_id_array);
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $stores_count = 0;
+          $stores = array();
+        }else{
+          $stores_count = $this->admin_model->getSettingStoresCount($search, $store_id_array);
+          $stores = $this->admin_model->getSettingStores($page_no, $per_page, $order_by, $order, $search, $store_id_array);
+        }
+
+        
         
         $pagination = array(
           "total_rows" => $stores_count,
@@ -488,7 +481,6 @@ class Admin extends CI_Controller
 
   }
   
-
   public function admin_catering_privilege(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
@@ -981,13 +973,16 @@ class Admin extends CI_Controller
         }
 
         $store_id_array = array();
-        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
-          $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-          foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $orders_count = 0;
+          $orders = array();
+        }else{
+          $orders_count = $this->admin_model->getSnackshopOrdersCount($status, $search, $store_id_array);
+          $orders = $this->admin_model->getSnackshopOrders($page_no, $per_page, $status, $order_by, $order, $search, $store_id_array);  
         }
-        
-        $orders_count = $this->admin_model->getSnackshopOrdersCount($status, $search, $store_id_array);
-        $orders = $this->admin_model->getSnackshopOrders($page_no, $per_page, $status, $order_by, $order, $search, $store_id_array);
 
         $pagination = array(
           "total_rows" => $orders_count,
@@ -1052,9 +1047,15 @@ class Admin extends CI_Controller
         }
 
         $store_id_array = array();
-        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
-          $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-          foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $bookings_count = 0;
+          $bookings = array();
+        }else{
+          $bookings_count = $this->admin_model->getCateringBookingsCount($status, $search, $store_id_array);
+          $bookings = $this->admin_model->getCateringBookings($page_no, $per_page, $status, $order_by, $order, $search,  $store_id_array);
         }
         
 
@@ -1165,19 +1166,21 @@ class Admin extends CI_Controller
         if($page_no != 0){
           $page_no = ($page_no - 1) * $per_page;
         }
-        
+
         $store_id_array = array();
-        if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
-          $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-          foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $redeems_count = 0;
+          $redeems = array();
+        }else{
+          $redeems_count = $this->admin_model->getPopclubRedeemsCount($status, $search, $store_id_array);
+          $redeems = $this->admin_model->getPopclubRedeems($page_no, $per_page, $status, $order_by, $order, $search, $store_id_array);
         }
         
-
-        $orders_count = $this->admin_model->getPopclubRedeemsCount($status, $search, $store_id_array);
-        $orders = $this->admin_model->getPopclubRedeems($page_no, $per_page, $status, $order_by, $order, $search, $store_id_array);
-
         $pagination = array(
-          "total_rows" => $orders_count,
+          "total_rows" => $redeems_count,
           "per_page" => $per_page,
         );
 
@@ -1185,7 +1188,7 @@ class Admin extends CI_Controller
           "message" => 'Successfully fetch popclub redeems',
           "data" => array(
             "pagination" => $pagination,
-            "orders" => $orders
+            "redeems" => $redeems
           ),
         );
   
@@ -1206,7 +1209,7 @@ class Admin extends CI_Controller
           "old_last_login" => $this->session->old_last_login,
           "last_check" => $this->session->last_check,
           "is_admin" => $this->ion_auth->in_group(1),
-          "is_csr" => $this->ion_auth->in_group(10),
+          "is_csr_admin" => $this->ion_auth->in_group(10),
           "is_catering_admin" => $this->ion_auth->in_group(14),
         );
 
@@ -1229,7 +1232,6 @@ class Admin extends CI_Controller
         return;
     }
   }
-
   
   // TO BE IMPROVED ( V2 Backend )
   public function print_asdoc($id, $isCatering){

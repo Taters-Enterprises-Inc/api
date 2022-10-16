@@ -17,6 +17,8 @@ class Transaction extends CI_Controller {
 		$this->load->model('deals_model');
 		$this->load->model('client_model');
         $this->load->model('notification_model');
+        $this->load->model('store_model');
+        $this->load->model('user_model');
 	}
     
     public function catering(){
@@ -399,29 +401,59 @@ class Transaction extends CI_Controller {
                         }
 
                         $message = $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!";
-
+                        
                         $notification_event_data = array(
                             "notification_event_type_id" => 1,
                             "transaction_tb_id" => $trans_id,
                             "text" => $message
                         );
-
-                        $notifications_data = array(
-                            "store_to_notify" => $store_id,
-                            "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
-                            "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
-                            "dateadded" => date('Y-m-d H:i:s'),
-                        );
-
-                        $this->notification_model->insertNotification($notification_event_data, $notifications_data);
                         
+                        $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+
+                        $users = $this->store_model->getUsersStoreGroupsByStoreId($store_id);
+                        foreach($users as $user){
+                            $notifications_data = array(
+                                "user_to_notify" => $user->user_id,
+                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                                'notification_event_id' => $notification_event_id,
+                                "dateadded" => date('Y-m-d H:i:s'),
+                            );
+
+                            $this->notification_model->insertNotification($notifications_data);   
+                        }
+                        
+                        $admin_users = $this->user_model->getUsersByGroupId(1);
+                        foreach($admin_users as $user){
+                            $notifications_data = array(
+                                "user_to_notify" => $user->user_id,
+                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                                'notification_event_id' => $notification_event_id,
+                                "dateadded" => date('Y-m-d H:i:s'),
+                            );
+                            $this->notification_model->insertNotification($notifications_data);   
+                        }
+                        
+                        $csr_admin_users = $this->user_model->getUsersByGroupId(10);
+                        foreach($csr_admin_users as $user){
+                            $notifications_data = array(
+                                "user_to_notify" => $user->user_id,
+                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                                'notification_event_id' => $notification_event_id,
+                                "dateadded" => date('Y-m-d H:i:s'),
+                            );
+                            $this->notification_model->insertNotification($notifications_data);   
+                        }
+
 
                         $realtime_notification = array(
                             "store_id" => $store_id,
                             "message" => $message,
                         );
+
                         notify('snackshop','order-transaction', $realtime_notification);
-                        
 
                         $response = array(
                             "data" => array(
@@ -448,7 +480,6 @@ class Transaction extends CI_Controller {
                 break;
         }
     }
-
 
     private function summary_actions($request){
         switch ($request) {
@@ -704,7 +735,6 @@ class Transaction extends CI_Controller {
         return $night_diff * 500;
     }
     
-	
     public function get_succeeding_hour_charge($start_datetime, $end_datetime){
         $event_start = $start_datetime;
         $event_end = $end_datetime;
@@ -721,6 +751,5 @@ class Transaction extends CI_Controller {
 
         return $additional_fee;
     }
-
 
 }
