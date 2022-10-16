@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 14, 2022 at 09:08 AM
+-- Generation Time: Oct 16, 2022 at 12:21 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -751,6 +751,13 @@ CREATE TABLE `catering_client_tb` (
   `add_address` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `catering_client_tb`
+--
+
+INSERT INTO `catering_client_tb` (`id`, `fb_user_id`, `mobile_user_id`, `fname`, `lname`, `email`, `address`, `contact_number`, `moh`, `payops`, `user_role`, `add_name`, `add_contact`, `add_address`) VALUES
+(1, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines');
+
 -- --------------------------------------------------------
 
 --
@@ -815,6 +822,13 @@ CREATE TABLE `catering_order_items` (
   `product_discount` varchar(99) DEFAULT NULL,
   `addon_base_product` varchar(99) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `catering_order_items`
+--
+
+INSERT INTO `catering_order_items` (`id`, `transaction_id`, `combination_id`, `product_id`, `quantity`, `status`, `store`, `remarks`, `type`, `promo_id`, `promo_price`, `sku`, `sku_id`, `price`, `product_price`, `product_label`, `product_discount`, `addon_base_product`) VALUES
+(1, 1, 0, 2, 1, 1, NULL, '<strong>1</strong> - Family Pack Superpop: Sour Cream<br/><strong>1</strong> - Family Pack Tortilla Chips: Natural<br/>', 'main', 0, '', '-1', -1, '315', '315', '', '0', '');
 
 -- --------------------------------------------------------
 
@@ -2180,6 +2194,21 @@ CREATE TABLE `catering_store_menu_type_tb` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `catering_transaction_logs_tb`
+--
+
+CREATE TABLE `catering_transaction_logs_tb` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `action` int(11) NOT NULL,
+  `reference_id` varchar(99) NOT NULL,
+  `details` varchar(200) NOT NULL,
+  `dateadded` varchar(99) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `catering_transaction_tb`
 --
 
@@ -2225,6 +2254,13 @@ CREATE TABLE `catering_transaction_tb` (
   `custom_message` varchar(200) NOT NULL,
   `logon_type` varchar(99) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `catering_transaction_tb`
+--
+
+INSERT INTO `catering_transaction_tb` (`id`, `tracking_no`, `client_id`, `purchase_amount`, `remarks`, `status`, `contract`, `uploaded_contract`, `company_name`, `message`, `serving_time`, `dateadded`, `event_date`, `start_datetime`, `end_datetime`, `event_class`, `initial_payment`, `initial_payment_proof`, `initial_payment_upload_date`, `final_payment`, `final_payment_proof`, `final_payment_upload_date`, `on_click`, `hash_key`, `store`, `distance`, `distance_id`, `distance_price`, `cod_fee`, `service_fee`, `night_diff_fee`, `additional_hour_charge`, `invoice_num`, `reference_num`, `payops`, `payment_plan`, `period_id`, `discount`, `custom_message`, `logon_type`) VALUES
+(1, 'd014c6', 1, '315', '', 2, 0, '', '', 'test', '1666976340', '2022-10-15 10:09:02', '', '1666976340', '1666987140', 'personal', 0, '', '', 0, '', '', 0, 'b31146ac8208b812dbff', 97, '2', 0, '700', '0', 32, 0, 0, '', '', 3, 'full', 0, '0', '', 'facebook');
 
 -- --------------------------------------------------------
 
@@ -2429,6 +2465,51 @@ CREATE TABLE `client_tb` (
   `add_address` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `client_tb`
+--
+
+INSERT INTO `client_tb` (`id`, `fb_user_id`, `mobile_user_id`, `fname`, `lname`, `email`, `address`, `contact_number`, `moh`, `payops`, `user_role`, `add_name`, `add_contact`, `add_address`) VALUES
+(1, 1, NULL, 'Eco', 'Villaraza', 'kjkjk', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'kjkj'),
+(2, 1, NULL, 'Eco', 'Villaraza', 'eco.villaraza19@gmail.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(3, 1, NULL, 'Eco', 'Villaraza', 'eco.villaraza19@gmail.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(4, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'sdflk'),
+(5, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'sdflk'),
+(6, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(7, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(8, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(9, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(10, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(11, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(12, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(13, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(14, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(15, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test@test.com'),
+(16, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(17, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(18, 1, NULL, 'Eco', 'Villaraza', 'test', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(19, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'adg'),
+(20, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(21, 1, NULL, 'Eco', 'Villaraza', 'test', '964 F.R. Hidalgo St, Quiapo, Manila, 1001 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(22, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '296 Ibarra St, Tondo, Manila, 1012 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(23, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(24, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(25, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(26, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(27, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test@test.com'),
+(28, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test@test.com'),
+(29, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(30, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'Test'),
+(31, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(32, 1, NULL, 'Eco', 'Villaraza', 'admin@admin.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(33, 1, NULL, 'Eco', 'Villaraza', 'admin@admin.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(34, 1, NULL, 'Eco', 'Villaraza', 'admin@admin.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(35, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(36, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(37, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', '857, 1003 Oroquieta Rd, Santa Cruz, Manila, 1008 Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(38, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', 'Cash & Carry Mall, Makati, Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test'),
+(39, 1, NULL, 'Eco', 'Villaraza', 'test@test.com', 'Cash & Carry Mall, Makati, Metro Manila, Philippines', '09084741500', 2, 3, 0, 'Eco Villaraza', '09084741500', 'test');
+
 -- --------------------------------------------------------
 
 --
@@ -2452,6 +2533,14 @@ CREATE TABLE `deals_client_tb` (
   `add_address` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `deals_client_tb`
+--
+
+INSERT INTO `deals_client_tb` (`id`, `fb_user_id`, `mobile_user_id`, `fname`, `lname`, `email`, `address`, `contact_number`, `moh`, `payops`, `user_role`, `add_name`, `add_contact`, `add_address`) VALUES
+(1, 1, NULL, 'Eco', 'Villaraza', '', 'NA', 'NA', 1, 0, 0, 'Eco Villaraza', 'NA', 'NA'),
+(2, 1, NULL, 'Eco', 'Villaraza', '', 'NA', 'NA', 1, 0, 0, 'Eco Villaraza', 'NA', 'NA');
+
 -- --------------------------------------------------------
 
 --
@@ -2469,6 +2558,14 @@ CREATE TABLE `deals_order_items` (
   `quantity` int(10) NOT NULL,
   `status` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `deals_order_items`
+--
+
+INSERT INTO `deals_order_items` (`id`, `redeems_id`, `transaction_id`, `deal_id`, `price`, `product_price`, `remarks`, `quantity`, `status`) VALUES
+(1, 1, 0, 3, 249, 0, '<strong>1</strong> - Minor House Fryes (Nacho Cheese)<br/><strong>1</strong> - Minor Taters Chips (Sour Cream)<br/><strong>1</strong> - Sandwich Churkey Hotdog<br/><strong>2</strong> - Lemonade Iced Tea 12oz<br/>', 1, 0),
+(2, 2, 0, 17, 249, 0, '<strong>1</strong> - Major House Fryes (Texan Barbeque)<br/><strong>1</strong> - Minor Mexican Munchers<br/><strong>2</strong> - Lemonade Iced Tea 12oz<br/>', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -2516,6 +2613,14 @@ CREATE TABLE `deals_redeems_tb` (
   `store_discount_type` int(11) DEFAULT NULL,
   `store_discount_ref_no` varchar(99) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `deals_redeems_tb`
+--
+
+INSERT INTO `deals_redeems_tb` (`id`, `redeem_code`, `deal_id`, `client_id`, `purchase_amount`, `platform_id`, `remarks`, `status`, `dateadded`, `expiration`, `payment_proof`, `upload_date`, `on_click`, `hash_key`, `store`, `distance`, `distance_id`, `distance_price`, `cod_fee`, `invoice_num`, `reference_num`, `reseller_id`, `payops`, `reseller_discount`, `period_id`, `discount`, `voucher_id`, `giftcard_discount`, `giftcard_number`, `table_number`, `custom_message`, `raffle_coupon_id`, `raffle_coupon_code`, `logon_type`, `store_payops`, `store_payops_ref_no`, `store_discount_type`, `store_discount_ref_no`) VALUES
+(1, 'DCaf9f50', 3, 1, '249', 1, '<strong>1</strong> - Minor House Fryes (Nacho Cheese)<br/><strong>1</strong> - Minor Taters Chips (Sour Cream)<br/><strong>1</strong> - Sandwich Churkey Hotdog<br/><strong>2</strong> - Lemonade Iced Tea 12oz<br/>', 6, '2022-10-14 22:22:12', '2022-10-14 22:52:12', '', '', 0, '00a948314a6a9e54f99b', 113, '', 0, '', '', '', '', 0, 0, '', 0, NULL, 0, NULL, '', NULL, '', NULL, NULL, 'facebook', NULL, '', NULL, ''),
+(2, 'DC1daeea', 17, 2, '249', 1, '<strong>1</strong> - Major House Fryes (Texan Barbeque)<br/><strong>1</strong> - Minor Mexican Munchers<br/><strong>2</strong> - Lemonade Iced Tea 12oz<br/>', 5, '2022-10-14 22:26:08', '2022-10-14 22:56:08', '', '', 0, '7117fe708d978ea815f9', 113, '', 0, '', '', '', '', 0, 0, '', 0, NULL, 0, NULL, '', NULL, '', NULL, NULL, 'facebook', NULL, '', NULL, '');
 
 -- --------------------------------------------------------
 
@@ -6900,6 +7005,13 @@ CREATE TABLE `fb_users` (
   `modified` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+--
+-- Dumping data for table `fb_users`
+--
+
+INSERT INTO `fb_users` (`id`, `oauth_provider`, `oauth_uid`, `first_name`, `last_name`, `email`, `gender`, `picture`, `link`, `created`, `modified`) VALUES
+(1, 'facebook', '5241908385896446', 'Eco', 'Villaraza', '', '', 'https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=5241908385896446&height=50&width=50&ext=1668507307&hash=AeQWDZI0zmslj79-nBM', 'https://www.facebook.com/', '2022-10-14 13:01:39', '2022-10-16 12:15:22');
+
 -- --------------------------------------------------------
 
 --
@@ -7035,6 +7147,14 @@ CREATE TABLE `invoice_tb` (
   `dateadded` varchar(99) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `invoice_tb`
+--
+
+INSERT INTO `invoice_tb` (`id`, `year`, `transaction_id`, `dateadded`) VALUES
+(1, '2222', 19, '2022-10-14 22:24:08'),
+(2, '2222', 22, '2022-10-15 13:27:05');
+
 -- --------------------------------------------------------
 
 --
@@ -7047,6 +7167,13 @@ CREATE TABLE `login_attempts` (
   `login` varchar(100) NOT NULL,
   `time` int(11) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `login_attempts`
+--
+
+INSERT INTO `login_attempts` (`id`, `ip_address`, `login`, `time`) VALUES
+(126, '127.0.0.1', 'taters.tdcgt.s@tatersgroup.com', 1665915274);
 
 -- --------------------------------------------------------
 
@@ -8744,13 +8871,12 @@ INSERT INTO `municipality_tb` (`id`, `name`, `region_id`, `status`) VALUES
 CREATE TABLE `notifications` (
   `id` int(11) NOT NULL,
   `user_to_notify` int(11) DEFAULT NULL,
-  `store_to_notify` int(11) DEFAULT NULL,
   `fb_user_to_notify` int(11) DEFAULT NULL,
   `mobile_user_to_notify` int(11) DEFAULT NULL,
   `user_who_fired_event` int(11) DEFAULT NULL,
   `fb_user_who_fired_event` int(11) DEFAULT NULL,
   `mobile_user_who_fired_event` int(11) DEFAULT NULL,
-  `event_id` int(11) DEFAULT NULL,
+  `notification_event_id` int(11) DEFAULT NULL,
   `dateadded` varchar(256) NOT NULL,
   `dateseen` varchar(256) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -8764,6 +8890,7 @@ CREATE TABLE `notifications` (
 CREATE TABLE `notification_events` (
   `id` int(11) NOT NULL,
   `notification_event_type_id` int(11) NOT NULL,
+  `transaction_tb_id` int(11) DEFAULT NULL,
   `text` varchar(256) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -8775,8 +8902,15 @@ CREATE TABLE `notification_events` (
 
 CREATE TABLE `notification_event_type` (
   `id` int(11) NOT NULL,
-  `name` int(11) NOT NULL
+  `name` varchar(265) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `notification_event_type`
+--
+
+INSERT INTO `notification_event_type` (`id`, `name`) VALUES
+(1, 'Snackshop Order');
 
 -- --------------------------------------------------------
 
@@ -8813,6 +8947,40 @@ CREATE TABLE `order_items` (
   `addon_base_product` int(11) DEFAULT NULL,
   `addon_base_product_name` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`transaction_id`, `combination_id`, `product_id`, `quantity`, `status`, `store`, `remarks`, `type`, `promo_id`, `promo_price`, `sku`, `sku_id`, `price`, `product_price`, `product_label`, `product_discount`, `addon_drink`, `addon_drink_sku`, `addon_drink_sku_id`, `addon_flav`, `addon_flav_sku`, `addon_flav_sku_id`, `addon_butter`, `addon_butter_sku`, `addon_butter_sku_id`, `addon_base_product`, `addon_base_product_name`) VALUES
+(1, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(2, 0, 217, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '275', '275', '', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(4, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(6, 0, 195, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '100', '100', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(9, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(11, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(14, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(15, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(16, 0, 165, 1, 1, NULL, 'Sour Cream', 'main', 0, '', '-1', -1, '295', '295', '', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(17, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(18, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(19, 0, 195, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '100', '100', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(20, 0, 195, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '100', '100', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(21, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(22, 0, 266, 1, 1, NULL, 'Plain', 'main', 0, '', '-1', -1, '125', '125', 'Family', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(23, 0, 214, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '220', '220', '', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(25, 0, 191, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '80', '80', 'Minor', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(26, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(27, 0, 191, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '80', '80', 'Minor', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(29, 0, 271, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '135', '125', 'Family', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(30, 0, 266, 1, 1, NULL, 'Plain', 'main', 0, '', '-1', -1, '125', '125', 'Family', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(31, 0, 271, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '135', '125', 'Family', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(32, 0, 165, 1, 1, NULL, 'Natural', 'main', 0, '', '-1', -1, '295', '295', '', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(35, 0, 165, 1, 1, NULL, 'Natural', 'main', 0, '', '-1', -1, '295', '295', '', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(36, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(37, 0, 194, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '115', '115', 'Sandwich', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(38, 0, 271, 1, 1, NULL, '', 'main', 0, '', '-1', -1, '135', '125', 'Family', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL),
+(39, 0, 266, 1, 1, NULL, 'Plain', 'main', 0, '', '-1', -1, '125', '125', 'Family', '0', '', 0, 0, '', 0, 0, '', 0, 0, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -20710,7 +20878,7 @@ INSERT INTO `store_tb` (`id`, `name`, `address`, `lat`, `lng`, `store_menu_type_
 (25, 'Taters Better Living ', '36 France Street, Don Bosco Paranaque City', 14.482521, 121.028542, 1, '0', '14:00:00', '23:45:00', '1', 1, 1, 1, 1, 1, 110, '09958333228', 'Taters Better Living Contact', 'taters_betterliving@tatersgroup.com', 0, 52, 107, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 107, '1', 'taters_betterliving.jpg', '12:00 PM', '8:00 PM', 'Same day delivery 7:00PM cut-off', 'TSS0124', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
 (26, 'Taters Ayala Circuit', 'Upper Ground Floor, Ayala Mall Circuit, Circuit Makati', 14.573413, 121.019325, 3, '0', '10:00:00', '19:00:00', '1', 1, 1, 1, 1, 1, 111, '09209773296', 'Taters Ayala Circuit Contact', 'taters_acircuit@tatersgroup.com', 0, 52, 108, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 108, '1', 'taters_ayalacircuit.jpg', '12:00 PM', '8:00 PM', 'Same day delivery 7:00PM cut-off', 'TSS0125', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
 (27, 'Taters Maginhawa', '168 Maginhawa St. Corner Mapagkumbaba St, Sikatuna Village, Diliman QC', 14.639179, 121.059090, 1, '0', '10:00:00', '19:00:00', '0', 1, 0, 0, 1, 0, 112, '09178828377', 'Taters Maginhawa Contact', 'taters.gfpt.m@tatersgroup.com', 0, 52, 109, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 109, '1', 'taters_maginhawa.jpg', '12:00 PM', '10:00 PM', 'Same day delivery 7:00PM cut-off', 'TSS0126', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
-(28, 'Taters Malate', '1020 San Andres St. Cor Singalong St. Malate Manila', 14.563431, 120.997314, 1, '0', '10:00:00', '19:00:00', '1', 1, 1, 1, 1, 1, 113, '09988568749', 'Taters Malate Contact', 'taters.tdcgt.s@tatersgroup.com', 0, 52, 110, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 110, '1', 'taters_malate.jpg', '10:00 AM', '8:00 PM', 'Same day delivery 7:00PM cut-off', 'TSS0127', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
+(28, 'Taters Malate', '1020 San Andres St. Cor Singalong St. Malate Manila', 14.563431, 120.997314, 1, '0', '10:00:00', '23:55:00', '1', 1, 1, 1, 1, 1, 113, '09988568749', 'Taters Malate Contact', 'taters.tdcgt.s@tatersgroup.com', 0, 52, 110, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 110, '1', 'taters_malate.jpg', '10:00 AM', '8:00 PM', 'Same day delivery 7:00PM cut-off', 'TSS0127', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
 (29, 'Taters White Plains', '#92 Katipunan Avenue White Plains Quezon City', 14.608464, 121.068512, 1, '0', '10:00:00', '19:00:00', '1', 1, 1, 1, 1, 1, 114, '09209753117', 'Taters White Plains Contact', 'taters.tei.wp@tatersgroup.com', 0, 52, 111, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 111, '1', 'taters_whiteplains.jpg', '10:00 AM', '11:59 PM', 'Same day delivery 11:59PM cut-off', 'TSS0128', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
 (30, 'Taters SM Southmall Gamepark', 'SM Southmall, Almanza Uno, Las Piñas, Metro Manila', 14.433253, 121.009277, 3, '0', '10:00:00', '19:00:00', '0', 1, 1, 0, 1, 0, 115, '09876543210', 'Taters SM Southmall Gamepark Contact', 'wholesale@tatersgroup.com', 0, 52, 112, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 112, '1', 'taters_sm_southmallgamepark.jpg', '10:00 AM', '11:59 PM', 'Same day delivery 11:59PM cut-off', 'TSS0130', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
 (31, 'Taters SM Fairview Bowling', 'Main Mall, Lower Ground Floor, Belfast, Quezon City', 14.733510, 121.056885, 3, '0', '10:00:00', '19:00:00', '0', 1, 1, 0, 1, 0, 116, '09876543210', 'Taters Fairview Bowling Contact', 'wholesale@tatersgroup.com', 0, 52, 113, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 113, '1', 'taters_sm_fairviewbowling.jpg', '10:00 AM', '11:59 PM', 'Same day delivery 11:59PM cut-off', 'TSS0131', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
@@ -21748,6 +21916,15 @@ CREATE TABLE `transaction_logs_tb` (
   `dateadded` varchar(99) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Dumping data for table `transaction_logs_tb`
+--
+
+INSERT INTO `transaction_logs_tb` (`id`, `user_id`, `action`, `reference_id`, `details`, `dateadded`) VALUES
+(1, 1, 1, '19', 'Confirm Order Success', '2022-10-14 22:24:08'),
+(2, 1, 1, '21', 'Transfer order from Taters Malate to Taters Maginhawa', '2022-10-15 10:57:06'),
+(3, 1, 1, '22', 'Confirm Order Success', '2022-10-15 13:27:05');
+
 -- --------------------------------------------------------
 
 --
@@ -21791,6 +21968,51 @@ CREATE TABLE `transaction_tb` (
   `store_discount_type` int(11) DEFAULT NULL,
   `store_discount_ref_no` varchar(99) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `transaction_tb`
+--
+
+INSERT INTO `transaction_tb` (`id`, `tracking_no`, `client_id`, `purchase_amount`, `remarks`, `status`, `dateadded`, `payment_proof`, `upload_date`, `on_click`, `hash_key`, `store`, `distance`, `distance_id`, `distance_price`, `cod_fee`, `invoice_num`, `reference_num`, `reseller_id`, `payops`, `reseller_discount`, `period_id`, `discount`, `voucher_id`, `giftcard_discount`, `giftcard_number`, `table_number`, `custom_message`, `raffle_coupon_id`, `raffle_coupon_code`, `logon_type`, `store_payops`, `store_payops_ref_no`, `store_discount_type`, `store_discount_ref_no`) VALUES
+(1, '42f77e', 1, '115', '', 1, '2022-10-14 19:02:00', '', '', 0, 'c610f689b75d1e401e3e', 129, '2', 0, '118', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(2, '759d99', 2, '275', '', 1, '2022-10-14 21:11:58', '', '', 0, 'fd45298219a80a3bc8f2', 129, '2', 0, '118', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(3, '971219', 3, '0', '', 1, '2022-10-14 21:12:20', '', '', 0, 'c2b1523e3f1743145cf7', 129, '2', 0, '118', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(4, '0f359f', 4, '115', '', 1, '2022-10-14 22:06:10', '', '', 0, 'f961ab21cb87d99287ad', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(5, 'cce5b9', 5, '0', '', 1, '2022-10-14 22:06:42', '', '', 0, 'a9aa23c2215ed776a725', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(6, '7b7a80', 6, '100', '', 1, '2022-10-14 22:07:13', '', '', 0, '90bd1a389bd9198633b7', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(7, 'd9ca4e', 7, '0', '', 1, '2022-10-14 22:08:05', '', '', 0, 'f109878aeaa1b28509b9', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(8, 'ab815e', 8, '0', '', 1, '2022-10-14 22:08:15', '', '', 0, '69e881993fb7038f34d2', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(9, 'edcfa7', 9, '115', '', 1, '2022-10-14 22:09:35', '', '', 0, '6aa8c20368e3cd611ba6', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(10, 'cfb603', 10, '0', '', 1, '2022-10-14 22:10:38', '', '', 0, 'bb2b6137afb7d132ce92', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(11, '029ae0', 11, '115', '', 1, '2022-10-14 22:12:29', '', '', 0, 'bf6f795dc3192562a00a', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(12, 'fa0baa', 12, '0', '', 1, '2022-10-14 22:12:50', '', '', 0, 'cafeaf11ef1a1c106059', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(13, '27a665', 13, '0', '', 1, '2022-10-14 22:13:00', '', '', 0, '7a81ad6efe654e442445', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(14, '4f7143', 14, '115', '', 1, '2022-10-14 22:13:47', '', '', 0, '80927fa7c742a019587a', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(15, '5b4621', 15, '115', '', 1, '2022-10-14 22:15:04', '', '', 0, '562d39d2668611f1e755', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(16, '468c5e', 16, '295', '', 1, '2022-10-14 22:15:36', '', '', 0, 'eca1f845a4991332143a', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(17, 'eac5f3', 17, '115', '', 1, '2022-10-14 22:18:26', '', '', 0, 'c26a9f2d701abcb88888', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(18, '0aeabc', 18, '115', '', 1, '2022-10-14 22:19:49', '', '', 0, 'b3901e3d321da5e8d005', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(19, 'c90d38', 19, '100', '', 3, '2022-10-14 22:23:09', '', '', 3, '7557652655934cfa8218', 113, '2', 0, '94', '50', '22-000001', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(20, 'bce563', 20, '100', '', 1, '2022-10-14 22:25:00', '', '', 0, 'eba5871fdb0849a29c1f', 113, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(21, '69def5', 21, '115', '', 1, '2022-10-14 22:28:44', '', '', 0, '39edc27e94bb63b3f526', 112, '2', 0, '94', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(22, 'f55a47', 22, '125', '', 3, '2022-10-15 13:26:38', '', '', 3, 'a3f95b61ba3f8ac88514', 129, '2', 0, '124', '50', '22-000002', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(23, '5fdca8', 23, '220', '', 1, '2022-10-15 18:13:39', '', '', 0, 'ec983c1617ec9a7919fa', 129, '2', 0, '100', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(24, '126667', 24, '0', '', 1, '2022-10-15 18:15:07', '', '', 0, '2debb6311c4a3989bffe', 129, '2', 0, '100', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(25, 'f89abe', 25, '80', '', 1, '2022-10-15 18:16:46', '', '', 0, 'b4dc625d81f777a7c295', 129, '2', 0, '100', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(26, '40e006', 26, '115', '', 1, '2022-10-15 23:54:42', '', '', 0, '8eede98b90719df6cef4', 113, '2', 0, '106', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(27, '27326b', 27, '80', '', 1, '2022-10-15 23:56:41', '', '', 0, '0be6a4dd42e1f3998046', 113, '2', 0, '106', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(28, '0b2cca', 28, '0', '', 1, '2022-10-15 23:59:11', '', '', 0, '98ff697357abc6635fa9', 113, '2', 0, '106', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(29, 'de19b6', 29, '135', '', 1, '2022-10-16 13:01:30', '', '', 0, '268ff2c812b18ef8226b', 61, '2', 0, '124', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(30, 'f5fc30', 30, '125', '', 1, '2022-10-16 13:03:16', '', '', 0, '14dfc196595cfd23ba78', 61, '2', 0, '124', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(31, 'ef8484', 31, '135', '', 1, '2022-10-16 13:15:02', '', '', 0, 'b3bee623d7f11d70a608', 61, '2', 0, '124', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(32, '60b85d', 32, '295', '', 1, '2022-10-16 16:37:16', '', '', 0, '7ad24eb0e54027d0318c', 61, '2', 0, '124', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(33, '534c07', 33, '0', '', 1, '2022-10-16 16:38:09', '', '', 0, '577aa8fbdb06623ec09a', 61, '2', 0, '124', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(34, '8f8473', 34, '0', '', 1, '2022-10-16 16:38:21', '', '', 0, 'cd3a6576aaec61f28398', 61, '2', 0, '124', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(35, '0a8029', 35, '295', '', 1, '2022-10-16 16:43:07', '', '', 0, 'ced6f45f9ab53fb40f90', 61, '2', 0, '124', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(36, '5828f9', 36, '115', '', 1, '2022-10-16 18:08:12', '', '', 0, '80051ee9f4b699bb5465', 129, '2', 0, '100', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(37, '816930', 37, '115', '', 1, '2022-10-16 18:13:33', '', '', 0, '386e6104da2dd250117b', 113, '2', 0, '106', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(38, '417366', 38, '135', '', 1, '2022-10-16 18:15:46', '', '', 0, '38b437bf1ab07c0d93cc', 3, '2', 0, '70', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, ''),
+(39, '20055e', 39, '125', '', 1, '2022-10-16 18:17:49', '', '', 0, 'a1296e8907a34cd71a40', 3, '2', 0, '70', '50', '', '', 0, 3, '', 0, '', 0, '', '', NULL, '', NULL, NULL, 'facebook', 0, '', 0, '');
 
 -- --------------------------------------------------------
 
@@ -21962,7 +22184,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `ip_address`, `username`, `password`, `email`, `activation_selector`, `activation_code`, `forgotten_password_selector`, `forgotten_password_code`, `forgotten_password_time`, `remember_selector`, `remember_code`, `created_on`, `last_login`, `active`, `first_name`, `last_name`, `company`, `phone`) VALUES
-(1, '127.0.0.1', 'administrator', '$2y$12$jaCQ9LSlp5NQV3hzx1vmXuiVD/u94ubYTDXjAS27DnOCDHaVbSuIW', 'admin@admin.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1268889823, 1665682320, 1, 'Admin', 'istrator', 'ADMIN', '0'),
+(1, '127.0.0.1', 'administrator', '$2y$12$jaCQ9LSlp5NQV3hzx1vmXuiVD/u94ubYTDXjAS27DnOCDHaVbSuIW', 'admin@admin.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1268889823, 1665915280, 1, 'Admin', 'istrator', 'ADMIN', '0'),
 (2, '152.32.99.128', 'hub@user.com', '$2y$10$In9nZl8lUjgdiSVmXsoAVO58xjmGX.ZlgLFaAjISiVz694hLaCVHi', 'hub@user.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1586789972, 1618885331, 1, 'TEI', 'Hub', 'TEI', '09468672339'),
 (3, '152.32.99.128', 'aaron.andes@tatersgroup.com', '$2y$10$nvS6HvZYmQZsdsRmdSY/XugW54SdAty..U.S6jNM6pvNppNgzfLhO', 'csr@user.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1586790072, 1640931423, 1, 'testing', 'only', 'TEI', '09468672339'),
 (4, '152.32.99.128', 'neil.angel@tatersgroup.com', '$2y$10$joh1RzFa8C3xRy0PSCWZU.FqZEyTYRksNAHf0nIf/Tabt0LE79OpS', 'neil.angel@tatersgroup.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1586916308, 1599972040, 1, 'Neil Bryan', 'Angel', 'Taters Enterprises Inc.', ''),
@@ -22770,7 +22992,7 @@ INSERT INTO `users` (`id`, `ip_address`, `username`, `password`, `email`, `activ
 (802, '110.54.195.244', '09954561538', '$2y$10$SoIUhLK.h9IOtigG6W2DuOR5bH/kJ6w.ZjXK7iBzi.WbfcWLtHEwS', '09954561538', NULL, NULL, NULL, NULL, NULL, '1f95fbd294c07e324fe014f1847b519a5c427f6b', '$2y$10$0qS2WkM/Cw20H4KZW.e1cuEnXwW5tMouF60zhuZgZje90NeuAnS.S', 1634472184, 1634472209, 1, NULL, NULL, NULL, '09954561538'),
 (803, '49.148.241.214', '09777389471', '$2y$10$bbStkodWyANZZK2fZvSwCu5wtz2M/dAF91bPLO0Sp2wdkQn9yWnLG', '09777389471', NULL, NULL, NULL, NULL, NULL, 'ea0780983157930829207e990b4a48ecbe93ae3c', '$2y$10$7mS4capnt11UK.0ZIZiFsOufghTvZ1DFC4FBb6srpiHwfcTqUUZiy', 1636965888, 1639386304, 1, NULL, NULL, NULL, '09777389471'),
 (804, '136.158.3.245', '09497996447', '$2y$10$vrmMXvoliU31.vRmhdb0Yu0FFAS2Lq6Y3Cbm6APHw8gk4nmA/ww7.', '09497996447', NULL, NULL, NULL, NULL, NULL, '77aa894d8a352993e0b6840394c71a4ef3f19cb6', '$2y$10$YGElSgHHYetjZJrGQkA2w.2DBSwnuNOf5KeMcILwQobXWvTKfl7Vy', 1638450755, 1638450799, 1, NULL, NULL, NULL, '09497996447'),
-(805, '122.54.154.152', 'tei.csr@tatersgroup.com', '$2y$10$FwGIFYxBhSs/uaOD9oOt7uvA5mrTkp89/E2hNZdgDrB00BHrV/f5u', 'tei.csr@tatersgroup.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1643266823, 1665024724, 1, 'Taters', 'CSR', 'Taters Enterprises Inc.', '09161450314'),
+(805, '122.54.154.152', 'tei.csr@tatersgroup.com', '$2y$10$FwGIFYxBhSs/uaOD9oOt7uvA5mrTkp89/E2hNZdgDrB00BHrV/f5u', 'tei.csr@tatersgroup.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1643266823, 1665915513, 1, 'Taters', 'CSR', 'Taters Enterprises Inc.', '09161450314'),
 (806, '49.144.133.206', 'taters_southforbes@tatersgroup.com', '$2y$10$LdUGZbcasJQYp6nlS4L7v.H7Y4hrmFs8ZVdNhVXo94HZz1hfcHQRG', 'taters_southforbes@tatersgroup.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1643950831, 1664937726, 1, 'TATERS', 'South Forbes', 'Taters Enterprises Inc.', '0961035520'),
 (807, '49.144.129.33', 'taters_betterliving@tatersgroup.com', '$2y$10$yJaJIvv8gyM6fGetMxywsOfG70Oe1fneNY.TJxaZodH4eydhy3YV.', 'taters_betterliving@tatersgroup.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1646105152, 1664962997, 1, 'Taters', 'Better Living', 'Taters Enterprises Inc.', '09958333228'),
 (808, '49.144.129.33', 'taters.tei.wp@tatersgroup.com', '$2y$10$B1MQ93Xp1q1VfQYQApOfmeDhPzgUdBjeM/1ewBWomY.x/XIXTY72u', 'taters.tei.wp@tatersgroup.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1646105343, 1664961447, 1, 'Taters', 'White Plains', 'Taters Enterprises Inc.', '09209753117'),
@@ -22840,7 +23062,7 @@ INSERT INTO `users` (`id`, `ip_address`, `username`, `password`, `email`, `activ
 (872, '122.54.154.152', 'taterssmcebu@gmail.com', '$2y$10$xx1WEJQhG8YLjti8gUQZ4.UGtbzFcCtO2pRGQhXMdAvq6pARDp28m', 'taterssmcebu@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1664434842, NULL, 1, 'Taters', 'SM CEBU', 'Taters Enterprises, Inc.', '09353478573'),
 (873, '122.54.154.152', 'taters.ccismccb@tatersgroup.com', '$2y$10$Wc5pKr0MVZxip4AzV9n9lO0rEHujylJwyxLThL8MOkdicIx3mB9Au', 'taters.ccismccb@tatersgroup.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1664435076, NULL, 1, 'Taters', 'SM Cebu Bowling', 'Taters Enterprises, Inc.', '09662489005'),
 (874, '122.54.154.152', 'taters.ccismssb@tatersgroup.com', '$2y$10$AomF8t9DZ5wJmA2BFsVoiONaRWwmuts4PRUBuirT2GEeLmWFyByKi', 'taters.ccismssb@tatersgroup.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1664435257, NULL, 1, 'Taters', 'SM Seaside Bowling', 'Taters Enterprises, Inc.', '09662489005'),
-(875, '136.158.56.90', 'eco.villaraza19@gmail.com', '$2y$10$Bs6cUS65bT1J5CgT4YjfAe2aABFWRDsH.kscx6CKlGKGDXDTHsDLO', 'eco.villaraza19@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1665324254, 1665324312, 1, 'Eco', 'Villaraza', 'Taters', '09084741500');
+(875, '136.158.56.90', 'eco.villaraza19@gmail.com', '$2y$10$Bs6cUS65bT1J5CgT4YjfAe2aABFWRDsH.kscx6CKlGKGDXDTHsDLO', 'eco.villaraza19@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1665324254, 1665915292, 1, 'Eco', 'Villaraza', 'Taters', '09084741500');
 
 -- --------------------------------------------------------
 
@@ -22886,7 +23108,6 @@ INSERT INTO `users_groups` (`id`, `user_id`, `group_id`) VALUES
 (45, 23, 3),
 (46, 24, 2),
 (47, 25, 3),
-(48, 26, 1),
 (480, 27, 1),
 (923, 28, 2),
 (924, 28, 14),
@@ -22894,7 +23115,6 @@ INSERT INTO `users_groups` (`id`, `user_id`, `group_id`) VALUES
 (922, 29, 14),
 (1069, 30, 2),
 (1070, 30, 14),
-(58, 31, 1),
 (919, 32, 2),
 (920, 32, 14),
 (61, 33, 3),
@@ -22903,7 +23123,6 @@ INSERT INTO `users_groups` (`id`, `user_id`, `group_id`) VALUES
 (67, 35, 3),
 (65, 36, 2),
 (68, 37, 3),
-(70, 38, 1),
 (1063, 39, 2),
 (1064, 39, 14),
 (79, 40, 3),
@@ -23074,7 +23293,6 @@ INSERT INTO `users_groups` (`id`, `user_id`, `group_id`) VALUES
 (241, 202, 8),
 (242, 203, 8),
 (243, 204, 8),
-(843, 205, 1),
 (246, 206, 8),
 (247, 207, 8),
 (248, 208, 8),
@@ -23653,14 +23871,12 @@ INSERT INTO `users_groups` (`id`, `user_id`, `group_id`) VALUES
 (836, 778, 8),
 (837, 779, 8),
 (838, 780, 8),
-(841, 781, 1),
 (844, 782, 8),
 (845, 783, 8),
 (846, 784, 8),
 (847, 785, 8),
 (848, 786, 8),
 (1041, 787, 2),
-(1042, 787, 10),
 (852, 788, 8),
 (855, 789, 3),
 (856, 790, 8),
@@ -23668,13 +23884,11 @@ INSERT INTO `users_groups` (`id`, `user_id`, `group_id`) VALUES
 (858, 792, 8),
 (859, 793, 8),
 (860, 794, 8),
-(862, 795, 1),
 (938, 796, 2),
 (939, 796, 14),
 (1035, 797, 2),
 (1036, 797, 14),
 (867, 798, 8),
-(869, 799, 1),
 (870, 800, 8),
 (871, 801, 8),
 (872, 802, 8),
@@ -23697,7 +23911,6 @@ INSERT INTO `users_groups` (`id`, `user_id`, `group_id`) VALUES
 (890, 814, 8),
 (891, 815, 8),
 (892, 816, 8),
-(895, 817, 10),
 (897, 818, 8),
 (898, 819, 8),
 (899, 820, 8),
@@ -24168,40 +24381,6 @@ INSERT INTO `users_store_groups` (`id`, `user_id`, `store_id`) VALUES
 (1808, 21, 116),
 (1809, 21, 117),
 (1810, 825, 116),
-(1965, 27, 3),
-(1966, 27, 18),
-(1967, 27, 16),
-(1968, 27, 0),
-(1969, 27, 51),
-(1970, 27, 8),
-(1971, 27, 52),
-(1972, 27, 61),
-(1973, 27, 90),
-(1974, 27, 62),
-(1975, 27, 89),
-(1976, 27, 88),
-(1977, 27, 64),
-(1978, 27, 97),
-(1979, 27, 63),
-(1980, 27, 104),
-(1981, 27, 60),
-(1982, 27, 65),
-(1983, 27, 99),
-(1984, 27, 105),
-(1985, 27, 106),
-(1986, 27, 107),
-(1987, 27, 108),
-(1988, 27, 109),
-(1989, 27, 110),
-(1990, 27, 111),
-(1991, 27, 112),
-(1992, 27, 113),
-(1993, 27, 114),
-(1994, 27, 115),
-(1995, 27, 116),
-(1996, 27, 117),
-(1997, 27, 118),
-(1998, 27, 119),
 (2033, 781, 3),
 (2034, 781, 18),
 (2035, 781, 16),
@@ -24236,40 +24415,6 @@ INSERT INTO `users_store_groups` (`id`, `user_id`, `store_id`) VALUES
 (2064, 781, 117),
 (2065, 781, 118),
 (2066, 781, 119),
-(2067, 805, 3),
-(2068, 805, 18),
-(2069, 805, 16),
-(2070, 805, 0),
-(2071, 805, 51),
-(2072, 805, 8),
-(2073, 805, 52),
-(2074, 805, 61),
-(2075, 805, 90),
-(2076, 805, 62),
-(2077, 805, 89),
-(2078, 805, 88),
-(2079, 805, 64),
-(2080, 805, 97),
-(2081, 805, 63),
-(2082, 805, 104),
-(2083, 805, 60),
-(2084, 805, 65),
-(2085, 805, 99),
-(2086, 805, 105),
-(2087, 805, 106),
-(2088, 805, 107),
-(2089, 805, 108),
-(2090, 805, 109),
-(2091, 805, 110),
-(2092, 805, 111),
-(2093, 805, 112),
-(2094, 805, 113),
-(2095, 805, 114),
-(2096, 805, 115),
-(2097, 805, 116),
-(2098, 805, 117),
-(2099, 805, 118),
-(2100, 805, 119),
 (2101, 789, 3),
 (2102, 789, 18),
 (2103, 789, 16),
@@ -24303,89 +24448,6 @@ INSERT INTO `users_store_groups` (`id`, `user_id`, `store_id`) VALUES
 (2131, 789, 118),
 (2132, 789, 119),
 (2133, 828, 117),
-(2246, 1, 3),
-(2247, 1, 18),
-(2248, 1, 16),
-(2249, 1, 0),
-(2250, 1, 51),
-(2251, 1, 8),
-(2252, 1, 52),
-(2253, 1, 61),
-(2254, 1, 90),
-(2255, 1, 62),
-(2256, 1, 89),
-(2257, 1, 88),
-(2258, 1, 64),
-(2259, 1, 97),
-(2260, 1, 63),
-(2261, 1, 104),
-(2262, 1, 60),
-(2263, 1, 65),
-(2264, 1, 99),
-(2265, 1, 105),
-(2266, 1, 106),
-(2267, 1, 107),
-(2268, 1, 108),
-(2269, 1, 109),
-(2270, 1, 110),
-(2271, 1, 111),
-(2272, 1, 112),
-(2273, 1, 113),
-(2274, 1, 114),
-(2275, 1, 115),
-(2276, 1, 116),
-(2277, 1, 117),
-(2278, 1, 118),
-(2279, 1, 119),
-(2280, 1, 120),
-(2281, 1, 121),
-(2282, 1, 122),
-(2283, 1, 123),
-(2284, 1, 126),
-(2285, 1, 129),
-(2286, 1, 130),
-(2287, 1, 132),
-(2288, 1, 133),
-(2289, 1, 134),
-(2290, 1, 135),
-(2291, 1, 136),
-(2292, 1, 137),
-(2293, 1, 138),
-(2294, 1, 139),
-(2295, 1, 140),
-(2296, 1, 141),
-(2297, 1, 142),
-(2298, 1, 144),
-(2299, 1, 145),
-(2300, 1, 146),
-(2301, 1, 147),
-(2302, 1, 148),
-(2303, 1, 149),
-(2304, 1, 151),
-(2305, 1, 152),
-(2306, 1, 153),
-(2307, 1, 154),
-(2308, 1, 156),
-(2309, 1, 157),
-(2310, 1, 158),
-(2311, 1, 159),
-(2312, 1, 160),
-(2313, 1, 162),
-(2314, 1, 163),
-(2315, 1, 164),
-(2316, 1, 165),
-(2317, 1, 166),
-(2318, 1, 167),
-(2319, 1, 168),
-(2320, 1, 169),
-(2321, 1, 170),
-(2322, 1, 171),
-(2323, 1, 172),
-(2324, 1, 173),
-(2325, 1, 174),
-(2326, 1, 176),
-(2327, 1, 178),
-(2328, 1, 179),
 (2329, 836, 107),
 (2330, 837, 115),
 (2331, 838, 119),
@@ -30777,6 +30839,12 @@ ALTER TABLE `catering_store_menu_type_tb`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `catering_transaction_logs_tb`
+--
+ALTER TABLE `catering_transaction_logs_tb`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `catering_transaction_tb`
 --
 ALTER TABLE `catering_transaction_tb`
@@ -31339,7 +31407,7 @@ ALTER TABLE `catering_category_tb`
 -- AUTO_INCREMENT for table `catering_client_tb`
 --
 ALTER TABLE `catering_client_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `catering_invoice_tb`
@@ -31351,7 +31419,7 @@ ALTER TABLE `catering_invoice_tb`
 -- AUTO_INCREMENT for table `catering_order_items`
 --
 ALTER TABLE `catering_order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `catering_packages_tb`
@@ -31420,10 +31488,16 @@ ALTER TABLE `catering_store_menu_type_tb`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `catering_transaction_logs_tb`
+--
+ALTER TABLE `catering_transaction_logs_tb`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `catering_transaction_tb`
 --
 ALTER TABLE `catering_transaction_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `city_group_tb`
@@ -31435,25 +31509,25 @@ ALTER TABLE `city_group_tb`
 -- AUTO_INCREMENT for table `client_tb`
 --
 ALTER TABLE `client_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `deals_client_tb`
 --
 ALTER TABLE `deals_client_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `deals_order_items`
 --
 ALTER TABLE `deals_order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `deals_redeems_tb`
 --
 ALTER TABLE `deals_redeems_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `deals_region_da_log`
@@ -31525,7 +31599,7 @@ ALTER TABLE `dotcom_stores`
 -- AUTO_INCREMENT for table `fb_users`
 --
 ALTER TABLE `fb_users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `fb_user_address`
@@ -31561,13 +31635,13 @@ ALTER TABLE `groups`
 -- AUTO_INCREMENT for table `invoice_tb`
 --
 ALTER TABLE `invoice_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `login_attempts`
 --
 ALTER TABLE `login_attempts`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=125;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT for table `mobile_users`
@@ -31603,7 +31677,7 @@ ALTER TABLE `notification_events`
 -- AUTO_INCREMENT for table `notification_event_type`
 --
 ALTER TABLE `notification_event_type`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `personnel_tb`
@@ -31819,13 +31893,13 @@ ALTER TABLE `suggestive_selling_tb`
 -- AUTO_INCREMENT for table `transaction_logs_tb`
 --
 ALTER TABLE `transaction_logs_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `transaction_tb`
 --
 ALTER TABLE `transaction_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `users`
