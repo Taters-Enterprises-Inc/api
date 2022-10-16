@@ -844,6 +844,8 @@ class Admin_model extends CI_Model
             A.purchase_amount,
             A.invoice_num,
             B.add_name as client_name,
+            B.fb_user_id,
+            B.mobile_user_id,
             B.payops,
             B.contact_number,
             B.email,
@@ -989,6 +991,8 @@ class Admin_model extends CI_Model
             B.email,
             B.address,
             B.add_address,
+            B.fb_user_id,
+            B.mobile_user_id,
             C.name as store_name
         ");
         $this->db->from('transaction_tb A');
