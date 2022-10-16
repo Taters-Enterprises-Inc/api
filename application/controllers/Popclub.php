@@ -344,7 +344,7 @@ class Popclub extends CI_Controller {
                             "message" => $this->session->userData['first_name'] . " " . $this->session->userData['last_name']." reedeem on popclub!"
                         );
 
-                        notify('popclub','popclub-store-visit-transaction', $data);
+                        notify('admin-popclub','popclub-store-visit-transaction', $data);
 		
 						$response = array(
 							"message" => 'Successfully Redeem Code',
