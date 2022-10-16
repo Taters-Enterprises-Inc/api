@@ -18,12 +18,19 @@ class Notification_model extends CI_Model {
         $this->db->insert('notifications', $notifications_data);
     }
 
+    public function seenNotification($notification_id, $date_now){
+		$this->db->set('dateseen', $date_now);
+        $this->db->where("id", $notification_id);
+        $this->db->update("notifications");
+    }
+
     public function getNotifications(
         $stores,
-        $notification_event_type_id
+        $notification_event_type_id,
+        $is_unseen
     ){
-
         $this->db->select('
+            A.id,
             A.dateadded, 
             A.dateseen,
             B.text,
@@ -33,6 +40,10 @@ class Notification_model extends CI_Model {
         $this->db->from('notifications A');
         $this->db->join('notification_events B', 'B.id = A.notification_event_id');
         $this->db->join('transaction_tb C', 'C.id = B.transaction_tb_id');
+
+        if($is_unseen){
+            $this->db->where('A.dateseen', NULL);
+        }
         
         if(!empty($store))
             $this->db->where_in('A.store', $store);
@@ -40,6 +51,8 @@ class Notification_model extends CI_Model {
         if(isset($notification_event_type_id)){
             $this->db->where('B.notification_event_type_id',$notification_event_type_id);
         }
+
+        $this->db->order_by('A.id','DESC');
         
         $query = $this->db->get();
         

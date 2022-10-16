@@ -127,7 +127,9 @@ $route['admin/setting/stores'] = 'admin/setting_stores';
 
 $route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
 $route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_logs/$1';
+
 $route['admin/notifications'] = 'admin/notifications';
+$route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
 
 //Others
 $route['404_override'] = '';

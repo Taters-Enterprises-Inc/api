@@ -24,6 +24,22 @@ class Admin extends CI_Controller
 		$this->load->model('notification_model');
 	}
 
+  public function notification_seen($notification_id){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'PUT':
+        $date_now = date('Y-m-d H:i:s');
+        $this->notification_model->seenNotification($notification_id, $date_now);
+        
+        $response = array(
+          "message" => "Succesfully seen notification"
+       );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
   public function notifications(){
     
 		switch($this->input->server('REQUEST_METHOD')){
@@ -44,11 +60,13 @@ class Admin extends CI_Controller
         $response = array(
             "data" => array(
               "all" => array(
-                'notifications'=> $this->notification_model->getNotifications($stores, null),
+                'notifications'=> $this->notification_model->getNotifications($stores, null, false),
+                "unseen_notifications" => $this->notification_model->getNotifications($stores, null, true),
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($stores, null),
               ),
               "snackshop_order" => array(
-                'notifications'=> $this->notification_model->getNotifications($stores, 1),
+                'notifications'=> $this->notification_model->getNotifications($stores, 1, false),
+                "unseen_notifications" => $this->notification_model->getNotifications($stores, null, true),
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($stores, 1),
               ),
             ),
