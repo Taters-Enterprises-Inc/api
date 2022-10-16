@@ -38,6 +38,15 @@ class Catering extends CI_Controller {
                 $data = $this->upload->data(); 
                 $hash_key = $_POST['hash_key'];
 
+                $store_id = $this->session->cache_data['store_id'];
+
+				$data = array(
+					"store_id" => $store_id,
+					"message" => $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." Upload Contract!"
+				);
+
+				notify('admin-catering','booking-transaction', $data);
+
 
                 $this->catering_model->upload_contract(
 					$data,

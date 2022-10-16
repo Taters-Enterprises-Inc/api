@@ -140,7 +140,7 @@ class Transaction extends CI_Controller {
                             "message" => $post['firstName'] . " " . $post['lastName'] ." book on catering!"
                         );
 
-                        notify('catering','booking-transaction', $data);
+                        notify('admin-catering','booking-transaction', $data);
                         
                 
                         $this->session->unset_userdata('orders');
@@ -403,7 +403,7 @@ class Transaction extends CI_Controller {
                             "message" => $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!"
                         );
 
-                        notify('snackshop','order-transaction', $data);
+                        notify('admin-snackshop','order-transaction', $data);
 
                         $response = array(
                             "data" => array(
