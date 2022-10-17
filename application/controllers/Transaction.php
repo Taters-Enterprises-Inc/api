@@ -106,6 +106,7 @@ class Transaction extends CI_Controller {
                     $query_transaction_result = $this->transaction_model->insertCateringTransactionDetails($transaction_data);
                     
                     if($query_transaction_result['status'] == true){
+                        $trans_id = $query_transaction_result['id'];
                         
                         if(!empty($this->session->orders)){
                             $comp_total = 0;
@@ -115,7 +116,7 @@ class Transaction extends CI_Controller {
                                 $type = (isset($value['addon_base_product_id']) && ($value['addon_base_product_id']) ? 'addon' : 'main');
 
                                 $order_data[] = array(
-                                    'transaction_id'      => $query_transaction_result['id'],
+                                    'transaction_id'      => $trans_id,
                                     'combination_id'      => $k,
                                     'product_id'          => $value['prod_id'],
                                     'quantity'            => $value['prod_qty'],
@@ -137,12 +138,59 @@ class Transaction extends CI_Controller {
                             $this->transaction_model->insertCateringClientOrders($order_data);
                         }
 
-                        $data = array(
+                        $message = $post['firstName'] . " " . $post['lastName'] ." book on catering!";
+
+                        
+                        $notification_event_data = array(
+                            "notification_event_type_id" => 2,
+                            "catering_transaction_tb_id" => $trans_id,
+                            "text" => $message
+                        );
+                        
+                        $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                        $users = $this->store_model->getUsersStoreGroupsByStoreId($store_id);
+                        foreach($users as $user){
+                            $notifications_data = array(
+                                "user_to_notify" => $user->user_id,
+                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                                'notification_event_id' => $notification_event_id,
+                                "dateadded" => date('Y-m-d H:i:s'),
+                            );
+
+                            $this->notification_model->insertNotification($notifications_data);   
+                        }
+                        
+                        $admin_users = $this->user_model->getUsersByGroupId(1);
+                        foreach($admin_users as $user){
+                            $notifications_data = array(
+                                "user_to_notify" => $user->user_id,
+                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                                'notification_event_id' => $notification_event_id,
+                                "dateadded" => date('Y-m-d H:i:s'),
+                            );
+                            $this->notification_model->insertNotification($notifications_data);   
+                        }
+                        
+                        $csr_admin_users = $this->user_model->getUsersByGroupId(10);
+                        foreach($csr_admin_users as $user){
+                            $notifications_data = array(
+                                "user_to_notify" => $user->user_id,
+                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                                'notification_event_id' => $notification_event_id,
+                                "dateadded" => date('Y-m-d H:i:s'),
+                            );
+                            $this->notification_model->insertNotification($notifications_data);   
+                        }
+
+                        $real_time_notification = array(
                             "store_id" => $store_id,
-                            "message" => $post['firstName'] . " " . $post['lastName'] ." book on catering!"
+                            "message" => $message,
                         );
 
-                        notify('admin-catering','booking-transaction', $data);
+                        notify('admin-catering','booking-transaction', $real_time_notification);
                         
                 
                         $this->session->unset_userdata('orders');
@@ -409,7 +457,6 @@ class Transaction extends CI_Controller {
                         );
                         
                         $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
-
                         $users = $this->store_model->getUsersStoreGroupsByStoreId($store_id);
                         foreach($users as $user){
                             $notifications_data = array(

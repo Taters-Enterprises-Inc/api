@@ -59,6 +59,11 @@ class Admin extends CI_Controller
                 "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true),
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 1),
               ),
+              "catering_order" => array(
+                'notifications'=> $this->notification_model->getNotifications($user_id, 2, false),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 2),
+              ),
             ),
             "message" => "Succesfully fetch notification"
         );

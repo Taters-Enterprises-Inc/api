@@ -36,12 +36,16 @@ class Notification_model extends CI_Model {
             A.dateadded, 
             A.dateseen,
             B.text,
-            C.tracking_no
+            B.notification_event_type_id,
+            C.tracking_no,
+            D.tracking_no as catering_tracking_no,
         ');
 
         $this->db->from('notifications A');
         $this->db->join('notification_events B', 'B.id = A.notification_event_id');
-        $this->db->join('transaction_tb C', 'C.id = B.transaction_tb_id');
+        
+        $this->db->join('transaction_tb C', 'C.id = B.transaction_tb_id','left');
+        $this->db->join('catering_transaction_tb D', 'D.id = B.catering_transaction_tb_id','left');
 
         if($is_unseen){
             $this->db->where('A.dateseen', NULL);
