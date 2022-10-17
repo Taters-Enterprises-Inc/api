@@ -12,7 +12,7 @@ class Contact_model extends CI_Model
         else
             $insert = $this->db->insert('mobile_user_contact', $data);
 
-        if ($insert) {
+        if ($insert) { 
             return true;
         } else {
             return false;

@@ -13,6 +13,7 @@ class Shared extends CI_Controller {
 		$this->load->model('shop_model');
 		$this->load->model('contact_model');
 		$this->load->model('catering_model');
+		$this->load->model('Client_model');
 		$this->load->model('user_model');
 		$this->load->model('logs_model');
 		$this->load->library('form_validation');
@@ -92,7 +93,7 @@ class Shared extends CI_Controller {
 			break;
 		}
     }
-	
+
     public function upload_payment()
     {
         if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
@@ -136,6 +137,93 @@ class Shared extends CI_Controller {
 			echo json_encode(array( "message" => 'Failed upload payment check your image'));
         }
     }
+
+
+	public function discount_registration(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST': 
+
+				if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
+					$config['upload_path'] = './assets/upload/scpwd_id'; 
+
+					if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
+
+					$config['allowed_types']    = 'gif|png|jpg|jpeg'; 
+					$config['max_size']         = 2000;
+					$config['max_width']        = 0;
+					$config['max_height']       = 0;
+					$config['encrypt_name']     = TRUE;
+
+			        $this->load->library('upload', $config);
+
+					if (!$this->upload->do_upload('uploaded_file')) {
+						$error = $this->upload->display_errors();
+						$this->output->set_status_header('401');
+						echo json_encode(array( "message" => $error));
+					} else {
+				
+						if(isset($_SESSION['userData']['oauth_uid'])){
+
+							$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+							$user_FbId = $get_fb_user_details->id;
+							$user_UserId = null;
+							
+						}else if(isset($_SESSION['userData']['mobile_user_id'])){
+
+							$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+							$user_UserId = $get_mobile_user_details->id;
+							$user_FbId = null;
+
+						}else{
+
+							$this->output->set_status_header(401);
+							echo json_encode(array('message'=>'User not found...'));
+							return;
+							
+						}
+						$data = $this->upload->data();
+						
+						$scpwd_data = array(
+							'first_name' => $_POST['firstName'],
+							'middle_name' => $_POST['middleName'],	
+							'last_name' => $_POST['lastName'],
+							'birthday' => $_POST['birthday'],
+							'id_number' => $_POST['scpwdnumber'],
+							'id_front' => $data['file_name'],
+							'id_back' => $data['file_name'],
+							'dateadded' => date('Y-m-d H:i:s'),
+							'discount_type_id' => '1',
+							'fb_user_id' => $user_FbId,
+							'mobile_user_id' => $user_UserId,
+							'status' => 1
+
+						);
+
+
+						// print_r($data);
+						
+						$this->Client_model->add_DiscountUser($scpwd_data);
+			
+						$response = array(
+							'message' => 'Verification request on review.'
+						);
+
+						header('content-type: application/json');
+						echo json_encode($response);
+						return;
+					
+								
+						
+					}
+
+				}else {
+					$this->output->set_status_header('401');
+					echo json_encode(array( "message" => 'Failed upload'));
+				}
+
+		}
+
+	}
 
 	
     public function catering_upload_payment()
@@ -246,6 +334,52 @@ class Shared extends CI_Controller {
 				break;
 		}
 	}
+
+	public function discount(){
+		switch($this->input->server('REQUEST_METHOD')){
+		  case 'GET':
+			$per_page = $this->input->get('per_page') ?? 25;
+			$page_no = $this->input->get('page_no') ?? 0;
+			$status = $this->input->get('status') ?? null;
+			$order = $this->input->get('order') ?? 'desc';
+			$order_by = $this->input->get('order_by') ?? 'dateadded';
+			$search = $this->input->get('search');
+	
+			if($page_no != 0){
+			  $page_no = ($page_no - 1) * $per_page;
+			}
+	
+			$store_id_array = array();
+			if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
+			  $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+			  foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+			}
+			
+			$orders_count = $this->admin_model->getSnackshopOrdersCount($status, $search, $store_id_array);
+			$orders = $this->admin_model->getSnackshopOrders($page_no, $per_page, $status, $order_by, $order, $search, $store_id_array);
+	
+			// $pagination = array(
+			//   "total_rows" => $orders_count,
+			//   "per_page" => $per_page,
+			//   "test" => $store_id_array,
+			// );
+	
+			// $response = array(
+			//   "message" => 'Successfully fetch snackshop orders',
+			//   "data" => array(
+			// 	"pagination" => $pagination,
+			// 	"orders" => $orders
+			//   ),
+			// );
+	  
+			// header('content-type: application/json');
+			// echo json_encode($response);
+			// return;
+		}
+	  }
+
+
+
 	
 	
 	public function clear_all_session(){
