@@ -178,4 +178,16 @@ class Client_model extends CI_Model {
         $data = $query->row();
         return $data;
     }
+
+    public function add_DiscountUser($data){
+        $insert = $this->db->insert('discount_users', $data);
+
+        if($insert){ 
+            return true;
+        }else {
+            return false;
+        }
+        
+    }
+
 }
