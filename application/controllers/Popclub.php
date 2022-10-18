@@ -339,12 +339,12 @@ class Popclub extends CI_Controller {
 						$_SESSION['redeem_data'] = $products;
 
 						
-                        $data = array(
+                        $real_time_notification = array(
                             "store_id" => $store_id,
                             "message" => $this->session->userData['first_name'] . " " . $this->session->userData['last_name']." reedeem on popclub!"
                         );
 
-                        notify('admin-popclub','popclub-store-visit-transaction', $data);
+                        notify('admin-popclub','popclub-store-visit-transaction', $real_time_notification);
 		
 						$response = array(
 							"message" => 'Successfully Redeem Code',
