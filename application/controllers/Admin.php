@@ -551,24 +551,24 @@ class Admin extends CI_Controller
           if ($request == "store_transfer"){
             $this->logs_model->insertCateringTransactionLogs($user_id, 1, $transaction_id, 'Transfer booking from ' . $from_store->name . ' to ' . $to_store->name);
             
-            $data = array(
+            $real_time_notification = array(
                 "fb_user_id" => $fb_user_id,
                 "mobile_user_id" => $mobile_user_id,
                 "message" => 'Your booking has been transfered from '. $from_store->name . ' to ' . $to_store->name,
             );
 
-            notify('user-catering','catering-booking-changed', $data);
+            notify('user-catering','catering-booking-changed', $real_time_notification);
           }
           elseif ($request == "change_status"){
             $this->logs_model->insertCateringTransactionLogs($user_id, 1, $transaction_id, 'Change booking status from ' . $from_status . ' to ' . $to_status);
             
-            $data = array(
+            $real_time_notification = array(
                 "fb_user_id" => $fb_user_id,
                 "mobile_user_id" => $mobile_user_id,
                 "message" => 'Your order status changed '. $from_store->name . ' to ' . $to_store->name,
             );
 
-            notify('user-catering','catering-booking-changed', $data);
+            notify('user-catering','catering-booking-changed', $real_time_notification);
           }
     
           header('content-type: application/json');
@@ -646,24 +646,24 @@ class Admin extends CI_Controller
           if ($request == "store_transfer"){
             $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Transfer order from ' . $from_store->name . ' to ' . $to_store->name);
             
-            $data = array(
+            $real_time_notification = array(
                 "fb_user_id" => $fb_user_id,
                 "mobile_user_id" => $mobile_user_id,
                 "message" => 'Your order has been transfered from '. $from_store->name . ' to ' . $to_store->name,
             );
 
-            notify('user-snackshop','snackshop-order-changed', $data);
+            notify('user-snackshop','snackshop-order-changed', $real_time_notification);
           }
           elseif ($request == "change_status"){
             $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Change order status from ' . $from_status . ' to ' . $to_status);
             
-            $data = array(
+            $real_time_notification = array(
                 "fb_user_id" => $fb_user_id,
                 "mobile_user_id" => $mobile_user_id,
                 "message" => 'Your order status changed '. $from_store->name . ' to ' . $to_store->name,
             );
 
-            notify('user-snackshop','snackshop-order-changed', $data);
+            notify('user-snackshop','snackshop-order-changed', $real_time_notification);
           }
     
           header('content-type: application/json');
@@ -703,13 +703,13 @@ class Admin extends CI_Controller
             if ($fetch_data == 1) {
               $this->logs_model->insertCateringTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Booking Success');
               
-              $data = array(
+              $real_time_notification = array(
                 "fb_user_id" => (int) $fb_user_id,
                 "mobile_user_id" => (int) $mobile_user_id,
                 "message" => $tagname,
               );
 
-              notify('user-catering','catering-booking-updated', $data);
+              notify('user-catering','catering-booking-updated', $real_time_notification);
               header('content-type: application/json');
               echo json_encode(array( "message" => 'Successfully update status!'));
             } else {
@@ -746,13 +746,13 @@ class Admin extends CI_Controller
               $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Order Success');
               $this->status_notification($trans_id, 9, $user_id);
               
-              $data = array(
+              $real_time_notification = array(
                   "fb_user_id" => (int) $fb_user_id,
                   "mobile_user_id" => (int) $mobile_user_id,
                   "status" => $status,
               );
 
-              notify('user-snackshop','snackshop-order-update', $data);
+              notify('user-snackshop','snackshop-order-update', $real_time_notification);
 
 
               header('content-type: application/json');
@@ -1096,13 +1096,13 @@ class Admin extends CI_Controller
 
         $this->admin_model->declineRedeem($redeem_id);
         
-        $data = array(
+        $real_time_notification = array(
           "fb_user_id" => (int) $fb_user_id,
           "mobile_user_id" => (int) $mobile_user_id,
           "message" => "Your redeem declined, Thank you."
         );
 
-        notify('user-popclub','popclub-redeem-declined', $data);
+        notify('user-popclub','popclub-redeem-declined', $real_time_notification);
 
         $response = array(
           "message" => 'Successfully declined the redeem',
@@ -1123,13 +1123,13 @@ class Admin extends CI_Controller
 
         $this->admin_model->completeRedeem($redeem_id);
 
-        $data = array(
+        $real_time_notification = array(
           "fb_user_id" => (int) $fb_user_id,
           "mobile_user_id" => (int) $mobile_user_id,
           "message" => "You completed your redeem, Thank you."
         );
 
-        notify('user-popclub','popclub-redeem-completed', $data);
+        notify('user-popclub','popclub-redeem-completed', $real_time_notification);
       
 
         $response = array(

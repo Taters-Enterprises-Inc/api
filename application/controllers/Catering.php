@@ -40,18 +40,19 @@ class Catering extends CI_Controller {
 
                 $store_id = $this->session->cache_data['store_id'];
 
-				$data = array(
-					"store_id" => $store_id,
-					"message" => $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." Upload Contract!"
-				);
-
-				notify('admin-catering','booking-transaction', $data);
-
 
                 $this->catering_model->upload_contract(
 					$data,
 					$hash_key,
 				);	
+
+				
+				$real_time_notification = array(
+					"store_id" => $store_id,
+					"message" => $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." Upload Contract!"
+				);
+
+				notify('admin-catering','booking-transaction', $real_time_notification);
 
                 header('content-type: application/json');
                 echo json_encode(array( "message" => 'Succesfully upload contract'));
