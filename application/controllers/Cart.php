@@ -122,12 +122,12 @@ class Cart extends CI_Controller {
                 $_SESSION['orders'][$put['product_id']]['prod_multiflavors'] =$put['prod_multiflavors'];
                 
                 
-                $response = array("message"=>"Edit Successfully" );
+                $response = array("message"=>"Edit Successfully");
                 header('content-type: application/json');
                 echo json_encode($response);
             
             break;
-            case 'DELETE':
+            case "DELETE":
 				    $item_index = $this->input->get('item-index');
                     
                     if(isset($_SESSION['orders'])){
