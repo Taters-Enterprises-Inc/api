@@ -868,6 +868,7 @@ class Admin_model extends CI_Model
         $this->db->from('deals_redeems_tb A');
         $this->db->join('deals_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
+        $this->db->where('A.platform_id', 1);
 
         if($status)
             $this->db->where('A.status', $status);
@@ -907,6 +908,7 @@ class Admin_model extends CI_Model
         $this->db->from('deals_redeems_tb A');
         $this->db->join('deals_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
+        $this->db->where('A.platform_id', 1);
         
             
         if($status)
