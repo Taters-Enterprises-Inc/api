@@ -26,6 +26,7 @@ $route['popclub/redeem-validators'] = 'popclub/redeem_validators';
 
 $route['popclub/deal/(:any)'] = 'popclub/deal/$1';
 $route['popclub/(:any)'] = 'popclub/deals/$1';
+
 //Shared
 $route['shared/session'] = 'shared/session';
 $route['shared/clear_redeems'] = 'shared/clear_redeems';
@@ -33,7 +34,6 @@ $route['shared/clear_all_session'] = 'shared/clear_all_session';
 $route['shared/upload_payment'] = 'shared/upload_payment';
 $route['shared/catering_upload_payment'] = 'shared/catering_upload_payment';
 $route['shared/contacts'] = 'shared/contacts';
-$route['shared/discount_registration'] = 'shared/discount_registration';
 
 // Facebook
 $route['facebook/login'] = 'user_authentication';
@@ -45,7 +45,6 @@ $route['facebook/logout'] = 'user_authentication/logout';
 $route['mobile_users/login_mobile_user'] = 'mobile_users/login_mobile_user';
 $route['mobile_users/registration'] = 'mobile_users/registration';
 $route['mobile_users/mobile_generate_forgot_pass_code'] = 'mobile_users/mobile_generate_forgot_pass_code';
-//$route['mobile_users/mobile_resend_forgot_pass_code'] = 'mobile_users/mobile_resend_forgot_pass_code';
 $route['mobile_users/validate_otp_code'] = 'mobile_users/validate_otp_code';
 $route['mobile_users/change_password'] = 'mobile_users/change_password';
 
@@ -53,6 +52,7 @@ $route['mobile_users/change_password'] = 'mobile_users/change_password';
 $route['profile/popclub-redeems'] = 'profile/popclub_redeems';
 $route['profile/snackshop-orders'] = 'profile/snackshop_orders';
 $route['profile/catering-bookings'] = 'profile/catering_bookings';
+$route['profile/user-discount'] = 'profile/user_discount';
 $route['profile/contact/(:num)'] = 'profile/contact/$1';
 
 // Store

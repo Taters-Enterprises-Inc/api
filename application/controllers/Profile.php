@@ -336,4 +336,8 @@ class Profile extends CI_Controller {
 		}
 
 	}
+
+	public function user_discount(){
+		
+	}
 }

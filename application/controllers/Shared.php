@@ -94,8 +94,7 @@ class Shared extends CI_Controller {
 		}
     }
 
-    public function upload_payment()
-    {
+    public function upload_payment(){
         if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
             $config['upload_path'] = './assets/upload/proof_payment'; 
 
@@ -137,7 +136,6 @@ class Shared extends CI_Controller {
 			echo json_encode(array( "message" => 'Failed upload payment check your image'));
         }
     }
-
 
 	public function discount_registration(){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -207,9 +205,6 @@ class Shared extends CI_Controller {
 						header('content-type: application/json');
 						echo json_encode($response);
 						return;
-					
-								
-						
 					}
 
 				}else {
@@ -221,9 +216,7 @@ class Shared extends CI_Controller {
 
 	}
 
-	
-    public function catering_upload_payment()
-    {
+    public function catering_upload_payment(){
         if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
             $config['upload_path'] = './assets/upload/catering_proof_payment'; 
 
@@ -271,7 +264,6 @@ class Shared extends CI_Controller {
 			echo json_encode(array( "message" => 'Failed upload payment check your image'));
         }
     }
-
 
 	public function session(){
 		switch($this->input->server('REQUEST_METHOD')){
