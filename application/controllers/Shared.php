@@ -335,53 +335,6 @@ class Shared extends CI_Controller {
 				break;
 		}
 	}
-
-	public function discount(){
-		switch($this->input->server('REQUEST_METHOD')){
-		  case 'GET':
-			$per_page = $this->input->get('per_page') ?? 25;
-			$page_no = $this->input->get('page_no') ?? 0;
-			$status = $this->input->get('status') ?? null;
-			$order = $this->input->get('order') ?? 'desc';
-			$order_by = $this->input->get('order_by') ?? 'dateadded';
-			$search = $this->input->get('search');
-	
-			if($page_no != 0){
-			  $page_no = ($page_no - 1) * $per_page;
-			}
-	
-			$store_id_array = array();
-			if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
-			  $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-			  foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-			}
-			
-			$orders_count = $this->admin_model->getSnackshopOrdersCount($status, $search, $store_id_array);
-			$orders = $this->admin_model->getSnackshopOrders($page_no, $per_page, $status, $order_by, $order, $search, $store_id_array);
-	
-			// $pagination = array(
-			//   "total_rows" => $orders_count,
-			//   "per_page" => $per_page,
-			//   "test" => $store_id_array,
-			// );
-	
-			// $response = array(
-			//   "message" => 'Successfully fetch snackshop orders',
-			//   "data" => array(
-			// 	"pagination" => $pagination,
-			// 	"orders" => $orders
-			//   ),
-			// );
-	  
-			// header('content-type: application/json');
-			// echo json_encode($response);
-			// return;
-		}
-	  }
-
-
-
-	
 	
 	public function clear_all_session(){
 		$this->session->sess_destroy();
