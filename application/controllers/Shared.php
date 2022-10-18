@@ -13,7 +13,7 @@ class Shared extends CI_Controller {
 		$this->load->model('shop_model');
 		$this->load->model('contact_model');
 		$this->load->model('catering_model');
-		$this->load->model('Client_model');
+		$this->load->model('client_model');
 		$this->load->model('user_model');
 		$this->load->model('logs_model');
 		$this->load->library('form_validation');
@@ -144,7 +144,7 @@ class Shared extends CI_Controller {
 			case 'POST': 
 
 				if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
-					$config['upload_path'] = './assets/upload/scpwd_id'; 
+					$config['upload_path'] = './assets/upload/user_discount'; 
 
 					if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
 
@@ -183,12 +183,12 @@ class Shared extends CI_Controller {
 						}
 						$data = $this->upload->data();
 						
-						$scpwd_data = array(
+						$user_discount_data = array(
 							'first_name' => $_POST['firstName'],
 							'middle_name' => $_POST['middleName'],	
 							'last_name' => $_POST['lastName'],
 							'birthday' => $_POST['birthday'],
-							'id_number' => $_POST['scpwdnumber'],
+							'id_number' => $_POST['id_number'],
 							'id_front' => $data['file_name'],
 							'id_back' => $data['file_name'],
 							'dateadded' => date('Y-m-d H:i:s'),
@@ -198,11 +198,7 @@ class Shared extends CI_Controller {
 							'status' => 1
 
 						);
-
-
-						// print_r($data);
-						
-						$this->Client_model->add_DiscountUser($scpwd_data);
+						$this->client_model->addDiscountUser($user_discount_data);
 			
 						$response = array(
 							'message' => 'Verification request on review.'

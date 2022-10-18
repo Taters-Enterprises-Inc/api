@@ -1210,7 +1210,7 @@ class Admin extends CI_Controller
         $idNumber = $this->admin_model->getVerificationRequest($id_number);
 
         $response = array(
-          "message" => 'Successfully fetch sc/pwd verification request',
+          "message" => 'Successfully fetch user discount request',
           "data" => $idNumber,
         );
   
@@ -1252,7 +1252,7 @@ class Admin extends CI_Controller
 			);
 	
 			$response = array(
-			  "message" => 'Successfully fetch sc/pwd Verification Request',
+			  "message" => 'Successfully fetch user discounts Request',
 			  "data" => array(
           "pagination" => $pagination,
           "request" => $request
