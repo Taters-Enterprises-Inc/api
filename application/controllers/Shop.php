@@ -97,12 +97,13 @@ class Shop extends CI_Controller {
 				switch($logon_type){
 					case 'facebook':
 						$facebook_details = $this->shop_model->get_facebook_details($order_details['clients_info']->fb_user_id);
-						$firstname = $facebook_details[0]->first_name;
-						$lastname = $facebook_details[0]->last_name;
+						$firstname = $facebook_details->first_name;
+						$lastname = $facebook_details->last_name;
 						break;
 					case 'mobile':
-						$firstname = $order_details['clients_info']->fname;
-						$lastname = $order_details['clients_info']->lname;
+						$mobile_details = $this->shop_model->get_mobile_details($order_details['clients_info']->mobile_user_id);
+						$firstname = $mobile_details->first_name;
+						$lastname = $mobile_details->last_name;
 						break;
 				}
 

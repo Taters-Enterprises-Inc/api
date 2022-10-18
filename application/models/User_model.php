@@ -6,6 +6,14 @@ class User_model extends CI_Model {
     {
         $this->load->database();
     }
+
+    function getUsersByGroupId($group_id){
+        $this->db->select('user_id');
+        $this->db->from('users_groups');
+        $this->db->where('group_id', $group_id);
+        $query = $this->db->get();
+        return $query->result();
+    }
     
     function add_store_group($user_id, $stores){
 
@@ -22,7 +30,16 @@ class User_model extends CI_Model {
             $insert_id[] = $this->db->insert_id();
         }
       }
-      
+     
+    function get_all_store()
+    {
+        $this->db->select('b.store_id, b.name, c.name as menu_name');
+        $this->db->from('store_tb b');
+        $this->db->join('store_menu_tb c', 'c.id = b.store_menu_type_id');
+        $query = $this->db->get();
+        return $query->result();
+    } 
+
     function get_store_group_order($user_id)
     {
         $this->db->select('a.store_id, b.name, c.name as menu_name');

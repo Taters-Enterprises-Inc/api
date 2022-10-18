@@ -12,15 +12,6 @@ class Shop_model extends CI_Model
         return $data;
     }
 
-    //jepoy get facebook client id
-    public function get_facebook_client_id($oauth_id){
-        $this->db->select('id');
-        $this->db->where('oauth_uid', $oauth_id);
-        $query = $this->db->get('fb_users');
-        $data = $query->result_array();
-        return $data[0]['id'];
-    }
-
 
     public function get_logon_type($hash_key){
         $this->db->select('logon_type');
@@ -46,12 +37,13 @@ class Shop_model extends CI_Model
 
             
         if($search){
+            $this->db->group_start();
             $this->db->like('A.tracking_no', $search);
             $this->db->or_like('B.fname', $search);
-            $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
-            $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
         }
 
         $query = $this->db->get();
@@ -85,10 +77,13 @@ class Shop_model extends CI_Model
         $this->db->order_by('A.dateadded','DESC');
         
         if($search){
+            $this->db->group_start();
             $this->db->like('A.tracking_no', $search);
             $this->db->or_like('B.fname', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
         }
             
         $this->db->limit($row_per_page, $row_no);
@@ -127,7 +122,15 @@ class Shop_model extends CI_Model
         $this->db->from('fb_users');
         $this->db->where('id', $id);
         $query = $this->db->get();
-        return $query->result();
+        return $query->row();
+    }
+    
+    public function get_mobile_details($id){
+        $this->db->select("*");
+        $this->db->from('mobile_users');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        return $query->row();
     }
     
     public function view_order($hash_key)
@@ -142,7 +145,7 @@ class Shop_model extends CI_Model
 
         if(!empty($result)){
             $table = "client_tb A";
-            $select_column = array("A.fb_user_id","A.fname", "A.lname", "A.email","A.address", "A.contact_number","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","B.voucher_id","B.table_number","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","A.add_name","A.add_contact","A.add_address","V.discount_value","V.voucher_code","B.giftcard_discount","B.giftcard_number");
+            $select_column = array("A.fb_user_id", "A.mobile_user_id","A.fname", "A.lname", "A.email","A.address", "A.contact_number","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","B.voucher_id","B.table_number","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","A.add_name","A.add_contact","A.add_address","V.discount_value","V.voucher_code","B.giftcard_discount","B.giftcard_number");
             $join_A = "A.id = B.client_id";
             $this->db->select($select_column);  
             $this->db->from($table);

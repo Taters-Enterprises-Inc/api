@@ -1,152 +1,66 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 class Transaction_model extends CI_Model {
-    
-    public function insert_client_orders($data)
-    {
-        $this->db->trans_start();
-        $this->db->insert_batch('order_items', $data);
-        $this->db->trans_complete();
-        return  $this->db->trans_status();
-    }
-	
-    public function insert_client_orders_deal($data)
-    {
-        $this->db->trans_start();
-        $this->db->insert_batch('deals_order_items', $data);
-        $this->db->trans_complete();
-        return  $this->db->trans_status();
-    }
 
-    public function insert_transaction_details($data)
+    public function insertSnackShopTransactionDetails($data)
     {   
         $this->db->trans_start();
 		$this->db->insert('transaction_tb', $data);
 		$insert_id = $this->db->insert_id();
         $this->db->trans_complete();
         
-        $id = ($this->db->trans_status() === FALSE) ? 0 : $insert_id;
-        return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
-    }
-    
-    public function insert_client_details($post)
-    {  
-        if (isset($_SESSION['userData']['oauth_uid'])) {
-            $facebook_client_details = $this->get_facebook_client($_SESSION['userData']['oauth_uid']);
-
-            $this->db->trans_start();
-            // $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
-            $data = array(
-                'fb_user_id'        => $facebook_client_details->id,
-                'email'             => $facebook_client_details->email,
-                'address'           => $post['address'],
-                'contact_number'    => $post['phoneNumber'],
-                'fname'             => $facebook_client_details->first_name,
-                'lname'             => $facebook_client_details->last_name,
-                'moh'               => 2,
-                'payops'            => $post['payops'],
-                'add_name'          => $post['firstName'].' '.$post['lastName'],
-                'add_contact'       => $post['phoneNumber'],
-                'add_address'       => $post['full_address'],
-            );
-            $this->db->insert('client_tb', $data);
-            $insert_id = $this->db->insert_id();
-            $this->db->trans_complete();
-
-        } elseif(isset($_SESSION['userData']) && $_SESSION['userData']['login_type'] == 'mobile'){
-                $this->db->trans_start();
-                $mobile_client_details = $this->get_mobile_client($_SESSION['userData']['mobile_user_id']);
-                // $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
-                $data = array(
-                    'mobile_user_id'    => $mobile_client_details->id,
-                    'fname'             => $mobile_client_details->first_name,
-                    'lname'             => $mobile_client_details->last_name,
-                    'email'             => $mobile_client_details->email,
-                    'address'           => $post['address'],
-                    'contact_number'    => $post['phoneNumber'],
-                    'moh'               => 2,
-                    'payops'            => $post['payops'],
-                    'add_name'          => $post['firstName'].' '.$post['lastName'],
-                    'add_contact'       => $post['phoneNumber'],
-                    'add_address'       => $post['full_address']
-                );
-                $this->db->insert('client_tb', $data);
-                $insert_id = $this->db->insert_id();
-            $this->db->trans_complete();
-        } else {
-            $this->db->trans_start();
-                // $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
-                $data = array(
-                    'fname'             => $post['firstName'],
-                    'lname'             => $post['lastName'],
-                    'email'             => $post['eMail'],
-                    'address'           => $post['address'],
-                    'contact_number'    => $post['phoneNumber'],
-                    'moh'               => 2,
-                    'payops'            => $post['payops'],
-                    'add_name'          => $post['firstName'].' '.$post['lastName'],
-                    'add_contact'       => $post['phoneNumber'],
-                    'add_address'       => $post['address']
-                );
-                $this->db->insert('client_tb', $data);
-                $insert_id = $this->db->insert_id();
-            $this->db->trans_complete();
-        }
-        
-        require FCPATH . 'vendor/autoload.php';
-        
-        $options = array(
-            'cluster' => 'ap1',
-            'useTLS' => true
+        return array(
+            'id'=>$insert_id,
+            'status' =>$this->db->trans_status(),
         );
-
-        $pusher = new Pusher\Pusher(
-            '8a62b17c8a9baa690edb',
-            '0e16bc6f7b22f371826b',
-            '1188170',
-            $options
+    }
+    
+    public function insertSnackshopClientOrders($data)
+    {
+        $this->db->trans_start();
+        $this->db->insert_batch('order_items', $data);
+        $this->db->trans_complete();
+        return  $this->db->trans_status();
+    }
+    
+    public function insertCateringTransactionDetails($data)
+    {   
+        $this->db->trans_start();
+        $this->db->insert('catering_transaction_tb', $data);
+        $insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return array(
+            'id'=>$insert_id,
+            'status' =>$this->db->trans_status(),
         );
-
-        $data['message'] = ''; //put any message here
-        $data['store_name'] = substr($_SESSION['cache_data']['region_name'],strpos($_SESSION['cache_data']['region_name'], "-") + 1);
-        $pusher->trigger('dashboard_notifs', 'my-event', $data);
-
-        $id = ($this->db->trans_status() === FALSE) ? 0 : $insert_id;
-        return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
-    }
-    
-    public function get_facebook_client($oauth_id){
-        $this->db->select('id, first_name, last_name, email');
-        $this->db->where('oauth_uid', $oauth_id);
-        $query = $this->db->get('fb_users');
-        $data = $query->row();
-        return $data;
-    }
-    
-    //jepoy get facebook client id
-    public function get_facebook_client_id($oauth_id){
-        $this->db->select('id');
-        $this->db->where('oauth_uid', $oauth_id);
-        $query = $this->db->get('fb_users');
-        $data = $query->result_array();
-        return $data[0]['id'];
-    }
-    
-    //jepoy get mobile client id
-    public function get_mobile_client($id){
-        $this->db->select('id, first_name, last_name, email');
-        $this->db->where('id', $id);
-        $query = $this->db->get('mobile_users');
-        $data = $query->row();
-        return $data;
     }
 
-    //jepoy get mobile client id
-    public function get_mobile_client_id($id){
-        $this->db->select('id');
-        $this->db->where('id', $id);
-        $query = $this->db->get('mobile_users');
-        $data = $query->result_array();
-        return $data[0]['id'];
+    public function insertCateringClientOrders($data)
+    {
+        $this->db->trans_start();
+        $this->db->insert_batch('catering_order_items', $data);
+        $this->db->trans_complete();
+        return  $this->db->trans_status();
     }
+    
+	public function insertPopClubTransactionDetails($data){   
+		$this->db->trans_start();
+		$this->db->insert('deals_redeems_tb', $data);
+		$insert_id = $this->db->insert_id();
+		$this->db->trans_complete();
+		
+		$id = ($this->db->trans_status() === FALSE) ? 0 : $insert_id;
+		return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
+	}
+
+	public function insertPopClubClientOrders($data){
+		$this->db->trans_start();
+		$this->db->insert_batch('deals_order_items', $data);
+		$this->db->trans_complete();
+		return  $this->db->trans_status();
+	}
+    
+    
+
 }

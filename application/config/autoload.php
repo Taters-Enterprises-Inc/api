@@ -58,7 +58,7 @@ $autoload['packages'] = array(APPPATH.'third_party/ion_auth');
 |
 |	$autoload['libraries'] = array('user_agent' => 'ua');
 */
-$autoload['libraries'] = array('database','session','ion_auth','pdf');
+$autoload['libraries'] = array('database','session','ion_auth','pdf','pusher');
 
 /*
 | -------------------------------------------------------------------
@@ -89,7 +89,7 @@ $autoload['drivers'] = array();
 |
 |	$autoload['helper'] = array('url', 'file');
 */
-$autoload['helper'] = array('asset');
+$autoload['helper'] = array('asset', 'notification');
 
 /*
 | -------------------------------------------------------------------

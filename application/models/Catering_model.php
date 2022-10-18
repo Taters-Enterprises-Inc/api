@@ -16,10 +16,13 @@ class Catering_model extends CI_Model
         }
             
         if($search){
+            $this->db->group_start();
             $this->db->like('A.tracking_no', $search);
             $this->db->or_like('B.fname', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
         }
 
         $query = $this->db->get();
@@ -55,10 +58,13 @@ class Catering_model extends CI_Model
         $this->db->order_by('A.dateadded','DESC');
         
         if($search){
+            $this->db->group_start();
             $this->db->like('A.tracking_no', $search);
             $this->db->or_like('B.fname', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
         }
             
         $this->db->limit($row_per_page, $row_no);
@@ -146,6 +152,15 @@ class Catering_model extends CI_Model
         $query = $this->db->get();
         return $query->row();
     }
+    
+    public function get_mobile_details($id){
+        $this->db->select("*");
+        $this->db->from('mobile_users');
+        $this->db->where('id', $id);
+        $query = $this->db->get();
+        return $query->row();
+    }
+
 
     public function view_order($hash_key)
     {   
@@ -158,7 +173,7 @@ class Catering_model extends CI_Model
         
         if(!empty($result)){
             $table = "catering_client_tb A";
-            $select_column = array("A.fb_user_id","A.fname", "A.lname", "A.email","A.address", "A.contact_number","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.company_name", "B.message", "B.serving_time", "B.event_class","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.discount","B.payment_plan","B.initial_payment","B.final_payment","B.final_payment_proof","B.contract","B.uploaded_contract","B.start_datetime","B.end_datetime","B.night_diff_fee","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","A.add_name","A.add_contact","A.add_address");
+            $select_column = array("A.fb_user_id", "A.mobile_user_id","A.fname", "A.lname", "A.email","A.address", "A.contact_number","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.company_name", "B.message", "B.serving_time", "B.event_class","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.discount","B.payment_plan","B.initial_payment","B.final_payment","B.final_payment_proof","B.contract","B.uploaded_contract","B.start_datetime","B.end_datetime","B.night_diff_fee","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","A.add_name","A.add_contact","A.add_address");
             $join_A = "A.id = B.client_id";
             $this->db->select($select_column);  
             $this->db->from($table);
@@ -215,119 +230,6 @@ class Catering_model extends CI_Model
             return $join_data = array();
         }
 
-    }
-    
-    public function insert_transaction_details($data)
-    {   
-        $this->db->trans_start();
-            $this->db->insert('catering_transaction_tb', $data);
-            $insert_id = $this->db->insert_id();
-        $this->db->trans_complete();
-        
-        $id = ($this->db->trans_status() === FALSE) ? 0 : $insert_id;
-        return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
-    }
-    
-    public function insert_client_orders($data)
-    {
-        $this->db->trans_start();
-        $this->db->insert_batch('catering_order_items', $data);
-        $this->db->trans_complete();
-        return  $this->db->trans_status();
-    }
-
-    public function insert_client_details($post)
-    {  
-        if (isset($_SESSION['userData']['oauth_uid'])) {
-            $this->db->trans_start();
-                // $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
-                $data = array(
-                    'fb_user_id'        => $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']),
-                    'email'             => $post['eMail'],
-                    'address'           => $post['address'],
-                    'contact_number'    => $post['phoneNumber'],
-                    'moh'               => 2,
-                    'payops'            => $post['payops'],
-                    'add_name'          => $post['firstName'].' '.$post['lastName'],
-                    'add_contact'       => $post['phoneNumber'],
-                    'add_address'       => $post['address']
-                );
-                $this->db->insert('catering_client_tb', $data);
-                $insert_id = $this->db->insert_id();
-            $this->db->trans_complete();
-
-        } elseif(isset($_SESSION['userData']) && $_SESSION['userData']['login_type'] == 'mobile'){
-            $this->db->trans_start();
-                $data = array(
-                    'mobile_user_id'    => $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']),
-                    'fname'             => $post['firstName'],
-                    'lname'             => $post['lastName'],
-                    'email'             => $post['eMail'],
-                    'address'           => $post['address'],
-                    'contact_number'    => $post['phoneNumber'],
-                    'moh'               => 2,
-                    'payops'            => $post['payops'],
-                    'add_name'          => $post['firstName'].' '.$post['lastName'],
-                    'add_contact'       => $post['phoneNumber'],
-                    'add_address'       => $post['address']
-                );
-                $this->db->insert('catering_client_tb', $data);
-                $insert_id = $this->db->insert_id();
-            $this->db->trans_complete();
-        } else {
-            $this->db->trans_start();
-                $data = array(
-                    'fname'             => $post['firstName'],
-                    'lname'             => $post['lastName'],
-                    'email'             => $post['eMail'],
-                    'address'           => $post['address'],
-                    'contact_number'    => $post['phoneNumber'],
-                    'moh'               => 2,
-                    'payops'            => $post['payops'],
-                    'add_name'          => $post['firstName'].' '.$post['lastName'],
-                    'add_contact'       => $post['phoneNumber'],
-                    'add_address'       => $post['address']
-                );
-                $this->db->insert('catering_client_tb', $data);
-                $insert_id = $this->db->insert_id();
-            $this->db->trans_complete();
-        }
-        
-        require FCPATH . 'vendor/autoload.php';
-
-        $options = array(
-            'cluster' => 'ap1',
-            'useTLS' => true
-        );
-        $pusher = new Pusher\Pusher(
-            '8a62b17c8a9baa690edb',
-            '0e16bc6f7b22f371826b',
-            '1188170',
-            $options
-        );
-
-        $data['message'] = ''; //put any message here
-        $data['store_name'] = substr($_SESSION['cache_data']['region_name'],strpos($_SESSION['cache_data']['region_name'], "-") + 1);
-        $pusher->trigger('dashboard_notifs', 'my-event', $data);
-
-        $id = ($this->db->trans_status() === FALSE) ? 0 : $insert_id;
-        return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
-    }
-    
-    public function get_mobile_client_id($id){
-        $this->db->select('id');
-        $this->db->where('id', $id);
-        $query = $this->db->get('mobile_users');
-        $data = $query->result_array();
-        return $data[0]['id'];
-    }
-
-    public function get_facebook_client_id($oauth_id){
-        $this->db->select('id');
-        $this->db->where('oauth_uid', $oauth_id);
-        $query = $this->db->get('fb_users');
-        $data = $query->result_array();
-        return $data[0]['id'];
     }
     
     function get_product_prices($id){

@@ -10,21 +10,28 @@
 class Deals_model extends CI_Model 
 {
 	
+    public function __construct()
+    {
+        $this->load->database();
+
+		$this->load->model('client_model');
+    }
+
 	public function getUserRedeems(){
 		if(!isset($_SESSION['userData'])){
 			return[];
 		}
 
 		if(isset($_SESSION['userData']['oauth_uid'])){
-			$fb_user_id = $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']);
+			$fb_user = $this->client_model->getFacebook($this->session->userData['oauth_uid']);
 			$this->db->select('id');
 			$this->db->from('deals_client_tb');
-			$this->db->where('fb_user_id', $fb_user_id);
+			$this->db->where('fb_user_id', $fb_user->id);
 		}else if (isset($_SESSION['userData']['mobile_user_id'])){
-			$mobile_user_id = $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']);
+			$mobile_user = $this->client_model->getMobile($this->session->userData['mobile_user_id']);
 			$this->db->select('id');
 			$this->db->from('deals_client_tb');
-			$this->db->where('mobile_user_id', $mobile_user_id);
+			$this->db->where('mobile_user_id', $mobile_user->id);
 		}
 
 		$clients_query = $this->db->get();
@@ -80,11 +87,13 @@ class Deals_model extends CI_Model
 
             
         if($search){
+            $this->db->group_start();
             $this->db->like('A.redeem_code', $search);
             $this->db->or_like('B.fname', $search);
-            $this->db->or_like('C.name', $search);
+            $this->db->or_like('B.lname', $search);
             $this->db->or_like('A.purchase_amount', $search);
-            $this->db->or_like('A.invoice_num', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
         }
 
         $query = $this->db->get();
@@ -114,10 +123,13 @@ class Deals_model extends CI_Model
         $this->db->order_by('A.dateadded','DESC');
         
         if($search){
+            $this->db->group_start();
             $this->db->like('A.redeem_code', $search);
             $this->db->or_like('B.fname', $search);
             $this->db->or_like('B.lname', $search);
             $this->db->or_like('A.purchase_amount', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
         }
             
         $this->db->limit($row_per_page, $row_no);
@@ -147,15 +159,15 @@ class Deals_model extends CI_Model
 		}
 
 		if(isset($_SESSION['userData']['oauth_uid'])){
-			$fb_user_id = $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']);
+			$fb_user = $this->client_model->getFacebook($this->session->userData['oauth_uid']);
 			$this->db->select('id');
 			$this->db->from('deals_client_tb');
-			$this->db->where('fb_user_id', $fb_user_id);
+			$this->db->where('fb_user_id', $fb_user->id);
 		}else if (isset($_SESSION['userData']['mobile_user_id'])){
-			$mobile_user_id = $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']);
+			$mobile_user = $this->client_model->getMobile($this->session->userData['mobile_user_id']);
 			$this->db->select('id');
 			$this->db->from('deals_client_tb');
-			$this->db->where('mobile_user_id', $mobile_user_id);
+			$this->db->where('mobile_user_id', $mobile_user->id);
 		}
 
 		$clients_query = $this->db->get();
@@ -167,6 +179,7 @@ class Deals_model extends CI_Model
 			$this->db->select('
 				A.id,
 				A.deal_id,
+				A.store,
 				A.redeem_code,
 				A.expiration,
 				A.dateadded AS date_redeemed,
@@ -197,71 +210,7 @@ class Deals_model extends CI_Model
 			}
 		}
 
-
 		return $deals_redeems;
-	}
-
-	public function insert_client_orders($data){
-		$this->db->trans_start();
-		$this->db->insert_batch('deals_order_items', $data);
-		$this->db->trans_complete();
-		return  $this->db->trans_status();
-	}
-
-	public function insert_redeem_transaction($data){   
-		$this->db->trans_start();
-		$this->db->insert('deals_redeems_tb', $data);
-		$insert_id = $this->db->insert_id();
-		$this->db->trans_complete();
-		
-		$id = ($this->db->trans_status() === FALSE) ? 0 : $insert_id;
-		return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
-	}
-  
-	public function get_facebook_client_id($oauth_id){
-	  $this->db->select('id');
-	  $this->db->where('oauth_uid', $oauth_id);
-	  $query = $this->db->get('fb_users');
-	  $data = $query->result_array();
-	  return $data[0]['id'];
-	}
-
-	public function insert_client_details(){
-	  if (isset($_SESSION['userData']['oauth_uid'])) {
-		$this->db->trans_start();
-		$data = array(
-			'fb_user_id'        => $this->get_facebook_client_id($_SESSION['userData']['oauth_uid']),
-			'email'             => ($_SESSION['userData']['email'] == "" ? "NA" : $_SESSION['userData']['email']),
-			'address'           => "NA",
-			'contact_number'    => "NA",
-			'moh'               => 1,
-			'payops'            => 0,
-			'add_name'          => $_SESSION['userData']['first_name'].' '.$_SESSION['userData']['last_name'],
-			'add_contact'       => "NA",
-			'add_address'       => "NA"
-		);
-		$this->db->insert('deals_client_tb', $data);
-		$insert_id = $this->db->insert_id();
-		$this->db->trans_complete();
-	  } elseif(isset($_SESSION['userData']) && $_SESSION['userData']['login_type'] == 'mobile'){
-		$this->db->trans_start();
-		// $address = (empty($this->input->post('checkout_address'))) ? $this->session->customer_address : $this->input->post('checkout_address');
-		$data = array(
-			'mobile_user_id'    => $this->get_mobile_client_id($_SESSION['userData']['mobile_user_id']),
-			'email'             => ($_SESSION['userData']['email'] == "" ? "NA" : $_SESSION['userData']['email']),
-			'address'           => "NA",
-			'contact_number'    => "NA",
-			'moh'               => 1,
-			'payops'            => 0,
-			'add_name'          => $_SESSION['userData']['first_name'].' '.$_SESSION['userData']['last_name'],
-			'add_contact'       => "NA",
-			'add_address'       => "NA"
-		);
-		$this->db->insert('deals_client_tb', $data);
-		$insert_id = $this->db->insert_id();
-		$this->db->trans_complete();
-		}
-	  return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$insert_id)), FALSE);
 	}
 	
 	public function getDealsPlatform(){
@@ -506,13 +455,4 @@ class Deals_model extends CI_Model
 	
 	  }
 	  
-	  //jepoy get mobile client id
-	  public function get_mobile_client_id($id){
-		  $this->db->select('id');
-		  $this->db->where('id', $id);
-		  $query = $this->db->get('mobile_users');
-		  $data = $query->result_array();
-		  return $data[0]['id'];
-	  }
-
 }

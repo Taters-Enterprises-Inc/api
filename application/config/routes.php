@@ -92,6 +92,7 @@ $route['admin/session'] = 'admin/session';
 $route['admin/payment'] = 'admin/payment';
 $route['admin/reference-num'] = 'admin/reference_num';
 $route['admin/admin-privilege'] = 'admin/admin_privilege';
+$route['admin/admin-catering-privilege'] = 'admin/admin_catering_privilege';
 
 $route['admin/catering-update-status'] = 'admin/catering_update_status';
 $route['admin/catering'] = 'admin/catering';
@@ -103,23 +104,32 @@ $route['admin/shop-update-status'] = 'admin/shop_update_status';
 $route['admin/shop/(:any)'] = 'admin/shop_order/$1';
 $route['admin/shop'] = 'admin/shop';
 
-$route['admin/popclub/(:any)/complete'] = 'admin/popclub_complete_redeem/$1';
-$route['admin/popclub/(:any)/decline'] = 'admin/popclub_decline_redeem/$1';
+$route['admin/popclub/complete-redeem'] = 'admin/popclub_complete_redeem';
+$route['admin/popclub/decline-redeem'] = 'admin/popclub_decline_redeem';
 $route['admin/popclub/(:any)'] = 'admin/popclub_redeem/$1';
 $route['admin/popclub'] = 'admin/popclub';
 
 $route['admin/availability/deal'] = 'admin/deal_availability';
 $route['admin/availability/product'] = 'admin/product_availability';
+$route['admin/availability/caters-package'] = 'admin/caters_package_availability';
+$route['admin/availability/caters-package-addon'] = 'admin/caters_package_addon_availability';
+$route['admin/availability/caters-product-addon'] = 'admin/caters_product_addon_availability';
+
+$route['admin/deal-categories'] = 'admin/deal_categories';
 $route['admin/product-categories'] = 'admin/product_categories';
+$route['admin/caters-package-categories'] = 'admin/caters_package_categories';
 
 $route['admin/users'] = 'admin/users';
 $route['admin/user/(:any)'] = 'admin/user/$1';
 $route['admin/groups'] = 'admin/groups';
 $route['admin/setting/stores'] = 'admin/setting_stores';
 
-//extract csv
 $route['admin/export_csv'] = 'admin/export_csv';
+$route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
+$route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_logs/$1';
 
+$route['admin/notifications'] = 'admin/notifications';
+$route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
 
 //Others
 $route['404_override'] = '';

@@ -2,6 +2,14 @@
 
 class Store_model extends CI_Model 
 {
+	public function getUsersStoreGroupsByStoreId($store_id){
+		$this->db->select('user_id');
+		
+		$this->db->from('users_store_groups');	
+		$this->db->where('store_id', $store_id);
+		$query = $this->db->get();
+		return $query->result();
+	}
     public function get_store_id_by_hash_key($hash_key){
         $this->db->select('store');
         $this->db->where('hash_key', $hash_key);
