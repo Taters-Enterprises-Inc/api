@@ -861,6 +861,53 @@ class Admin_model extends CI_Model
         $query = $this->db->get();
         return $query->row();
     }
+
+    public function getVerificationRequest($idNumber){
+        $this->db->select("
+            A.id,
+            A.first_name,
+            A.middle_name,
+            A.last_name,
+            A.birthday,
+            A.id_number,
+            A.dateadded,
+            A.discount_type_id
+            A.status
+
+            B.name,
+            B.percentage
+        ");
+        $this->db->from('discount_users A');
+        $this->db->join('discount B', 'B.id = A.discount_type_id');
+        $this->db->where('A.id_number', $idNumber);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function getVerificationRequestCount($status, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('discount_users A');
+        $this->db->join('discount B', 'B.id = A.discount_type_id');
+
+        if($status)
+            $this->db->where('A.status', $status);
+
+            
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.id_number', $search);
+            $this->db->or_like('A.first_name', $search);
+            $this->db->or_like('A.middle_name', $search);
+            $this->db->or_like('A.last_name', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
     
     public function getPopclubRedeemsCount($status, $search, $store){
         $this->db->select('count(*) as all_count');
@@ -889,6 +936,48 @@ class Admin_model extends CI_Model
 
         $query = $this->db->get();
         return $query->row()->all_count;
+    }
+
+    public function getVerificationRequests($row_no, $row_per_page, $status, $order_by,  $order, $search){
+        
+        $this->db->select("
+            A.id,
+            A.first_name,
+            A.middle_name,
+            A.last_name,
+            A.birthday,
+            A.id_number,
+            A.dateadded,
+            A.discount_type_id,
+            A.status,
+
+            B.id,
+            B.name,
+            B.percentage
+        ");
+        $this->db->from('discount_users A');
+        $this->db->join('discount B', 'B.id = A.discount_type_id');
+        
+            
+        if($status)
+            $this->db->where('A.status', $status);
+
+
+            if($search){
+                $this->db->group_start();
+                $this->db->like('A.id_number', $search);
+                $this->db->or_like('A.first_name', $search);
+                $this->db->or_like('A.middle_name', $search);
+                $this->db->or_like('A.last_name', $search);
+                $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+                $this->db->group_end();
+            }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
     }
     
     public function getPopclubRedeems($row_no, $row_per_page, $status, $order_by,  $order, $search, $store){

@@ -1204,6 +1204,67 @@ class Admin extends CI_Controller
     }
   }
 
+  public function discount_id_number($id_number){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $idNumber = $this->admin_model->getVerificationRequest($id_number);
+
+        $response = array(
+          "message" => 'Successfully fetch sc/pwd verification request',
+          "data" => $redeem,
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
+  public function discount(){
+		switch($this->input->server('REQUEST_METHOD')){
+		  case 'GET':
+			$per_page = $this->input->get('per_page') ?? 25;
+			$page_no = $this->input->get('page_no') ?? 0;
+			$status = $this->input->get('status') ?? null;
+			$order = $this->input->get('order') ?? 'desc';
+			$order_by = $this->input->get('order_by') ?? 'dateadded';
+			$search = $this->input->get('search');
+	
+			if($page_no != 0){
+			  $page_no = ($page_no - 1) * $per_page;
+			}
+
+
+      
+	
+			$store_id_array = array();
+			if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
+			  $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+			  foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+			}
+			
+			$request_count = $this->admin_model->getVerificationRequestCount($status, $search);
+      $request = $this->admin_model->getVerificationRequests($page_no, $per_page, $status, $order_by, $order, $search);
+	
+			$pagination = array(
+			  "total_rows" => $request_count,
+			  "per_page" => $per_page,
+			);
+	
+			$response = array(
+			  "message" => 'Successfully fetch sc/pwd Verification Request',
+			  "data" => array(
+          "pagination" => $pagination,
+          "request" => $request
+			  ),
+			);
+	  
+			header('content-type: application/json');
+			echo json_encode($response);
+			return;
+		}
+	  }
+
   public function session(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
