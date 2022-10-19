@@ -172,7 +172,9 @@ class Shared extends CI_Controller {
 
 							$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
 							$user_UserId = $get_mobile_user_details->id;
+					
 							$user_FbId = null;
+							
 
 						}else{
 
@@ -182,6 +184,16 @@ class Shared extends CI_Controller {
 							
 						}
 						$data = $this->upload->data();
+
+						$this->form_validation->set_rules( 'scpwdnumber' , 'Id Number', 'required|is_unique[discount_users.id_number]');
+
+						if ($this->form_validation->run() === FALSE) { 
+
+							$this->output->set_status_header('401');
+							echo json_encode(array( "message" => 'Your Id Number, already exist in our database. '));
+							return;
+
+						}else{
 						
 						$scpwd_data = array(
 							'first_name' => $_POST['firstName'],
@@ -211,8 +223,8 @@ class Shared extends CI_Controller {
 						header('content-type: application/json');
 						echo json_encode($response);
 						return;
-					
-								
+
+						}		
 						
 					}
 
@@ -246,6 +258,8 @@ class Shared extends CI_Controller {
 				$this->output->set_status_header('401');
                 echo json_encode(array( "message" => $error));
             } else {
+
+
 
                 $data = $this->upload->data();
                 $file_name = $data['file_name'];

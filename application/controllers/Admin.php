@@ -1211,7 +1211,7 @@ class Admin extends CI_Controller
 
         $response = array(
           "message" => 'Successfully fetch sc/pwd verification request',
-          "data" => $redeem,
+          "data" => $idNumber,
         );
   
         header('content-type: application/json');

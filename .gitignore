@@ -5,6 +5,10 @@ assets/upload/proof_payment/*
 assets/upload/catering_proof_payment/*
 assets/upload/catering/*
 assets/upload/reciepts/*
+assets/upload/scpwd_id/*
+
+application/views/errors/*
+
 
 
 application/cache/*
