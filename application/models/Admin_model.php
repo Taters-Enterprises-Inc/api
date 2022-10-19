@@ -862,7 +862,7 @@ class Admin_model extends CI_Model
         return $query->row();
     }
 
-    public function getVerificationRequest($idNumber){
+    public function getDiscount($discount_id){
         $this->db->select("
             A.id,
             A.first_name,
@@ -879,13 +879,13 @@ class Admin_model extends CI_Model
         ");
         $this->db->from('discount_users A');
         $this->db->join('discount B', 'B.id = A.discount_type_id');
-        $this->db->where('A.id_number', $idNumber);
+        $this->db->where('A.id_number', $discount_id);
 
         $query = $this->db->get();
         return $query->row();
     }
 
-    public function getVerificationRequestCount($status, $search){
+    public function getDiscountsCount($status, $search){
         $this->db->select('count(*) as all_count');
             
         $this->db->from('discount_users A');
@@ -938,7 +938,7 @@ class Admin_model extends CI_Model
         return $query->row()->all_count;
     }
 
-    public function getVerificationRequests($row_no, $row_per_page, $status, $order_by,  $order, $search){
+    public function getDiscounts($row_no, $row_per_page, $status, $order_by,  $order, $search){
         
         $this->db->select("
             A.id,

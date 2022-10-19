@@ -110,8 +110,8 @@ $route['admin/popclub/decline-redeem'] = 'admin/popclub_decline_redeem';
 $route['admin/popclub/(:any)'] = 'admin/popclub_redeem/$1';
 $route['admin/popclub'] = 'admin/popclub';
 
-$route['admin/discount/(:any)'] = 'admin/discount_id_number/$1';
-$route['admin/discount'] = 'admin/discount';
+$route['admin/discount/(:any)'] = 'admin/discount/$1';
+$route['admin/discounts'] = 'admin/discounts';
 
 $route['admin/availability/deal'] = 'admin/deal_availability';
 $route['admin/availability/product'] = 'admin/product_availability';
