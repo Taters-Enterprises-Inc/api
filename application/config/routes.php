@@ -77,6 +77,7 @@ $route['download/contract/(:any)'] = 'download/contract/$1';
 $route['load-image/(:any)'] = 'image/load_image/$1';	
 $route['load-image-catering/(:any)'] = 'image/load_catering_image/$1';	
 $route['load-image-catering-contract/(:any)'] = 'image/load_catering_image_contract/$1';
+$route['load-image-user-discount/(:any)'] = 'image/load_image_user_discount/$1';
 
 //Auth
 $route['auth/login'] = 'auth/login';
@@ -110,6 +111,7 @@ $route['admin/popclub/decline-redeem'] = 'admin/popclub_decline_redeem';
 $route['admin/popclub/(:any)'] = 'admin/popclub_redeem/$1';
 $route['admin/popclub'] = 'admin/popclub';
 
+$route['admin/discount/user-discount-change-status'] = 'admin/user_discount_change_status';
 $route['admin/discount/(:any)'] = 'admin/discount/$1';
 $route['admin/discounts'] = 'admin/discounts';
 

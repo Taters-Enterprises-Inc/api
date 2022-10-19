@@ -391,7 +391,6 @@ class Profile extends CI_Controller {
 					}
 
 						
-					$data = $this->upload->data();
 					$user_discount_data = array(
 						'first_name' => $_POST['firstName'],
 						'middle_name' => $_POST['middleName'],	
@@ -402,7 +401,7 @@ class Profile extends CI_Controller {
 						'id_back' => $id_back_data['file_name'],
 						'dateadded' => date('Y-m-d H:i:s'),
 						'discount_type_id' => $_POST['discountTypeId'],
-						'fb_user_id' => $this->session->userData['mobile_user_id'] ?? null,
+						'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
 						'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
 						'status' => 1
 					);

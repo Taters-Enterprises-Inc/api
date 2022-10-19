@@ -1114,6 +1114,24 @@ class Admin extends CI_Controller
     }
   }
 
+  public function user_discount_change_status(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST': 
+        $discount_users_id = $this->input->post('discount_users_id');
+        $status = $this->input->post('status');
+
+        $this->admin_model->changeStatusUserDiscount($discount_users_id, $status);
+
+        $response = array(
+          "message" => 'Successfully approved user discount',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
   public function popclub_complete_redeem(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 

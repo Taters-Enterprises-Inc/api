@@ -7,7 +7,7 @@ class Discount_model extends CI_Model {
     }
 
     public function insertDiscountUser($data){
-        $insert = $this->db->insert('discount_users', $data);
+        $this->db->insert('discount_users', $data);
     }
 
     public function getUserDiscount($fb_user_id, $mobile_user_id){
