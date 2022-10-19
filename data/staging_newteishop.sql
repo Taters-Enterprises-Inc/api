@@ -6405,8 +6405,8 @@ CREATE TABLE `discount_users` (
   `id_back` varchar(256) NOT NULL,
   `dateadded` varchar(256) NOT NULL,
   `discount_type_id` int(11) NOT NULL,
-  `fb_user_id` int(11) NOT NULL,
-  `mobile_user_id` int(11) NOT NULL,
+  `fb_user_id` int(11) DEFAULT NULL,
+  `mobile_user_id` int(11) DEFAULT NULL,
   `status` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
