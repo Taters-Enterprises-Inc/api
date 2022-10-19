@@ -7,8 +7,7 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
 class Shared extends CI_Controller {
 	
-	public function __construct()
-	{
+	public function __construct(){
 		parent::__construct();
 		$this->load->model('shop_model');
 		$this->load->model('contact_model');

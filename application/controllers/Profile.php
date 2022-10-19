@@ -9,8 +9,7 @@ date_default_timezone_set('Asia/Manila');
 
 class Profile extends CI_Controller {
 
-	public function __construct()
-	{
+	public function __construct(){
 		parent::__construct();
 		$this->load->model('shop_model');
 		$this->load->model('catering_model');
@@ -23,7 +22,6 @@ class Profile extends CI_Controller {
 		$this->form_validation->set_error_delimiters('', '');
 		$this->ion_auth->set_message_delimiters('', '');
 		$this->ion_auth->set_error_delimiters('', '');
-
 	}
 
 	public function contact($id){
@@ -402,8 +400,6 @@ class Profile extends CI_Controller {
 	public function user_discount(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-
-
 				$discount = $this->discount_model->getUserDiscount(
 					$this->session->userData['fb_user_id'] ?? null,
 					$this->session->userData['mobile_user_id'] ?? null

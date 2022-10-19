@@ -38,19 +38,23 @@ class Discount_model extends CI_Model {
 
     public function getUserDiscount($fb_user_id, $mobile_user_id){
         $this->db->select('
-            id,
-            first_name,
-            middle_name,
-            last_name,
-            birthday,
-            id_number,
-            id_front,
-            id_back,
-            discount_type_id,
-            status
+            A.id,
+            A.first_name,
+            A.middle_name,
+            A.last_name,
+            A.birthday,
+            A.id_number,
+            A.id_front,
+            A.id_back,
+            A.discount_type_id,
+            A.status,
+
+            B.name AS discount_type_name,
+            B.percentage
         ');
 
-        $this->db->from('discount_users');
+        $this->db->from('discount_users A');
+        $this->db->join('discount B','B.id = discount_type_id');
         
         if(isset($fb_user_id)){
             $this->db->where('fb_user_id', $fb_user_id);
