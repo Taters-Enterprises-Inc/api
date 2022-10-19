@@ -53,6 +53,7 @@ $route['profile/popclub-redeems'] = 'profile/popclub_redeems';
 $route['profile/snackshop-orders'] = 'profile/snackshop_orders';
 $route['profile/catering-bookings'] = 'profile/catering_bookings';
 $route['profile/user-discount'] = 'profile/user_discount';
+$route['profile/update-user-discount'] = 'profile/update_user_discount';
 $route['profile/contact/(:num)'] = 'profile/contact/$1';
 
 // Store

@@ -6,8 +6,34 @@ class Discount_model extends CI_Model {
         $this->load->database();
     }
 
+    public function updateDiscountUser($id, $data){
+        $this->db->where('id', (int)$id);
+        $this->db->update('discount_users', $data);
+    }
+
     public function insertDiscountUser($data){
         $this->db->insert('discount_users', $data);
+    }
+
+    public function getUserDiscountById($id){
+        $this->db->select('
+            id,
+            first_name,
+            middle_name,
+            last_name,
+            birthday,
+            id_number,
+            id_front,
+            id_back,
+            discount_type_id,
+            status
+        ');
+
+        $this->db->from('discount_users');
+        $this->db->where('id', $id);
+        
+        $query = $this->db->get();
+        return $query->row();
     }
 
     public function getUserDiscount($fb_user_id, $mobile_user_id){

@@ -344,6 +344,61 @@ class Profile extends CI_Controller {
 
 	}
 
+	public function update_user_discount(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+				$config['upload_path'] = './assets/upload/user_discount'; 
+				
+				if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
+				
+				$config['allowed_types']    = 'gif|png|jpg|jpeg'; 
+				$config['max_size']         = 2000;
+				$config['max_width']        = 0;
+				$config['max_height']       = 0;
+				$config['encrypt_name']     = TRUE;
+
+				$this->load->library('upload', $config);
+
+				
+				$user_discount_data = array(
+					'first_name' => $_POST['firstName'],
+					'middle_name' => $_POST['middleName'],	
+					'last_name' => $_POST['lastName'],
+					'birthday' => $_POST['birthday'],
+					'id_number' => $_POST['idNumber'],
+					'dateadded' => date('Y-m-d H:i:s'),
+					'discount_type_id' => $_POST['discountTypeId'],
+					'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
+					'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
+					'status' => 1
+				);
+
+				$old_user_discount = $this->discount_model->getUserDiscountById($_POST['id']);
+
+
+				if($this->upload->do_upload('idFront')){
+					$id_front_data = $this->upload->data();
+					unlink(  FCPATH . "assets/upload/user_discount/" . $old_user_discount->id_front);
+					$user_discount_data['id_front'] = $id_front_data['file_name'];
+				}
+				
+				if($this->upload->do_upload('idBack')){
+					$id_back_data = $this->upload->data();
+					unlink(  FCPATH . "assets/upload/user_discount/" . $old_user_discount->id_back);
+					$user_discount_data['id_back'] = $id_back_data['file_name'];
+				}
+					
+				$this->discount_model->updateDiscountUser($_POST['id'], $user_discount_data);
+
+				$response = array(
+					"message" => 'Edit application successfull'
+				);
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+
 	public function user_discount(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
@@ -362,7 +417,6 @@ class Profile extends CI_Controller {
 				echo json_encode($response);
 				break;
 			case 'POST':
-
 				if(
 					is_uploaded_file($_FILES['idFront']['tmp_name']) &&
 					is_uploaded_file($_FILES['idBack']['tmp_name'])
@@ -417,6 +471,10 @@ class Profile extends CI_Controller {
 					$this->output->set_status_header('401');
 					echo json_encode(array( "message" => 'Application for user discount failed.'));
 				}
+				break;
+
+			case 'PUT':
+
 				break;
 		}
 		
