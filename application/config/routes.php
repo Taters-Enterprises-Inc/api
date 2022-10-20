@@ -1,6 +1,5 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-
 //Shop
 $route['shop/product'] = 'shop/product';
 $route['shop/products'] = 'shop/products';
@@ -27,6 +26,7 @@ $route['popclub/redeem-validators'] = 'popclub/redeem_validators';
 
 $route['popclub/deal/(:any)'] = 'popclub/deal/$1';
 $route['popclub/(:any)'] = 'popclub/deals/$1';
+
 //Shared
 $route['shared/session'] = 'shared/session';
 $route['shared/clear_redeems'] = 'shared/clear_redeems';
@@ -34,7 +34,6 @@ $route['shared/clear_all_session'] = 'shared/clear_all_session';
 $route['shared/upload_payment'] = 'shared/upload_payment';
 $route['shared/catering_upload_payment'] = 'shared/catering_upload_payment';
 $route['shared/contacts'] = 'shared/contacts';
-$route['shared/discount_registration'] = 'shared/discount_registration';
 
 // Facebook
 $route['facebook/login'] = 'user_authentication';
@@ -46,7 +45,6 @@ $route['facebook/logout'] = 'user_authentication/logout';
 $route['mobile_users/login_mobile_user'] = 'mobile_users/login_mobile_user';
 $route['mobile_users/registration'] = 'mobile_users/registration';
 $route['mobile_users/mobile_generate_forgot_pass_code'] = 'mobile_users/mobile_generate_forgot_pass_code';
-//$route['mobile_users/mobile_resend_forgot_pass_code'] = 'mobile_users/mobile_resend_forgot_pass_code';
 $route['mobile_users/validate_otp_code'] = 'mobile_users/validate_otp_code';
 $route['mobile_users/change_password'] = 'mobile_users/change_password';
 
@@ -54,6 +52,8 @@ $route['mobile_users/change_password'] = 'mobile_users/change_password';
 $route['profile/popclub-redeems'] = 'profile/popclub_redeems';
 $route['profile/snackshop-orders'] = 'profile/snackshop_orders';
 $route['profile/catering-bookings'] = 'profile/catering_bookings';
+$route['profile/user-discount'] = 'profile/user_discount';
+$route['profile/update-user-discount'] = 'profile/update_user_discount';
 $route['profile/contact/(:num)'] = 'profile/contact/$1';
 
 // Store
@@ -78,6 +78,7 @@ $route['download/contract/(:any)'] = 'download/contract/$1';
 $route['load-image/(:any)'] = 'image/load_image/$1';	
 $route['load-image-catering/(:any)'] = 'image/load_catering_image/$1';	
 $route['load-image-catering-contract/(:any)'] = 'image/load_catering_image_contract/$1';
+$route['load-image-user-discount/(:any)'] = 'image/load_image_user_discount/$1';
 
 //Auth
 $route['auth/login'] = 'auth/login';
@@ -111,8 +112,9 @@ $route['admin/popclub/decline-redeem'] = 'admin/popclub_decline_redeem';
 $route['admin/popclub/(:any)'] = 'admin/popclub_redeem/$1';
 $route['admin/popclub'] = 'admin/popclub';
 
-$route['admin/discount/(:any)'] = 'admin/discount_id_number/$1';
-$route['admin/discount'] = 'admin/discount';
+$route['admin/discount/user-discount-change-status'] = 'admin/user_discount_change_status';
+$route['admin/discount/(:any)'] = 'admin/discount/$1';
+$route['admin/discounts'] = 'admin/discounts';
 
 $route['admin/availability/deal'] = 'admin/deal_availability';
 $route['admin/availability/product'] = 'admin/product_availability';
@@ -129,6 +131,7 @@ $route['admin/user/(:any)'] = 'admin/user/$1';
 $route['admin/groups'] = 'admin/groups';
 $route['admin/setting/stores'] = 'admin/setting_stores';
 
+$route['admin/export_csv'] = 'admin/export_csv';
 $route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
 $route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_logs/$1';
 

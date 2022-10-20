@@ -805,6 +805,12 @@ class Admin_model extends CI_Model
         return $query->result();
     }
 
+    public function changeStatusUserDiscount($discount_users_id, $status){
+		$this->db->set('status', (int) $status);
+        $this->db->where('id', $discount_users_id);
+        $this->db->update("discount_users");
+    }
+
     public function completeRedeem($redeem_id){
 		$this->db->set('status', 6);
         $this->db->where('id', $redeem_id);
@@ -862,7 +868,7 @@ class Admin_model extends CI_Model
         return $query->row();
     }
 
-    public function getVerificationRequest($idNumber){
+    public function getDiscount($discount_id){
         $this->db->select("
             A.id,
             A.first_name,
@@ -871,21 +877,30 @@ class Admin_model extends CI_Model
             A.birthday,
             A.id_number,
             A.dateadded,
-            A.discount_type_id
-            A.status
+            A.id_front,
+            A.id_back,
+            A.discount_type_id,
+            A.status,
+            B.name as discount_type_name,
 
-            B.name,
-            B.percentage
+            C.first_name as fb_first_name,
+            C.last_name as fb_last_name,
+
+            D.first_name as mobile_first_name,
+            D.last_name as mobile_last_name,
         ");
         $this->db->from('discount_users A');
         $this->db->join('discount B', 'B.id = A.discount_type_id');
-        $this->db->where('A.id_number', $idNumber);
+        $this->db->join('fb_users C', 'C.id = A.fb_user_id','left');
+        $this->db->join('mobile_users D', 'D.id = A.mobile_user_id','left');
+
+        $this->db->where('A.id', $discount_id);
 
         $query = $this->db->get();
         return $query->row();
     }
 
-    public function getVerificationRequestCount($status, $search){
+    public function getDiscountsCount($status, $search){
         $this->db->select('count(*) as all_count');
             
         $this->db->from('discount_users A');
@@ -938,7 +953,7 @@ class Admin_model extends CI_Model
         return $query->row()->all_count;
     }
 
-    public function getVerificationRequests($row_no, $row_per_page, $status, $order_by,  $order, $search){
+    public function getDiscounts($row_no, $row_per_page, $status, $order_by,  $order, $search){
         
         $this->db->select("
             A.id,
@@ -950,10 +965,8 @@ class Admin_model extends CI_Model
             A.dateadded,
             A.discount_type_id,
             A.status,
-
-            B.id,
-            B.name,
-            B.percentage
+            B.name as discount_type_name,
+            B.percentage,
         ");
         $this->db->from('discount_users A');
         $this->db->join('discount B', 'B.id = A.discount_type_id');

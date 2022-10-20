@@ -1114,6 +1114,24 @@ class Admin extends CI_Controller
     }
   }
 
+  public function user_discount_change_status(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST': 
+        $discount_users_id = $this->input->post('discount_users_id');
+        $status = $this->input->post('status');
+
+        $this->admin_model->changeStatusUserDiscount($discount_users_id, $status);
+
+        $response = array(
+          "message" => 'Successfully approved user discount',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
   public function popclub_complete_redeem(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
@@ -1204,14 +1222,14 @@ class Admin extends CI_Controller
     }
   }
 
-  public function discount_id_number($id_number){
+  public function discount($discount_id){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
-        $idNumber = $this->admin_model->getVerificationRequest($id_number);
+        $discount = $this->admin_model->getDiscount($discount_id);
 
         $response = array(
-          "message" => 'Successfully fetch sc/pwd verification request',
-          "data" => $idNumber,
+          "message" => 'Successfully fetch user discount request',
+          "data" => $discount,
         );
   
         header('content-type: application/json');
@@ -1220,7 +1238,7 @@ class Admin extends CI_Controller
     }
   }
 
-  public function discount(){
+  public function discounts(){
 		switch($this->input->server('REQUEST_METHOD')){
 		  case 'GET':
 			$per_page = $this->input->get('per_page') ?? 25;
@@ -1233,29 +1251,20 @@ class Admin extends CI_Controller
 			if($page_no != 0){
 			  $page_no = ($page_no - 1) * $per_page;
 			}
-
-
-      
-	
-			$store_id_array = array();
-			if (!$this->ion_auth->in_group(4) && !$this->ion_auth->in_group(5)  && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(3)) {
-			  $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-			  foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-			}
 			
-			$request_count = $this->admin_model->getVerificationRequestCount($status, $search);
-      $request = $this->admin_model->getVerificationRequests($page_no, $per_page, $status, $order_by, $order, $search);
+			$discounts_count = $this->admin_model->getDiscountsCount($status, $search);
+      $discounts = $this->admin_model->getDiscounts($page_no, $per_page, $status, $order_by, $order, $search);
 	
 			$pagination = array(
-			  "total_rows" => $request_count,
+			  "total_rows" => $discounts_count,
 			  "per_page" => $per_page,
 			);
 	
 			$response = array(
-			  "message" => 'Successfully fetch sc/pwd Verification Request',
+			  "message" => 'Successfully fetch user discounts',
 			  "data" => array(
           "pagination" => $pagination,
-          "request" => $request
+          "discounts" => $discounts
 			  ),
 			);
 	  
@@ -1263,7 +1272,7 @@ class Admin extends CI_Controller
 			echo json_encode($response);
 			return;
 		}
-	  }
+  }
 
   public function session(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -1443,4 +1452,40 @@ class Admin extends CI_Controller
     }
   }
 
+  public function export_csv(){
+    $filename = 'users_'.date('Ymd').'.csv'; 
+    header("Content-Description: File Transfer"); 
+    header("Content-Disposition: attachment; filename=$filename"); 
+    header("Content-Type: application/csv; ");
+    $pages_array=[
+      [
+          "Username" => "James1",
+          "Name" => "James1",
+          "Gender" => "James1",
+          "Email" => "James1"
+        ],
+        [
+          "Username" => "James2",
+          "Name" => "James2",
+          "Gender" => "James2",
+          "Email" => "James2"
+          ]
+        ];
+        
+        
+        $file = fopen('php://output', 'w');
+        $header = array("Username","Name","Gender","Email"); 
+        fputcsv($file, $header);
+        
+    foreach ($pages_array as $key=>$line){ 
+      fputcsv($file,$line); 
+    }
+    fclose($file); 
+     exit; 
+   
+    
+  }
+
+
 }
+

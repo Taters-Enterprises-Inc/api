@@ -17,7 +17,6 @@ class Branches extends CI_Controller {
 	public function index(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-
 				$store_per_region = array(
 					'ncr' => $this->store_model->fetch_ncr(),
 					'luzon' => $this->store_model->fetch_luzon(),

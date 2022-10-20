@@ -7,13 +7,12 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
 class Shared extends CI_Controller {
 	
-	public function __construct()
-	{
+	public function __construct(){
 		parent::__construct();
 		$this->load->model('shop_model');
 		$this->load->model('contact_model');
 		$this->load->model('catering_model');
-		$this->load->model('Client_model');
+		$this->load->model('client_model');
 		$this->load->model('user_model');
 		$this->load->model('logs_model');
 		$this->load->library('form_validation');
@@ -94,8 +93,7 @@ class Shared extends CI_Controller {
 		}
     }
 
-    public function upload_payment()
-    {
+    public function upload_payment(){
         if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
             $config['upload_path'] = './assets/upload/proof_payment'; 
 
@@ -138,108 +136,7 @@ class Shared extends CI_Controller {
         }
     }
 
-
-	public function discount_registration(){
-		switch($this->input->server('REQUEST_METHOD')){
-			case 'POST': 
-
-				if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
-					$config['upload_path'] = './assets/upload/scpwd_id'; 
-
-					if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
-
-					$config['allowed_types']    = 'gif|png|jpg|jpeg'; 
-					$config['max_size']         = 2000;
-					$config['max_width']        = 0;
-					$config['max_height']       = 0;
-					$config['encrypt_name']     = TRUE;
-
-			        $this->load->library('upload', $config);
-
-					if (!$this->upload->do_upload('uploaded_file')) {
-						$error = $this->upload->display_errors();
-						$this->output->set_status_header('401');
-						echo json_encode(array( "message" => $error));
-					} else {
-				
-						if(isset($_SESSION['userData']['oauth_uid'])){
-
-							$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-							$user_FbId = $get_fb_user_details->id;
-							$user_UserId = null;
-							
-						}else if(isset($_SESSION['userData']['mobile_user_id'])){
-
-							$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
-							$user_UserId = $get_mobile_user_details->id;
-					
-							$user_FbId = null;
-							
-
-						}else{
-
-							$this->output->set_status_header(401);
-							echo json_encode(array('message'=>'User not found...'));
-							return;
-							
-						}
-						$data = $this->upload->data();
-
-						$this->form_validation->set_rules( 'scpwdnumber' , 'Id Number', 'required|is_unique[discount_users.id_number]');
-
-						if ($this->form_validation->run() === FALSE) { 
-
-							$this->output->set_status_header('401');
-							echo json_encode(array( "message" => 'Your Id Number, already exist in our database. '));
-							return;
-
-						}else{
-						
-						$scpwd_data = array(
-							'first_name' => $_POST['firstName'],
-							'middle_name' => $_POST['middleName'],	
-							'last_name' => $_POST['lastName'],
-							'birthday' => $_POST['birthday'],
-							'id_number' => $_POST['scpwdnumber'],
-							'id_front' => $data['file_name'],
-							'id_back' => $data['file_name'],
-							'dateadded' => date('Y-m-d H:i:s'),
-							'discount_type_id' => '1',
-							'fb_user_id' => $user_FbId,
-							'mobile_user_id' => $user_UserId,
-							'status' => 1
-
-						);
-
-
-						// print_r($data);
-						
-						$this->Client_model->add_DiscountUser($scpwd_data);
-			
-						$response = array(
-							'message' => 'Verification request on review.'
-						);
-
-						header('content-type: application/json');
-						echo json_encode($response);
-						return;
-
-						}		
-						
-					}
-
-				}else {
-					$this->output->set_status_header('401');
-					echo json_encode(array( "message" => 'Failed upload'));
-				}
-
-		}
-
-	}
-
-	
-    public function catering_upload_payment()
-    {
+    public function catering_upload_payment(){
         if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
             $config['upload_path'] = './assets/upload/catering_proof_payment'; 
 
@@ -258,8 +155,6 @@ class Shared extends CI_Controller {
 				$this->output->set_status_header('401');
                 echo json_encode(array( "message" => $error));
             } else {
-
-
 
                 $data = $this->upload->data();
                 $file_name = $data['file_name'];
@@ -289,7 +184,6 @@ class Shared extends CI_Controller {
 			echo json_encode(array( "message" => 'Failed upload payment check your image'));
         }
     }
-
 
 	public function session(){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -324,6 +218,7 @@ class Shared extends CI_Controller {
 					"cash_delivery"						=> $this->session->cash_delivery,
 				);
 		
+				
 				$response = array(
 					'message' => 'Successfully fetch session',
 					'data' => $data,

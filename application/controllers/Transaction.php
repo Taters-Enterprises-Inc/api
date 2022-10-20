@@ -19,6 +19,7 @@ class Transaction extends CI_Controller {
         $this->load->model('notification_model');
         $this->load->model('store_model');
         $this->load->model('user_model');
+        $this->load->model('discount_model');
 	}
     
     public function catering(){
@@ -324,11 +325,17 @@ class Transaction extends CI_Controller {
                         $table_number = null;
                     }
 
+                    $discount = $this->discount_model->getUserDiscount(
+                        $this->session->userData['fb_user_id'] ?? null,
+                        $this->session->userData['mobile_user_id'] ?? null
+                    );
+
                     $payops_ref_no = '';
                     $discount_type = '';
                     $discount_ref_no = '';
-                    $discount_value = '';
-
+                    $discount_value = (int)$comp_total * (float)$discount->percentage;
+                    $discount_id = '';
+                    
                     $client_id = $insert_client_details['id'];
 
                     $transaction_data = array(
@@ -348,6 +355,7 @@ class Transaction extends CI_Controller {
                         'reseller_discount' => "",
                         'payops'            => $payops,
                         'discount'          => $discount_value,
+                        'discount_id'       => $discount->discount_type_id,
                         'giftcard_discount' => "",
                         'giftcard_number'   => "",
                         'voucher_id'        => $voucher_id,

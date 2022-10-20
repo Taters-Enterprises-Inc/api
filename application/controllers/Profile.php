@@ -5,18 +5,23 @@ header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
+date_default_timezone_set('Asia/Manila');
+
 class Profile extends CI_Controller {
 
-	public function __construct()
-	{
+	public function __construct(){
 		parent::__construct();
 		$this->load->model('shop_model');
 		$this->load->model('catering_model');
 		$this->load->model('deals_model');
 		$this->load->model('user_model');
 		$this->load->model('contact_model');
-		$this->load->library('form_validation');
+		$this->load->model('discount_model');
 
+		$this->load->library('form_validation');
+		$this->form_validation->set_error_delimiters('', '');
+		$this->ion_auth->set_message_delimiters('', '');
+		$this->ion_auth->set_error_delimiters('', '');
 	}
 
 	public function contact($id){
@@ -335,5 +340,139 @@ class Profile extends CI_Controller {
 
 		}
 
+	}
+
+	public function update_user_discount(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+				$config['upload_path'] = './assets/upload/user_discount'; 
+				
+				if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
+				
+				$config['allowed_types']    = 'gif|png|jpg|jpeg'; 
+				$config['max_size']         = 2000;
+				$config['max_width']        = 0;
+				$config['max_height']       = 0;
+				$config['encrypt_name']     = TRUE;
+
+				$this->load->library('upload', $config);
+
+				
+				$user_discount_data = array(
+					'first_name' => $_POST['firstName'],
+					'middle_name' => $_POST['middleName'],	
+					'last_name' => $_POST['lastName'],
+					'birthday' => $_POST['birthday'],
+					'id_number' => $_POST['idNumber'],
+					'dateadded' => date('Y-m-d H:i:s'),
+					'discount_type_id' => $_POST['discountTypeId'],
+					'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
+					'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
+					'status' => 1
+				);
+
+				$old_user_discount = $this->discount_model->getUserDiscountById($_POST['id']);
+
+
+				if($this->upload->do_upload('idFront')){
+					$id_front_data = $this->upload->data();
+					unlink(  FCPATH . "assets/upload/user_discount/" . $old_user_discount->id_front);
+					$user_discount_data['id_front'] = $id_front_data['file_name'];
+				}
+				
+				if($this->upload->do_upload('idBack')){
+					$id_back_data = $this->upload->data();
+					unlink(  FCPATH . "assets/upload/user_discount/" . $old_user_discount->id_back);
+					$user_discount_data['id_back'] = $id_back_data['file_name'];
+				}
+					
+				$this->discount_model->updateDiscountUser($_POST['id'], $user_discount_data);
+
+				$response = array(
+					"message" => 'Edit application successfull'
+				);
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+
+	public function user_discount(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$discount = $this->discount_model->getUserDiscount(
+					$this->session->userData['fb_user_id'] ?? null,
+					$this->session->userData['mobile_user_id'] ?? null
+				);
+
+				$response = array(
+					"message" => 'Successfully fetch user discount',
+					"data" => $discount,
+				);
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+			case 'POST':
+				if(
+					is_uploaded_file($_FILES['idFront']['tmp_name']) &&
+					is_uploaded_file($_FILES['idBack']['tmp_name'])
+				){
+					$config['upload_path'] = './assets/upload/user_discount'; 
+					
+					if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
+					
+					$config['allowed_types']    = 'gif|png|jpg|jpeg'; 
+					$config['max_size']         = 2000;
+					$config['max_width']        = 0;
+					$config['max_height']       = 0;
+					$config['encrypt_name']     = TRUE;
+
+					$this->load->library('upload', $config);
+
+					$id_front_data = null;
+					$id_back_data = null;
+
+					if($this->upload->do_upload('idFront')){
+						$id_front_data = $this->upload->data();
+					}
+					
+					if($this->upload->do_upload('idBack')){
+						$id_back_data = $this->upload->data();
+					}
+
+						
+					$user_discount_data = array(
+						'first_name' => $_POST['firstName'],
+						'middle_name' => $_POST['middleName'],	
+						'last_name' => $_POST['lastName'],
+						'birthday' => $_POST['birthday'],
+						'id_number' => $_POST['idNumber'],
+						'id_front' => $id_front_data['file_name'],
+						'id_back' => $id_back_data['file_name'],
+						'dateadded' => date('Y-m-d H:i:s'),
+						'discount_type_id' => $_POST['discountTypeId'],
+						'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
+						'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
+						'status' => 1
+					);
+
+					$this->discount_model->insertDiscountUser($user_discount_data);
+
+					$response = array(
+						"message" => 'Application for user discount is successful!'
+					);
+					header('content-type: application/json');
+					echo json_encode($response);
+				}else{
+					$this->output->set_status_header('401');
+					echo json_encode(array( "message" => 'Application for user discount failed.'));
+				}
+				break;
+
+			case 'PUT':
+
+				break;
+		}
+		
 	}
 }
