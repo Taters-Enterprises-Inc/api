@@ -1279,23 +1279,25 @@ class Admin extends CI_Controller
       case 'GET':
 
         $data = array(
-          "identity" => $this->session->identity,
-          "email" => $this->session->email,
-          "user_id" => $this->session->user_id,
-          "old_last_login" => $this->session->old_last_login,
-          "last_check" => $this->session->last_check,
-          "is_admin" => $this->ion_auth->in_group(1),
-          "is_csr_admin" => $this->ion_auth->in_group(10),
-          "is_catering_admin" => $this->ion_auth->in_group(14),
+          "admin" => array(
+            "identity" => $this->session->admin['identity'],
+            "email" => $this->session->admin['email'],
+            "user_id" => $this->session->admin['user_id'],
+            "old_last_login" => $this->session->admin['old_last_login'],
+            "last_check" => $this->session->admin['last_check'],
+            "is_admin" => $this->ion_auth->in_group(1),
+            "is_csr_admin" => $this->ion_auth->in_group(10),
+            "is_catering_admin" => $this->ion_auth->in_group(14),
+          )
         );
 
-        $data['user_details'] = $this->admin_model->getUser($this->session->user_id);
-        $data['user_details']->groups = $this->admin_model->getUserGroups($this->session->user_id);
+        $data["admin"]['user_details'] = $this->admin_model->getUser($this->session->admin['user_id']);
+        $data["admin"]['user_details']->groups = $this->admin_model->getUserGroups($this->session->admin['user_id']);
 
         if($this->ion_auth->in_group(1) || $this->ion_auth->in_group(10)){
-          $data['user_details']->stores = $this->user_model->get_all_store();
+          $data["admin"]['user_details']->stores = $this->user_model->get_all_store();
         }else{
-          $data['user_details']->stores = $this->user_model->get_store_group_order($this->session->user_id);
+          $data["admin"]['user_details']->stores = $this->user_model->get_store_group_order($this->session->admin['user_id']);
         }
 
         $response = array(

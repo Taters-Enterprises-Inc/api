@@ -80,14 +80,14 @@ $route['load-image-catering/(:any)'] = 'image/load_catering_image/$1';
 $route['load-image-catering-contract/(:any)'] = 'image/load_catering_image_contract/$1';
 $route['load-image-user-discount/(:any)'] = 'image/load_image_user_discount/$1';
 
-//Auth
+
+//Admin
 $route['auth/login'] = 'auth/login';
 $route['auth/logout'] = 'auth/logout';
 $route['auth/create-user'] = 'auth/create_user';
 $route['auth/edit-user/(:any)'] = 'auth/edit_user/$1';
 $route['auth/create-group'] = 'auth/create_group';
 
-//Admin
 $route['admin/stores'] = 'admin/stores';
 $route['admin/store'] = 'admin/store';
 $route['admin/store-operating-hours'] = 'admin/store_operating_hours';
@@ -137,6 +137,15 @@ $route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_l
 
 $route['admin/notifications'] = 'admin/notifications';
 $route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
+
+// BSC
+$route['auth-bsc/login'] = 'auth_bsc/login';
+$route['auth-bsc/logout'] = 'auth_bsc/logout';
+$route['auth-bsc/create-user'] = 'auth_bsc/create_user';
+$route['auth-bsc/edit-user/(:any)'] = 'auth_bsc/edit_user/$1';
+$route['auth-bsc/create-group'] = 'auth_bsc/create_group';
+
+$route['bsc/session'] = 'bsc/session';
 
 //Others
 $route['404_override'] = '';
