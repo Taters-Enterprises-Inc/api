@@ -10,6 +10,10 @@ class Bsc extends CI_Controller
 {
 	public function __construct(){
 		parent::__construct();
+
+		if ($this->bsc_auth->logged_in() === false){
+		  exit();
+		}
 	}
 
 	public function session(){
