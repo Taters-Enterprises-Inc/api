@@ -145,13 +145,14 @@ class Shop_model extends CI_Model
 
         if(!empty($result)){
             $table = "client_tb A";
-            $select_column = array("A.fb_user_id", "A.mobile_user_id","A.fname", "A.lname", "A.email","A.address", "A.contact_number","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","B.voucher_id","B.table_number","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","A.add_name","A.add_contact","A.add_address","V.discount_value","V.voucher_code","B.giftcard_discount","B.giftcard_number");
+            $select_column = array("A.fb_user_id", "A.mobile_user_id","A.fname", "A.lname", "A.email","A.address", "A.contact_number","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","B.voucher_id","B.table_number","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","A.add_name","A.add_contact","A.add_address","V.discount_value","V.voucher_code","B.giftcard_discount","B.giftcard_number",'D.name AS discount_name', 'D.percentage AS discount_percentage');
             $join_A = "A.id = B.client_id";
             $this->db->select($select_column);  
             $this->db->from($table);
             $this->db->join('transaction_tb B', $join_A ,'left');
             $this->db->join('store_tb Z', 'Z.store_id = B.store' ,'left');
             $this->db->join('voucher_logs_tb V', 'V.transaction_id = B.id' ,'left');
+            $this->db->join('discount D', 'D.id = B.discount_id' ,'left');
             $this->db->where('B.hash_key', $hash_key);
             // $this->db->where('B.status !=', 4);
             // $this->db->where('B.status !=', 6);
