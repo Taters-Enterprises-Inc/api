@@ -413,56 +413,67 @@ class Profile extends CI_Controller {
 				echo json_encode($response);
 				break;
 			case 'POST':
+
+				$birthday = new DateTime($_POST['birthday']);
+				$currentYear = new DateTime();
+				
 				if(
 					is_uploaded_file($_FILES['idFront']['tmp_name']) &&
 					is_uploaded_file($_FILES['idBack']['tmp_name'])
 				){
-					$config['upload_path'] = './assets/upload/user_discount'; 
-					
-					if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
-					
-					$config['allowed_types']    = 'gif|png|jpg|jpeg'; 
-					$config['max_size']         = 2000;
-					$config['max_width']        = 0;
-					$config['max_height']       = 0;
-					$config['encrypt_name']     = TRUE;
+					if($birthday->format('Y') > ($currentYear->format('Y') - 60) && $_POST['discountTypeId'] == 1){
 
-					$this->load->library('upload', $config);
+						$this->output->set_status_header('401');
+						echo json_encode(array( "message" => 'Invalid birthday for senior citizen.'));
 
-					$id_front_data = null;
-					$id_back_data = null;
-
-					if($this->upload->do_upload('idFront')){
-						$id_front_data = $this->upload->data();
-					}
-					
-					if($this->upload->do_upload('idBack')){
-						$id_back_data = $this->upload->data();
-					}
-
+					}else {
+						$config['upload_path'] = './assets/upload/user_discount'; 
 						
-					$user_discount_data = array(
-						'first_name' => $_POST['firstName'],
-						'middle_name' => $_POST['middleName'],	
-						'last_name' => $_POST['lastName'],
-						'birthday' => $_POST['birthday'],
-						'id_number' => $_POST['idNumber'],
-						'id_front' => $id_front_data['file_name'],
-						'id_back' => $id_back_data['file_name'],
-						'dateadded' => date('Y-m-d H:i:s'),
-						'discount_type_id' => $_POST['discountTypeId'],
-						'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
-						'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
-						'status' => 1
-					);
+						if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
+						
+						$config['allowed_types']    = 'gif|png|jpg|jpeg'; 
+						$config['max_size']         = 2000;
+						$config['max_width']        = 0;
+						$config['max_height']       = 0;
+						$config['encrypt_name']     = TRUE;
 
-					$this->discount_model->insertDiscountUser($user_discount_data);
+						$this->load->library('upload', $config);
 
-					$response = array(
-						"message" => 'Application for user discount is successful!'
-					);
-					header('content-type: application/json');
-					echo json_encode($response);
+						$id_front_data = null;
+						$id_back_data = null;
+
+						if($this->upload->do_upload('idFront')){
+							$id_front_data = $this->upload->data();
+						}
+						
+						if($this->upload->do_upload('idBack')){
+							$id_back_data = $this->upload->data();
+						}
+
+							
+						$user_discount_data = array(
+							'first_name' => $_POST['firstName'],
+							'middle_name' => $_POST['middleName'],	
+							'last_name' => $_POST['lastName'],
+							'birthday' => $_POST['birthday'],
+							'id_number' => $_POST['idNumber'],
+							'id_front' => $id_front_data['file_name'],
+							'id_back' => $id_back_data['file_name'],
+							'dateadded' => date('Y-m-d H:i:s'),
+							'discount_type_id' => $_POST['discountTypeId'],
+							'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
+							'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
+							'status' => 1
+						);
+
+						$this->discount_model->insertDiscountUser($user_discount_data);
+
+						$response = array(
+							"message" => 'Application for user discount is successful!'
+						);
+						header('content-type: application/json');
+						echo json_encode($response);
+					}
 				}else{
 					$this->output->set_status_header('401');
 					echo json_encode(array( "message" => 'Application for user discount failed.'));
