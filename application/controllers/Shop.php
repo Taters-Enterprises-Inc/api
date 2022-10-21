@@ -7,8 +7,7 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
 class Shop extends CI_Controller {
 
-	public function __construct()
-	{
+	public function __construct(){
 		parent::__construct();
 		$this->load->model('store_model');
 		$this->load->model('shop_model');
@@ -16,8 +15,7 @@ class Shop extends CI_Controller {
 		$this->load->library('images');
 	}
 	
-    public function get_product_sku()
-    {
+    public function get_product_sku(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);

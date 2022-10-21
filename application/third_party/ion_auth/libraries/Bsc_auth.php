@@ -228,7 +228,7 @@ class Bsc_auth
 
 		$identity = $this->config->item('identity', 'bsc_auth');
 
-		$this->session->unset_userdata([$identity, 'id', 'user_id']);
+		$this->session->unset_userdata('bsc');
 
 		// delete the remember me cookies if they exist
 		delete_cookie($this->config->item('remember_cookie_name', 'bsc_auth'));
