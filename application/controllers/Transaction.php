@@ -325,7 +325,7 @@ class Transaction extends CI_Controller {
                         $table_number = null;
                     }
 
-                    $discount = $this->discount_model->getUserDiscount(
+                    $discount = $this->discount_model->getAvailableUserDiscount(
                         $this->session->userData['fb_user_id'] ?? null,
                         $this->session->userData['mobile_user_id'] ?? null
                     );
@@ -333,8 +333,12 @@ class Transaction extends CI_Controller {
                     $payops_ref_no = '';
                     $discount_type = '';
                     $discount_ref_no = '';
-                    $discount_value = (int)$comp_total * (float)$discount->percentage;
-                    $discount_id = '';
+                    $discount_value = "";
+                    $discount_id = null;
+                    if(isset($discount)){
+                        $discount_value = (int)$comp_total * (float)$discount->percentage;
+                        $discount_id = $discount->discount_type_id;
+                    }
                     
                     $client_id = $insert_client_details['id'];
 
@@ -355,7 +359,7 @@ class Transaction extends CI_Controller {
                         'reseller_discount' => "",
                         'payops'            => $payops,
                         'discount'          => $discount_value,
-                        'discount_id'       => $discount->discount_type_id,
+                        'discount_id'       => $discount_id,
                         'giftcard_discount' => "",
                         'giftcard_number'   => "",
                         'voucher_id'        => $voucher_id,
