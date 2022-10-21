@@ -1123,7 +1123,7 @@ class Admin extends CI_Controller
         $this->admin_model->changeStatusUserDiscount($discount_users_id, $status);
 
         $response = array(
-          "message" => 'Successfully approved user discount',
+          "message" => 'Successfully update user discount status',
         );
   
         header('content-type: application/json');

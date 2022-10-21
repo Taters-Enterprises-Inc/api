@@ -15,6 +15,7 @@ class Shared extends CI_Controller {
 		$this->load->model('client_model');
 		$this->load->model('user_model');
 		$this->load->model('logs_model');
+		$this->load->model('discount_model');
 		$this->load->library('form_validation');
 	}
 
@@ -255,5 +256,24 @@ class Shared extends CI_Controller {
 		unset($_SESSION['deals']);
 		echo "<pre>";
 		print_r($_SESSION);
+	}
+
+	public function available_user_discount(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+
+				$available_user_discount = $this->discount_model->getAvailableUserDiscount(
+					$this->session->userData['fb_user_id'] ?? null,
+					$this->session->userData['mobile_user_id'] ?? null
+				);
+
+				$response = array(
+					"message" => 'Successfully fetch user available discount',
+					"data" => $available_user_discount,
+				);
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
 	}
 }

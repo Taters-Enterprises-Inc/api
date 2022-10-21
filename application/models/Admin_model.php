@@ -1097,11 +1097,14 @@ class Admin_model extends CI_Model
             B.add_address,
             B.fb_user_id,
             B.mobile_user_id,
-            C.name as store_name
+            
+            C.name as store_name,
+            D.name AS discount_name
         ");
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
+        $this->db->join('discount D', 'D.id = A.discount_id');
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();
