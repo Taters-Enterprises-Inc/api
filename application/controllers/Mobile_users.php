@@ -72,22 +72,23 @@ class Mobile_users extends CI_Controller
   }
 
   // handle mobile user logins (for normal customers and store staffs)
-  public function login_mobile_user()
-  {
+  public function login_mobile_user(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
         $this->form_validation->set_error_delimiters('', '');
         $this->form_validation->set_rules('phoneNumber', 'Mobile Number', 'required|regex_match[/^[0-9]{11}$/]');
-        $this->form_validation->set_rules('login_password', 'Password', 'required');
+        $this->form_validation->set_rules('password', 'Password', 'required');
         
       if ($this->form_validation->run() === TRUE) { 
-        $mobile_number = $_POST['phoneNumber'];
+        $mobile_number = $this->input->post('phoneNumber');
+        $password = $this->input->post('password');
 
         $query_result = $this->mobile_users_model->verify_login($mobile_number);
     
         // if $query_result has contents
         if (!empty($query_result)) {
-          if (password_verify($_POST['login_password'], $query_result[0]->password)) {
+          if (password_verify($password, $query_result[0]->password)) {
             $validation_status = 'success';
             $user_data = array();
             $user_data['login_type']      = 'mobile';
@@ -206,6 +207,7 @@ class Mobile_users extends CI_Controller
   public function registration(){
     switch($this->input->server("REQUEST_METHOD")){
       case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
         $this->form_validation->set_error_delimiters('', '');
         $this->form_validation->set_rules('firstName', 'First Name', 'required|min_length[1]|max_length[20]|trim');
         $this->form_validation->set_rules('lastName', 'Last Name', 'required|min_length[1]|max_length[20]|trim');
@@ -235,7 +237,7 @@ class Mobile_users extends CI_Controller
           
           $temp_password = substr(md5(uniqid(mt_rand(), true)), 0, 8);
           if ($this->mobile_users_model->registration($_POST, $temp_password) == true) {
-            $this->send_sms($_POST['phoneNumber'], $temp_password, 'temp_pass');
+            $this->send_sms($this->input->post('phoneNumber'), $temp_password, 'temp_pass');
           }
           
           header('content-type: application/json');
