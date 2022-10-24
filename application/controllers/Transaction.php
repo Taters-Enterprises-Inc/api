@@ -35,7 +35,7 @@ class Transaction extends CI_Controller {
                 $insert_client_details = $this->client_model->insertClientDetailsCatering(
                     $post['firstName'],
                     $post['lastName'],
-                    $post['address'],
+                    $post['eventAddress'],
                     $post['phoneNumber'],
                     $post['payops'],
                     $post['eMail']
@@ -61,7 +61,7 @@ class Transaction extends CI_Controller {
                         $cod_fee = $this->session->cash_delivery;
                     }
 
-					$str_serving_time = strtotime($post['catering_serving_time']);
+					$str_serving_time = strtotime($post['servingTime']);
 					$serving_time = date($str_serving_time);
                     
                     $catering_start_date = $_SESSION['catering_start_date'];
@@ -83,12 +83,12 @@ class Transaction extends CI_Controller {
                         'contract'          => 0,
                         'store'             => $this->session->cache_data['store_id'],
                         'dateadded'         => date('Y-m-d H:i:s'),
-						'company_name'		=> isset($post['catering_company_name']) ? $post['catering_company_name'] : '',
-						'message'			=> isset($post['other_details']) ? $post['other_details'] : '',
+						'company_name'		=> isset($post['companyName']) ? $post['companyName'] : '',
+						'message'			=> isset($post['otherDetails']) ? $post['otherDetails'] : '',
 						'serving_time'		=> $serving_time,
                         'start_datetime'    => $catering_start_date,
                         'end_datetime'      => $catering_end_date,
-                        'event_class'       => isset($post['event_class']) ? $post['event_class'] : '',
+                        'event_class'       => isset($post['eventClass']) ? $post['eventClass'] : '',
                         'service_fee'       => $comp_total * 0.1,
                         'night_diff_fee'    => $this->get_night_diff((int)$start_datetime, (int)$end_datetime),
                         'additional_hour_charge' => $this->get_succeeding_hour_charge((int)$start_datetime, (int)$end_datetime),
@@ -97,7 +97,7 @@ class Transaction extends CI_Controller {
                         'distance_price'    => $distance_rate_price,
                         'cod_fee'           => $cod_fee,
                         'payops'            => $payops,
-                        'payment_plan'      => $post['payment_plan'],
+                        'payment_plan'      => $post['paymentPlan'],
                         'discount'          => 0,
                         'custom_message'    => '',
                         'logon_type'        => $insert_client_details['logon_type'],
