@@ -1064,10 +1064,6 @@ class Admin extends CI_Controller
           $bookings = $this->admin_model->getCateringBookings($page_no, $per_page, $status, $order_by, $order, $search,  $store_id_array);
         }
         
-
-        $bookings_count = $this->admin_model->getCateringBookingsCount($status, $search, $store_id_array);
-        $bookings = $this->admin_model->getCateringBookings($page_no, $per_page, $status, $order_by, $order, $search,  $store_id_array);
-
         $pagination = array(
           "total_rows" => $bookings_count,
           "per_page" => $per_page,
