@@ -80,6 +80,7 @@ class Auth extends CI_Controller{
     public function login(){
         switch($this->input->server('REQUEST_METHOD')){
             case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
 		        $this->data['title'] = $this->lang->line('login_heading');
                 $this->form_validation->set_rules('identity', str_replace(':', '', $this->lang->line('login_identity_label')), 'required');
                 $this->form_validation->set_rules('password', str_replace(':', '', $this->lang->line('login_password_label')), 'required');
