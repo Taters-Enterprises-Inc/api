@@ -1104,7 +1104,7 @@ class Admin_model extends CI_Model
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
-        $this->db->join('discount D', 'D.id = A.discount_id');
+        $this->db->join('discount D', 'D.id = A.discount_id','left');
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();
