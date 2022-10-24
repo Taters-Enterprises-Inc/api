@@ -75,6 +75,8 @@ class Auth_bsc extends CI_Controller{
     public function login(){
         switch($this->input->server('REQUEST_METHOD')){
             case 'POST':
+				$_POST = json_decode(file_get_contents("php://input"), true);
+
 		        $this->data['title'] = $this->lang->line('login_heading');
                 $this->form_validation->set_rules('identity', str_replace(':', '', $this->lang->line('login_identity_label')), 'required');
                 $this->form_validation->set_rules('password', str_replace(':', '', $this->lang->line('login_password_label')), 'required');
@@ -83,18 +85,15 @@ class Auth_bsc extends CI_Controller{
                     $remember = (bool) $this->input->post('remember');
 
                     if ($this->bsc_auth->login($this->input->post('identity'), $this->input->post('password'), $remember)) {
-
                         header('content-type: application/json');
                         echo json_encode(array("message" =>  $this->bsc_auth->messages()));
                         return;
                     } else {
-
 				        $this->output->set_status_header(401);
                         header('content-type: application/json');
                         echo json_encode(array("message" =>  $this->bsc_auth->errors()));
                         return;
                     }
-
                 }else{ 
                     $this->output->set_status_header(401);
                     header('content-type: application/json');
@@ -249,18 +248,19 @@ class Auth_bsc extends CI_Controller{
 		
 				// validate form input
 				$this->form_validation->set_error_delimiters('', '');
-				$this->form_validation->set_rules('first_name', $this->lang->line('create_user_validation_fname_label'), 'trim|required');
-				$this->form_validation->set_rules('last_name', $this->lang->line('create_user_validation_lname_label'), 'trim|required');
 				$this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'trim|required|valid_email|is_unique[users.email]');
-				$this->form_validation->set_rules('phone', $this->lang->line('create_user_validation_phone_label'), 'trim');
-				$this->form_validation->set_rules('company', $this->lang->line('create_user_validation_company_label'), 'trim');
 				$this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'bsc_auth') . ']|matches[password_confirm]');
 				$this->form_validation->set_rules('password_confirm', $this->lang->line('create_user_validation_password_confirm_label'), 'required');
+
+				$this->form_validation->set_rules('first_name', $this->lang->line('create_user_validation_fname_label'), 'trim|required');
+				$this->form_validation->set_rules('last_name', $this->lang->line('create_user_validation_lname_label'), 'trim|required');
+				$this->form_validation->set_rules('phone', $this->lang->line('create_user_validation_phone_label'), 'trim');
+				$this->form_validation->set_rules('company', $this->lang->line('create_user_validation_company_label'), 'trim');
 		
 				if ($this->form_validation->run() === TRUE) {
 					$email = strtolower($this->input->post('email'));
 					$password = $this->input->post('password');
-		
+					
 					$additional_data = [
 						'first_name' => $this->input->post('first_name'),
 						'last_name' => $this->input->post('last_name'),
@@ -268,7 +268,8 @@ class Auth_bsc extends CI_Controller{
 						'phone' => $this->input->post('phone'),
 					];
 				}
-				if ($this->form_validation->run() === TRUE && $this->bsc_auth->register($email, $password, $email, $additional_data)) {
+				
+				if ($this->form_validation->run() === TRUE && $this->bsc_auth->register($email, $password, $email)) {
 					// check to see if we are creating the user
 					// redirect them back to the admin page
 					header('content-type: application/json');
