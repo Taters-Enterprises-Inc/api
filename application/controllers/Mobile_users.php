@@ -208,6 +208,7 @@ class Mobile_users extends CI_Controller
     switch($this->input->server("REQUEST_METHOD")){
       case 'POST':
 				$_POST =  json_decode(file_get_contents("php://input"), true);
+
         $this->form_validation->set_error_delimiters('', '');
         $this->form_validation->set_rules('firstName', 'First Name', 'required|min_length[1]|max_length[20]|trim');
         $this->form_validation->set_rules('lastName', 'Last Name', 'required|min_length[1]|max_length[20]|trim');
@@ -255,11 +256,13 @@ class Mobile_users extends CI_Controller
   {
     switch($this->input->server("REQUEST_METHOD")){
       case 'POST':
+				$_POST = json_decode(file_get_contents("php://input"), true);
+
         $this->form_validation->set_rules('phoneNumber', 'Mobile number', 'required|regex_match[/^[0-9]{11}$/]');
         
         if ($this->form_validation->run() === TRUE) {
           
-          $mobile_number = $_POST['phoneNumber'];
+          $mobile_number = $this->input->post('phoneNumber');
           $check_if_mobile_exist = $this->mobile_users_model->verify_login($mobile_number);
 
           if (!empty($check_if_mobile_exist)) {
@@ -338,51 +341,14 @@ class Mobile_users extends CI_Controller
         }
     }
   }
-
-  // public function mobile_resend_forgot_pass_code(){
-  //   switch($this->input->server('REQUEST_METHOD')){
-	// 		case 'POST':
-  //       $mobile_number    = $_POST['phoneNumber'];
-       
-        
-  //       $mobile_user_details            = $this->mobile_users_model->verify_login($mobile_number);
-  //       $forgot_password_code_validity  = strtotime($mobile_user_details[0]->forgot_password_time);
-  //       $current_time                   = strtotime(date('Y-m-d H:i:s'));
-  //       $otp_code                 = $mobile_user_details[0]->forgot_password_code;
-
-        
-  //       if ($current_time < $forgot_password_code_validity) {
-
-  //         $this->send_sms($mobile_number, $otp_code, 'pass_reset');
-                
-  //         header('content-type: application/json');
-  //         $response = array(
-  //           "message"    =>  'otp code successfully resent'
-  //         );
-  //           echo json_encode($response);
-  //           return;
-  //       } 
-  //       else {
-  //           $this->output->set_status_header('401');
-  //           header('content-type: application/json');
-
-  //           $response = array(
-  //             "message"    =>  'Your opt code is expired.'
-  //           );
-  //           echo json_encode($response);
-  //           return;
-  //       }
-  //   }
-
-  // }
-
   
   public function validate_otp_code()
   {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
-          $mobile_number    = $_POST['phoneNumber'];
-          $otp_code         = $_POST['otpCode'];
+				  $_POST = json_decode(file_get_contents("php://input"), true);
+          $mobile_number    = $this->input->post('phoneNumber');
+          $otp_code         = $this->input->post('otpCode');
       
           $mobile_user_details            = $this->mobile_users_model->verify_login($mobile_number);
           $forgot_password_code_validity  = strtotime($mobile_user_details[0]->forgot_password_time);
@@ -426,8 +392,9 @@ class Mobile_users extends CI_Controller
   {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
-        $this->form_validation->set_rules('newPassword', 'New Password', 'trim|required|min_length[6]|max_length[20]');
-        $this->form_validation->set_rules('confirmNewPassword', 'Confirm Password', 'trim|required|min_length[6]|max_length[20]|matches[newPassword]', array(
+        $_POST = json_decode(file_get_contents("php://input"), true);
+        $this->form_validation->set_rules('password', 'New Password', 'trim|required|min_length[6]|max_length[20]');
+        $this->form_validation->set_rules('confirmPassword', 'Confirm Password', 'trim|required|min_length[6]|max_length[20]|matches[newPassword]', array(
           'matches'  => "{field} doesn't match"
         ));
     
@@ -439,8 +406,8 @@ class Mobile_users extends CI_Controller
               $message[$key] = form_error($key);
             }
           }
-          $mobile_number    = $_POST['phoneNumber'];
-          $new_pass         = $_POST['newPassword'];
+          $mobile_number    = $this->input->post('phoneNumber');
+          $new_pass         = $this->input->post('password');
     
           $new_password = password_hash($new_pass, PASSWORD_DEFAULT);
           $reset_pass   = $this->mobile_users_model->reset_password($mobile_number, $new_password);
