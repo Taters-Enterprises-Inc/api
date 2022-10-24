@@ -112,10 +112,10 @@ class Client_model extends CI_Model {
     public function insertClientDetailsShop(
         $first_name,
         $last_name,
-        $address,
+        $landMarkAddress,
         $phone_number,
         $payops,
-        $full_address,
+        $completeDeliveryAddress,
         $email
     ){
         $client_details = null;
@@ -131,7 +131,7 @@ class Client_model extends CI_Model {
 
         $client_details_to_be_inserted = array(
             'email'             => $email,
-            'address'           => $address,
+            'address'           => $landMarkAddress,
             'contact_number'    => $phone_number,
             'fname'             => $first_name,
             'lname'             => $last_name,
@@ -139,7 +139,7 @@ class Client_model extends CI_Model {
             'payops'            => $payops,
             'add_name'          => $first_name.' '.$last_name,
             'add_contact'       => $phone_number,
-            'add_address'       => $full_address,
+            'add_address'       => $completeDeliveryAddress,
         );
 
         switch($logon_type){

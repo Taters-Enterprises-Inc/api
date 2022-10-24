@@ -45,7 +45,7 @@ class Admin extends CI_Controller
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 
-        $user_id = $this->session->user_id;
+        $user_id = $this->session->admin['user_id'];
 
         $response = array(
             "data" => array(
@@ -505,7 +505,7 @@ class Admin extends CI_Controller
         
         $request = isset($to_store_id) ? 'store_transfer' : (isset($to_status_id) ? 'change_status' : null);
         
-        $user_id = $this->session->user_id;
+        $user_id = $this->session->admin['user_id'];
 
         $from_store = $this->store_model->get_store_info($from_store_id);
         $to_store = $this->store_model->get_store_info($to_store_id);
@@ -606,7 +606,7 @@ class Admin extends CI_Controller
         
         $request = isset($to_store_id) ? 'store_transfer' : (isset($to_status_id) ? 'change_status' : null);
         
-        $user_id = $this->session->user_id;
+        $user_id = $this->session->admin['user_id'];
 
         $from_store = $this->store_model->get_store_info($from_store_id);
         $to_store = $this->store_model->get_store_info($to_store_id);
@@ -688,7 +688,7 @@ class Admin extends CI_Controller
             $trans_id = (int) $this->input->post('trans_id');
             $status = $this->input->post('status');
             $fetch_data = $this->admin_model->update_catering_status($trans_id, $status);
-            $user_id = $this->session->user_id;
+            $user_id = $this->session->admin['user_id'];
             $fb_user_id = $this->input->post('fb_user_id');
             $mobile_user_id = $this->input->post('mobile_user_id');
 
@@ -726,7 +726,7 @@ class Admin extends CI_Controller
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
             $trans_id = (int) $this->input->post('trans_id');
-            $user_id = $this->session->user_id;
+            $user_id = $this->session->admin['user_id'];
             $status = $this->input->post('status');
             $fetch_data = $this->admin_model->update_shop_status($trans_id, $status);
             $fb_user_id = $this->input->post('fb_user_id');
@@ -767,7 +767,7 @@ class Admin extends CI_Controller
   }
   
   public function reference_num(){
-    $user_id = $this->session->user_id;
+    $user_id = $this->session->admin['user_id'];
     $trans_id = $this->input->post('trans_id');
     $ref_num = $this->input->post('ref_num');
     $fetch_data = $this->admin_model->validate_ref_num($trans_id, $ref_num);

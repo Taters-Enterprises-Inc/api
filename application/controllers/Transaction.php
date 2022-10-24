@@ -236,10 +236,10 @@ class Transaction extends CI_Controller {
                 $insert_client_details = $this->client_model->insertClientDetailsShop(
                     $post['firstName'],
                     $post['lastName'],
-                    $post['address'],
+                    $post['landmarkAddress'],
                     $post['phoneNumber'],
                     $post['payops'],
-                    $post['full_address'],
+                    $post['completeDeliveryAddress'],
                     $post['eMail']
                 );
 
