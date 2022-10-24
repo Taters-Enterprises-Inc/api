@@ -565,7 +565,7 @@ class Admin extends CI_Controller
             $real_time_notification = array(
                 "fb_user_id" => $fb_user_id,
                 "mobile_user_id" => $mobile_user_id,
-                "message" => 'Your order status changed '. $from_store->name . ' to ' . $to_store->name,
+                "message" => 'Your order status changed '. $from_status . ' to ' . $to_status,
             );
 
             notify('user-catering','catering-booking-changed', $real_time_notification);
@@ -660,7 +660,7 @@ class Admin extends CI_Controller
             $real_time_notification = array(
                 "fb_user_id" => $fb_user_id,
                 "mobile_user_id" => $mobile_user_id,
-                "message" => 'Your order status changed '. $from_store->name . ' to ' . $to_store->name,
+                "message" => 'Your order status changed '. $from_status . ' to ' . $to_status,
             );
 
             notify('user-snackshop','snackshop-order-changed', $real_time_notification);
