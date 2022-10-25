@@ -43,8 +43,8 @@ class Shared extends CI_Controller {
 				break;
 
 			case 'POST':
-				$post = json_decode(file_get_contents("php://input"), true);
-				$this->form_validation->set_data($post);
+				$_POST = json_decode(file_get_contents("php://input"), true);
+				$this->form_validation->set_data($this->input->post);
 
 				$this->form_validation->set_rules( 'contact' , 'Mobile Number', 'required|is_unique[mobile_user_contact.contact]|is_unique[fb_user_contact.contact]');
 
@@ -62,7 +62,7 @@ class Shared extends CI_Controller {
 							$isFbUser = true;
 							$data = array(
 								'fb_id' => $get_fb_user_details->id,
-								'contact' => $post['contact']
+								'contact' => $this->input->post('contact')
 							);
 		
 		
@@ -71,7 +71,7 @@ class Shared extends CI_Controller {
 							$isFbUser = false;
 							$data = array(
 								'mobile_id' => $get_mobile_user_details->id,
-								'contact' => $post['contact']
+								'contact' => $this->input->post('contact')
 							);
 
 							

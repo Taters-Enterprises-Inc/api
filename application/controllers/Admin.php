@@ -45,7 +45,7 @@ class Admin extends CI_Controller
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 
-        $user_id = $this->session->user_id;
+        $user_id = $this->session->admin['user_id'];
 
         $response = array(
             "data" => array(
@@ -489,23 +489,24 @@ class Admin extends CI_Controller
   public function admin_catering_privilege(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
+				$_POST =  json_decode(file_get_contents("php://input"), true);
 
         $fb_user_id = $this->input->post('fb_user_id');
         $mobile_user_id = $this->input->post('mobile_user_id');
 
         $password = $this->input->post('password');
         
-        $transaction_id = $this->input->post('trans_id');
+        $transaction_id = $this->input->post('transactionId');
 
-        $from_store_id = $this->input->post('from_store_id');
-        $to_store_id = $this->input->post('to_store_id');
+        $from_store_id = $this->input->post('fromStoreId');
+        $to_store_id = $this->input->post('toStoreId');
 
-        $from_status_id = $this->input->post('from_status_id');
-        $to_status_id = $this->input->post('to_status_id');
+        $from_status_id = $this->input->post('fromStatusId');
+        $to_status_id = $this->input->post('toStatusId');
         
         $request = isset($to_store_id) ? 'store_transfer' : (isset($to_status_id) ? 'change_status' : null);
         
-        $user_id = $this->session->user_id;
+        $user_id = $this->session->admin['user_id'];
 
         $from_store = $this->store_model->get_store_info($from_store_id);
         $to_store = $this->store_model->get_store_info($to_store_id);
@@ -590,23 +591,24 @@ class Admin extends CI_Controller
   public function admin_privilege(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
+				$_POST =  json_decode(file_get_contents("php://input"), true);
 
         $fb_user_id = $this->input->post('fb_user_id');
         $mobile_user_id = $this->input->post('mobile_user_id');
 
         $password = $this->input->post('password');
         
-        $transaction_id = $this->input->post('trans_id');
+        $transaction_id = $this->input->post('transactionId');
 
-        $from_store_id = $this->input->post('from_store_id');
-        $to_store_id = $this->input->post('to_store_id');
+        $from_store_id = $this->input->post('fromStoreId');
+        $to_store_id = $this->input->post('toStoreId');
 
-        $from_status_id = $this->input->post('from_status_id');
-        $to_status_id = $this->input->post('to_status_id');
+        $from_status_id = $this->input->post('fromStatusId');
+        $to_status_id = $this->input->post('toStatusId');
         
         $request = isset($to_store_id) ? 'store_transfer' : (isset($to_status_id) ? 'change_status' : null);
         
-        $user_id = $this->session->user_id;
+        $user_id = $this->session->admin['user_id'];
 
         $from_store = $this->store_model->get_store_info($from_store_id);
         $to_store = $this->store_model->get_store_info($to_store_id);
@@ -688,7 +690,7 @@ class Admin extends CI_Controller
             $trans_id = (int) $this->input->post('trans_id');
             $status = $this->input->post('status');
             $fetch_data = $this->admin_model->update_catering_status($trans_id, $status);
-            $user_id = $this->session->user_id;
+            $user_id = $this->session->admin['user_id'];
             $fb_user_id = $this->input->post('fb_user_id');
             $mobile_user_id = $this->input->post('mobile_user_id');
 
@@ -726,7 +728,7 @@ class Admin extends CI_Controller
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
             $trans_id = (int) $this->input->post('trans_id');
-            $user_id = $this->session->user_id;
+            $user_id = $this->session->admin['user_id'];
             $status = $this->input->post('status');
             $fetch_data = $this->admin_model->update_shop_status($trans_id, $status);
             $fb_user_id = $this->input->post('fb_user_id');
@@ -767,9 +769,12 @@ class Admin extends CI_Controller
   }
   
   public function reference_num(){
-    $user_id = $this->session->user_id;
-    $trans_id = $this->input->post('trans_id');
-    $ref_num = $this->input->post('ref_num');
+    
+    $_POST =  json_decode(file_get_contents("php://input"), true);
+
+    $user_id = $this->session->admin['user_id'];
+    $trans_id = $this->input->post('transactionId');
+    $ref_num = $this->input->post('referenceNumber');
     $fetch_data = $this->admin_model->validate_ref_num($trans_id, $ref_num);
 
     if ($fetch_data == 1) {
@@ -857,9 +862,10 @@ class Admin extends CI_Controller
         return;
         
       case 'POST': 
-				$stores = json_decode($_POST['stores'], true);
+				$_POST =  json_decode(file_get_contents("php://input"), true);
+				$stores = $this->input->post('stores');
 
-        $this->user_model->add_store_group($_POST['user_id'],$stores);
+        $this->user_model->add_store_group($this->input->post('userId'),$stores);
 
         $response = array(
           "message" => 'Successfully update user stores',

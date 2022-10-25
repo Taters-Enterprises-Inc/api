@@ -20,61 +20,68 @@ class Auth_bsc extends CI_Controller{
     }
 	
 	public function create_group(){
-		$this->data['title'] = $this->lang->line('create_group_title');
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+				$_POST = json_decode(file_get_contents("php://input"), true);
+				$this->data['title'] = $this->lang->line('create_group_title');
 
-		if (!$this->bsc_auth->logged_in() || !$this->bsc_auth->is_admin()) {
-			$this->output->set_status_header('401');
-			header('content-type: application/json');
-			echo json_encode(array("message" => 'Unauthorized user'));
-			return;
+				if (!$this->bsc_auth->logged_in() || !$this->bsc_auth->is_admin()) {
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode(array("message" => 'Unauthorized user'));
+					return;
+				}
+
+				$this->form_validation->set_error_delimiters('', '');
+				$this->form_validation->set_rules('group_name', $this->lang->line('create_group_validation_name_label'), 'trim|required|alpha_dash');
+
+				if ($this->form_validation->run() === TRUE) {
+					$new_group_id = $this->bsc_auth->create_group($this->input->post('group_name'), $this->input->post('description'));
+					if ($new_group_id) {
+						
+						header('content-type: application/json');
+						echo json_encode(array("message" =>  $this->bsc_auth->messages()));
+						return;
+					} else {
+
+						$this->output->set_status_header(401);
+						header('content-type: application/json');
+						echo json_encode(array("message" => validation_errors()));
+						return;
+					}
+				}else{
+					// display the create group form
+					// set the flash data error message if there is one
+					$this->data['message'] = (validation_errors() ? validation_errors() : ($this->bsc_auth->errors() ? $this->bsc_auth->errors() : $this->session->flashdata('message')));
+
+					$this->data['group_name'] = [
+						'name'  => 'group_name',
+						'id'    => 'group_name',
+						'type'  => 'text',
+						'value' => $this->form_validation->set_value('group_name'),
+					];
+					$this->data['description'] = [
+						'name'  => 'description',
+						'id'    => 'description',
+						'type'  => 'text',
+						'value' => $this->form_validation->set_value('description'),
+					];
+
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode(array("message" => validation_errors()));
+					return;
+				}
+				break;
 		}
-
-		$this->form_validation->set_error_delimiters('', '');
-		$this->form_validation->set_rules('group_name', $this->lang->line('create_group_validation_name_label'), 'trim|required|alpha_dash');
-
-		if ($this->form_validation->run() === TRUE) {
-			$new_group_id = $this->bsc_auth->create_group($this->input->post('group_name'), $this->input->post('description'));
-			if ($new_group_id) {
-				
-				header('content-type: application/json');
-				echo json_encode(array("message" =>  $this->bsc_auth->messages()));
-				return;
-			} else {
-
-				$this->output->set_status_header(401);
-				header('content-type: application/json');
-				echo json_encode(array("message" => validation_errors()));
-				return;
-			}
-		}
-
-		// display the create group form
-		// set the flash data error message if there is one
-		$this->data['message'] = (validation_errors() ? validation_errors() : ($this->bsc_auth->errors() ? $this->bsc_auth->errors() : $this->session->flashdata('message')));
-
-		$this->data['group_name'] = [
-			'name'  => 'group_name',
-			'id'    => 'group_name',
-			'type'  => 'text',
-			'value' => $this->form_validation->set_value('group_name'),
-		];
-		$this->data['description'] = [
-			'name'  => 'description',
-			'id'    => 'description',
-			'type'  => 'text',
-			'value' => $this->form_validation->set_value('description'),
-		];
-
-		$this->output->set_status_header('401');
-		header('content-type: application/json');
-		echo json_encode(array("message" => validation_errors()));
-		return;
-
+		
 	}
     
     public function login(){
         switch($this->input->server('REQUEST_METHOD')){
             case 'POST':
+				$_POST = json_decode(file_get_contents("php://input"), true);
+
 		        $this->data['title'] = $this->lang->line('login_heading');
                 $this->form_validation->set_rules('identity', str_replace(':', '', $this->lang->line('login_identity_label')), 'required');
                 $this->form_validation->set_rules('password', str_replace(':', '', $this->lang->line('login_password_label')), 'required');
@@ -83,18 +90,15 @@ class Auth_bsc extends CI_Controller{
                     $remember = (bool) $this->input->post('remember');
 
                     if ($this->bsc_auth->login($this->input->post('identity'), $this->input->post('password'), $remember)) {
-
                         header('content-type: application/json');
                         echo json_encode(array("message" =>  $this->bsc_auth->messages()));
                         return;
                     } else {
-
 				        $this->output->set_status_header(401);
                         header('content-type: application/json');
                         echo json_encode(array("message" =>  $this->bsc_auth->errors()));
                         return;
                     }
-
                 }else{ 
                     $this->output->set_status_header(401);
                     header('content-type: application/json');
@@ -249,18 +253,19 @@ class Auth_bsc extends CI_Controller{
 		
 				// validate form input
 				$this->form_validation->set_error_delimiters('', '');
-				$this->form_validation->set_rules('first_name', $this->lang->line('create_user_validation_fname_label'), 'trim|required');
-				$this->form_validation->set_rules('last_name', $this->lang->line('create_user_validation_lname_label'), 'trim|required');
 				$this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'trim|required|valid_email|is_unique[users.email]');
-				$this->form_validation->set_rules('phone', $this->lang->line('create_user_validation_phone_label'), 'trim');
-				$this->form_validation->set_rules('company', $this->lang->line('create_user_validation_company_label'), 'trim');
 				$this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'bsc_auth') . ']|matches[password_confirm]');
 				$this->form_validation->set_rules('password_confirm', $this->lang->line('create_user_validation_password_confirm_label'), 'required');
+
+				$this->form_validation->set_rules('first_name', $this->lang->line('create_user_validation_fname_label'), 'trim|required');
+				$this->form_validation->set_rules('last_name', $this->lang->line('create_user_validation_lname_label'), 'trim|required');
+				$this->form_validation->set_rules('phone', $this->lang->line('create_user_validation_phone_label'), 'trim');
+				$this->form_validation->set_rules('company', $this->lang->line('create_user_validation_company_label'), 'trim');
 		
 				if ($this->form_validation->run() === TRUE) {
 					$email = strtolower($this->input->post('email'));
 					$password = $this->input->post('password');
-		
+					
 					$additional_data = [
 						'first_name' => $this->input->post('first_name'),
 						'last_name' => $this->input->post('last_name'),
@@ -268,7 +273,8 @@ class Auth_bsc extends CI_Controller{
 						'phone' => $this->input->post('phone'),
 					];
 				}
-				if ($this->form_validation->run() === TRUE && $this->bsc_auth->register($email, $password, $email, $additional_data)) {
+				
+				if ($this->form_validation->run() === TRUE && $this->bsc_auth->register($email, $password, $email)) {
 					// check to see if we are creating the user
 					// redirect them back to the admin page
 					header('content-type: application/json');
