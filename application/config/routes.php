@@ -139,6 +139,9 @@ $route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_l
 $route['admin/notifications'] = 'admin/notifications';
 $route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
 
+$route['admin/report-pmix/(:any)/(:any)'] = 'admin/report_pmix/$1/$2';
+$route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/$2';
+
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';
 $route['auth-bsc/logout'] = 'auth_bsc/logout';
