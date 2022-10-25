@@ -14,6 +14,8 @@ class Bsc extends CI_Controller
 		if ($this->bsc_auth->logged_in() === false){
 		  exit();
 		}
+
+		$this->load->model('store_model');
 	}
 
 	public function session(){

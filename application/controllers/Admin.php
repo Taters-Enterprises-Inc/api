@@ -919,7 +919,7 @@ class Admin extends CI_Controller{
         if($user_id){
           $stores =  $this->user_model->get_store_group_order_set($user_id);
         }else{
-          $stores = $this->admin_model->getStores();
+          $stores = $this->store_model->getStores();
         }
 
         $response = array(
