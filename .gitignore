@@ -7,6 +7,7 @@ assets/upload/user_discount/*
 assets/upload/catering/*
 assets/upload/reciepts/*
 
+application/views/errors/*
 
 application/cache/*
 !application/cache/index.html

@@ -99,7 +99,8 @@ class Store_model extends CI_Model
 			A.contact_number as contactno,
 			A.operating_hours as operatinghours, 
 			A.map_link as maplink, 
-			( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
+			( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance, 
+			A.dateadded
 		');
 
 		$this->db->from('store_tb A');
@@ -156,6 +157,7 @@ class Store_model extends CI_Model
 			  'maplink'   => $value->maplink,
 			  'available_start_time' => $value->available_start_time,
 			  'available_end_time' => $value->available_end_time,
+			  'dateadded' => $value->dateadded,
 			);  
 		}
 	  
