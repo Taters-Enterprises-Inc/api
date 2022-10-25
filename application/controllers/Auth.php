@@ -25,55 +25,64 @@ class Auth extends CI_Controller{
     }
 	
 	public function create_group(){
-		$this->data['title'] = $this->lang->line('create_group_title');
+		
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
+				$this->data['title'] = $this->lang->line('create_group_title');
+		
+				if (!$this->ion_auth->logged_in() || !$this->ion_auth->is_admin()) {
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode(array("message" => 'Unauthorized user'));
+					return;
+				}
+		
+				$this->form_validation->set_error_delimiters('', '');
+				$this->form_validation->set_rules('groupName', $this->lang->line('create_group_validation_name_label'), 'trim|required|alpha_dash');
+		
+				if ($this->form_validation->run() === TRUE) {
+					$new_group_id = $this->ion_auth->create_group($this->input->post('groupName'), $this->input->post('description'));
+					if ($new_group_id) {
+						
+						header('content-type: application/json');
+						echo json_encode(array("message" =>  $this->ion_auth->messages()));
+						return;
+					} else {
+		
+						$this->output->set_status_header(401);
+						header('content-type: application/json');
+						echo json_encode(array("message" => validation_errors()));
+						return;
+					}
+				}else{
+					// display the create group form
+					// set the flash data error message if there is one
+					$this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
+		
+					$this->data['groupName'] = [
+						'name'  => 'groupName',
+						'id'    => 'groupName',
+						'type'  => 'text',
+						'value' => $this->form_validation->set_value('groupName'),
+					];
+					$this->data['description'] = [
+						'name'  => 'description',
+						'id'    => 'description',
+						'type'  => 'text',
+						'value' => $this->form_validation->set_value('description'),
+					];
+		
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode(array("message" => validation_errors()));
+					return;
+				}
 
-		if (!$this->ion_auth->logged_in() || !$this->ion_auth->is_admin()) {
-			$this->output->set_status_header('401');
-			header('content-type: application/json');
-			echo json_encode(array("message" => 'Unauthorized user'));
-			return;
+				break;
 		}
 
-		$this->form_validation->set_error_delimiters('', '');
-		$this->form_validation->set_rules('group_name', $this->lang->line('create_group_validation_name_label'), 'trim|required|alpha_dash');
-
-		if ($this->form_validation->run() === TRUE) {
-			$new_group_id = $this->ion_auth->create_group($this->input->post('group_name'), $this->input->post('description'));
-			if ($new_group_id) {
-				
-				header('content-type: application/json');
-				echo json_encode(array("message" =>  $this->ion_auth->messages()));
-				return;
-			} else {
-
-				$this->output->set_status_header(401);
-				header('content-type: application/json');
-				echo json_encode(array("message" => validation_errors()));
-				return;
-			}
-		}
-
-		// display the create group form
-		// set the flash data error message if there is one
-		$this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
-
-		$this->data['group_name'] = [
-			'name'  => 'group_name',
-			'id'    => 'group_name',
-			'type'  => 'text',
-			'value' => $this->form_validation->set_value('group_name'),
-		];
-		$this->data['description'] = [
-			'name'  => 'description',
-			'id'    => 'description',
-			'type'  => 'text',
-			'value' => $this->form_validation->set_value('description'),
-		];
-
-		$this->output->set_status_header('401');
-		header('content-type: application/json');
-		echo json_encode(array("message" => validation_errors()));
-		return;
+		
 
 	}
     
@@ -118,12 +127,13 @@ class Auth extends CI_Controller{
 				$_POST = json_decode(file_get_contents("php://input"), true);
 				$this->data['title'] = $this->lang->line('edit_user_heading');
 
-				// if (!$this->ion_auth->logged_in() || (!$this->ion_auth->is_admin() && !($this->ion_auth->user()->row()->id == $id))) {
-				// 	$this->output->set_status_header('401');
-				// 	header('content-type: application/json');
-				// 	echo json_encode(array("message" => 'Unauthorized user'));
-				// 	return;
-				// }
+				if (!$this->ion_auth->logged_in() || (!$this->ion_auth->is_admin() && !($this->ion_auth->user()->row()->id == $id))) {
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode(array("message" => 'Unauthorized user'));
+					return;
+				}
+				
 				$user = $this->ion_auth->user($id)->row();
 				$groups = $this->ion_auth->groups()->result_array();
 				$currentGroups = $this->ion_auth->get_users_groups($id)->result();

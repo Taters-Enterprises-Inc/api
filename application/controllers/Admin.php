@@ -862,9 +862,10 @@ class Admin extends CI_Controller
         return;
         
       case 'POST': 
-				$stores = json_decode($_POST['stores'], true);
+				$_POST =  json_decode(file_get_contents("php://input"), true);
+				$stores = $this->input->post('stores');
 
-        $this->user_model->add_store_group($_POST['user_id'],$stores);
+        $this->user_model->add_store_group($this->input->post('userId'),$stores);
 
         $response = array(
           "message" => 'Successfully update user stores',
