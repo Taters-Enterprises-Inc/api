@@ -111,6 +111,7 @@ class Store_model extends CI_Model
 		switch($service){
 			case 'BRANCHES':
 				$this->db->where('A.branch_status', 1);
+				$this->db->order_by('locale', 'ASC');
 				break;
 			case 'SNACKSHOP':
 				$this->db->where('A.status', 1);
@@ -126,7 +127,6 @@ class Store_model extends CI_Model
 				break;
 		}
 		
-		$this->db->order_by('locale', 'ASC');
 		$this->db->order_by('distance', 'ASC');
 		$query = $this->db->get();  
 		$query_data = $query->result();
