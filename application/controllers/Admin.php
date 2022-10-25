@@ -93,7 +93,7 @@ class Admin extends CI_Controller{
 
   public function notification_seen($notification_id){
 		switch($this->input->server('REQUEST_METHOD')){
-			case 'PUT':
+			case 'GET':
         $date_now = date('Y-m-d H:i:s');
         $this->notification_model->seenNotification($notification_id, $date_now);
         
@@ -754,39 +754,41 @@ class Admin extends CI_Controller{
   public function catering_update_status(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
-            $trans_id = (int) $this->input->post('trans_id');
-            $status = $this->input->post('status');
-            $fetch_data = $this->admin_model->update_catering_status($trans_id, $status);
-            $user_id = $this->session->admin['user_id'];
-            $fb_user_id = $this->input->post('fb_user_id');
-            $mobile_user_id = $this->input->post('mobile_user_id');
+        $_POST = json_decode(file_get_contents("php://input"), true);
+        $trans_id = (int) $this->input->post('transactionId');
+        $status = $this->input->post('status');
+        $fetch_data = $this->admin_model->update_catering_status($trans_id, $status);
+        $user_id = $this->session->admin['user_id'];
+        $fb_user_id = $this->input->post('fbUserId');
+        $mobile_user_id = $this->input->post('mobileUserId');
 
-            $update_on_click = $this->admin_model->update_catering_on_click($trans_id, $status);
-            if ($status == 2) $generate_invoice = $this->admin_model->generate_catering_invoice_num($trans_id);
+        $update_on_click = $this->admin_model->update_catering_on_click($trans_id, $status);
+        if ($status == 2) $generate_invoice = $this->admin_model->generate_catering_invoice_num($trans_id);
 
-            if ($status == 2) $tagname = "Confirm";
-            elseif ($status == 4) $tagname = "Contract Verified";
-            elseif ($status == 6) $tagname = "Initial Payment Verified";
-            elseif ($status == 8) $tagname = "Final Payment Verified";
+        if ($status == 2) $tagname = "Confirm";
+        elseif ($status == 4) $tagname = "Contract Verified";
+        elseif ($status == 6) $tagname = "Initial Payment Verified";
+        elseif ($status == 8) $tagname = "Final Payment Verified";
 
-            if ($fetch_data == 1) {
-              $this->logs_model->insertCateringTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Booking Success');
-              
-              $real_time_notification = array(
-                "fb_user_id" => (int) $fb_user_id,
-                "mobile_user_id" => (int) $mobile_user_id,
-                "message" => $tagname,
-              );
+        if ($fetch_data == 1) {
+          $this->logs_model->insertCateringTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Booking Success');
+          
+          $real_time_notification = array(
+            "fb_user_id" => (int) $fb_user_id,
+            "mobile_user_id" => (int) $mobile_user_id,
+            "message" => $tagname,
+          );
 
-              notify('user-catering','catering-booking-updated', $real_time_notification);
-              header('content-type: application/json');
-              echo json_encode(array( "message" => 'Successfully update status!'));
-            } else {
-              $this->logs_model->insertTransactionLogs($user_id, 3, $trans_id, '' . $tagname . ' ' . 'Booking Success');
-              $this->output->set_status_header('401');
-              echo json_encode(array( "message" => 'Failed update status!'));
-            }
-          return;
+          notify('user-catering','catering-booking-updated', $real_time_notification);
+          header('content-type: application/json');
+          echo json_encode(array( "message" => 'Successfully update status!'));
+        } else {
+          $this->logs_model->insertTransactionLogs($user_id, 3, $trans_id, '' . $tagname . ' ' . 'Booking Success');
+          $this->output->set_status_header('401');
+          echo json_encode(array( "message" => 'Failed update status!'));
+        }
+        
+        return;
     }
 
   }
@@ -794,44 +796,45 @@ class Admin extends CI_Controller{
   public function shop_update_status(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
-            $trans_id = (int) $this->input->post('trans_id');
-            $user_id = $this->session->admin['user_id'];
-            $status = $this->input->post('status');
-            $fetch_data = $this->admin_model->update_shop_status($trans_id, $status);
-            $fb_user_id = $this->input->post('fb_user_id');
-            $mobile_user_id = $this->input->post('mobile_user_id');
+        $_POST = json_decode(file_get_contents("php://input"), true);
+        $trans_id = (int) $this->input->post('transactionId');
+        $user_id = $this->session->admin['user_id'];
+        $status = $this->input->post('status');
+        $fetch_data = $this->admin_model->update_shop_status($trans_id, $status);
+        $fb_user_id = $this->input->post('fbUserId');
+        $mobile_user_id = $this->input->post('mobileUserId');
 
-            $update_on_click = $this->admin_model->update_shop_on_click($trans_id, $_POST['status']);
-            if ($status == 3) $generate_invoice = $this->admin_model->generate_shop_invoice_num($trans_id);
+        $update_on_click = $this->admin_model->update_shop_on_click($trans_id, $_POST['status']);
+        if ($status == 3) $generate_invoice = $this->admin_model->generate_shop_invoice_num($trans_id);
 
-            if ($status == 3) $tagname = "Confirm";
-            elseif ($status == 4) $tagname = "Declined";
-            elseif ($status == 6) $tagname = "Complete";
-            elseif ($status == 7) $tagname = "Reject";
-            elseif ($status == 8) $tagname = "Prepare";
-            elseif ($status == 9) $tagname = "Dispatched";
+        if ($status == 3) $tagname = "Confirm";
+        elseif ($status == 4) $tagname = "Declined";
+        elseif ($status == 6) $tagname = "Complete";
+        elseif ($status == 7) $tagname = "Reject";
+        elseif ($status == 8) $tagname = "Prepare";
+        elseif ($status == 9) $tagname = "Dispatched";
 
-            if ($fetch_data == 1) {
-              $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Order Success');
-              $this->status_notification($trans_id, 9, $user_id);
-              
-              $real_time_notification = array(
-                  "fb_user_id" => (int) $fb_user_id,
-                  "mobile_user_id" => (int) $mobile_user_id,
-                  "status" => $status,
-              );
+        if ($fetch_data == 1) {
+          $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Order Success');
+          $this->status_notification($trans_id, 9, $user_id);
+          
+          $real_time_notification = array(
+              "fb_user_id" => (int) $fb_user_id,
+              "mobile_user_id" => (int) $mobile_user_id,
+              "status" => $status,
+          );
 
-              notify('user-snackshop','snackshop-order-update', $real_time_notification);
+          notify('user-snackshop','snackshop-order-update', $real_time_notification);
 
 
-              header('content-type: application/json');
-              echo json_encode(array( "message" => 'Successfully update status!'));
-            } else {
-              $this->logs_model->insertTransactionLogs($user_id, 3, $trans_id, '' . $tagname . ' ' . 'Order Success');
-              $this->output->set_status_header('401');
-              echo json_encode(array( "message" => 'Failed update status!'));
-            }
-          return;
+          header('content-type: application/json');
+          echo json_encode(array( "message" => 'Successfully update status!'));
+        } else {
+          $this->logs_model->insertTransactionLogs($user_id, 3, $trans_id, '' . $tagname . ' ' . 'Order Success');
+          $this->output->set_status_header('401');
+          echo json_encode(array( "message" => 'Failed update status!'));
+        }
+        return;
     }
   }
   
@@ -1159,9 +1162,11 @@ class Admin extends CI_Controller{
   public function popclub_decline_redeem(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
-        $redeem_id = $this->input->post('redeem_id');
-        $fb_user_id = $this->input->post('fb_user_id');
-        $mobile_user_id = $this->input->post('mobile_user_id');
+				$_POST =  json_decode(file_get_contents("php://input"), true);
+        
+        $redeem_id = $this->input->post('redeemId');
+        $fb_user_id = $this->input->post('fbUserId');
+        $mobile_user_id = $this->input->post('mobileUserId');
 
         $this->admin_model->declineRedeem($redeem_id);
         
@@ -1185,8 +1190,10 @@ class Admin extends CI_Controller{
 
   public function user_discount_change_status(){
     switch($this->input->server('REQUEST_METHOD')){
-      case 'POST': 
-        $discount_users_id = $this->input->post('discount_users_id');
+      case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
+        
+        $discount_users_id = $this->input->post('discountUserId');
         $status = $this->input->post('status');
 
         $this->admin_model->changeStatusUserDiscount($discount_users_id, $status);
@@ -1204,9 +1211,11 @@ class Admin extends CI_Controller{
   public function popclub_complete_redeem(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
-        $redeem_id = $this->input->post('redeem_id');
-        $fb_user_id = $this->input->post('fb_user_id');
-        $mobile_user_id = $this->input->post('mobile_user_id');
+				$_POST =  json_decode(file_get_contents("php://input"), true);
+        
+        $redeem_id = $this->input->post('redeemId');
+        $fb_user_id = $this->input->post('fbUserId');
+        $mobile_user_id = $this->input->post('mobileUserId');
 
         $this->admin_model->completeRedeem($redeem_id);
 
