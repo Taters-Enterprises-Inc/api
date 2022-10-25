@@ -131,6 +131,9 @@ $route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_l
 $route['admin/notifications'] = 'admin/notifications';
 $route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
 
+$route['admin/report-pmix/(:any)/(:any)'] = 'admin/report_pmix/$1/$2';
+$route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/$2';
+
 //Others
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;

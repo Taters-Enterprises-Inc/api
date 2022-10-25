@@ -6,8 +6,7 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
 date_default_timezone_set('Asia/Manila');
 
-class Admin extends CI_Controller
-{
+class Admin extends CI_Controller{
 
 	public function __construct(){
 		parent::__construct();
@@ -22,7 +21,75 @@ class Admin extends CI_Controller
 		$this->load->model('store_model');
 		$this->load->model('logs_model');
 		$this->load->model('notification_model');
+		$this->load->model('report_model');
 	}
+
+  public function report_transaction($startDate, $endDate){
+
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
+        $end = date("Y-m-d", strtotime($endDate)) . " 59:59:59";
+        $data = $this->report_model->getReportTransaction($start, $end);
+        header("Content-Type: application/vnd.ms-excel");
+
+        header("Content-disposition: attachment; filename=transaction_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
+       
+        $flag = false;
+        foreach ($data as $row) {
+          if (!$flag) 
+          {
+            echo implode("\t", array_keys((array)$row)) . "\r\n";
+            $flag = true;
+          }
+
+          $line = "";
+          foreach ((array)$row as $key => $val) {
+            if ($key == 'REMARKS') 
+              $line .= $this->report_remarks($val) . "\t";
+            else 
+              $line .= $val . "\t";
+          }
+
+          echo $line . "\r\n";
+        }
+        
+        break;
+    }
+  }
+
+  public function report_pmix($startDate, $endDate){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
+        $end = date("Y-m-d", strtotime($endDate)) . " 59:59:59";
+        $data = $this->report_model->getReportPmix($start, $end);
+        header("Content-Type: application/vnd.ms-excel");
+
+        header("Content-disposition: attachment; filename=PMIX_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
+          
+        $flag = false;
+        foreach ($data as $row) {
+          if (!$flag) 
+          {
+            echo implode("\t", array_keys((array)$row)) . "\r\n";
+            $flag = true;
+          }
+
+          $line = "";
+          foreach ((array)$row as $key => $val) {
+            if ($key == 'REMARKS') 
+              $line .= $this->report_remarks($val) . "\t";
+            else 
+              $line .= $val . "\t";
+          }
+
+          echo $line . "\r\n";
+        }
+        
+        break;
+    }
+  }
 
   public function notification_seen($notification_id){
 		switch($this->input->server('REQUEST_METHOD')){
