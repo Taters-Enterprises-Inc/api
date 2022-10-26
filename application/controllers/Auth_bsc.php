@@ -241,97 +241,106 @@ class Auth_bsc extends CI_Controller{
 	public function create_user(){
         switch($this->input->server('REQUEST_METHOD')){
             case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
 				$this->data['title'] = $this->lang->line('create_user_heading');
-
-				if (!$this->bsc_auth->logged_in() || !$this->bsc_auth->is_admin()) {
-					$this->output->set_status_header('401');
-					header('content-type: application/json');
-					echo json_encode(array("message" => 'Unauthorized user'));
-					return;
-				}
-		
 		
 				// validate form input
 				$this->form_validation->set_error_delimiters('', '');
 				$this->form_validation->set_rules('email', $this->lang->line('create_user_validation_email_label'), 'trim|required|valid_email|is_unique[users.email]');
-				$this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'bsc_auth') . ']|matches[password_confirm]');
-				$this->form_validation->set_rules('password_confirm', $this->lang->line('create_user_validation_password_confirm_label'), 'required');
+				$this->form_validation->set_rules('password', $this->lang->line('create_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'bsc_auth') . ']|matches[confirmPassword]');
+				$this->form_validation->set_rules('confirmPassword', $this->lang->line('create_user_validation_password_confirm_label'), 'required');
 
-				$this->form_validation->set_rules('first_name', $this->lang->line('create_user_validation_fname_label'), 'trim|required');
-				$this->form_validation->set_rules('last_name', $this->lang->line('create_user_validation_lname_label'), 'trim|required');
-				$this->form_validation->set_rules('phone', $this->lang->line('create_user_validation_phone_label'), 'trim');
+				$this->form_validation->set_rules('firstName', $this->lang->line('create_user_validation_fname_label'), 'trim|required');
+				$this->form_validation->set_rules('lastName', $this->lang->line('create_user_validation_lname_label'), 'trim|required');;
+				$this->form_validation->set_rules('designation', 'Designation', 'trim');
+				$this->form_validation->set_rules('store', 'Store ', 'trim');
+				$this->form_validation->set_rules('phoneNumber', $this->lang->line('create_user_validation_phone_label'), 'trim');
 				$this->form_validation->set_rules('company', $this->lang->line('create_user_validation_company_label'), 'trim');
-		
+	
+				
 				if ($this->form_validation->run() === TRUE) {
+					
 					$email = strtolower($this->input->post('email'));
 					$password = $this->input->post('password');
-					
-					$additional_data = [
-						'first_name' => $this->input->post('first_name'),
-						'last_name' => $this->input->post('last_name'),
-						'company' => $this->input->post('company'),
-						'phone' => $this->input->post('phone'),
-					];
-				}
-				
-				if ($this->form_validation->run() === TRUE && $this->bsc_auth->register($email, $password, $email)) {
-					// check to see if we are creating the user
-					// redirect them back to the admin page
-					header('content-type: application/json');
-					echo json_encode(array("message" =>  $this->bsc_auth->messages()));
-					redirect("auth", 'refresh');
+
+					$new_user_id = $this->bsc_auth->register($email, $password, $email);
+
+					if($new_user_id !== FALSE){
+						header('content-type: application/json');
+						echo json_encode(array("message" =>  $this->bsc_auth->messages()));
+						return;
+					}else{
+				        $this->output->set_status_header(401);
+                        header('content-type: application/json');
+                        echo json_encode(array("message" =>  $this->bsc_auth->errors()));
+                        return;
+					}
 				} else {
 					// display the create user form
 					// set the flash data error message if there is one
 					$this->data['message'] = (validation_errors() ? validation_errors() : ($this->bsc_auth->errors() ? $this->bsc_auth->errors() : $this->session->flashdata('message')));
 		
-					$this->data['first_name'] = [
-						'name' => 'first_name',
-						'id' => 'first_name',
-						'type' => 'text',
-						'value' => $this->form_validation->set_value('first_name'),
-					];
-					$this->data['last_name'] = [
-						'name' => 'last_name',
-						'id' => 'last_name',
-						'type' => 'text',
-						'value' => $this->form_validation->set_value('last_name'),
-					];
-					$this->data['identity'] = [
-						'name' => 'identity',
-						'id' => 'identity',
-						'type' => 'text',
-						'value' => $this->form_validation->set_value('identity'),
-					];
 					$this->data['email'] = [
 						'name' => 'email',
 						'id' => 'email',
 						'type' => 'text',
 						'value' => $this->form_validation->set_value('email'),
 					];
-					$this->data['company'] = [
-						'name' => 'company',
-						'id' => 'company',
-						'type' => 'text',
-						'value' => $this->form_validation->set_value('company'),
-					];
-					$this->data['phone'] = [
-						'name' => 'phone',
-						'id' => 'phone',
-						'type' => 'text',
-						'value' => $this->form_validation->set_value('phone'),
-					];
+
 					$this->data['password'] = [
 						'name' => 'password',
 						'id' => 'password',
 						'type' => 'password',
 						'value' => $this->form_validation->set_value('password'),
 					];
-					$this->data['password_confirm'] = [
-						'name' => 'password_confirm',
-						'id' => 'password_confirm',
+					
+					$this->data['confirmPassword'] = [
+						'name' => 'confirmPassword',
+						'id' => 'confirmPassword',
 						'type' => 'password',
-						'value' => $this->form_validation->set_value('password_confirm'),
+						'value' => $this->form_validation->set_value('confirmPassword'),
+					];
+
+					$this->data['firstName'] = [
+						'name' => 'firstName',
+						'id' => 'firstName',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('firstName'),
+					];
+
+					$this->data['lastName'] = [
+						'name' => 'lastName',
+						'id' => 'lastName',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('lastName'),
+					];
+
+					$this->data['designation'] = [
+						'name' => 'designation',
+						'id' => 'designation',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('designation'),
+					];
+
+					$this->data['company'] = [
+						'name' => 'company',
+						'id' => 'company',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('company'),
+					];
+
+					$this->data['store'] = [
+						'name' => 'store',
+						'id' => 'store',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('store'),
+					];
+
+					$this->data['phoneNumber'] = [
+						'name' => 'phoneNumber',
+						'id' => 'phoneNumber',
+						'type' => 'text',
+						'value' => $this->form_validation->set_value('phoneNumber'),
 					];
 		
 					$this->output->set_status_header('401');
