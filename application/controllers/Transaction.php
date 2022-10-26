@@ -341,6 +341,7 @@ class Transaction extends CI_Controller {
                     }
                     
                     $client_id = $insert_client_details['id'];
+                
 
                     $transaction_data = array(
                         'tracking_no' 		=> $tracking_no,
@@ -351,7 +352,7 @@ class Transaction extends CI_Controller {
                         'status' 		    => 1,
                         'store'             => $store_id,
                         'dateadded'         => date('Y-m-d H:i:s'),
-                        'distance'          => '2',
+                        'distance'          => $this->session->distance,
                         'distance_id'       => $distance_rate_id,
                         'distance_price'    => $distance_rate_price,
                         'cod_fee'           => $cod_fee,
@@ -369,7 +370,8 @@ class Transaction extends CI_Controller {
                         'store_payops'      => 0,
                         'store_payops_ref_no'=> $payops_ref_no,
                         'store_discount_type'=> $discount_type,
-                        'store_discount_ref_no'=> $discount_ref_no
+                        'store_discount_ref_no'=> $discount_ref_no,
+                        'deals_redeems_id' => $this->session->redeem_data['id'],
                     );
 
                     $query_transaction_result = $this->transaction_model->insertSnackShopTransactionDetails($transaction_data);
