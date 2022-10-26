@@ -16,11 +16,14 @@ class Bsc extends CI_Controller
 		}
 
 		$this->load->model('store_model');
+		$this->load->model('bsc_model');
 	}
 
 	public function session(){
 		switch($this->input->server('REQUEST_METHOD')){
 		  case 'GET':
+
+			$user_profile =  $this->bsc_model->getUserProfile($this->session->bsc['user_id']);
 	
 			$data = array(
 				"bsc" => array(
@@ -29,6 +32,8 @@ class Bsc extends CI_Controller
 					"user_id" => $this->session->bsc['user_id'],
 					"old_last_login" => $this->session->bsc['old_last_login'],
 					"last_check" => $this->session->bsc['last_check'],
+					"is_admin" => $this->bsc_auth->in_group(1),
+					"user_status_id" => $user_profile->user_status_id,
 				)
 			);
 

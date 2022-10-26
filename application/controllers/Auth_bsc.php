@@ -8,7 +8,8 @@ class Auth_bsc extends CI_Controller{
 
     public function __construct(){
         parent::__construct();
-        $this->load->database();
+        $this->db = $this->load->database('bsc', TRUE, TRUE);
+
         $this->load->library('form_validation');
         $this->load->helper(['url', 'language']);
 
@@ -16,6 +17,7 @@ class Auth_bsc extends CI_Controller{
         $this->bsc_auth->set_message_delimiters('', '');
         $this->bsc_auth->set_error_delimiters('', '');
 
+		$this->load->model('bsc_model');
         $this->lang->load('auth');
     }
 	
@@ -263,9 +265,23 @@ class Auth_bsc extends CI_Controller{
 					$email = strtolower($this->input->post('email'));
 					$password = $this->input->post('password');
 
-					$new_user_id = $this->bsc_auth->register($email, $password, $email);
+					$user_id = $this->bsc_auth->register($email, $password, $email);
 
-					if($new_user_id !== FALSE){
+					if($user_id !== FALSE){
+						$user_details = array(
+							"user_id" => $user_id,
+							"first_name" => $this->input->post('firstName'),
+							"last_name" => $this->input->post('lastName'),
+							"designation" => $this->input->post('designation'),
+							"company_id" => $this->input->post('company'),
+							"email" => $this->input->post('email'),
+							"store_id" => $this->input->post('store'),
+							"phone_number" => $this->input->post('phoneNumber'),
+							"user_status_id" => 1,
+						);
+
+						$this->bsc_model->insertUserProfile($user_details);
+
 						header('content-type: application/json');
 						echo json_encode(array("message" =>  $this->bsc_auth->messages()));
 						return;

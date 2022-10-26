@@ -16,4 +16,19 @@ class Bsc_model extends CI_Model {
         return $query->result();
     }
 
+    public function insertUserProfile($user_details){
+		$this->db->insert('user_profile', $user_details);
+    }
+
+    public function getUserProfile($user_id){
+        $this->db->select('
+            user_status_id,
+        ');
+
+        $this->db->from('user_profile');
+        $this->db->where('user_id', $user_id);
+        $query = $this->db->get();
+        return $query->row();
+    }
+
 }
