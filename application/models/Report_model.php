@@ -8,20 +8,37 @@ class Report_model extends CI_Model{
     }
     
     public function getReportTransaction($startDate, $endDate){
-        $columns = array("a.id AS TRANSACTION_ID", "a.tracking_no AS TRACKING_NO", "c.fname AS FIRSTNAME", "c.lname AS SURNAME", " b.dateadded AS 'COMPLETE_DATE'", "a.dateadded AS ORDER_DATE", "c.contact_number AS CONTACT_NUMBER", "c.address AS DELIVERY_ADDRESS", "c.email AS EMAIL", "a.purchase_amount AS AMOUNT", "a.distance_price AS DELIVERY FEE", "a.status AS STATUS", "d.name AS STORE", "a.invoice_num AS INVOICE NUMBER", "c.payops AS PAYMENT OPTION", "c.moh AS MODE OF HANDLING", "a.distance AS DISTANCE", "e.voucher_code AS VOUCHER CODE", "e.discount_value AS VOUCHER DISCOUNT", "CASE WHEN a.reseller_id = 0 THEN 'REG-CUS' ELSE 'RESELLER' END AS 'CUSTOMER_TYPE'");
+        $this->db->select('
+            A.tracking_no as TRACKING NO,
+            B.fname as FIRSTNAME,
+            B.lname as SURNAME,
+            A.dateadded as ORDER DATE,
+            B.add_contact as CONTACT NUMBER,
+            B.add_address as DELIVERY ADDRESS,
+            B.email as EMAIL,
+            A.purchase_amount as AMOUNT,
+            A.distance_price as DELIVERY FEE,
+            (A.purchase_amount + A.distance_price) as " ",
+            A.status as STATUS,
+            C.name as STORE,
+            A.invoice_num as INVOICE NUMBER,
+            A.payops as PAYMENT OPTION,
+            B.moh as MODE OF HANDLING,
+            A.distance as DISTANCE,
+            D.voucher_code as VOUCHER CODE,
+            D.discount_value as DISCOUNT VALUE,
+        ');
 
-        $this->db->select($columns);
-        $this->db->from('transaction_tb a');
-        $this->db->join('transaction_logs_tb b', " b.reference_id = a.id AND b.details = 'Complete Order Success'", 'left');
-        $this->db->join('client_tb c', 'a.client_id = c.id', 'left');
-        $this->db->join('store_tb d', 'a.store = d.store_id', 'left');
-        $this->db->join('voucher_logs_tb e', ' e.transaction_id = a.id', 'left');
-        $this->db->join('order_items f', 'f.transaction_id = a.id', 'left');
+        $this->db->from('transaction_tb A');
+        $this->db->join('client_tb B','B.id = A.client_id');
+        $this->db->join('store_tb C','C.store_id = A.store');
+        $this->db->join('voucher_logs_tb D', ' D.transaction_id = A.id', 'left');
 
         
-        $this->db->where('a.dateadded >=', $startDate);
-        $this->db->where('a.dateadded <=', $endDate);
-        $this->db->order_by('a.dateadded', 'ASC');
+        $this->db->where('A.dateadded >=', $startDate);
+        $this->db->where('A.dateadded <=', $endDate);
+        $this->db->where('A.status', 6);
+        $this->db->order_by('A.dateadded', 'ASC');
         $query = $this->db->get();
         return $query->result();
     }
