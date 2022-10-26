@@ -89,6 +89,9 @@ class Admin extends CI_Controller{
               case 'STATUS':
                 $line .= $order_status[$val]. "\t";
                 break;
+              case 'DISTANCE':
+                $line .= $val. " km\t";
+                break;
               case 'REMARKS':
                 $line .= $this->report_remarks($val) . "\t";
                 break;

@@ -27,12 +27,20 @@ class Report_model extends CI_Model{
             A.distance as DISTANCE,
             D.voucher_code as VOUCHER CODE,
             D.discount_value as DISCOUNT VALUE,
+            E.redeem_code as POPCLUB CODE,
+            F.alias as POPCLUB DEAL NUMBER,
+            H.name as POPCLUB DEAL CATEGORY,
+            (F.original_price - F.promo_price) as "POPCLUB DISCOUNT",
         ');
 
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B','B.id = A.client_id');
         $this->db->join('store_tb C','C.store_id = A.store');
-        $this->db->join('voucher_logs_tb D', ' D.transaction_id = A.id', 'left');
+        $this->db->join('voucher_logs_tb D', 'D.transaction_id = A.id', 'left');
+        $this->db->join('deals_redeems_tb E', 'E.id = A.deals_redeems_id', 'left');
+        $this->db->join('dotcom_deals_tb F', 'F.id = E.deal_id', 'left');
+        $this->db->join('dotcom_deals_platform_combination G', 'G.deal_id = F.id', 'left');
+        $this->db->join('dotcom_deals_category H', 'H.id = G.platform_category_id', 'left');
 
         
         $this->db->where('A.dateadded >=', $startDate);
