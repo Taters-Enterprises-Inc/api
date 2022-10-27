@@ -1193,9 +1193,6 @@ class Admin_model extends CI_Model
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();
-
-        // $queryData['info'] = $query->result();
-        
         return $query->row();
     }
 
