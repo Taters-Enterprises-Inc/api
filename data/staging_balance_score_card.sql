@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 27, 2022 at 04:42 AM
+-- Generation Time: Oct 27, 2022 at 11:35 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -191,7 +191,7 @@ INSERT INTO `user_status` (`id`, `name`) VALUES
 CREATE TABLE `user_stores` (
   `id` int(11) UNSIGNED NOT NULL,
   `store_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL
+  `user_id` int(11) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -239,17 +239,13 @@ ALTER TABLE `users_groups`
 -- Indexes for table `user_companies`
 --
 ALTER TABLE `user_companies`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `company_id` (`company_id`),
-  ADD UNIQUE KEY `user_id` (`user_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `user_profile`
 --
 ALTER TABLE `user_profile`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `user_id` (`user_id`),
-  ADD KEY `user_status_id` (`user_status_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `user_status`
@@ -261,7 +257,8 @@ ALTER TABLE `user_status`
 -- Indexes for table `user_stores`
 --
 ALTER TABLE `user_stores`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -345,6 +342,12 @@ ALTER TABLE `user_companies`
 ALTER TABLE `user_profile`
   ADD CONSTRAINT `user_profile_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   ADD CONSTRAINT `user_profile_ibfk_3` FOREIGN KEY (`user_status_id`) REFERENCES `user_status` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `user_stores`
+--
+ALTER TABLE `user_stores`
+  ADD CONSTRAINT `user_stores_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

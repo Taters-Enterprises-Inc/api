@@ -29,11 +29,11 @@ class Bsc_model extends CI_Model {
     }
     
     public function insertUserCompany($user_id, $company_id){
-        $user_store = array(
+        $user_company = array(
             "user_id" => $user_id,
             "company_id" => $company_id,
         );
-		$this->db->insert('user_companies', $user_store);
+		$this->db->insert('user_companies', $user_company);
     }
 
     public function getUserProfile($user_id){
