@@ -329,7 +329,6 @@ class Popclub extends CI_Controller {
 						}else{
 							$products['deal_original_price'] = $deal->original_price;
 							$products['deal_promo_price'] = $deal->promo_price;
-		
 						}
 	
 						if($deal->platform_id === 2 && $deal->minimum_purchase === null){
