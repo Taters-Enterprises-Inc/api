@@ -19,6 +19,46 @@ class Bsc extends CI_Controller
 		$this->load->model('bsc_model');
 	}
 
+	
+	public function users(){
+		switch($this->input->server('REQUEST_METHOD')){
+		  case 'GET': 
+			$per_page = $this->input->get('per_page') ?? 25;
+			$page_no = $this->input->get('page_no') ?? 0;
+			$order = $this->input->get('order') ?? 'asc';
+			$order_by = $this->input->get('order_by') ?? 'id';
+			$search = $this->input->get('search');
+	
+			if($page_no != 0){
+			  $page_no = ($page_no - 1) * $per_page;
+			}
+			
+			$users_count =  $this->bsc_model->getUsersCount($search);
+			$users = $this->bsc_model->getUsers($page_no, $per_page, $order_by, $order, $search);
+	
+			foreach($users as $user){
+			  $user->groups = $this->bsc_model->getUserGroups($user->id);
+			}
+	
+			$pagination = array(
+			  "total_rows" => $users_count,
+			  "per_page" => $per_page,
+			);
+	
+			$response = array(
+			  "message" => 'Successfully fetch snackshop orders',
+			  "data" => array(
+				"pagination" => $pagination,
+				"users" => $users
+			  ),
+			);
+			header('content-type: application/json');
+			echo json_encode($response);
+			return;
+		}
+	
+	  }
+
 	public function session(){
 		switch($this->input->server('REQUEST_METHOD')){
 		  case 'GET':
@@ -32,7 +72,7 @@ class Bsc extends CI_Controller
 					"user_id" => $this->session->bsc['user_id'],
 					"old_last_login" => $this->session->bsc['old_last_login'],
 					"last_check" => $this->session->bsc['last_check'],
-					"is_admin" => $this->bsc_auth->in_group(1),
+					"is_bsc" => $this->bsc_auth->in_group(1),
 					"user_status_id" => $user_profile->user_status_id,
 				)
 			);

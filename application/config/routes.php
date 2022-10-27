@@ -152,6 +152,7 @@ $route['auth-bsc/edit-user/(:any)'] = 'auth_bsc/edit_user/$1';
 $route['auth-bsc/create-group'] = 'auth_bsc/create_group';
 
 $route['bsc/session'] = 'bsc/session';
+$route['bsc/users'] = 'bsc/users';
 
 //Others
 $route['404_override'] = '';
