@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 25, 2022 at 06:24 PM
+-- Generation Time: Oct 27, 2022 at 04:42 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `companies` (
-  `id` int(11) NOT NULL,
+  `id` mediumint(8) UNSIGNED NOT NULL,
   `name` varchar(265) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -37,7 +37,7 @@ CREATE TABLE `companies` (
 --
 
 INSERT INTO `companies` (`id`, `name`) VALUES
-(1, 'Taters Enterprises, Inc.');
+(1, 'Taters Enterprises Inc.');
 
 -- --------------------------------------------------------
 
@@ -105,7 +105,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `ip_address`, `username`, `password`, `email`, `activation_selector`, `activation_code`, `forgotten_password_selector`, `forgotten_password_code`, `forgotten_password_time`, `remember_selector`, `remember_code`, `created_on`, `last_login`, `active`, `first_name`, `last_name`, `company`, `phone`) VALUES
-(1, '127.0.0.1', 'administrator', '$2y$08$200Z6ZZbp3RAEXoaWcMA6uJOFicwNZaqk4oDhqTUiFXFe63MG.Daa', 'admin@admin.com', NULL, '', NULL, NULL, NULL, NULL, NULL, 1268889823, 1666342548, 1, 'Admin', 'istrator', 'ADMIN', '0');
+(1, '127.0.0.1', 'administrator', '$2y$08$200Z6ZZbp3RAEXoaWcMA6uJOFicwNZaqk4oDhqTUiFXFe63MG.Daa', 'admin@admin.com', NULL, '', NULL, NULL, NULL, NULL, NULL, 1268889823, 1666835582, 1, 'Admin', 'istrator', 'ADMIN', '0');
 
 -- --------------------------------------------------------
 
@@ -124,8 +124,19 @@ CREATE TABLE `users_groups` (
 --
 
 INSERT INTO `users_groups` (`id`, `user_id`, `group_id`) VALUES
-(1, 1, 1),
-(2, 1, 2);
+(1, 1, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_companies`
+--
+
+CREATE TABLE `user_companies` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `company_id` mediumint(8) UNSIGNED NOT NULL,
+  `user_id` int(11) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -134,15 +145,53 @@ INSERT INTO `users_groups` (`id`, `user_id`, `group_id`) VALUES
 --
 
 CREATE TABLE `user_profile` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `id` int(11) UNSIGNED NOT NULL,
+  `user_id` int(11) UNSIGNED NOT NULL,
   `first_name` varchar(265) NOT NULL,
   `last_name` varchar(265) NOT NULL,
   `designation` varchar(265) NOT NULL,
-  `company_id` int(11) NOT NULL,
-  `store_id` int(11) NOT NULL,
   `email` varchar(256) NOT NULL,
-  `phone_number` varchar(256) NOT NULL
+  `phone_number` varchar(256) NOT NULL,
+  `user_status_id` int(11) UNSIGNED DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `user_profile`
+--
+
+INSERT INTO `user_profile` (`id`, `user_id`, `first_name`, `last_name`, `designation`, `email`, `phone_number`, `user_status_id`) VALUES
+(1, 1, 'Administrator', 'Administrator', 'MIS Department', 'admin@admin.com', '09084741500', 2);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_status`
+--
+
+CREATE TABLE `user_status` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `name` varchar(265) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `user_status`
+--
+
+INSERT INTO `user_status` (`id`, `name`) VALUES
+(1, 'New'),
+(2, 'Verified'),
+(3, 'Rejected');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_stores`
+--
+
+CREATE TABLE `user_stores` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `store_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -187,9 +236,31 @@ ALTER TABLE `users_groups`
   ADD KEY `fk_users_groups_groups1_idx` (`group_id`);
 
 --
+-- Indexes for table `user_companies`
+--
+ALTER TABLE `user_companies`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `company_id` (`company_id`),
+  ADD UNIQUE KEY `user_id` (`user_id`);
+
+--
 -- Indexes for table `user_profile`
 --
 ALTER TABLE `user_profile`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_id` (`user_id`),
+  ADD KEY `user_status_id` (`user_status_id`);
+
+--
+-- Indexes for table `user_status`
+--
+ALTER TABLE `user_status`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `user_stores`
+--
+ALTER TABLE `user_stores`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -200,7 +271,7 @@ ALTER TABLE `user_profile`
 -- AUTO_INCREMENT for table `companies`
 --
 ALTER TABLE `companies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` mediumint(8) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `groups`
@@ -224,13 +295,31 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `users_groups`
 --
 ALTER TABLE `users_groups`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `user_companies`
+--
+ALTER TABLE `user_companies`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `user_profile`
 --
 ALTER TABLE `user_profile`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `user_status`
+--
+ALTER TABLE `user_status`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `user_stores`
+--
+ALTER TABLE `user_stores`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -242,6 +331,20 @@ ALTER TABLE `user_profile`
 ALTER TABLE `users_groups`
   ADD CONSTRAINT `fk_users_groups_groups1` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   ADD CONSTRAINT `fk_users_groups_users1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `user_companies`
+--
+ALTER TABLE `user_companies`
+  ADD CONSTRAINT `user_companies_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  ADD CONSTRAINT `user_companies_ibfk_3` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `user_profile`
+--
+ALTER TABLE `user_profile`
+  ADD CONSTRAINT `user_profile_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  ADD CONSTRAINT `user_profile_ibfk_3` FOREIGN KEY (`user_status_id`) REFERENCES `user_status` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

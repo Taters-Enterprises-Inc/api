@@ -273,14 +273,14 @@ class Auth_bsc extends CI_Controller{
 							"first_name" => $this->input->post('firstName'),
 							"last_name" => $this->input->post('lastName'),
 							"designation" => $this->input->post('designation'),
-							"company_id" => $this->input->post('company'),
 							"email" => $this->input->post('email'),
-							"store_id" => $this->input->post('store'),
 							"phone_number" => $this->input->post('phoneNumber'),
 							"user_status_id" => 1,
 						);
 
 						$this->bsc_model->insertUserProfile($user_details);
+						$this->bsc_model->insertUserStore($user_id, $this->input->post('store'));
+						$this->bsc_model->insertUserCompany($user_id,$this->input->post('company'));
 
 						header('content-type: application/json');
 						echo json_encode(array("message" =>  $this->bsc_auth->messages()));

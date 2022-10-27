@@ -20,6 +20,22 @@ class Bsc_model extends CI_Model {
 		$this->db->insert('user_profile', $user_details);
     }
 
+    public function insertUserStore($user_id, $store_id){
+        $user_store = array(
+            "user_id" => $user_id,
+            "store_id" => $store_id,
+        );
+		$this->db->insert('user_stores', $user_store);
+    }
+    
+    public function insertUserCompany($user_id, $company_id){
+        $user_store = array(
+            "user_id" => $user_id,
+            "company_id" => $company_id,
+        );
+		$this->db->insert('user_companies', $user_store);
+    }
+
     public function getUserProfile($user_id){
         $this->db->select('
             user_status_id,
