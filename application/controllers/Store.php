@@ -153,8 +153,7 @@ class Store extends CI_Controller {
 		
 	}
 	
-    private function distance_computation($dist, $service)
-    {   
+    private function distance_computation($dist, $service){   
         //check if catering order
 
 		switch($service){
@@ -204,7 +203,6 @@ class Store extends CI_Controller {
 
         return $delivery_charge;
     }
-
 	
     public function get_night_diff($start_datetime, $end_datetime){
         date_default_timezone_set('Asia/Manila');
@@ -233,7 +231,6 @@ class Store extends CI_Controller {
         }
         return $night_diff * 500;
     }
-
 	
     public function get_succeeding_hour_charge($start_datetime, $end_datetime){
         $event_start = $start_datetime;

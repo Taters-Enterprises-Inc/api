@@ -15,6 +15,8 @@ class Shared extends CI_Controller {
 		$this->load->model('client_model');
 		$this->load->model('user_model');
 		$this->load->model('logs_model');
+		$this->load->model('store_model');
+		$this->load->model('bsc_model');
 		$this->load->model('discount_model');
 		$this->load->library('form_validation');
 	}
@@ -274,6 +276,42 @@ class Shared extends CI_Controller {
 				header('content-type: application/json');
 				echo json_encode($response);
 				break;
+		}
+	}
+
+	public function stores(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+
+				$stores = $this->store_model->getAllStores();
+		  
+				$response = array(
+					"message" => 'Successfully fetch stores',
+					"data" => $stores,
+				);
+		
+				header('content-type: application/json');
+				echo json_encode($response);
+
+				return;
+		}
+	}
+	
+	public function companies(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+
+				$companies = $this->bsc_model->getAllCompanies();
+		  
+				$response = array(
+					"message" => 'Successfully fetch companies',
+					"data" => $companies,
+				);
+		
+				header('content-type: application/json');
+				echo json_encode($response);
+
+				return;
 		}
 	}
 }

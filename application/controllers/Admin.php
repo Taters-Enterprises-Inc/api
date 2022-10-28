@@ -32,9 +32,41 @@ class Admin extends CI_Controller{
         $end = date("Y-m-d", strtotime($endDate)) . " 59:59:59";
         $data = $this->report_model->getReportTransaction($start, $end);
         header("Content-Type: application/vnd.ms-excel");
-
         header("Content-disposition: attachment; filename=transaction_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
        
+        $payment_options = array(
+          "' - '",
+          "BPI",
+          "BDO",
+          "CASH",
+          "GCASH",
+          "PAYMAYA",
+          "ROBINSONS-BANK",
+          "CHINABANK",
+        );
+
+        $order_status = array(
+          "Incomplete Transaction",
+          "New",
+          "Paid",
+          "Confirmed",
+          "Declined",
+          "Cancelled",
+          "Completed",
+          "Rejected",
+          "Preparing",
+          "For Dispatch",
+          "Error Transaction",
+        );
+        
+
+        $mode_of_handling = array(
+          "",
+          "Pickup",
+          "Delivery",
+        );
+      
+
         $flag = false;
         foreach ($data as $row) {
           if (!$flag) 
@@ -44,11 +76,29 @@ class Admin extends CI_Controller{
           }
 
           $line = "";
+          
           foreach ((array)$row as $key => $val) {
-            if ($key == 'REMARKS') 
-              $line .= $this->report_remarks($val) . "\t";
-            else 
-              $line .= $val . "\t";
+
+            switch($key){
+              case 'PAYMENT OPTION':
+                $line .= $payment_options[$val]. "\t";
+                break;
+              case 'MODE OF HANDLING':
+                $line .= $mode_of_handling[$val]. "\t";
+                break;
+              case 'STATUS':
+                $line .= $order_status[$val]. "\t";
+                break;
+              case 'DISTANCE':
+                $line .= $val. " km\t";
+                break;
+              case 'REMARKS':
+                $line .= $this->report_remarks($val) . "\t";
+                break;
+              default:
+                $line .= $val . "\t";
+                break;
+            }
           }
 
           echo $line . "\r\n";
@@ -919,7 +969,7 @@ class Admin extends CI_Controller{
         if($user_id){
           $stores =  $this->user_model->get_store_group_order_set($user_id);
         }else{
-          $stores = $this->admin_model->getStores();
+          $stores = $this->store_model->getAllStores();
         }
 
         $response = array(

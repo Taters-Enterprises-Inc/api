@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 17, 2022 at 02:21 AM
+-- Generation Time: Oct 27, 2022 at 05:14 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -764,31 +764,6 @@ CREATE TABLE `catering_invoice_tb` (
   `dateadded` varchar(99) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
---
--- Dumping data for table `catering_invoice_tb`
---
-
-INSERT INTO `catering_invoice_tb` (`id`, `year`, `transaction_id`, `dateadded`) VALUES
-(1, '2222', 1, '2022-07-04 22:32:27'),
-(2, '2222', 2, '2022-07-04 22:45:26'),
-(3, '2222', 9, '2022-07-05 15:48:01'),
-(4, '2222', 10, '2022-07-05 16:41:37'),
-(5, '2222', 15, '2022-07-23 17:34:02'),
-(6, '2222', 14, '2022-07-26 17:57:53'),
-(7, '2222', 18, '2022-08-04 13:49:38'),
-(8, '2222', 17, '2022-08-04 15:48:27'),
-(9, '2222', 20, '2022-08-17 17:08:35'),
-(10, '2222', 19, '2022-08-17 17:09:03'),
-(11, '2222', 21, '2022-08-19 11:15:54'),
-(12, '2222', 23, '2022-08-25 16:21:14'),
-(13, '2222', 26, '2022-08-30 14:45:51'),
-(14, '2222', 25, '2022-08-31 16:22:40'),
-(15, '2222', 28, '2022-09-06 11:39:58'),
-(16, '2222', 33, '2022-09-08 15:49:11'),
-(17, '2222', 34, '2022-09-22 16:30:39'),
-(18, '2222', 37, '2022-10-14 01:00:12'),
-(19, '2222', 38, '2022-10-14 01:10:33');
-
 -- --------------------------------------------------------
 
 --
@@ -956,7 +931,7 @@ INSERT INTO `catering_package_addons_tb` (`id`, `region_id`, `store_id`, `produc
 (66, 114, 117, 14, 0),
 (67, 115, 118, 14, 0),
 (68, 116, 119, 14, 0),
-(69, 94, 3, 15, 0),
+(69, 94, 3, 15, 1),
 (70, 83, 18, 15, 0),
 (71, 84, 16, 15, 0),
 (72, 0, 0, 15, 0),
@@ -2237,6 +2212,7 @@ CREATE TABLE `catering_transaction_tb` (
   `payment_plan` varchar(99) NOT NULL,
   `period_id` int(11) NOT NULL,
   `discount` varchar(99) DEFAULT NULL,
+  `discount_id` int(11) DEFAULT NULL,
   `custom_message` varchar(200) NOT NULL,
   `logon_type` varchar(99) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -6410,6 +6386,13 @@ CREATE TABLE `discount_users` (
   `status` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `discount_users`
+--
+
+INSERT INTO `discount_users` (`id`, `first_name`, `middle_name`, `last_name`, `birthday`, `id_number`, `id_front`, `id_back`, `dateadded`, `discount_type_id`, `fb_user_id`, `mobile_user_id`, `status`) VALUES
+(4, 'Jerico', 'Cabiling', 'Villaraza', '1900-01-10T01:30:40.000Z', 'fadfkvamewf', 'ada9365864ab3b251dead9e28eb37a7a.jpg', '63287ee3c39aef75e8902d32373d333f.png', '2022-10-21 08:26:38', 1, 1, NULL, 3);
+
 -- --------------------------------------------------------
 
 --
@@ -7035,13 +7018,6 @@ CREATE TABLE `login_attempts` (
   `login` varchar(100) NOT NULL,
   `time` int(11) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `login_attempts`
---
-
-INSERT INTO `login_attempts` (`id`, `ip_address`, `login`, `time`) VALUES
-(126, '127.0.0.1', 'taters.tdcgt.s@tatersgroup.com', 1665915274);
 
 -- --------------------------------------------------------
 
@@ -20714,7 +20690,7 @@ INSERT INTO `store_tb` (`id`, `name`, `address`, `lat`, `lng`, `store_menu_type_
 (25, 'Taters Better Living ', '36 France Street, Don Bosco Paranaque City', 14.482521, 121.028542, 1, '0', '14:00:00', '23:45:00', '1', 1, 1, 1, 1, 1, 110, '09958333228', 'Taters Better Living Contact', 'taters_betterliving@tatersgroup.com', 0, 52, 107, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 107, '1', 'taters_betterliving.jpg', '12:00 PM', '8:00 PM', 'Same day delivery 7:00PM cut-off', 'TSS0124', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
 (26, 'Taters Ayala Circuit', 'Upper Ground Floor, Ayala Mall Circuit, Circuit Makati', 14.573413, 121.019325, 3, '0', '10:00:00', '19:00:00', '1', 1, 1, 1, 1, 1, 111, '09209773296', 'Taters Ayala Circuit Contact', 'taters_acircuit@tatersgroup.com', 0, 52, 108, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 108, '1', 'taters_ayalacircuit.jpg', '12:00 PM', '8:00 PM', 'Same day delivery 7:00PM cut-off', 'TSS0125', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
 (27, 'Taters Maginhawa', '168 Maginhawa St. Corner Mapagkumbaba St, Sikatuna Village, Diliman QC', 14.639179, 121.059090, 1, '0', '10:00:00', '19:00:00', '0', 1, 0, 0, 1, 0, 112, '09178828377', 'Taters Maginhawa Contact', 'taters.gfpt.m@tatersgroup.com', 0, 52, 109, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 109, '1', 'taters_maginhawa.jpg', '12:00 PM', '10:00 PM', 'Same day delivery 7:00PM cut-off', 'TSS0126', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
-(28, 'Taters Malate', '1020 San Andres St. Cor Singalong St. Malate Manila', 14.563431, 120.997314, 1, '0', '06:00:00', '19:55:00', '1', 1, 1, 1, 1, 1, 113, '09988568749', 'Taters Malate Contact', 'taters.tdcgt.s@tatersgroup.com', 0, 52, 110, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 110, '1', 'taters_malate.jpg', '10:00 AM', '8:00 PM', 'Same day delivery 7:00PM cut-off', 'TSS0127', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
+(28, 'Taters Malate', '1020 San Andres St. Cor Singalong St. Malate Manila', 14.563431, 120.997314, 1, '0', '06:00:00', '23:59:00', '1', 1, 1, 1, 1, 1, 113, '09988568749', 'Taters Malate Contact', 'taters.tdcgt.s@tatersgroup.com', 0, 52, 110, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 110, '1', 'taters_malate.jpg', '10:00 AM', '8:00 PM', 'Same day delivery 7:00PM cut-off', 'TSS0127', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
 (29, 'Taters White Plains', '#92 Katipunan Avenue White Plains Quezon City', 14.608464, 121.068512, 1, '0', '10:00:00', '19:00:00', '1', 1, 1, 1, 1, 1, 114, '09209753117', 'Taters White Plains Contact', 'taters.tei.wp@tatersgroup.com', 0, 52, 111, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 111, '1', 'taters_whiteplains.jpg', '10:00 AM', '11:59 PM', 'Same day delivery 11:59PM cut-off', 'TSS0128', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
 (30, 'Taters SM Southmall Gamepark', 'SM Southmall, Almanza Uno, Las Piñas, Metro Manila', 14.433253, 121.009277, 3, '0', '10:00:00', '19:00:00', '0', 1, 1, 0, 1, 0, 115, '09876543210', 'Taters SM Southmall Gamepark Contact', 'wholesale@tatersgroup.com', 0, 52, 112, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 112, '1', 'taters_sm_southmallgamepark.jpg', '10:00 AM', '11:59 PM', 'Same day delivery 11:59PM cut-off', 'TSS0130', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
 (31, 'Taters SM Fairview Bowling', 'Main Mall, Lower Ground Floor, Belfast, Quezon City', 14.733510, 121.056885, 3, '0', '10:00:00', '19:00:00', '0', 1, 1, 0, 1, 0, 116, '09876543210', 'Taters Fairview Bowling Contact', 'wholesale@tatersgroup.com', 0, 52, 113, '8', '80', '50', '500', 1, 6, 70, '<li>Delivery and/or Pick-up of items are from Monday to Sunday (except holidays) between 11AM to 7PM</li>\r\n<li>Delivery and/or Pick-up of product would be on the same day if paid before 5:00 pm</li>\r\n<li>You will be charged with a delivery fee depending on your location</li>\r\n<li>Our stores will reach out to you via SMS once orders are ready for delivery/pick-up</li>', 3, '', 113, '1', 'taters_sm_fairviewbowling.jpg', '10:00 AM', '11:59 PM', 'Same day delivery 11:59PM cut-off', 'TSS0131', NULL, NULL, 'MON - SUN (10AM - 7PM)', '1', ''),
@@ -21782,6 +21758,8 @@ CREATE TABLE `transaction_tb` (
   `reseller_discount` varchar(99) NOT NULL,
   `period_id` int(11) NOT NULL,
   `discount` varchar(99) NOT NULL,
+  `deals_redeems_id` int(11) DEFAULT NULL,
+  `discount_id` int(11) DEFAULT NULL,
   `voucher_id` int(11) NOT NULL,
   `giftcard_discount` varchar(99) DEFAULT NULL,
   `giftcard_number` varchar(99) NOT NULL,
@@ -21966,7 +21944,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `ip_address`, `username`, `password`, `email`, `activation_selector`, `activation_code`, `forgotten_password_selector`, `forgotten_password_code`, `forgotten_password_time`, `remember_selector`, `remember_code`, `created_on`, `last_login`, `active`, `first_name`, `last_name`, `company`, `phone`) VALUES
-(1, '127.0.0.1', 'administrator', '$2y$12$jaCQ9LSlp5NQV3hzx1vmXuiVD/u94ubYTDXjAS27DnOCDHaVbSuIW', 'admin@admin.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1268889823, 1665962467, 1, 'Admin', 'istrator', 'ADMIN', '0'),
+(1, '127.0.0.1', 'administrator', '$2y$12$jaCQ9LSlp5NQV3hzx1vmXuiVD/u94ubYTDXjAS27DnOCDHaVbSuIW', 'admin@admin.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1268889823, 1666801667, 1, 'Admin', 'istrator', 'ADMIN', '0'),
 (2, '152.32.99.128', 'hub@user.com', '$2y$10$In9nZl8lUjgdiSVmXsoAVO58xjmGX.ZlgLFaAjISiVz694hLaCVHi', 'hub@user.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1586789972, 1618885331, 1, 'TEI', 'Hub', 'TEI', '09468672339'),
 (3, '152.32.99.128', 'aaron.andes@tatersgroup.com', '$2y$10$nvS6HvZYmQZsdsRmdSY/XugW54SdAty..U.S6jNM6pvNppNgzfLhO', 'csr@user.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1586790072, 1640931423, 1, 'testing', 'only', 'TEI', '09468672339'),
 (4, '152.32.99.128', 'neil.angel@tatersgroup.com', '$2y$10$joh1RzFa8C3xRy0PSCWZU.FqZEyTYRksNAHf0nIf/Tabt0LE79OpS', 'neil.angel@tatersgroup.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1586916308, 1599972040, 1, 'Neil Bryan', 'Angel', 'Taters Enterprises Inc.', ''),
@@ -31195,7 +31173,7 @@ ALTER TABLE `catering_client_tb`
 -- AUTO_INCREMENT for table `catering_invoice_tb`
 --
 ALTER TABLE `catering_invoice_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `catering_order_items`
@@ -31327,7 +31305,7 @@ ALTER TABLE `discount`
 -- AUTO_INCREMENT for table `discount_users`
 --
 ALTER TABLE `discount_users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `dotcom_deals_category`
@@ -31423,7 +31401,7 @@ ALTER TABLE `invoice_tb`
 -- AUTO_INCREMENT for table `login_attempts`
 --
 ALTER TABLE `login_attempts`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
 
 --
 -- AUTO_INCREMENT for table `mobile_users`
