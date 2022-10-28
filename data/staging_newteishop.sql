@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 26, 2022 at 05:03 PM
+-- Generation Time: Oct 27, 2022 at 05:14 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -2212,6 +2212,7 @@ CREATE TABLE `catering_transaction_tb` (
   `payment_plan` varchar(99) NOT NULL,
   `period_id` int(11) NOT NULL,
   `discount` varchar(99) DEFAULT NULL,
+  `discount_id` int(11) DEFAULT NULL,
   `custom_message` varchar(200) NOT NULL,
   `logon_type` varchar(99) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -21943,7 +21944,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `ip_address`, `username`, `password`, `email`, `activation_selector`, `activation_code`, `forgotten_password_selector`, `forgotten_password_code`, `forgotten_password_time`, `remember_selector`, `remember_code`, `created_on`, `last_login`, `active`, `first_name`, `last_name`, `company`, `phone`) VALUES
-(1, '127.0.0.1', 'administrator', '$2y$12$jaCQ9LSlp5NQV3hzx1vmXuiVD/u94ubYTDXjAS27DnOCDHaVbSuIW', 'admin@admin.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1268889823, 1666756539, 1, 'Admin', 'istrator', 'ADMIN', '0'),
+(1, '127.0.0.1', 'administrator', '$2y$12$jaCQ9LSlp5NQV3hzx1vmXuiVD/u94ubYTDXjAS27DnOCDHaVbSuIW', 'admin@admin.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1268889823, 1666801667, 1, 'Admin', 'istrator', 'ADMIN', '0'),
 (2, '152.32.99.128', 'hub@user.com', '$2y$10$In9nZl8lUjgdiSVmXsoAVO58xjmGX.ZlgLFaAjISiVz694hLaCVHi', 'hub@user.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1586789972, 1618885331, 1, 'TEI', 'Hub', 'TEI', '09468672339'),
 (3, '152.32.99.128', 'aaron.andes@tatersgroup.com', '$2y$10$nvS6HvZYmQZsdsRmdSY/XugW54SdAty..U.S6jNM6pvNppNgzfLhO', 'csr@user.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1586790072, 1640931423, 1, 'testing', 'only', 'TEI', '09468672339'),
 (4, '152.32.99.128', 'neil.angel@tatersgroup.com', '$2y$10$joh1RzFa8C3xRy0PSCWZU.FqZEyTYRksNAHf0nIf/Tabt0LE79OpS', 'neil.angel@tatersgroup.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1586916308, 1599972040, 1, 'Neil Bryan', 'Angel', 'Taters Enterprises Inc.', ''),
