@@ -6,6 +6,22 @@ class Bsc_model extends CI_Model {
         $this->db = $this->load->database('bsc', TRUE, TRUE);
     }
     
+    public function getUser($user_id){
+        $this->db->select('
+            A.id,
+            B.first_name,
+            B.last_name,
+            B.designation,
+            B.phone_number,
+        ');
+
+        $this->db->from('users A');
+        $this->db->join('user_profile B', 'B.user_id = A.id');
+        $this->db->where('A.id', $user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
 
     public function getUserGroups($user_id){
         
@@ -28,12 +44,15 @@ class Bsc_model extends CI_Model {
         $this->db->select("
             A.id,
             A.active,
-            A.first_name,
-            A.last_name,
-            A.email
+            A.email,
+            
+            B.first_name,
+            B.last_name,
+            B.user_status_id,
         ");
 
         $this->db->from('users A');
+        $this->db->join('user_profile B', 'B.user_id = A.id');
 
         if($search){
             $this->db->group_start();

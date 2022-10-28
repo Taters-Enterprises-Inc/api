@@ -76,6 +76,8 @@ class Bsc extends CI_Controller
 					"user_status_id" => $user_profile->user_status_id,
 				)
 			);
+			
+			$data["bsc"]['user_details'] = $this->bsc_model->getUser($this->session->bsc['user_id']);
 
 			$response = array(
 			  "message" => 'Successfully fetch bsc session',
