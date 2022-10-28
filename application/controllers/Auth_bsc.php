@@ -279,7 +279,10 @@ class Auth_bsc extends CI_Controller{
 						);
 
 						$this->bsc_model->insertUserProfile($user_details);
-						$this->bsc_model->insertUserStore($user_id, $this->input->post('store'));
+
+						if( $this->input->post('store') !== 'none')
+							$this->bsc_model->insertUserStore($user_id, $this->input->post('store'));
+							
 						$this->bsc_model->insertUserCompany($user_id,$this->input->post('company'));
 
 						header('content-type: application/json');

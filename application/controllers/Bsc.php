@@ -19,6 +19,62 @@ class Bsc extends CI_Controller
 		$this->load->model('bsc_model');
 	}
 
+	public function user_status(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
+				
+				$status = $this->input->post('status');
+				$user_id = $this->input->post('user_id');
+
+				$this->bsc_model->updateUserStatus($status, $user_id);
+
+				$response = array(
+					"message" => 'Successfully updated user status',
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+	
+	public function groups(){
+    
+		switch($this->input->server('REQUEST_METHOD')){
+		  case 'GET': 
+			$groups =  $this->bsc_model->getGroups();
+	
+			$response = array(
+			  "message" => 'Successfully fetch snackshop user',
+			  "data" => $groups,
+			);
+	
+			header('content-type: application/json');
+			echo json_encode($response);
+			return;
+		}
+	  }
+	
+	public function user($user_id){
+    
+		switch($this->input->server('REQUEST_METHOD')){
+		  case 'GET': 
+	
+			$user =  $this->bsc_model->getUser($user_id);
+			$user->groups = $this->bsc_model->getUserGroups($user->id);
+	
+			$response = array(
+			  "message" => 'Successfully fetch snackshop user',
+			  "data" => $user,
+			);
+	
+			header('content-type: application/json');
+			echo json_encode($response);
+			return;
+		}
+	  }
+
 	
 	public function stores(){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -43,6 +99,7 @@ class Bsc extends CI_Controller
 			
 		  case 'POST': 
 			$_POST =  json_decode(file_get_contents("php://input"), true);
+
 			$stores = $this->input->post('stores');
 	
 			$this->bsc_model->updateUserStores($this->input->post('userId'),$stores);

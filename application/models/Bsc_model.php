@@ -6,14 +6,36 @@ class Bsc_model extends CI_Model {
         $this->newteishopDB =  $this->load->database('default', TRUE, TRUE);
         $this->db = $this->load->database('bsc', TRUE, TRUE);
     }
+
+    public function updateUserStatus($status, $user_id){
+        $this->db->set('user_status_id', $status);
+        $this->db->where('user_id', $user_id);
+        $this->db->update('user_profile');
+    }
+    
+    public function getGroups(){
+        $this->db->select("
+            id,
+            name,
+            description,
+        ");
+
+        $this->db->from('groups');
+        
+        $query = $this->db->get();
+        return $query->result();
+
+    }
     
     public function getUser($user_id){
         $this->db->select('
             A.id,
+
             B.first_name,
             B.last_name,
             B.designation,
             B.phone_number,
+            B.user_status_id,
         ');
 
         $this->db->from('users A');
@@ -45,6 +67,7 @@ class Bsc_model extends CI_Model {
     public function getUserCompanies($user_id){
         
         $this->db->select("
+        B.id,
             B.name,
         ");
 
