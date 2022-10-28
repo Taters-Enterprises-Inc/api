@@ -153,6 +153,7 @@ $route['auth-bsc/create-group'] = 'auth_bsc/create_group';
 
 $route['bsc/session'] = 'bsc/session';
 $route['bsc/users'] = 'bsc/users';
+$route['bsc/stores'] = 'bsc/stores';
 
 //Others
 $route['404_override'] = '';

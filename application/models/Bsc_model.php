@@ -3,6 +3,7 @@
 class Bsc_model extends CI_Model {
 
 	public function __construct(){
+        $this->newteishopDB =  $this->load->database('default', TRUE, TRUE);
         $this->db = $this->load->database('bsc', TRUE, TRUE);
     }
     
@@ -40,6 +41,55 @@ class Bsc_model extends CI_Model {
         return $query->result();
     }
     
+    
+    public function getUserCompanies($user_id){
+        
+        $this->db->select("
+            B.name,
+        ");
+
+        $this->db->from('user_companies A');
+        $this->db->join('companies B', 'B.id = A.company_id');
+        $this->db->where('A.user_id',$user_id);
+        
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function updateUserStores($user_id, $stores){
+
+        $this->db->where('user_id', $user_id);
+        $this->db->delete('user_stores');
+
+        foreach ($stores as $key => $value) {
+            $data = array(
+                'user_id'     => $user_id,
+                'store_id'       => $value['store_id']
+            );
+            $this->db->insert('user_stores', $data);
+            $insert_id[] = $this->db->insert_id();
+        }
+    }
+
+    public function getUserStores($user_id){
+        
+        $this->db->select("
+            B.name,
+            B.store_id,
+            B.available_start_time,
+            B.available_end_time,
+        ");
+
+        $this->db->from('user_stores A');
+        $this->db->join($this->newteishopDB->database.'.store_tb B', 'B.store_id = A.store_id');
+        $this->db->where('A.user_id',$user_id);
+        
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     public function getUsers($row_no, $row_per_page, $order_by,  $order, $search){
         $this->db->select("
             A.id,
@@ -48,6 +98,7 @@ class Bsc_model extends CI_Model {
             
             B.first_name,
             B.last_name,
+            B.designation,
             B.user_status_id,
         ");
 

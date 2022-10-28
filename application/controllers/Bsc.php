@@ -20,6 +20,44 @@ class Bsc extends CI_Controller
 	}
 
 	
+	public function stores(){
+		switch($this->input->server('REQUEST_METHOD')){
+		  case 'GET': 
+			$user_id = $this->input->get('user_id');
+
+
+			if($user_id){
+				$stores =  $this->bsc_model->getUserStores($user_id);
+			}else{
+				$stores = $this->store_model->getAllStores();
+			}
+	
+			$response = array(
+			  "message" => 'Successfully fetch user stores',
+			  "data" => $stores,
+			);
+	
+			header('content-type: application/json');
+			echo json_encode($response);
+			return;
+			
+		  case 'POST': 
+			$_POST =  json_decode(file_get_contents("php://input"), true);
+			$stores = $this->input->post('stores');
+	
+			$this->bsc_model->updateUserStores($this->input->post('userId'),$stores);
+	
+			$response = array(
+			  "message" => 'Successfully update user stores',
+			);
+	
+			header('content-type: application/json');
+			echo json_encode($response);
+			return;
+		}
+	  }
+
+	
 	public function users(){
 		switch($this->input->server('REQUEST_METHOD')){
 		  case 'GET': 
@@ -39,7 +77,15 @@ class Bsc extends CI_Controller
 			foreach($users as $user){
 			  $user->groups = $this->bsc_model->getUserGroups($user->id);
 			}
+			
+			foreach($users as $user){
+				$user->stores = $this->bsc_model->getUserStores($user->id);
+			}
 	
+			foreach($users as $user){
+				$user->companies = $this->bsc_model->getUserCompanies($user->id);
+			}
+
 			$pagination = array(
 			  "total_rows" => $users_count,
 			  "per_page" => $per_page,
