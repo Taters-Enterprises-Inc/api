@@ -112,130 +112,110 @@ class Auth_bsc extends CI_Controller{
         }
     }
 	
-	public function edit_user($id){
+	public function edit_user(){
         switch($this->input->server('REQUEST_METHOD')){
             case 'POST':
-				$post = json_decode(file_get_contents("php://input"), true);
+				$_POST = json_decode(file_get_contents("php://input"), true);
 				$this->data['title'] = $this->lang->line('edit_user_heading');
 
-				if (!$this->bsc_auth->logged_in() || (!$this->bsc_auth->is_admin() && !($this->bsc_auth->user()->row()->id == $id))) {
-					$this->output->set_status_header('401');
-					header('content-type: application/json');
-					echo json_encode(array("message" => 'Unauthorized user'));
-					return;
-				}
-				$user = $this->bsc_auth->user($id)->row();
+				$userId = $this->input->post('userId');
+
+				$user = $this->bsc_auth->user($userId)->row();
 				$groups = $this->bsc_auth->groups()->result_array();
-				$currentGroups = $this->bsc_auth->get_users_groups($id)->result();
-				
+				$currentGroups = $this->bsc_auth->get_users_groups($userId)->result();
 
 				// validate form input
 				$this->form_validation->set_error_delimiters('', '');
-				$this->form_validation->set_rules('first_name', $this->lang->line('edit_user_validation_fname_label'), 'trim|required');
-				$this->form_validation->set_rules('last_name', $this->lang->line('edit_user_validation_lname_label'), 'trim|required');
-				$this->form_validation->set_rules('phone', $this->lang->line('edit_user_validation_phone_label'), 'trim');
-				$this->form_validation->set_rules('company', $this->lang->line('edit_user_validation_company_label'), 'trim');
+				$this->form_validation->set_rules('firstName', $this->lang->line('edit_user_validation_fname_label'), 'trim|required');
+				$this->form_validation->set_rules('lastName', $this->lang->line('edit_user_validation_lname_label'), 'trim|required');
+				$this->form_validation->set_rules('designation', $this->lang->line('edit_user_validation_company_label'), 'trim|required');
+				$this->form_validation->set_rules('company', $this->lang->line('edit_user_validation_company_label'), 'trim|required');
+				$this->form_validation->set_rules('store', 'Store', 'trim|required');
+				$this->form_validation->set_rules('email', 'Email', 'trim|required');
+				$this->form_validation->set_rules('phoneNumber', $this->lang->line('edit_user_validation_phone_label'), 'trim|required');
 				
+				if ($this->input->post('password')) {
+					$this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'bsc_auth') . ']|matches[confirmPassword]');
+					$this->form_validation->set_rules('confirmPassword', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
+				}
 
-				if (isset($_POST) && !empty($_POST)) {
+				if ($this->form_validation->run() === TRUE) {
+					$data = [
+						// 'username' => $this->input->post('email'),
+						'email' => $this->input->post('email'),
+					];
+
 					// update the password if it was posted
 					if ($this->input->post('password')) {
-						$this->form_validation->set_rules('password', $this->lang->line('edit_user_validation_password_label'), 'required|min_length[' . $this->config->item('min_password_length', 'bsc_auth') . ']|matches[password_confirm]');
-						$this->form_validation->set_rules('password_confirm', $this->lang->line('edit_user_validation_password_confirm_label'), 'required');
+						$data['password'] = $this->input->post('password');
 					}
 
-					if ($this->form_validation->run() === TRUE) {
-						$data = [
-							'first_name' => $this->input->post('first_name'),
-							'last_name' => $this->input->post('last_name'),
-							'company' => $this->input->post('company'),
-							'phone' => $this->input->post('phone'),
-						];
+					// Only allow updating groups if user is admin
+					if ($this->bsc_auth->is_admin()) {
+						// Update the groups user belongs to
+						$this->bsc_auth->remove_from_group('', $userId);
 
-						// update the password if it was posted
-						if ($this->input->post('password')) {
-							$data['password'] = $this->input->post('password');
-						}
-
-						// Only allow updating groups if user is admin
-						if ($this->bsc_auth->is_admin()) {
-							// Update the groups user belongs to
-							$this->bsc_auth->remove_from_group('', $id);
-
-							$groupData = $this->input->post('groups');
-							if (isset($groupData) && !empty($groupData)) {
-								foreach ($groupData as $grp) {
-									$this->bsc_auth->add_to_group($grp, $id);
-								}
+						$groupData = $this->input->post('groups');
+						if (isset($groupData) && !empty($groupData)) {
+							foreach ($groupData as $grp) {
+								$this->bsc_auth->add_to_group($grp, $userId);
 							}
 						}
-
-						// check to see if we are updating the user
-						if ($this->bsc_auth->update($user->id, $data)) {
-							
-							header('content-type: application/json');
-							echo json_encode(array("message" =>  $this->bsc_auth->messages()));
-							return;
-						} else {
-
-							$this->output->set_status_header('401');
-							header('content-type: application/json');
-							echo json_encode(array("message" => validation_errors()));
-							return;
-						}
 					}
+
+
+					// check to see if we are updating the user
+					if ($this->bsc_auth->update($user->id, $data)) {
+						$userProfile = array(
+							'first_name' => $this->input->post('firstName'),
+							'last_name' => $this->input->post('lastName'),
+							'designation' => $this->input->post('designation'),
+							'email' => $this->input->post('email'),
+							'phone_number' => $this->input->post('phoneNumber'),
+						);
+
+						$this->bsc_model->updateUser($user->id, $userProfile);
+						$this->bsc_model->updateStore($user->id, $this->input->post('store'));
+						$this->bsc_model->updateCompany($user->id, $this->input->post('company'));
+
+						header('content-type: application/json');
+						echo json_encode(array("message" =>  $this->bsc_auth->messages()));
+						return;
+					} else {
+
+						$this->output->set_status_header('401');
+						header('content-type: application/json');
+						echo json_encode(array("message" => validation_errors()));
+						return;
+					}
+				}else{
+
+				// 	// set the flash data error message if there is one
+				// 	$this->data['message'] = (validation_errors() ? validation_errors() : ($this->bsc_auth->errors() ? $this->bsc_auth->errors() : $this->session->flashdata('message')));
+
+				// 	$this->data['email'] = [
+				// 		'name'  => 'email',
+				// 		'id'    => 'email',
+				// 		'type'  => 'text',
+				// 		'value' => $this->form_validation->set_value('email', $user->first_name),
+				// 	];
+
+				// 	$this->data['password'] = [
+				// 		'name' => 'password',
+				// 		'id'   => 'password',
+				// 		'type' => 'password'
+				// 	];
+				// 	$this->data['confirmPassword'] = [
+				// 		'name' => 'confirmPassword',
+				// 		'id'   => 'confirmPassword',
+				// 		'type' => 'password'
+				// 	];
+
+				// 	$this->output->set_status_header('401');
+				// 	header('content-type: application/json');
+				// 	echo json_encode(array("message" => validation_errors()));
+				// 	return;
 				}
-				
-
-				// display the edit user form
-				$this->data['csrf'] = $this->_get_csrf_nonce();
-
-				// set the flash data error message if there is one
-				$this->data['message'] = (validation_errors() ? validation_errors() : ($this->bsc_auth->errors() ? $this->bsc_auth->errors() : $this->session->flashdata('message')));
-
-				// pass the user to the view
-				$this->data['user'] = $user;
-				$this->data['groups'] = $groups;
-				$this->data['currentGroups'] = $currentGroups;
-
-				$this->data['first_name'] = [
-					'name'  => 'first_name',
-					'id'    => 'first_name',
-					'type'  => 'text',
-					'value' => $this->form_validation->set_value('first_name', $user->first_name),
-				];
-				$this->data['last_name'] = [
-					'name'  => 'last_name',
-					'id'    => 'last_name',
-					'type'  => 'text',
-					'value' => $this->form_validation->set_value('last_name', $user->last_name),
-				];
-				$this->data['company'] = [
-					'name'  => 'company',
-					'id'    => 'company',
-					'type'  => 'text',
-					'value' => $this->form_validation->set_value('company', $user->company),
-				];
-				$this->data['phone'] = [
-					'name'  => 'phone',
-					'id'    => 'phone',
-					'type'  => 'text',
-					'value' => $this->form_validation->set_value('phone', $user->phone),
-				];
-				$this->data['password'] = [
-					'name' => 'password',
-					'id'   => 'password',
-					'type' => 'password'
-				];
-				$this->data['password_confirm'] = [
-					'name' => 'password_confirm',
-					'id'   => 'password_confirm',
-					'type' => 'password'
-				];
-				$this->output->set_status_header('401');
-				header('content-type: application/json');
-				echo json_encode(array("message" => validation_errors()));
-				return;
 		}
 
 	}

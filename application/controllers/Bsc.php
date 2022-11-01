@@ -62,6 +62,8 @@ class Bsc extends CI_Controller
 		  case 'GET': 
 	
 			$user =  $this->bsc_model->getUser($user_id);
+			$user->stores = $this->bsc_model->getUserStores($user->id);
+			$user->companies = $this->bsc_model->getUserCompanies($user->id);
 			$user->groups = $this->bsc_model->getUserGroups($user->id);
 	
 			$response = array(

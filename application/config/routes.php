@@ -148,7 +148,7 @@ $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/
 $route['auth-bsc/login'] = 'auth_bsc/login';
 $route['auth-bsc/logout'] = 'auth_bsc/logout';
 $route['auth-bsc/create-user'] = 'auth_bsc/create_user';
-$route['auth-bsc/edit-user/(:any)'] = 'auth_bsc/edit_user/$1';
+$route['auth-bsc/edit-user'] = 'auth_bsc/edit_user';
 $route['auth-bsc/create-group'] = 'auth_bsc/create_group';
 
 $route['bsc/session'] = 'bsc/session';

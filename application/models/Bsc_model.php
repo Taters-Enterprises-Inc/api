@@ -7,6 +7,24 @@ class Bsc_model extends CI_Model {
         $this->db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    public function updateStore($user_id, $store_id){
+        $this->db->set('store_id', $store_id);
+        $this->db->where('user_id', $user_id);
+        $this->db->update('user_stores');
+    }
+
+    public function updateCompany($user_id, $company_id){
+        $this->db->set('company_id', $company_id);
+        $this->db->where('user_id', $user_id);
+        $this->db->update('user_companies');
+    }
+
+    public function updateUser($user_id, $data){
+        $this->db->where('user_id', $user_id);
+        $this->db->update('user_profile', $data);
+    }
+    
+
     public function updateUserStatus($status, $user_id){
         $this->db->set('user_status_id', $status);
         $this->db->where('user_id', $user_id);
@@ -36,6 +54,7 @@ class Bsc_model extends CI_Model {
             B.designation,
             B.phone_number,
             B.user_status_id,
+            B.email,
         ');
 
         $this->db->from('users A');
