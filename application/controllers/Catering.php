@@ -82,18 +82,12 @@ class Catering extends CI_Controller {
 
 				
 				$catering_start_date = $order_details['clients_info']->start_datetime;
-				$str_start_datetime = strtotime($catering_start_date);
-				$start_datetime = date($str_start_datetime);
-				
 				$catering_end_date = $order_details['clients_info']->end_datetime;
-				$str_end_datetime = strtotime($catering_end_date);
-				$end_datetime = date($str_end_datetime);
-				
 				
 				$service_fee = 0;
 				$service_fee_percentage = 0.1;
-				$night_diff_charge = $this->get_night_diff((int)$start_datetime,(int)$end_datetime);
-				$additional_fee = (int)$this->get_succeeding_hour_charge((int)$start_datetime, (int)$end_datetime);
+				$night_diff_charge = (int)$this->get_night_diff($catering_start_date,$catering_end_date);
+				$additional_fee = (int)$this->get_succeeding_hour_charge($catering_start_date, $catering_end_date);
 		
 				if(isset($service_fee_percentage)){
 					$service_fee = round($subtotal * $service_fee_percentage);
@@ -182,7 +176,6 @@ class Catering extends CI_Controller {
 
 						'subtotal' => $subtotal,
 						'transportation_fee' => $transportation_fee,
-						'night_diff_charge' => $night_diff_charge,
 						'service_fee' => $service_fee,
 						'cod_fee' => $cod_fee,
 						

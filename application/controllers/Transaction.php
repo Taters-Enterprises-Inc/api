@@ -65,12 +65,20 @@ class Transaction extends CI_Controller {
 					$serving_time = date($str_serving_time);
                     
                     $catering_start_date = $_SESSION['catering_start_date'];
-                    $str_start_datetime = strtotime($catering_start_date);
-                    $start_datetime = date($str_start_datetime);
-                    
                     $catering_end_date = $_SESSION['catering_end_date'];
-                    $str_end_datetime = strtotime($catering_end_date);
-                    $end_datetime = date($str_end_datetime);
+
+                    $discount = $this->discount_model->getAvailableUserDiscount(
+                        $this->session->userData['fb_user_id'] ?? null,
+                        $this->session->userData['mobile_user_id'] ?? null
+                    );
+
+                    $discount_value = "";
+                    $discount_id = null;
+                    
+                    if(isset($discount)){
+                        $discount_value = (int)$comp_total * (float)$discount->percentage;
+                        $discount_id = $discount->discount_type_id;
+                    }
                     
                     $client_id = $insert_client_details['id'];
                     $transaction_data = array(
@@ -90,17 +98,18 @@ class Transaction extends CI_Controller {
                         'end_datetime'      => $catering_end_date,
                         'event_class'       => isset($post['eventClass']) ? $post['eventClass'] : '',
                         'service_fee'       => $comp_total * 0.1,
-                        'night_diff_fee'    => $this->get_night_diff((int)$start_datetime, (int)$end_datetime),
-                        'additional_hour_charge' => $this->get_succeeding_hour_charge((int)$start_datetime, (int)$end_datetime),
+                        'night_diff_fee'    => (int)$this->get_night_diff($catering_start_date, $catering_end_date),
+                        'additional_hour_charge' => (int)$this->get_succeeding_hour_charge($catering_start_date, $catering_end_date),
                         'distance'          => '2',
                         'distance_id'       => $distance_rate_id,
                         'distance_price'    => $distance_rate_price,
                         'cod_fee'           => $cod_fee,
                         'payops'            => $payops,
                         'payment_plan'      => $post['paymentPlan'],
-                        'discount'          => 0,
                         'custom_message'    => '',
                         'logon_type'        => $insert_client_details['logon_type'],
+                        'discount'          => $discount_value,
+                        'discount_id'       => $discount_id,
                     );
 
                         

@@ -134,7 +134,6 @@ $route['admin/user/(:any)'] = 'admin/user/$1';
 $route['admin/groups'] = 'admin/groups';
 $route['admin/setting/stores'] = 'admin/setting_stores';
 
-$route['admin/export_csv'] = 'admin/export_csv';
 $route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
 $route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_logs/$1';
 
@@ -148,12 +147,14 @@ $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/
 $route['auth-bsc/login'] = 'auth_bsc/login';
 $route['auth-bsc/logout'] = 'auth_bsc/logout';
 $route['auth-bsc/create-user'] = 'auth_bsc/create_user';
-$route['auth-bsc/edit-user/(:any)'] = 'auth_bsc/edit_user/$1';
+$route['auth-bsc/edit-user'] = 'auth_bsc/edit_user';
 $route['auth-bsc/create-group'] = 'auth_bsc/create_group';
 
 $route['bsc/session'] = 'bsc/session';
 $route['bsc/users'] = 'bsc/users';
 $route['bsc/stores'] = 'bsc/stores';
+$route['bsc/user/(:num)'] = 'bsc/user/$1';
+$route['bsc/user/status'] = 'bsc/user_status';
 
 //Others
 $route['404_override'] = '';
