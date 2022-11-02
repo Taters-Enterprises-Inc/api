@@ -106,7 +106,6 @@ class Transaction extends CI_Controller {
                         'cod_fee'           => $cod_fee,
                         'payops'            => $payops,
                         'payment_plan'      => $post['paymentPlan'],
-                        'discount'          => 0,
                         'custom_message'    => '',
                         'logon_type'        => $insert_client_details['logon_type'],
                         'discount'          => $discount_value,

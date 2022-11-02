@@ -176,7 +176,6 @@ class Catering extends CI_Controller {
 
 						'subtotal' => $subtotal,
 						'transportation_fee' => $transportation_fee,
-						'night_diff_charge' => $night_diff_charge,
 						'service_fee' => $service_fee,
 						'cod_fee' => $cod_fee,
 						
