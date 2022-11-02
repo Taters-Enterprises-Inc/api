@@ -1582,5 +1582,41 @@ class Admin extends CI_Controller{
     }
   }
 
-}
+  
+  public function payment()
+  {
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST': 
 
+          $config['upload_path']          = './assets/upload/proof_payment/';
+          $config['allowed_types']        = 'jpeg|jpg|png';
+          $config['max_size']             = 2000;
+          $config['max_width']            = 0;
+          $config['max_height']           = 0;
+          $config['encrypt_name']         = TRUE;
+
+          $this->load->library('upload', $config);
+
+          $trans_id = $_POST['trans_id'];
+
+          if (!$this->upload->do_upload('payment_file')) { // Upload validation
+            // Failed-Upload
+            $error = $this->upload->display_errors();
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $error));
+          } else {
+            // File-Uploaded-Successfull
+            $data = $this->upload->data(); // Get file details
+            $file_name = $data['file_name'];
+
+            $this->admin_model->uploadPayment($trans_id, $data, $file_name);
+
+            header('content-type: application/json');
+            echo json_encode(array( "message" => 'Succesfully upload payment'));
+          }
+
+        break;
+    }
+  }
+
+}

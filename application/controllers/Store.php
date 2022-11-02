@@ -96,7 +96,7 @@ class Store extends CI_Controller {
 						$this->session->set_userdata('catering_end_date', $end_datetime);
 					}
 
-					$night_diff = $this->get_night_diff($start_datetime, $end_datetime);
+					$night_diff = (int)$this->get_night_diff($start_datetime, $end_datetime);
 					$this->session->set_userdata('catering_night_differential_fee', (int) $night_diff);
 
 					$succeeding_hour_charge = $this->get_succeeding_hour_charge($start_datetime, $end_datetime);

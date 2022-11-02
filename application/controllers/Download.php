@@ -34,12 +34,8 @@ class Download extends CI_Controller {
 		}
         
         $catering_start_date = $query_result['clients_info']->start_datetime;
-        $str_start_datetime = strtotime($catering_start_date);
-        $start_datetime = date($str_start_datetime);
         
         $catering_end_date = $query_result['clients_info']->end_datetime;
-        $str_end_datetime = strtotime($catering_end_date);
-        $end_datetime = date($str_end_datetime);
 
 		$query_logon  = $this->catering_model->get_logon_type($hash_key);
 		$logon_type   = $query_logon->logon_type;
@@ -57,7 +53,7 @@ class Download extends CI_Controller {
 		$subtotal = $query_result['clients_info']->purchase_amount;
 		$transportation_fee = $query_result['clients_info']->distance_price;
 			
-		$night_diff_charge = $this->get_night_diff((int)$start_datetime,(int)$end_datetime);
+		$night_diff_charge = (int)$this->get_night_diff($catering_start_date,$catering_end_date);
 		
 		$service_fee = 0;
 		$service_fee_percentage = 0.1;
@@ -72,7 +68,7 @@ class Download extends CI_Controller {
 			$voucher_amount = $query_result['clients_info']->discount;
 		}
 		$cod_fee = $query_result['clients_info']->cod_fee;
-		$grand_total = (int)$subtotal + (int)$transportation_fee + (int)$service_fee + (int)$night_diff_charge + (int)$this->get_succeeding_hour_charge((int)$start_datetime,(int)$end_datetime) + (int)$cod_fee - (double)$voucher_amount ;
+		$grand_total = (int)$subtotal + (int)$transportation_fee + (int)$service_fee + (int)$night_diff_charge + (int)$this->get_succeeding_hour_charge($catering_start_date,$catering_end_date) + (int)$cod_fee - (double)$voucher_amount ;
 
 
 		if ($query_result == NULL) {
@@ -123,7 +119,7 @@ class Download extends CI_Controller {
 				$data['lastname'] = $facebook_details->last_name;
 			}
 
-			$succeeding_hour_charge =  $this->get_succeeding_hour_charge((int)$start_datetime,(int)$end_datetime);
+			$succeeding_hour_charge =  (int)$this->get_succeeding_hour_charge($catering_start_date,$catering_end_date);
 
             $data['succeeding_hour_charge'] = $succeeding_hour_charge;
 			$data['grand_total'] = $grand_total;
