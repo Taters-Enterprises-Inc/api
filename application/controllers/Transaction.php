@@ -64,12 +64,7 @@ class Transaction extends CI_Controller {
 					$serving_time = date($str_serving_time);
                     
                     $catering_start_date = $_SESSION['catering_start_date'];
-                    $str_start_datetime = strtotime($catering_start_date);
-                    $start_datetime = date($str_start_datetime);
-                    
                     $catering_end_date = $_SESSION['catering_end_date'];
-                    $str_end_datetime = strtotime($catering_end_date);
-                    $end_datetime = date($str_end_datetime);
                     
                     $client_id = $insert_client_details['id'];
                     $transaction_data = array(
@@ -89,8 +84,8 @@ class Transaction extends CI_Controller {
                         'end_datetime'      => $catering_end_date,
                         'event_class'       => isset($post['event_class']) ? $post['event_class'] : '',
                         'service_fee'       => $comp_total * 0.1,
-                        'night_diff_fee'    => $this->get_night_diff((int)$start_datetime, (int)$end_datetime),
-                        'additional_hour_charge' => $this->get_succeeding_hour_charge((int)$start_datetime, (int)$end_datetime),
+                        'night_diff_fee'    => (int)$this->get_night_diff($catering_start_date, $catering_end_date),
+                        'additional_hour_charge' => (int)$this->get_succeeding_hour_charge($catering_start_date, $catering_end_date),
                         'distance'          => '2',
                         'distance_id'       => $distance_rate_id,
                         'distance_price'    => $distance_rate_price,
