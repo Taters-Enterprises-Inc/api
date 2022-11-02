@@ -71,6 +71,19 @@ class Transaction extends CI_Controller {
                     $catering_end_date = $_SESSION['catering_end_date'];
                     $str_end_datetime = strtotime($catering_end_date);
                     $end_datetime = date($str_end_datetime);
+
+                    $discount = $this->discount_model->getAvailableUserDiscount(
+                        $this->session->userData['fb_user_id'] ?? null,
+                        $this->session->userData['mobile_user_id'] ?? null
+                    );
+
+                    $discount_value = "";
+                    $discount_id = null;
+                    
+                    if(isset($discount)){
+                        $discount_value = (int)$comp_total * (float)$discount->percentage;
+                        $discount_id = $discount->discount_type_id;
+                    }
                     
                     $client_id = $insert_client_details['id'];
                     $transaction_data = array(
@@ -101,6 +114,8 @@ class Transaction extends CI_Controller {
                         'discount'          => 0,
                         'custom_message'    => '',
                         'logon_type'        => $insert_client_details['logon_type'],
+                        'discount'          => $discount_value,
+                        'discount_id'       => $discount_id,
                     );
 
                         
