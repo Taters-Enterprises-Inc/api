@@ -123,7 +123,6 @@ class Transaction extends CI_Controller {
 
                             foreach ($this->session->orders as $k => $value) {
                                 $remarks = (empty($value['prod_multiflavors'])) ? $value['prod_flavor'] : $value['prod_multiflavors'];
-                                $type = (isset($value['addon_base_product_id']) && ($value['addon_base_product_id']) ? 'addon' : 'main');
 
                                 $order_data[] = array(
                                     'transaction_id'      => $trans_id,
@@ -131,8 +130,7 @@ class Transaction extends CI_Controller {
                                     'product_id'          => $value['prod_id'],
                                     'quantity'            => $value['prod_qty'],
                                     'remarks'             => $remarks,
-                                    'type'                => isset($value['is_free_item']) && $value['is_free_item'] === true ? "freebie" : "main",
-                                    'type'                => $type,
+                                    'type'                => $value['prod_type'],
                                     'status'              => 1,
                                     'promo_id'            => "",
                                     'promo_price'         => "",
@@ -399,7 +397,6 @@ class Transaction extends CI_Controller {
                             foreach ($orders as $k => $value) {
 								if(isset($value['prod_id'])){
 									$remarks = (empty($value['prod_multiflavors'])) ? $value['prod_flavor'] : $value['prod_multiflavors'];
-									$type = (isset($value['addon_base_product_id']) && ($value['addon_base_product_id']) ? 'addon' : 'main');
 	
 									$order_data_product[] = array(
 										'transaction_id'      => $query_transaction_result['id'],
@@ -407,7 +404,7 @@ class Transaction extends CI_Controller {
 										'product_id'          => $value['prod_id'],
 										'quantity'            => $value['prod_qty'],
 										'remarks'             => $remarks,
-										'type'                => $type,
+                                        'type'                => $value['prod_type'],
 										'status'              => 1,
 										'promo_id'            => "",
 										'promo_price'         => "",
@@ -417,8 +414,6 @@ class Transaction extends CI_Controller {
 										'product_price'       => $value['prod_price'],
 										'product_label'       => $value['prod_size'],
 										'product_discount'    => $value['prod_discount'],
-										// 'addon_base_product'        => $value['addon_base_product_id'],
-										// 'addon_base_product_name'   => $this->shop_model->fetch_product_name($value['addon_base_product_id'])[0]->name,
 									);
 									if($value['prod_category'] == 17) {
 										if (isset($this->session->userData['mobile_user_id'])) {
