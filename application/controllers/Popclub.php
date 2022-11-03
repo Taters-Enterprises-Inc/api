@@ -9,12 +9,32 @@ date_default_timezone_set('Asia/Singapore');
 
 class Popclub extends CI_Controller {
 
+
 	public function __construct()
 	{
 		parent::__construct();
 		$this->load->model('deals_model');
 		$this->load->model('transaction_model');
 		$this->load->model('client_model');
+		$this->load->model('store_model');
+	}
+
+	public function orders(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$hash = $this->input->get('hash');
+				$user_deals_details = $this->deals_model->getUserDeals($hash);
+			
+				
+				$response = array(
+					'data' => $user_deals_details,
+					'message' => 'Successfully fetch product'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
 	}
 	private function unable_redeems(){
 		$redeems = $this->deals_model->getUserRedeems();
