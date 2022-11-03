@@ -191,6 +191,7 @@ class Catering_model extends CI_Model
             $this->db->join('catering_transaction_tb T', 'O.transaction_id = T.id' ,'left');
             $this->db->join('freebie_products_tb U', 'U.id = O.product_id' ,'left');
             $this->db->where('T.hash_key', $hash_key);
+            $this->db->where('O.type', 'main');
             $this->db->order_by('type','DESC');
             $query_orders = $this->db->get();
             $orders = $query_orders->result();
@@ -201,6 +202,7 @@ class Catering_model extends CI_Model
             $this->db->join('catering_order_items O', 'P.id = O.product_id' ,'left');
             $this->db->join('catering_transaction_tb T', 'O.transaction_id = T.id' ,'left');
             $this->db->where('T.hash_key', $hash_key);
+            $this->db->where('O.type', 'addon');
             $this->db->order_by('type','DESC');
             $query_addons = $this->db->get();
             $addons = $query_addons->result();

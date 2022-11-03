@@ -78,30 +78,7 @@ class Download extends CI_Controller {
 			$data['info'] = $query_result['clients_info'];
 
 			$order_design = array();
-
-            foreach ($query_result['addons'] as $k => $order){
-				if($order->type == 'addon'){
-					$order_design[$k]['main']['product_id'] = $order->product_id;
-					$order_design[$k]['main']['combination_id'] = $order->combination_id;
-					$order_design[$k]['main']['type'] = $order->type;
-					$order_design[$k]['main']['quantity'] = $order->quantity;
-					$order_design[$k]['main']['status'] = $order->status;
-					$order_design[$k]['main']['remarks'] = $order->remarks;
-					$order_design[$k]['main']['promo_id'] = $order->promo_id;
-					$order_design[$k]['main']['promo_price'] = $order->promo_price;
-					$order_design[$k]['main']['sku'] = $order->sku;
-					$order_design[$k]['main']['sku_id'] = $order->sku_id;
-					$order_design[$k]['main']['calc_price'] = $order->calc_price;
-					$order_design[$k]['main']['product_price'] = $order->product_price;
-					$order_design[$k]['main']['product_image'] = $order->product_image;
-					$order_design[$k]['main']['name'] = $order->name;
-					$order_design[$k]['main']['description'] = $order->description;
-					$order_design[$k]['main']['product_label'] = $order->product_label;
-					$order_design[$k]['main']['freebie_prod_name'] = $order->freebie_prod_name;
-					$order_design[$k]['main']['addon_base_product'] = $this->product_model->fetch_product_name($order->addon_base_product)[0]->name;
-				}
-			}
-
+			
 			$data['orders'] = $order_design;
 			$data['personnel'] = $query_result['personnel'];
 			$data['bank'] = $query_result['bank'];
@@ -142,20 +119,22 @@ class Download extends CI_Controller {
 				$order->product_price = $order->product_price;
 				$order->calc_price = $order->calc_price;
 
-				$package_selection[$key] = $order;
-				$remarks = explode("<br/>",$order->remarks); 
+				$package_selection[] = $order;
+				if(!empty($order->remarks)){
+					$remarks = explode("<br/>",$order->remarks); 
 
-				foreach($remarks as $remarks_key => $remark){
-					$get_first_letter = substr($remark,8);
-					$quantity = (int)strtok($get_first_letter, " - ");
-					$remarks[$remarks_key] = array(
-						'quantity' => $quantity,
-						'name' => substr($remark,21),
-					);
+					foreach($remarks as $remarks_key => $remark){
+						$get_first_letter = substr($remark,8);
+						$quantity = (int)strtok($get_first_letter, " - ");
+						$remarks[$remarks_key] = array(
+							'quantity' => $quantity,
+							'name' => substr($remark,21),
+						);
+					}
+	
+					$package_selection[$key]->flavors = $remarks;
+					array_pop($package_selection[$key]->flavors);
 				}
-
-				$package_selection[$key]->flavors = $remarks;
-				array_pop($package_selection[$key]->flavors);
 			}
 
 			$package_price = number_format($package_price ,2,'.',',');
