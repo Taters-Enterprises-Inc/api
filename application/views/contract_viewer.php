@@ -121,22 +121,23 @@
 			</tr>
 
 			<?php if(!empty($package->flavors)):?>
-			<tr>
-				<td ></td>	
-				<td style="color: rgb(0, 110, 255); font-weight: bold; text-align: center">Available Flavors:</td>	
-				<td ></td>	
-				<td ></td>	
-			</tr>
-			<?php endif;?>
-
-			<?php foreach($package->flavors as $flavor):?>
 				<tr>
-					<td style="text-align: center; font-weight: bold" ><?= $flavor['quantity']?></td>	
-					<td style="color: rgb(0, 110, 255); text-align: center" ><?= $flavor['name']?></td>	
+					<td ></td>	
+					<td style="color: rgb(0, 110, 255); font-weight: bold; text-align: center">Available Flavors:</td>	
 					<td ></td>	
 					<td ></td>	
 				</tr>
-			<?php endforeach;?>
+				
+
+				<?php foreach($package->flavors as $flavor):?>
+					<tr>
+						<td style="text-align: center; font-weight: bold" ><?= $flavor['quantity']?></td>	
+						<td style="color: rgb(0, 110, 255); text-align: center" ><?= $flavor['name']?></td>	
+						<td ></td>	
+						<td ></td>	
+					</tr>
+				<?php endforeach;?>
+			<?php endif;?>
 			
 		
 			<tr>
