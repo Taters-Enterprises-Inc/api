@@ -181,8 +181,23 @@ class Profile extends CI_Controller {
 				}
 
 				return;
+			break;
+
+			case 'PUT': 
+				$post = json_decode(file_get_contents("php://input"), true);
+				
+				$data = array(
+					'seen' => 1,
+				);
+
+				$this->shop_model->Update_Seen($post['trackingNo'], $data);
+
+				header('content-type: application/json');
+				return;
 		}
 	}
+
+
 
 	public function catering_bookings(){
 		switch($this->input->server('REQUEST_METHOD')){

@@ -61,6 +61,7 @@ class Shop_model extends CI_Model
             C.generated_raffle_code,
             C.application_status,
             A.hash_key,
+            A.seen,
         ');
 
         $this->db->from('transaction_tb A');
@@ -93,6 +94,33 @@ class Shop_model extends CI_Model
         return $query->result();
     }
 
+    public function Update_Seen($transaction_id, $data){
+    
+        $this->db->where('tracking_no', $transaction_id);
+        $this->db->update('transaction_tb', $data);
+
+    }
+
+    public function get_unread_count($type, $id){
+        $this->db->select('
+            A.seen
+        ');
+        $this->db->from('transaction_tb A');
+        $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
+
+        if ($type == 'mobile') {
+            $this->db->where('B.mobile_user_id', $id);
+        } else if($type == 'facebook') {
+            $this->db->where('B.fb_user_id', $id);
+        }
+
+        $this->db->where('seen', 0);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+    
+
     function upload_payment($data,$file_name,$tracking_no,$transaction_id)
     { 
         date_default_timezone_set('Asia/Manila');
@@ -116,7 +144,8 @@ class Shop_model extends CI_Model
         }
         return $return_data;
     }
-    
+
+   
     public function get_facebook_details($id){
         $this->db->select("*");
         $this->db->from('fb_users');

@@ -31770,6 +31770,9 @@ ALTER TABLE `__teisid`
 --
 -- Constraints for dumped tables
 --
+ALTER TABLE `store_tb` 
+ADD `dateadded` VARCHAR(256) NULL AFTER `map_link`;
+
 
 --
 -- Constraints for table `users_groups`
