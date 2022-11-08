@@ -117,7 +117,6 @@ class Popclub extends CI_Controller {
 							'description' => $redeem->description,
 							'deal_qty' => 1, 
 							'redeem_code'=> $redeem->redeem_code,
-							'deal_remarks'=> $redeem->remarks,
 							'promo_discount_percentage' => $redeem->promo_discount_percentage,
 							'minimum_purchase' => $redeem->minimum_purchase,
 							'deal_original_price' => $redeem->original_price,
@@ -148,8 +147,8 @@ class Popclub extends CI_Controller {
 									'deal_remarks'=> $redeem->remarks,
 									'promo_discount_percentage' => $redeem->promo_discount_percentage,
 									'minimum_purchase' => $redeem->minimum_purchase,
-									'deal_original_price' => $redeem->deal_original_price,
-									'deal_promo_price' => $redeem->deal_promo_price,
+									'deal_original_price' => $redeem->original_price,
+									'deal_promo_price' => $redeem->promo_price,
 								);
 
 								if($redeem->platform_id === 2 && $redeem->minimum_purchase === null){
@@ -170,8 +169,8 @@ class Popclub extends CI_Controller {
 								'deal_remarks' => $redeem->remarks,
 								'promo_discount_percentage' => $redeem->promo_discount_percentage,
 								'minimum_purchase' => $redeem->minimum_purchase,
-								'deal_original_price' => $redeem->deal_original_price,
-								'deal_promo_price' => $redeem->deal_promo_price,
+								'deal_original_price' => $redeem->original_price,
+								'deal_promo_price' => $redeem->promo_price,
 							);
 
 							if($redeem->platform_id === 2 && $redeem->minimum_purchase === null){
