@@ -99,7 +99,7 @@ class Popclub extends CI_Controller {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 				$deal_id = $this->input->get('deal_id');
-				$redeems = $this->deals_model->get_redeem($deal_id);
+				$redeems = $this->deals_model->getRedeem($deal_id);
 				$latest_not_expired_redeem = null;
 				$today = date("Y-m-d H:i:s");
 
@@ -118,15 +118,12 @@ class Popclub extends CI_Controller {
 							'deal_qty' => 1, 
 							'redeem_code'=> $redeem->redeem_code,
 							'deal_remarks'=> $redeem->remarks,
+							'promo_discount_percentage' => $redeem->promo_discount_percentage,
+							'minimum_purchase' => $redeem->minimum_purchase,
+							'deal_original_price' => $redeem->original_price,
+							'deal_promo_price' => $redeem->promo_price,
 						);
-						
-						if($redeem->minimum_purchase != null){
-							$products['minimum_purchase'] = $redeem->minimum_purchase;
-						}else{
-							$products['deal_original_price'] = $redeem->original_price;
-							$products['deal_promo_price'] = $redeem->promo_price;
-						}
-
+					
 
 						$this->session->set_userdata('redeem_data', $products);
 
@@ -149,14 +146,11 @@ class Popclub extends CI_Controller {
 									'deal_qty' => 1, 
 									'redeem_code'=> $redeem->redeem_code,
 									'deal_remarks'=> $redeem->remarks,
+									'promo_discount_percentage' => $redeem->promo_discount_percentage,
+									'minimum_purchase' => $redeem->minimum_purchase,
+									'deal_original_price' => $redeem->deal_original_price,
+									'deal_promo_price' => $redeem->deal_promo_price,
 								);
-				
-								if($redeem->minimum_purchase != null){
-									$products['minimum_purchase'] = $redeem->minimum_purchase;
-								}else{
-									$products['deal_original_price'] = $redeem->original_price;
-									$products['deal_promo_price'] = $redeem->promo_price;
-								}
 
 								if($redeem->platform_id === 2 && $redeem->minimum_purchase === null){
 									$_SESSION['deals'][] = $products;
@@ -165,7 +159,7 @@ class Popclub extends CI_Controller {
 							}
 						}else {
 							
-							$products= array(	
+							$products = array(	
 								'id' => $redeem->id,
 								'deal_id' => $redeem->deal_id,
 								'deal_image_name' => $redeem->product_image,
@@ -174,15 +168,11 @@ class Popclub extends CI_Controller {
 								'deal_qty' => 1, 
 								'redeem_code'=> $redeem->redeem_code,
 								'deal_remarks' => $redeem->remarks,
+								'promo_discount_percentage' => $redeem->promo_discount_percentage,
+								'minimum_purchase' => $redeem->minimum_purchase,
+								'deal_original_price' => $redeem->deal_original_price,
+								'deal_promo_price' => $redeem->deal_promo_price,
 							);
-			
-							if($redeem->minimum_purchase != null){
-								$products['minimum_purchase'] = $redeem->minimum_purchase;
-							}else{
-								$products['deal_original_price'] = $redeem->original_price;
-								$products['deal_promo_price'] = $redeem->promo_price;
-							}
-							
 
 							if($redeem->platform_id === 2 && $redeem->minimum_purchase === null){
 								$this->session->set_userdata('deals',array($products));
@@ -322,16 +312,17 @@ class Popclub extends CI_Controller {
 							'deal_qty' => 1, 
 							'redeem_code'=> $redeem_code,
 							'deal_remarks' =>$post['remarks'],
+							'promo_discount_percentage' => $deal->promo_discount_percentage,
+							'minimum_purchase' => $deal->minimum_purchase,
+							'deal_original_price' => $deal->original_price,
+							'deal_promo_price' => $deal->promo_price,
 						);
-				
-						if($deal->minimum_purchase != null){
-							$products['minimum_purchase'] = $deal->minimum_purchase;
-						}else{
-							$products['deal_original_price'] = $deal->original_price;
-							$products['deal_promo_price'] = $deal->promo_price;
-						}
 	
-						if($deal->platform_id === 2 && $deal->minimum_purchase === null){
+						if(
+							$deal->platform_id === 2 && 
+							$deal->minimum_purchase === null && 
+							$deal->promo_discount_percentage === null
+							){
 							$_SESSION['deals'] = array($products);	
 						}
 	

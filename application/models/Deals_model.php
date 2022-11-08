@@ -153,7 +153,7 @@ class Deals_model extends CI_Model
         $this->db->trans_complete();
 	}
 
-	public function get_redeem($deal_id = null){
+	public function getRedeem($deal_id = null){
 		if($_SESSION['userData'] === null){
 			return;
 		}
@@ -191,6 +191,7 @@ class Deals_model extends CI_Model
 				B.product_image,
 				B.description,
 				B.original_price,
+				B.promo_discount_percentage,
 				B.minimum_purchase,
 				B.promo_price,
 			');
@@ -238,6 +239,7 @@ class Deals_model extends CI_Model
 			A.original_price,
 			A.promo_price,
 			A.minimum_purchase,
+			A.promo_discount_percentage,
 			A.description,
 			A.seconds_before_expiration,
 			A.available_start_time,
