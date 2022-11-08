@@ -102,21 +102,23 @@ class Shop_model extends CI_Model
     }
 
     public function get_unread_count($type, $id){
-        $this->db->select('
-            A.seen
-        ');
+
+        $this->db->select('count(*) as all_count');
+            
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
-
+    
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
         }
 
-        $this->db->where('seen', 0);
+        $this->db->where('A.seen', 0);
 
         $query = $this->db->get();
+
+
         return $query->row()->all_count;
     }
     

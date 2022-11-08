@@ -353,6 +353,7 @@ class Transaction extends CI_Controller {
                         'store_discount_type'=> $discount_type,
                         'store_discount_ref_no'=> $discount_ref_no,
                         'deals_redeems_id' => $this->session->redeem_data['id'],
+                        'seen' => 0,
                     );
 
                     $query_transaction_result = $this->transaction_model->insertSnackShopTransactionDetails($transaction_data);
@@ -430,6 +431,7 @@ class Transaction extends CI_Controller {
                         if(isset($_SESSION['orders'])){
                             $this->session->unset_userdata('orders');
                         }
+                        
 
                         if(isset($_SESSION['deals'])){
                             $this->session->unset_userdata('deals');
@@ -439,6 +441,18 @@ class Transaction extends CI_Controller {
                                 $this->session->unset_userdata('redeem_data');
                             }
                         }
+                     
+                        $getUnreadCount =  $this->shop_model->get_unread_count('mobile', $_SESSION['userData']['mobile_user_id']);
+            
+                        $userData = $_SESSION['userData'];
+
+                        $userNotificationData = array(
+                            "Snackshop" => $getUnreadCount,
+                        );
+
+                        $userData['notification'] = $userNotificationData;
+
+                        $this->session->set_userdata('userData', $userData);
 
                         $message = $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!";
                         

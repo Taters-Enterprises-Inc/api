@@ -14,6 +14,7 @@ class Mobile_users extends CI_Controller
   {
     parent::__construct();
     $this->load->model('mobile_users_model');
+    $this->load->model('shop_model');
     $this->load->library('form_validation');
     
     $this->form_validation->set_error_delimiters('', '');
@@ -157,6 +158,17 @@ class Mobile_users extends CI_Controller
               $store_option = $this->store_model->fetch_store_option();
               $this->session->set_userdata('store_option', $store_option);
             }
+
+            // Check and set user notification data
+            $getUnreadCount =  $this->shop_model->get_unread_count('mobile', $user_data['mobile_user_id']);
+            
+            $userNotificationData = array(
+
+              "Snackshop" => $getUnreadCount,
+
+            );
+
+            $user_data['notification'] = $userNotificationData;
 
             // set user's data on current session
             $this->session->set_userdata('userData', $user_data);
