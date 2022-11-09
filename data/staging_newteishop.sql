@@ -31773,6 +31773,7 @@ ALTER TABLE `__teisid`
 ALTER TABLE `store_tb` 
 ADD `dateadded` VARCHAR(256) NULL AFTER `map_link`;
 
+ALTER TABLE `notifications` CHANGE `user_to_notify` `user_to_notify` VARCHAR(11) NULL DEFAULT NULL;
 
 --
 -- Constraints for table `users_groups`

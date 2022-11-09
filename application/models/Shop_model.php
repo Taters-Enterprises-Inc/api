@@ -61,16 +61,25 @@ class Shop_model extends CI_Model
             C.generated_raffle_code,
             C.application_status,
             A.hash_key,
-            A.seen,
+          
+            F.id as notification_id,
+            F.dateseen,
+
         ');
 
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
+        $this->db->join('notification_events E', 'A.id = E.transaction_tb_id' ,'left');
+        $this->db->join('notifications F', 'E.id = F.notification_event_id','left');
+
 
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
+            $userId = 'M-' . $id;
+            $this->db->where('F.user_to_notify', $userId);
+
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
         }
@@ -93,36 +102,7 @@ class Shop_model extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
-
-    public function Update_Seen($transaction_id, $data){
     
-        $this->db->where('tracking_no', $transaction_id);
-        $this->db->update('transaction_tb', $data);
-
-    }
-
-    public function get_unread_count($type, $id){
-
-        $this->db->select('count(*) as all_count');
-            
-        $this->db->from('transaction_tb A');
-        $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
-    
-        if ($type == 'mobile') {
-            $this->db->where('B.mobile_user_id', $id);
-        } else if($type == 'facebook') {
-            $this->db->where('B.fb_user_id', $id);
-        }
-
-        $this->db->where('A.seen', 0);
-
-        $query = $this->db->get();
-
-
-        return $query->row()->all_count;
-    }
-    
-
     function upload_payment($data,$file_name,$tracking_no,$transaction_id)
     { 
         date_default_timezone_set('Asia/Manila');

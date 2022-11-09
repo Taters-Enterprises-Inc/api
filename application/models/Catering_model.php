@@ -44,13 +44,23 @@ class Catering_model extends CI_Model
             A.distance_price,
 
             A.hash_key,
+         
+
+            D.id as notification_id,
+            D.dateseen,
+            
         ');
 
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'A.client_id = B.id' ,'left');
+        $this->db->join('notification_events C', 'A.id = C.catering_transaction_tb_id' ,'left');
+        $this->db->join('notifications D', 'C.id = D.notification_event_id','left');
+
 
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
+            $userId = 'M-' . $id;
+            $this->db->where('D.user_to_notify', $userId);
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
         }
@@ -73,7 +83,6 @@ class Catering_model extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
-
     
     function upload_payment($data,$file_name,$tracking_no,$transaction_id,$payment_plan, $status)
     { 

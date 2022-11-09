@@ -14,6 +14,7 @@ class Transaction extends CI_Controller {
         
 		$this->load->model('transaction_model');
 		$this->load->model('shop_model');
+        $this->load->model('catering_model');
 		$this->load->model('deals_model');
 		$this->load->model('client_model');
         $this->load->model('notification_model');
@@ -140,6 +141,7 @@ class Transaction extends CI_Controller {
                             "text" => $message
                         );
                         
+                        //Store User
                         $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
                         $users = $this->store_model->getUsersStoreGroupsByStoreId($store_id);
                         foreach($users as $user){
@@ -153,7 +155,8 @@ class Transaction extends CI_Controller {
 
                             $this->notification_model->insertNotification($notifications_data);   
                         }
-                        
+
+                        //Admin user
                         $admin_users = $this->user_model->getUsersByGroupId(1);
                         foreach($admin_users as $user){
                             $notifications_data = array(
@@ -166,6 +169,7 @@ class Transaction extends CI_Controller {
                             $this->notification_model->insertNotification($notifications_data);   
                         }
                         
+                        //CSR Admin
                         $csr_admin_users = $this->user_model->getUsersByGroupId(10);
                         foreach($csr_admin_users as $user){
                             $notifications_data = array(
@@ -177,6 +181,20 @@ class Transaction extends CI_Controller {
                             );
                             $this->notification_model->insertNotification($notifications_data);   
                         }
+
+                        //Mobile and FB user Client
+                        $clientUserId = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['oauth_uid']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
+                        foreach($csr_admin_users as $user){
+                            $notifications_data = array(
+                                "user_to_notify" => $clientUserId,
+                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                                'notification_event_id' => $notification_event_id,
+                                "dateadded" => date('Y-m-d H:i:s'),
+                            );
+                            $this->notification_model->insertNotification($notifications_data);   
+                        }
+
 
                         $real_time_notification = array(
                             "store_id" => $store_id,
@@ -353,7 +371,6 @@ class Transaction extends CI_Controller {
                         'store_discount_type'=> $discount_type,
                         'store_discount_ref_no'=> $discount_ref_no,
                         'deals_redeems_id' => $this->session->redeem_data['id'],
-                        'seen' => 0,
                     );
 
                     $query_transaction_result = $this->transaction_model->insertSnackShopTransactionDetails($transaction_data);
@@ -441,18 +458,6 @@ class Transaction extends CI_Controller {
                                 $this->session->unset_userdata('redeem_data');
                             }
                         }
-                     
-                        $getUnreadCount =  $this->shop_model->get_unread_count('mobile', $_SESSION['userData']['mobile_user_id']);
-            
-                        $userData = $_SESSION['userData'];
-
-                        $userNotificationData = array(
-                            "Snackshop" => $getUnreadCount,
-                        );
-
-                        $userData['notification'] = $userNotificationData;
-
-                        $this->session->set_userdata('userData', $userData);
 
                         $message = $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!";
                         
@@ -463,9 +468,12 @@ class Transaction extends CI_Controller {
                         );
                         
                         $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                        
+                        //store group
                         $users = $this->store_model->getUsersStoreGroupsByStoreId($store_id);
                         foreach($users as $user){
                             $notifications_data = array(
+        
                                 "user_to_notify" => $user->user_id,
                                 "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
                                 "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
@@ -476,6 +484,7 @@ class Transaction extends CI_Controller {
                             $this->notification_model->insertNotification($notifications_data);   
                         }
                         
+                        //admin
                         $admin_users = $this->user_model->getUsersByGroupId(1);
                         foreach($admin_users as $user){
                             $notifications_data = array(
@@ -488,6 +497,7 @@ class Transaction extends CI_Controller {
                             $this->notification_model->insertNotification($notifications_data);   
                         }
                         
+                        //csr admin
                         $csr_admin_users = $this->user_model->getUsersByGroupId(10);
                         foreach($csr_admin_users as $user){
                             $notifications_data = array(
@@ -500,6 +510,18 @@ class Transaction extends CI_Controller {
                             $this->notification_model->insertNotification($notifications_data);   
                         }
 
+                        //mobile and fb user
+                        $clientUserId = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['oauth_uid']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
+                        foreach($csr_admin_users as $user){
+                            $notifications_data = array(
+                                "user_to_notify" => $clientUserId,
+                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                                'notification_event_id' => $notification_event_id,
+                                "dateadded" => date('Y-m-d H:i:s'),
+                            );
+                            $this->notification_model->insertNotification($notifications_data);   
+                        }
 
                         $realtime_notification = array(
                             "store_id" => $store_id,

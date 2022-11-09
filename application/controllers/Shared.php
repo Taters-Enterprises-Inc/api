@@ -15,6 +15,7 @@ class Shared extends CI_Controller {
 		$this->load->model('catering_model');
 		$this->load->model('user_model');
 		$this->load->model('logs_model');
+		$this->load->model('notification_model');
 		$this->load->library('form_validation');
 	}
 
@@ -92,6 +93,33 @@ class Shared extends CI_Controller {
 			break;
 		}
     }
+
+
+	public function notifications(){
+    
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+
+		
+        $user_id = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['oauth_uid']) : ('M-' . $_SESSION['userData']['mobile_user_id']);;
+
+		$data = array(
+
+			'Snackshop' => $this->notification_model->getUnseenNotificationsCount($user_id, 1),
+			'Catering'  => $this->notification_model->getUnseenNotificationsCount($user_id, 2),
+		);
+
+        $response = array(
+            "data" => $data,
+            "message" => "Succesfully fetch notification"
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+      }
+  }
+
 	
     public function upload_payment()
     {
