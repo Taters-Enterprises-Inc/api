@@ -945,6 +945,7 @@ class Admin_model extends CI_Model
             B.description,
             B.add_details,
             C.name as deal_name,
+            C.promo_discount_percentage,
         ");
         $this->db->from('order_items A');
         $this->db->join('products_tb B', 'B.id = A.product_id');

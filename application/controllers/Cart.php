@@ -67,6 +67,7 @@ class Cart extends CI_Controller {
                 $set_value['prod_discount']         = 0;
                 $set_value['prod_category']         = $product_details->category;
                 $set_value['prod_type']             = $this->input->post('prod_type');
+                $set_value['promo_discount_percentage'] = $this->input->post('promo_discount_percentage');
 
                 $_SESSION['orders'][] = $set_value;
 

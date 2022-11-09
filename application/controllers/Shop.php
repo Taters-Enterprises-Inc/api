@@ -52,27 +52,6 @@ class Shop extends CI_Controller {
 				$variants = array_values(array_filter($variant));
 	
 				$query_result = $this->shop_model->fetch_product_sku($variants);
-				
-                $redeem_data = $this->session->redeem_data;
-                $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
-
-                if($deal_products_promo_exclude){
-                    $discount_percentage = (float)$redeem_data['promo_discount_percentage'];
-
-                    foreach($deal_products_promo_exclude as $value){
-                        if($value->product_id === $query_result->product_id){
-                            $discount_percentage = 0;
-                            break;
-                        }
-                    }
-
-					if($discount_percentage !== 0){
-						$query_result->discounted_original_price = $query_result->price;
-						$query_result->price = $query_result->price - ($query_result->price * $discount_percentage);
-					}
-
-
-                }
 
 				header('content-type: application/json');
 				echo json_encode(array(
@@ -163,23 +142,19 @@ class Shop extends CI_Controller {
 				
                 $redeem_data = $this->session->redeem_data;
                 $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+				$promo_discount_percentage = null;
 
                 if($deal_products_promo_exclude){
-                    $discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                    $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
 
                     foreach($deal_products_promo_exclude as $value){
                         if($value->product_id === $product->id){
-                            $discount_percentage = 0;
+                            $promo_discount_percentage = null;
                             break;
                         }
                     }
 
-					if($discount_percentage !== 0){
-						$product->discounted_original_price = $product->price;
-						$product->price = $product->price - ($product->price * $discount_percentage);
-					}
-
-
+					$product->promo_discount_percentage = $promo_discount_percentage;
                 }
 				
 				$product_size = $this->shop_model->fetch_product_variants($product->id,'size');

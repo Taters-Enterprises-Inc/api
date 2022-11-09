@@ -241,7 +241,9 @@ class Transaction extends CI_Controller {
                     if(isset($_SESSION['orders'])){
                         if(!empty($_SESSION['orders'])){
                             foreach ($_SESSION['orders'] as $row => $val) {
-                                $comp_total += $val['prod_calc_amount'];
+                                $promo_discount_percentage = $val['promo_discount_percentage'];
+                                $promo_discount = isset($promo_discount_percentage) ? $val['prod_calc_amount'] * $promo_discount_percentage : 0 ;
+                                $comp_total += $val['prod_calc_amount'] - $promo_discount;
                             }
                         }
                     }

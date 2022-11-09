@@ -191,6 +191,12 @@ class Popclub extends CI_Controller {
 						}
 					}else{
 
+						if(isset($_SESSION['orders']) && isset($_SESSION['redeem_data']['promo_discount_percentage'])){
+							foreach($_SESSION['orders'] as $key => $value){
+								$_SESSION['orders'][$key]['promo_discount_percentage'] = null;
+							}
+						}
+
 						if(isset($_SESSION['redeem_data'])){
 							if($_SESSION['redeem_data']['id'] === $redeem->id){
 								unset($_SESSION['redeem_data']);
@@ -234,6 +240,13 @@ class Popclub extends CI_Controller {
 							}
 						}
 					}
+					
+					if(isset($_SESSION['orders']) && isset($_SESSION['redeem_data']['promo_discount_percentage'])){
+						foreach($_SESSION['orders'] as $key => $value){
+							$_SESSION['orders'][$key]['promo_discount_percentage'] = null;
+						}
+					}
+					
 					
 					$this->deals_model->forfeit_redeem_deal($reedem_id);
 					unset($_SESSION['redeem_data']);
