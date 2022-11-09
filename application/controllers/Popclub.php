@@ -153,7 +153,11 @@ class Popclub extends CI_Controller {
 									'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),
 								);
 
-								if($redeem->platform_id === 2 && $redeem->minimum_purchase === null){
+								if(
+									$redeem->platform_id === 2 && 
+									$redeem->minimum_purchase === null &&
+									$redeem->promo_discount_percentage === null
+									){
 									$_SESSION['deals'][] = $products;
 								}
 								
@@ -176,7 +180,11 @@ class Popclub extends CI_Controller {
 								'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),
 							);
 
-							if($redeem->platform_id === 2 && $redeem->minimum_purchase === null){
+							if(
+								$redeem->platform_id === 2 && 
+								$redeem->minimum_purchase === null && 
+								$redeem->promo_discount_percentage === null
+							){
 								$this->session->set_userdata('deals',array($products));
 							}
 							

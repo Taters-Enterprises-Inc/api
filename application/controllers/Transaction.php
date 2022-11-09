@@ -259,11 +259,18 @@ class Transaction extends CI_Controller {
                     $distance_rate_price = (empty($this->session->distance_rate_price)) ? 0 : $this->session->distance_rate_price;
 
 					if(isset($_SESSION['redeem_data'])){
-                        if(isset($_SESSION['redeem_data']['minimum_purchase']) && $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total){
+                        if(
+                            isset($_SESSION['redeem_data']['minimum_purchase']) && 
+                            $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total
+                        ){
                             $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
-                            $this->session->unset_userdata('redeem_data');
-                            
                             $distance_rate_price = 0;
+                        }
+                        
+                        if(
+                            isset($_SESSION['redeem_data']['promo_discount_percentage'])
+                        ){
+                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
                         }
 					}
 
@@ -371,8 +378,8 @@ class Transaction extends CI_Controller {
                             foreach ($orders as $k => $value) {
 								if(isset($value['prod_id'])){
 									$remarks = (empty($value['prod_multiflavors'])) ? $value['prod_flavor'] : $value['prod_multiflavors'];
-	
-									$order_data_product[] = array(
+
+                                    $order_product =  array(
 										'transaction_id'      => $query_transaction_result['id'],
 										'combination_id'      => $k,
 										'product_id'          => $value['prod_id'],
@@ -388,7 +395,28 @@ class Transaction extends CI_Controller {
 										'product_price'       => $value['prod_price'],
 										'product_label'       => $value['prod_size'],
 										'product_discount'    => $value['prod_discount'],
+                                        'deal_id'             => null,
 									);
+
+                                    
+                                    $redeem_data = $this->session->redeem_data;
+                                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+
+                                    if($deal_products_promo_exclude){
+                                        $deal_id = $this->session->redeem_data['deal_id'];
+
+                                        foreach($deal_products_promo_exclude as $promo){
+                                            if($promo->product_id === $value['prod_id']){
+                                                $deal_id = null;
+                                                break;
+                                            }
+                                        }
+
+                                        $order_product['deal_id'] = $deal_id;
+                                    }
+	
+									$order_data_product[] = $order_product;
+
 									if($value['prod_category'] == 17) {
 										if (isset($this->session->userData['mobile_user_id'])) {
 											$type = 'mobile';
@@ -436,8 +464,11 @@ class Transaction extends CI_Controller {
 
                             if(isset($_SESSION['redeem_data'])){
                                 $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
-                                $this->session->unset_userdata('redeem_data');
                             }
+                        }
+                        
+                        if(isset($_SESSION['redeem_data'])){
+                            $this->session->unset_userdata('redeem_data');
                         }
 
                         $message = $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!";

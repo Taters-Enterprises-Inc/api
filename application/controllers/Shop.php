@@ -66,7 +66,11 @@ class Shop extends CI_Controller {
                         }
                     }
 
-                    $query_result->price = $query_result->price - ($query_result->price * $discount_percentage);
+					if($discount_percentage !== 0){
+						$query_result->discounted_original_price = $query_result->price;
+						$query_result->price = $query_result->price - ($query_result->price * $discount_percentage);
+					}
+
 
                 }
 
@@ -170,7 +174,11 @@ class Shop extends CI_Controller {
                         }
                     }
 
-                    $product->price = $product->price - ($product->price * $discount_percentage);
+					if($discount_percentage !== 0){
+						$product->discounted_original_price = $product->price;
+						$product->price = $product->price - ($product->price * $discount_percentage);
+					}
+
 
                 }
 				

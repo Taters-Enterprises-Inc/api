@@ -936,6 +936,7 @@ class Admin_model extends CI_Model
 
     public function getSnackshopOrderItems($transaction_id){
         $this->db->select("
+            A.price,
             A.product_price,
             A.quantity,
             A.remarks,
@@ -943,9 +944,11 @@ class Admin_model extends CI_Model
             B.name,
             B.description,
             B.add_details,
+            C.name as deal_name,
         ");
         $this->db->from('order_items A');
         $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->join('dotcom_deals_tb C', 'C.id = A.deal_id', 'left');
         $this->db->where('A.transaction_id', $transaction_id);
         $products_query = $this->db->get();
         $products = $products_query->result();
