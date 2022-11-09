@@ -16,6 +16,7 @@ class Popclub extends CI_Controller {
 		$this->load->model('transaction_model');
 		$this->load->model('client_model');
 	}
+
 	private function unable_redeems(){
 		$redeems = $this->deals_model->getUserRedeems();
 		$today = date("Y-m-d H:i:s");
