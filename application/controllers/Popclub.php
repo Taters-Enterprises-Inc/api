@@ -121,6 +121,7 @@ class Popclub extends CI_Controller {
 							'minimum_purchase' => $redeem->minimum_purchase,
 							'deal_original_price' => $redeem->original_price,
 							'deal_promo_price' => $redeem->promo_price,
+							'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),
 						);
 					
 
@@ -149,6 +150,7 @@ class Popclub extends CI_Controller {
 									'minimum_purchase' => $redeem->minimum_purchase,
 									'deal_original_price' => $redeem->original_price,
 									'deal_promo_price' => $redeem->promo_price,
+									'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),
 								);
 
 								if($redeem->platform_id === 2 && $redeem->minimum_purchase === null){
@@ -171,6 +173,7 @@ class Popclub extends CI_Controller {
 								'minimum_purchase' => $redeem->minimum_purchase,
 								'deal_original_price' => $redeem->original_price,
 								'deal_promo_price' => $redeem->promo_price,
+								'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),
 							);
 
 							if($redeem->platform_id === 2 && $redeem->minimum_purchase === null){
@@ -290,7 +293,7 @@ class Popclub extends CI_Controller {
 					
 					$query_transaction_result = $this->transaction_model->insertPopClubTransactionDetails($redeems_transaction_data);
 		
-					if ($query_transaction_result->status == true) {
+					if ($query_transaction_result->status == true) {                                       
 						$order_data[] = array(
 							'redeems_id'  => $query_transaction_result->id,
 							'deal_id'         => $deal->id,
@@ -315,6 +318,7 @@ class Popclub extends CI_Controller {
 							'minimum_purchase' => $deal->minimum_purchase,
 							'deal_original_price' => $deal->original_price,
 							'deal_promo_price' => $deal->promo_price,
+							'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($deal->id),
 						);
 	
 						if(

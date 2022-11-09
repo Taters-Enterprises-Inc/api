@@ -50,6 +50,24 @@ class Cart extends CI_Controller {
                 $product_price = (empty($varx)) ? $product_details->price : $product_sku_price;
                 $prod_calc_amount   = $this->input->post('prod_calc_amount');
 
+                // $redeem_data = $this->session->redeem_data;
+
+                // $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+
+                // if($deal_products_promo_exclude){
+                //     $discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                //     foreach($deal_products_promo_exclude as $value){
+                //         if($value->product_id === $prod_id){
+                //             $discount_percentage = 0;
+                //             break;
+                //         }
+                //     }
+
+                //     $prod_calc_amount = $prod_calc_amount - ($prod_calc_amount * $discount_percentage);
+
+                // }
+
 
 
                 $set_value['prod_id']               = $prod_id;

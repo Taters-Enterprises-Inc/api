@@ -17,6 +17,16 @@ class Deals_model extends CI_Model
 		$this->load->model('client_model');
     }
 
+	public function getDealProductsPromoExclude($deal_id){
+		$this->db->select('product_id');
+		$this->db->from('deals_product_promo_exclude');
+		$this->db->where('deal_id',$deal_id);
+
+		$query = $this->db->get();
+
+		return $query->result();
+	}
+
 	public function getUserRedeems(){
 		if(!isset($_SESSION['userData'])){
 			return[];
