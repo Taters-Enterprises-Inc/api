@@ -9,8 +9,6 @@ assets/upload/reciepts/*
 
 application/views/errors/*
 
-
-
 application/cache/*
 !application/cache/index.html
 

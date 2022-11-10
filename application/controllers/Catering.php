@@ -111,6 +111,7 @@ class Catering extends CI_Controller {
 					if($order->status == 0){
 						continue;
 					}
+					
 					if($order->category != 11 && $order->category != 5){
 						$no_of_pax += $order->quantity;
 					}
@@ -120,20 +121,22 @@ class Catering extends CI_Controller {
 					$order->calc_price = $order->calc_price;
 	
 					
-					$package_selection[$key] = $order;
-					$remarks = explode("<br/>",$order->remarks); 
+					$package_selection[] = $order;
+					if(!empty($order->remarks)){
+						$remarks = explode("<br/>",$order->remarks); 
 	
-					foreach($remarks as $remarks_key => $remark){
-						$get_first_letter = substr($remark,8);
-						$quantity = (int)strtok($get_first_letter, " - ");
-						$remarks[$remarks_key] = array(
-							'quantity' => $quantity,
-							'name' => substr($remark,21),
-						);
+						foreach($remarks as $remarks_key => $remark){
+							$get_first_letter = substr($remark,8);
+							$quantity = (int)strtok($get_first_letter, " - ");
+							$remarks[$remarks_key] = array(
+								'quantity' => $quantity,
+								'name' => substr($remark,21),
+							);
+						}
+		
+						$package_selection[$key]->flavors = $remarks;
+						array_pop($package_selection[$key]->flavors);
 					}
-	
-					$package_selection[$key]->flavors = $remarks;
-					array_pop($package_selection[$key]->flavors);
 				}
 
 				$package_price = $package_price;	

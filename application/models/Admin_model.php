@@ -1112,9 +1112,27 @@ class Admin_model extends CI_Model
         $this->db->from('catering_order_items A');
         $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
         $this->db->where('A.transaction_id', $transaction_id);
+        $this->db->where('A.type', 'main');
+        $query_catering_packages = $this->db->get();
+        $catering_packages = $query_catering_packages->result();
 
-        $query = $this->db->get();
-        return $query->result();
+        $this->db->select("
+            B.product_price,
+            B.quantity,
+            B.remarks,
+            B.product_label,
+            A.name,
+            A.description,
+            A.add_details,
+        "); 
+        $this->db->from('products_tb A');
+        $this->db->join('catering_order_items B', 'B.product_id = A.id' ,'left');
+        $this->db->where('B.transaction_id', $transaction_id);
+        $this->db->where('B.type', 'addon');
+        $query_catering_add_ons = $this->db->get();
+        $catering_add_ons = $query_catering_add_ons->result();
+
+        return array_merge($catering_packages, $catering_add_ons);
     }
 
     public function getCateringBooking($tracking_no){
