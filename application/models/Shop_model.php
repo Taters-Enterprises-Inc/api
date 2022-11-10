@@ -172,12 +172,13 @@ class Shop_model extends CI_Model
             // $fb_info = $query_fb_info->result();
 
             //jepoy addon for tag on view cart
-            $select_col = array("O.product_id","O.combination_id","O.type","O.quantity","O.status","O.remarks","O.promo_id","O.promo_price","O.sku","O.sku_id","O.price AS calc_price","O.product_price","P.product_image","P.name","P.description","P.delivery_details","P.uom","P.add_details","P.add_remarks","P.product_hash","P.note","P.product_code","O.product_label","O.addon_drink","O.addon_flav","O.addon_butter","O.addon_base_product","U.name AS freebie_prod_name");
+            $select_col = array("D.name AS deal_name","D.description AS deal_description","D.promo_discount_percentage","O.product_id","O.combination_id","O.type","O.quantity","O.status","O.remarks","O.promo_id","O.promo_price","O.sku","O.sku_id","O.price AS calc_price","O.product_price","P.product_image","P.name","P.description","P.delivery_details","P.uom","P.add_details","P.add_remarks","P.product_hash","P.note","P.product_code","O.product_label","O.addon_drink","O.addon_flav","O.addon_butter","O.addon_base_product","U.name AS freebie_prod_name");
             $this->db->from('products_tb P');
             $this->db->select($select_col);
             $this->db->join('order_items O', 'P.id = O.product_id' ,'left');
             $this->db->join('transaction_tb T', 'O.transaction_id = T.id' ,'left');
             $this->db->join('freebie_products_tb U', 'U.id = O.product_id' ,'left');
+            $this->db->join('dotcom_deals_tb D', 'D.id = O.deal_id' ,'left');
             $this->db->where('T.hash_key', $hash_key);
             $this->db->order_by('type','DESC');
             $query_orders = $this->db->get();
@@ -187,7 +188,7 @@ class Shop_model extends CI_Model
 			$this->db->from('dotcom_deals_tb D');
             $this->db->select($select_col);
             $this->db->join('deals_order_items O', 'D.id = O.deal_id' ,'left');
-            $this->db->join('transaction_tb T', 'O.redeems_id = T.id' ,'left');
+            $this->db->join('transaction_tb T', 'O.transaction_id = T.id' ,'left');
             $this->db->where('T.hash_key', $hash_key);
             $query_deals = $this->db->get();
             $deals = $query_deals->result();
@@ -496,6 +497,22 @@ class Shop_model extends CI_Model
         if($store_menu_type != '2'){
             if($category != 14 || $category == 'prod_category_page') {
                 foreach ($query_data as $key => $val) {
+                    
+                    $redeem_data = $this->session->redeem_data;
+                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $promo_discount_percentage = null;
+
+                    if($deal_products_promo_exclude){
+                        $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                        foreach($deal_products_promo_exclude as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = null;
+                                break;
+                            }
+                        }
+                    }
+
                     $return_data[$val->sequence]['category_id']          = $val->category_id;
                     $return_data[$val->sequence]['category_name']        = $val->category_name;
                     $return_data[$val->sequence]['category_details']     = $val->category_details;
@@ -508,6 +525,7 @@ class Shop_model extends CI_Model
                         'image' => $val->product_image,
                         'description' => $val->product_description,
                         'price' => $val->product_price,
+                        'promo_discount_percentage' => $promo_discount_percentage,
                         'hash' => $val->product_hash,
                     );
                 }
@@ -516,6 +534,23 @@ class Shop_model extends CI_Model
             //use if store_type of some stores shown is popcorn
             else if(!empty($store_menu_type)) {
                 foreach ($query_data as $key => $val) {
+                    
+                    $redeem_data = $this->session->redeem_data;
+                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $promo_discount_percentage = null;
+
+                    if($deal_products_promo_exclude){
+                        $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                        foreach($deal_products_promo_exclude as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = null;
+                                break;
+                            }
+                        }
+
+                    }
+
                     $return_data[$val->sequence]['category_id']          = $val->category_id;
                     $return_data[$val->sequence]['category_name']        = $val->category_name;
                     $return_data[$val->sequence]['category_details']     = $val->category_details;
@@ -528,6 +563,7 @@ class Shop_model extends CI_Model
                         'image' => $val->product_image,
                         'description' => $val->product_description,
                         'price' => $val->product_price,
+                        'promo_discount_percentage' => $promo_discount_percentage,
                         'hash' => $val->product_hash,
                     );
                 }
@@ -536,6 +572,23 @@ class Shop_model extends CI_Model
             //for showing all products (shop grid)
             else if ($category == 14){
                 foreach ($query_data as $key => $value) {
+
+                    $redeem_data = $this->session->redeem_data;
+                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $promo_discount_percentage = null;
+
+                    if($deal_products_promo_exclude){
+                        $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                        foreach($deal_products_promo_exclude as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = null;
+                                break;
+                            }
+                        }
+
+                    }
+
 
                     $return_data[]['category_products'][] = array(
                         'category_id'      => $value->category_id,
@@ -547,6 +600,7 @@ class Shop_model extends CI_Model
                         'image'  => $value->product_image,
                         'description'  => $value->product_description,
                         'price'  => $value->product_price,
+                        'promo_discount_percentage' => $promo_discount_percentage,
                         'hash'  => $value->product_hash,
                     );
 
@@ -557,6 +611,23 @@ class Shop_model extends CI_Model
 
             if($category != 14 || $category == 'prod_category_page') {
                 foreach ($query_data as $key => $val) {
+
+                    $redeem_data = $this->session->redeem_data;
+                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $promo_discount_percentage = null;
+
+                    if($deal_products_promo_exclude){
+                        $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                        foreach($deal_products_promo_exclude as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = null;
+                                break;
+                            }
+                        }
+
+
+                    }
 
                     $return_data[0]['category_id'] = $val->category_id;
                     $return_data[0]['category_name'] = $val->category_name;
@@ -569,6 +640,7 @@ class Shop_model extends CI_Model
                         'name' => $val->product_name,
                         'image' => $val->product_image,
                         'description' => $val->product_description,
+                        'promo_discount_percentage' => $promo_discount_percentage,
                         'price' => $val->product_price,
                         'hash' => $val->product_hash,
                     );
@@ -577,6 +649,22 @@ class Shop_model extends CI_Model
             //for showing all products (shop grid)
             else if ($category == 14){
                 foreach ($query_data as $key => $value) {
+                    
+                    $redeem_data = $this->session->redeem_data;
+                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $promo_discount_percentage = null;
+
+                    if($deal_products_promo_exclude){
+                        $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                        foreach($deal_products_promo_exclude as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = null;
+                                break;
+                            }
+                        }
+
+                    }
 
                     $return_data[]['category_products'][] = array(
                         'category_id'      => $value->category_id,
@@ -588,6 +676,7 @@ class Shop_model extends CI_Model
                         'image'  => $value->product_image,
                         'description'  => $value->product_description,
                         'price'  => $value->product_price,
+                        'promo_discount_percentage' => $promo_discount_percentage,
                         'hash'  => $value->product_hash,
                     );
 

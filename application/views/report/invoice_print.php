@@ -143,6 +143,13 @@
             <?php $ctr = 1; $total_val=0;?>
             <?php foreach ($orders as $key => $value): ?>
                     <?php $price = ( isset($value->promo_id ) && $value->promo_id == 0) ? $value->product_price : (isset($value->promo_id)  ?  $value->promo_price : $value->product_price);?>
+                    <?php 
+                      $discount_percentage = $value->promo_discount_percentage;
+
+                      if(isset($discount_percentage)){
+                        $price = $price - ($price * $discount_percentage );
+                      }
+                    ?>
                     <?php $row_sum = $price * $value->quantity;?>
                     <?php if( isset($value->promo_id ) && $value->promo_id != 0){$have_promo=1;}?>
                     <tr>
