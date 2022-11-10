@@ -183,7 +183,7 @@ class Transaction extends CI_Controller {
                         }
 
                         //Mobile and FB user Client
-                        $clientUserId = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['oauth_uid']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
+                        $clientUserId = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['fb_user_id']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
                         foreach($csr_admin_users as $user){
                             $notifications_data = array(
                                 "user_to_notify" => $clientUserId,
@@ -511,7 +511,7 @@ class Transaction extends CI_Controller {
                         }
 
                         //mobile and fb user
-                        $clientUserId = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['oauth_uid']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
+                        $clientUserId = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['fb_user_id']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
                         foreach($csr_admin_users as $user){
                             $notifications_data = array(
                                 "user_to_notify" => $clientUserId,

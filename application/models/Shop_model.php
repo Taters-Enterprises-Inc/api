@@ -82,6 +82,8 @@ class Shop_model extends CI_Model
 
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
+            $userId = 'FB-' . $id;
+            $this->db->where('F.user_to_notify', $userId);
         }
 
         $this->db->order_by('A.dateadded','DESC');

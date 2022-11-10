@@ -101,7 +101,7 @@ class Shared extends CI_Controller {
 			case 'GET':
 
 		
-        $user_id = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['oauth_uid']) : ('M-' . $_SESSION['userData']['mobile_user_id']);;
+        $user_id = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['fb_user_id']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
 
 		$data = array(
 

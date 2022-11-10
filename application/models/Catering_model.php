@@ -63,6 +63,8 @@ class Catering_model extends CI_Model
             $this->db->where('D.user_to_notify', $userId);
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
+            $userId = 'FB-' . $id;
+            $this->db->where('D.user_to_notify', $userId);
         }
 
         $this->db->order_by('A.dateadded','DESC');
