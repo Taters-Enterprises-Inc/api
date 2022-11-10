@@ -437,9 +437,9 @@ class Transaction extends CI_Controller {
 										);
 										$this->shop_model->insert_giftcard_user($data);
 									}
-								}else if($value['deal_id']){
+								}else if($value['deal_id'] && $value['minimum_purchase'] === null && $value['promo_discount_percentage'] === null){
 									$order_data_deal[] = array(
-										'redeems_id'  => $query_transaction_result['id'],
+										'transaction_id'  => $query_transaction_result['id'],
 										'deal_id'         => $value['deal_id'],
 										'price'			  => $value['deal_promo_price'],
 										'product_price'   => $value['deal_promo_price'],

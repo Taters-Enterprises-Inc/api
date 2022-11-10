@@ -118,6 +118,7 @@ class Popclub extends CI_Controller {
 							'description' => $redeem->description,
 							'deal_qty' => 1, 
 							'redeem_code'=> $redeem->redeem_code,
+							'deal_remarks'=> $redeem->remarks,
 							'promo_discount_percentage' => $redeem->promo_discount_percentage,
 							'minimum_purchase' => $redeem->minimum_purchase,
 							'deal_original_price' => $redeem->original_price,
@@ -315,17 +316,19 @@ class Popclub extends CI_Controller {
 					
 					$query_transaction_result = $this->transaction_model->insertPopClubTransactionDetails($redeems_transaction_data);
 		
-					if ($query_transaction_result->status == true) {                                       
-						$order_data[] = array(
-							'redeems_id'  => $query_transaction_result->id,
-							'deal_id'         => $deal->id,
-							'price'			  => $deal->promo_price,
-							'quantity'	      => 1,
-							'status'	      => 0,
-							'remarks'		  => $post['remarks'] === NULL? '' : $post['remarks'],
-						);
-
-						$this->transaction_model->insertPopClubClientOrders($order_data);
+					if ($query_transaction_result->status == true) {      
+						if($deal->platform_id === 1){
+							$order_data[] = array(
+								'redeems_id'  => $query_transaction_result->id,
+								'deal_id'         => $deal->id,
+								'price'			  => $deal->promo_price,
+								'quantity'	      => 1,
+								'status'	      => 0,
+								'remarks'		  => $post['remarks'] === NULL? '' : $post['remarks'],
+							);
+	
+							$this->transaction_model->insertPopClubClientOrders($order_data);
+						}                                 
 
 						$products= array(
 							'id' => $query_transaction_result->id,

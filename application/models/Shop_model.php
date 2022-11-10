@@ -172,7 +172,7 @@ class Shop_model extends CI_Model
             // $fb_info = $query_fb_info->result();
 
             //jepoy addon for tag on view cart
-            $select_col = array("D.name AS deal_name","D.promo_discount_percentage","O.product_id","O.combination_id","O.type","O.quantity","O.status","O.remarks","O.promo_id","O.promo_price","O.sku","O.sku_id","O.price AS calc_price","O.product_price","P.product_image","P.name","P.description","P.delivery_details","P.uom","P.add_details","P.add_remarks","P.product_hash","P.note","P.product_code","O.product_label","O.addon_drink","O.addon_flav","O.addon_butter","O.addon_base_product","U.name AS freebie_prod_name");
+            $select_col = array("D.name AS deal_name","D.description AS deal_description","D.promo_discount_percentage","O.product_id","O.combination_id","O.type","O.quantity","O.status","O.remarks","O.promo_id","O.promo_price","O.sku","O.sku_id","O.price AS calc_price","O.product_price","P.product_image","P.name","P.description","P.delivery_details","P.uom","P.add_details","P.add_remarks","P.product_hash","P.note","P.product_code","O.product_label","O.addon_drink","O.addon_flav","O.addon_butter","O.addon_base_product","U.name AS freebie_prod_name");
             $this->db->from('products_tb P');
             $this->db->select($select_col);
             $this->db->join('order_items O', 'P.id = O.product_id' ,'left');
@@ -188,7 +188,7 @@ class Shop_model extends CI_Model
 			$this->db->from('dotcom_deals_tb D');
             $this->db->select($select_col);
             $this->db->join('deals_order_items O', 'D.id = O.deal_id' ,'left');
-            $this->db->join('transaction_tb T', 'O.redeems_id = T.id' ,'left');
+            $this->db->join('transaction_tb T', 'O.transaction_id = T.id' ,'left');
             $this->db->where('T.hash_key', $hash_key);
             $query_deals = $this->db->get();
             $deals = $query_deals->result();
