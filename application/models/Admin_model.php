@@ -139,7 +139,7 @@ class Admin_model extends CI_Model
         ");
         $this->db->from('deals_order_items A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
-        $this->db->where('A.redeems_id', $id);
+        $this->db->where('A.transaction_id', $id);
         $deals_query = $this->db->get();
         $deals = $deals_query->result();
 
