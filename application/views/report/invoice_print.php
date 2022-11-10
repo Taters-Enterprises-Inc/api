@@ -136,7 +136,7 @@
                 <th style="width:25%;">Remarks</th>
                 <th style="width:5%;">Qty</th>
                 <th style="width:15%;">Price</th>
-                <?php echo ($info->moh == 1) ? '<th style="width:15%;">Subtotal</th>' : '<th style="width:15%;">Total</th>';?>
+                <?php echo ($info->moh == 1) ? '<th style="widths:15%;">Subtotal</th>' : '<th style="width:15%;">Total</th>';?>
             </tr>
             </thead>
             <tbody>
@@ -144,10 +144,9 @@
             <?php foreach ($orders as $key => $value): ?>
                     <?php $price = ( isset($value->promo_id ) && $value->promo_id == 0) ? $value->product_price : (isset($value->promo_id)  ?  $value->promo_price : $value->product_price);?>
                     <?php 
-                      $discount_percentage = $value->promo_discount_percentage;
 
-                      if(isset($discount_percentage)){
-                        $price = $price - ($price * $discount_percentage );
+                      if(isset($value->promo_discount_percentage)){
+                        $price = $price - ($price * $value->promo_discount_percentage );
                       }
                     ?>
                     <?php $row_sum = $price * $value->quantity;?>
