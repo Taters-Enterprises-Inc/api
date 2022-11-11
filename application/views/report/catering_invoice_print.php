@@ -100,9 +100,9 @@
             $serving = new DateTime('@'.$info->serving_time);
             ?>
             <!-- San Francisco, CA 94107<br> -->
-            Event Date and Time: <?php echo $start->format('l jS \of F Y'), " ",  $start->format('H:i:s'), " - " , $end->format('H:i:s');?><br>
-            Serving Time: <?php echo $serving->format('H:i:s');?><br>
-            Type of function: <?php echo $info->event_class;?>
+            Event Date and Time: <?php echo $start->format('l jS \of F Y'), " ",  $start->format('h:i:s a'), " to " , $end->format('h:i:s a');?><br>
+            Serving Time: <?php echo $serving->format('h:i:s a');?><br>
+            Type of function: <?php echo $info->event_class;?><br>
             Company Name: <?php echo ($info->event_class == "personal") ? "N/A" : $info->event_class; ?>
            <br> Special Arrangement: <?php echo ($info->message == "") ? "N/A" : $info->message; ?>
           </address>
@@ -113,7 +113,7 @@
         <div class="col-sm-4 invoice-col">
           <strong>Invoice Number #</strong> <?php echo ($info->invoice_num == '') ? '<span class="badge badge-pill badge-info">Order for confirmation</span>' : $info->invoice_num;?><br>
           <strong>Tracking Number #</strong> <?php echo $info->tracking_no;?><br>
-          <?php $status_paid = array(2,3,6,8,9);?>
+          
           <?php if($info->payops == 1){ ?>
             <b>Payment Options:</b> BPI<br>
           <?php } ?>
@@ -124,20 +124,18 @@
             <b>Payment Options:</b> CASH<br>
           <?php } ?>
           
-          <?php if($info->payops == 3){ ?>
-            <b>Payment Status:</b> <?php echo ($info->status == 6) ? 'Paid' : 'Not Paid'?><br>
-            <b>Payment Terms:</b> <?php 
-
-            echo $info->payment_plan, " payment ", ($info->payment_plan == "full") ? "(100%)" : "(50%)"; 
-            ;
-             
-            ?><br>
-
-            <?php } ?>
-  
           <?php if($info->payops != 3){ ?>
-            <?php $status_paid = array(2,3,6,8,9);?>
-            <b>Payment Status:</b> <?php echo ($info->payment_proof != '' && in_array($info->status,$status_paid)) ? 'Paid' : '-'?><br>
+            <b>Payment Terms:</b> <?php echo $info->payment_plan, " payment ", ($info->payment_plan == "full") ? "(100%)" : "(50%)"; ?><br>
+            
+            <?php if($info->payment_plan === 'half'): ?>
+            <b>Initial Payment Status:</b> <?php echo $info->initial_payment_proof ? 'Paid' : '-'?><br>
+            <b>Final Payment Status:</b> <?php echo $info->final_payment_proof ? 'Paid' : '-'?><br>
+            <?php endif;?>
+            
+            <?php if($info->payment_plan === 'full'): ?>
+            <b>Final Payment Status:</b> <?php echo $info->final_payment_proof ? 'Paid' : '-'?><br>
+            <?php endif;?>
+            
           <?php } ?>
   
           <!-- <b>Mode of Handling:</b> <?php //echo ($info->moh == 1) ? 'Pick-up' : 'Delivery';?><br>
@@ -193,7 +191,7 @@
                             
                             ?>
                             <!-- <td style="text-align: center;"><? //php echo $flavors;?></td> -->
-                            <td style="text-align: center;"><?php echo $value->add_details;?></td>
+                            <td style="text-align: center;"><?php echo $value->name . ', ' .$value->add_details?></td>
                             <td style="text-align: center;"><?php echo $value->remarks;?></td>
                             <td style="text-align: center;"><?php echo $value->quantity;?></td>
                             <td style="text-align: center;"><?php echo $value->product_price;?></td>
