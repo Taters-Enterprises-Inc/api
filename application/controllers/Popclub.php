@@ -11,6 +11,8 @@ class Popclub extends CI_Controller {
 
 	public function __construct(){
 		parent::__construct();
+		$this->load->library('google');
+
 		$this->load->model('deals_model');
 		$this->load->model('transaction_model');
 		$this->load->model('client_model');
@@ -143,34 +145,17 @@ class Popclub extends CI_Controller {
 							'deal_promo_price' => $redeem->promo_price,
 							'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),
 						);
-					
-
-						
-						$store = $this->store_model->get_store_info($redeem->store);
-						$region = $this->store_model->select_region($store->region_id);
-
-						$check_surcharge = $this->store_model->check_surcharge($redeem->store);
-						$surcharge = $check_surcharge->enable_surcharge;
-						$surcharge_delivery_rate = $check_surcharge->surcharge_delivery_rate;
-						$surcharge_minimum_rate = $check_surcharge->surcharge_minimum_rate;
-
-						$_SESSION['cache_data'] = array(
-							'store_id'					=>	$store->store_id,
-							'region_id'					=>	$store->region_id,
-							'region_name'				=>	$region->name,
-							'store_name'				=>	$store->name,
-							'moh_notes'					=>	$store->moh_notes,
-							'store_address'				=> 	$store->address,
-							'surcharge_delivery_rate'	=>	$surcharge_delivery_rate,
-							'surcharge_minimum_rate'	=>	$surcharge_minimum_rate,
-							'surcharge'					=>	$surcharge
-						);
 
 						$_SESSION['popclub_data'] = [
 							'platform' => $redeem->platform_url_name,
 						];
+						
+						set_store_sessions(
+							$redeem->store,
+							$redeem->address,
+							'SNACKSHOP',
+						);
 
-						$_SESSION['customer_address'] = $redeem->address;
 						
 						$this->session->set_userdata('redeem_data', $products);
 
