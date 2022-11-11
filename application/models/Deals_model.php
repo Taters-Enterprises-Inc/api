@@ -204,9 +204,13 @@ class Deals_model extends CI_Model
 				B.promo_discount_percentage,
 				B.minimum_purchase,
 				B.promo_price,
+				C.url_name as platform_url_name,
+				D.address,
 			');
 			$this->db->from('deals_redeems_tb A');
 			$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+			$this->db->join('dotcom_deals_platform C', 'C.id = A.platform_id');
+			$this->db->join('deals_client_tb D', 'D.id = A.client_id');
 			$this->db->where('A.client_id', $client->id);
 			$this->db->where('A.status', 1);
 

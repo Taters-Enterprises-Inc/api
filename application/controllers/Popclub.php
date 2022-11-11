@@ -9,12 +9,12 @@ date_default_timezone_set('Asia/Singapore');
 
 class Popclub extends CI_Controller {
 
-	public function __construct()
-	{
+	public function __construct(){
 		parent::__construct();
 		$this->load->model('deals_model');
 		$this->load->model('transaction_model');
 		$this->load->model('client_model');
+		$this->load->model('store_model');
 	}
 
 	private function unable_redeems(){
@@ -127,6 +127,33 @@ class Popclub extends CI_Controller {
 						);
 					
 
+						
+						$store = $this->store_model->get_store_info($redeem->store);
+						$region = $this->store_model->select_region($store->region_id);
+
+						$check_surcharge = $this->store_model->check_surcharge($redeem->store);
+						$surcharge = $check_surcharge->enable_surcharge;
+						$surcharge_delivery_rate = $check_surcharge->surcharge_delivery_rate;
+						$surcharge_minimum_rate = $check_surcharge->surcharge_minimum_rate;
+
+						$_SESSION['cache_data'] = array(
+							'store_id'					=>	$store->store_id,
+							'region_id'					=>	$store->region_id,
+							'region_name'				=>	$region->name,
+							'store_name'				=>	$store->name,
+							'moh_notes'					=>	$store->moh_notes,
+							'store_address'				=> 	$store->address,
+							'surcharge_delivery_rate'	=>	$surcharge_delivery_rate,
+							'surcharge_minimum_rate'	=>	$surcharge_minimum_rate,
+							'surcharge'					=>	$surcharge
+						);
+
+						$_SESSION['popclub_data'] = [
+							'platform' => $redeem->platform_url_name,
+						];
+
+						$_SESSION['customer_address'] = $redeem->address;
+						
 						$this->session->set_userdata('redeem_data', $products);
 
 						if(isset($_SESSION['deals'])){
@@ -311,7 +338,7 @@ class Popclub extends CI_Controller {
 							'expiration'					=> $expiration_date,
 							'hash_key'          			=> $trans_hash_key,
 							'logon_type'        			=> "facebook",
-							'store'							=> $_SESSION['cache_data']['store_id']
+							'store'							=> $_SESSION['cache_data']['store_id'],
 					);
 					
 					$query_transaction_result = $this->transaction_model->insertPopClubTransactionDetails($redeems_transaction_data);
@@ -392,8 +419,7 @@ class Popclub extends CI_Controller {
 		}
 	}
 
-	public function platform()
-	{
+	public function platform(){
 		$platforms = $this->deals_model->getDealsPlatform();
 
 		$response = array(
@@ -405,8 +431,7 @@ class Popclub extends CI_Controller {
 		echo json_encode($response);
 	}
 
-	public function category()
-	{
+	public function category(){
 		$platforms = $this->deals_model->getDealsPlatform();
 		$active_platform_url_name =  $this->input->get('platform_url_name');
 
@@ -491,7 +516,6 @@ class Popclub extends CI_Controller {
 		echo json_encode($response);
 	}
 
-	
 	public function deal($hash){
 		$deal = $this->deals_model->getDeal($hash);
 		
