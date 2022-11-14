@@ -74,16 +74,18 @@ class Shop_model extends CI_Model
         $this->db->join('notification_events E', 'A.id = E.transaction_tb_id' ,'left');
         $this->db->join('notifications F', 'E.id = F.notification_event_id','left');
 
+        $this->db->where('F.user_to_notify',  0);
+
 
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
-            $userId = 'M-' . $id;
-            $this->db->where('F.user_to_notify', $userId);
+            // $userId = 'M-' . $id;
+            $this->db->where('F.mobile_user_who_fired_event', $id);
 
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
-            $userId = 'FB-' . $id;
-            $this->db->where('F.user_to_notify', $userId);
+            // $userId = 'FB-' . $id;
+            $this->db->where('F.fb_user_who_fired_event',  $id);
         }
 
         $this->db->order_by('A.dateadded','DESC');

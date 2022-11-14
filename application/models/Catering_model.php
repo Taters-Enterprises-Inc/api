@@ -56,15 +56,17 @@ class Catering_model extends CI_Model
         $this->db->join('notification_events C', 'A.id = C.catering_transaction_tb_id' ,'left');
         $this->db->join('notifications D', 'C.id = D.notification_event_id','left');
 
+        $this->db->where('D.user_to_notify',  0);
 
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
-            $userId = 'M-' . $id;
-            $this->db->where('D.user_to_notify', $userId);
+            // $userId = 'M-' . $id;
+            $this->db->where('D.mobile_user_who_fired_event', $id);
+
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
-            $userId = 'FB-' . $id;
-            $this->db->where('D.user_to_notify', $userId);
+            // $userId = 'FB-' . $id;
+            $this->db->where('D.fb_user_who_fired_event', $id);
         }
 
         $this->db->order_by('A.dateadded','DESC');

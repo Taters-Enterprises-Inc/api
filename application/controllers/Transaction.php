@@ -184,16 +184,15 @@ class Transaction extends CI_Controller {
 
                         //Mobile and FB user Client
                         $clientUserId = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['fb_user_id']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
-                        foreach($csr_admin_users as $user){
-                            $notifications_data = array(
-                                "user_to_notify" => $clientUserId,
-                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
-                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
-                                'notification_event_id' => $notification_event_id,
-                                "dateadded" => date('Y-m-d H:i:s'),
-                            );
-                            $this->notification_model->insertNotification($notifications_data);   
-                        }
+                        $notifications_data = array(
+                            "user_to_notify" => 0,
+                            "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                            "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                            'notification_event_id' => $notification_event_id,
+                            "dateadded" => date('Y-m-d H:i:s'),
+                        );
+                        $this->notification_model->insertNotification($notifications_data);   
+                    
 
 
                         $real_time_notification = array(
@@ -545,16 +544,16 @@ class Transaction extends CI_Controller {
 
                         //mobile and fb user
                         $clientUserId = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['fb_user_id']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
-                        foreach($csr_admin_users as $user){
-                            $notifications_data = array(
-                                "user_to_notify" => $clientUserId,
-                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
-                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
-                                'notification_event_id' => $notification_event_id,
-                                "dateadded" => date('Y-m-d H:i:s'),
-                            );
-                            $this->notification_model->insertNotification($notifications_data);   
-                        }
+                        
+                        $notifications_data = array(
+                            "user_to_notify" => 0,
+                            "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                            "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                            'notification_event_id' => $notification_event_id,
+                            "dateadded" => date('Y-m-d H:i:s'),
+                        );
+                        $this->notification_model->insertNotification($notifications_data);   
+                        
 
                         $realtime_notification = array(
                             "store_id" => $store_id,
