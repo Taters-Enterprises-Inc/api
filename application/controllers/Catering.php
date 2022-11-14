@@ -266,6 +266,7 @@ class Catering extends CI_Controller {
 
 				$response = array(
 					'data' => array(
+						'region' => $region_id,
 						'product' => $product,
 						'product_flavor' => array_values($product_flavor),
 						'addons' => $addons,

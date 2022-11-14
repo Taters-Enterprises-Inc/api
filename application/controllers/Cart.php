@@ -50,8 +50,6 @@ class Cart extends CI_Controller {
                 $product_price = (empty($varx)) ? $product_details->price : $product_sku_price;
                 $prod_calc_amount   = $this->input->post('prod_calc_amount');
 
-
-
                 $set_value['prod_id']               = $prod_id;
                 $set_value['prod_image_name']       = $prod_image_name;
                 $set_value['prod_name']             = $product_details->name;
@@ -69,6 +67,7 @@ class Cart extends CI_Controller {
                 $set_value['prod_discount']         = 0;
                 $set_value['prod_category']         = $product_details->category;
                 $set_value['prod_type']             = $this->input->post('prod_type');
+                $set_value['promo_discount_percentage'] = $this->input->post('promo_discount_percentage');
 
                 $_SESSION['orders'][] = $set_value;
 

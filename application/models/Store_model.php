@@ -63,9 +63,10 @@ class Store_model extends CI_Model
     }
 
 	public function get_store_info($id){
-	  $this->db->select('store_id,region_id,name,delivery_hours,address,moh_notes');
-	  $this->db->from('store_tb');
-	  $this->db->where('store_id',$id);
+	  $this->db->select('A.store_id,B.region_store_id,A.name,A.delivery_hours,A.address,A.moh_notes');
+	  $this->db->from('store_tb A');
+	  $this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
+	  $this->db->where('A.store_id',$id);
 	  $query = $this->db->get();
 	  return $query->row();
 	}

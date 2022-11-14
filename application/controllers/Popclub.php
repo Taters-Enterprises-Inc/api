@@ -9,13 +9,16 @@ date_default_timezone_set('Asia/Singapore');
 
 class Popclub extends CI_Controller {
 
-	public function __construct()
-	{
+	public function __construct(){
 		parent::__construct();
+		$this->load->library('google');
+
 		$this->load->model('deals_model');
 		$this->load->model('transaction_model');
 		$this->load->model('client_model');
+		$this->load->model('store_model');
 	}
+
 	private function unable_redeems(){
 		$redeems = $this->deals_model->getUserRedeems();
 		$today = date("Y-m-d H:i:s");
@@ -99,7 +102,7 @@ class Popclub extends CI_Controller {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 				$deal_id = $this->input->get('deal_id');
-				$redeems = $this->deals_model->get_redeem($deal_id);
+				$redeems = $this->deals_model->getRedeem($deal_id);
 				$latest_not_expired_redeem = null;
 				$today = date("Y-m-d H:i:s");
 
@@ -118,16 +121,24 @@ class Popclub extends CI_Controller {
 							'deal_qty' => 1, 
 							'redeem_code'=> $redeem->redeem_code,
 							'deal_remarks'=> $redeem->remarks,
+							'promo_discount_percentage' => $redeem->promo_discount_percentage,
+							'minimum_purchase' => $redeem->minimum_purchase,
+							'deal_original_price' => $redeem->original_price,
+							'deal_promo_price' => $redeem->promo_price,
+							'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),
 						);
+
+						$_SESSION['popclub_data'] = [
+							'platform' => $redeem->platform_url_name,
+						];
 						
-						if($redeem->minimum_purchase != null){
-							$products['minimum_purchase'] = $redeem->minimum_purchase;
-						}else{
-							$products['deal_original_price'] = $redeem->original_price;
-							$products['deal_promo_price'] = $redeem->promo_price;
-						}
+						set_store_sessions(
+							$redeem->store,
+							$redeem->address,
+							'SNACKSHOP',
+						);
 
-
+						
 						$this->session->set_userdata('redeem_data', $products);
 
 						if(isset($_SESSION['deals'])){
@@ -149,23 +160,25 @@ class Popclub extends CI_Controller {
 									'deal_qty' => 1, 
 									'redeem_code'=> $redeem->redeem_code,
 									'deal_remarks'=> $redeem->remarks,
+									'promo_discount_percentage' => $redeem->promo_discount_percentage,
+									'minimum_purchase' => $redeem->minimum_purchase,
+									'deal_original_price' => $redeem->original_price,
+									'deal_promo_price' => $redeem->promo_price,
+									'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),
 								);
-				
-								if($redeem->minimum_purchase != null){
-									$products['minimum_purchase'] = $redeem->minimum_purchase;
-								}else{
-									$products['deal_original_price'] = $redeem->original_price;
-									$products['deal_promo_price'] = $redeem->promo_price;
-								}
 
-								if($redeem->platform_id === 2 && $redeem->minimum_purchase === null){
+								if(
+									$redeem->platform_id === 2 && 
+									$redeem->minimum_purchase === null &&
+									$redeem->promo_discount_percentage === null
+									){
 									$_SESSION['deals'][] = $products;
 								}
 								
 							}
 						}else {
 							
-							$products= array(	
+							$products = array(	
 								'id' => $redeem->id,
 								'deal_id' => $redeem->deal_id,
 								'deal_image_name' => $redeem->product_image,
@@ -174,22 +187,29 @@ class Popclub extends CI_Controller {
 								'deal_qty' => 1, 
 								'redeem_code'=> $redeem->redeem_code,
 								'deal_remarks' => $redeem->remarks,
+								'promo_discount_percentage' => $redeem->promo_discount_percentage,
+								'minimum_purchase' => $redeem->minimum_purchase,
+								'deal_original_price' => $redeem->original_price,
+								'deal_promo_price' => $redeem->promo_price,
+								'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),
 							);
-			
-							if($redeem->minimum_purchase != null){
-								$products['minimum_purchase'] = $redeem->minimum_purchase;
-							}else{
-								$products['deal_original_price'] = $redeem->original_price;
-								$products['deal_promo_price'] = $redeem->promo_price;
-							}
-							
 
-							if($redeem->platform_id === 2 && $redeem->minimum_purchase === null){
+							if(
+								$redeem->platform_id === 2 && 
+								$redeem->minimum_purchase === null && 
+								$redeem->promo_discount_percentage === null
+							){
 								$this->session->set_userdata('deals',array($products));
 							}
 							
 						}
 					}else{
+
+						if(isset($_SESSION['orders']) && isset($_SESSION['redeem_data']['promo_discount_percentage'])){
+							foreach($_SESSION['orders'] as $key => $value){
+								$_SESSION['orders'][$key]['promo_discount_percentage'] = null;
+							}
+						}
 
 						if(isset($_SESSION['redeem_data'])){
 							if($_SESSION['redeem_data']['id'] === $redeem->id){
@@ -234,6 +254,13 @@ class Popclub extends CI_Controller {
 							}
 						}
 					}
+					
+					if(isset($_SESSION['orders']) && isset($_SESSION['redeem_data']['promo_discount_percentage'])){
+						foreach($_SESSION['orders'] as $key => $value){
+							$_SESSION['orders'][$key]['promo_discount_percentage'] = null;
+						}
+					}
+					
 					
 					$this->deals_model->forfeit_redeem_deal($reedem_id);
 					unset($_SESSION['redeem_data']);
@@ -296,22 +323,24 @@ class Popclub extends CI_Controller {
 							'expiration'					=> $expiration_date,
 							'hash_key'          			=> $trans_hash_key,
 							'logon_type'        			=> "facebook",
-							'store'							=> $_SESSION['cache_data']['store_id']
+							'store'							=> $_SESSION['cache_data']['store_id'],
 					);
 					
 					$query_transaction_result = $this->transaction_model->insertPopClubTransactionDetails($redeems_transaction_data);
 		
-					if ($query_transaction_result->status == true) {
-						$order_data[] = array(
-							'redeems_id'  => $query_transaction_result->id,
-							'deal_id'         => $deal->id,
-							'price'			  => $deal->promo_price,
-							'quantity'	      => 1,
-							'status'	      => 0,
-							'remarks'		  => $post['remarks'] === NULL? '' : $post['remarks'],
-						);
-
-						$this->transaction_model->insertPopClubClientOrders($order_data);
+					if ($query_transaction_result->status == true) {      
+						if($deal->platform_id === 1){
+							$order_data[] = array(
+								'redeems_id'  => $query_transaction_result->id,
+								'deal_id'         => $deal->id,
+								'price'			  => $deal->promo_price,
+								'quantity'	      => 1,
+								'status'	      => 0,
+								'remarks'		  => $post['remarks'] === NULL? '' : $post['remarks'],
+							);
+	
+							$this->transaction_model->insertPopClubClientOrders($order_data);
+						}                                 
 
 						$products= array(
 							'id' => $query_transaction_result->id,
@@ -322,16 +351,18 @@ class Popclub extends CI_Controller {
 							'deal_qty' => 1, 
 							'redeem_code'=> $redeem_code,
 							'deal_remarks' =>$post['remarks'],
+							'promo_discount_percentage' => $deal->promo_discount_percentage,
+							'minimum_purchase' => $deal->minimum_purchase,
+							'deal_original_price' => $deal->original_price,
+							'deal_promo_price' => $deal->promo_price,
+							'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($deal->id),
 						);
-				
-						if($deal->minimum_purchase != null){
-							$products['minimum_purchase'] = $deal->minimum_purchase;
-						}else{
-							$products['deal_original_price'] = $deal->original_price;
-							$products['deal_promo_price'] = $deal->promo_price;
-						}
 	
-						if($deal->platform_id === 2 && $deal->minimum_purchase === null){
+						if(
+							$deal->platform_id === 2 && 
+							$deal->minimum_purchase === null && 
+							$deal->promo_discount_percentage === null
+							){
 							$_SESSION['deals'] = array($products);	
 						}
 	
@@ -373,8 +404,7 @@ class Popclub extends CI_Controller {
 		}
 	}
 
-	public function platform()
-	{
+	public function platform(){
 		$platforms = $this->deals_model->getDealsPlatform();
 
 		$response = array(
@@ -386,8 +416,7 @@ class Popclub extends CI_Controller {
 		echo json_encode($response);
 	}
 
-	public function category()
-	{
+	public function category(){
 		$platforms = $this->deals_model->getDealsPlatform();
 		$active_platform_url_name =  $this->input->get('platform_url_name');
 
@@ -472,7 +501,6 @@ class Popclub extends CI_Controller {
 		echo json_encode($response);
 	}
 
-	
 	public function deal($hash){
 		$deal = $this->deals_model->getDeal($hash);
 		

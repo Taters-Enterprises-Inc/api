@@ -12,6 +12,7 @@ class Client_model extends CI_Model {
 
         $first_name = $this->session->userData['first_name'];
         $last_name = $this->session->userData['last_name'];
+        $address = $this->session->customer_address;
         
         if(isset($this->session->userData['oauth_uid'])){
             $client_details = $this->getFacebook($this->session->userData['oauth_uid']);
@@ -24,14 +25,14 @@ class Client_model extends CI_Model {
 
         $client_details_to_be_inserted = array(
             'email'             => $client_details->email,
-			'address'           => "NA",
+			'address'           => $address,
 			'contact_number'    => "NA",
             'fname'             => $first_name,
             'lname'             => $last_name,
             'moh'               => 1,
             'payops'            => 0,
             'add_name'          => $first_name.' '.$last_name,
-			'add_contact'       => "NA",
+			'add_contact'       => $address,
 			'add_address'       => "NA"
         );
 
