@@ -19,11 +19,11 @@ if ( ! function_exists('set_store_sessions'))
         $surcharge_delivery_rate = $check_surcharge->surcharge_delivery_rate;
         $surcharge_minimum_rate = $check_surcharge->surcharge_minimum_rate;
         
-        $region = $CI->store_model->select_region($store->region_id);
+        $region = $CI->store_model->select_region($store->region_store_id);
 
         $CI->session->cache_data = array(
             'store_id'					=>	$store_id,
-            'region_id'					=>	$store->region_id,
+            'region_id'					=>	$store->region_store_id,
             'region_name'				=>	$region->name,
             'store_name'				=>	$store->name,
             'moh_notes'					=>	$store->moh_notes,
@@ -36,7 +36,7 @@ if ( ! function_exists('set_store_sessions'))
         $CI->session->customer_address = $address;
 
         $opening = $CI->store_model->get_store_schedule($store_id);
-        $moh_setup = $CI->store_model->fetch_moh_setup($store->region_id);
+        $moh_setup = $CI->store_model->fetch_moh_setup($store->region_store_id);
         
         $CI->session->set_userdata('km_radius', $moh_setup->km_radius);
         $CI->session->set_userdata('km_min', $moh_setup->km_min);
