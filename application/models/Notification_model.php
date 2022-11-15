@@ -68,7 +68,8 @@ class Notification_model extends CI_Model {
 
     public function getUnseenNotificationsCount(
         $user_id,
-        $notification_event_type_id
+        $notification_event_type_id,
+        $type
     ){
         $this->db->select('count(*) as all_count');
 
@@ -79,10 +80,17 @@ class Notification_model extends CI_Model {
         if(isset($notification_event_type_id)){
             $this->db->where('B.notification_event_type_id',$notification_event_type_id);
         }
-        if(isset($user_id)){
-            $this->db->where('user_to_notify', $user_id);
+        if($type =='mobile'){
+            $this->db->where('mobile_user_to_notify', $user_id);
+        }else if($type == 'facebook'){
+            $this->db->where('fb_user_to_notify', $user_id);
+        }else if($type == 'admin'){
+            if(isset($user_id)){
+                $this->db->where('user_to_notify', $user_id);
+            }
+            
         }
-        
+   
         $query = $this->db->get();
         return $query->row()->all_count;
     }

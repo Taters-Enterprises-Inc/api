@@ -28,11 +28,16 @@ class Shop_model extends CI_Model
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
+        $this->db->join('notification_events E', 'A.id = E.transaction_tb_id' ,'left');
+        $this->db->join('notifications F', 'E.id = F.notification_event_id','left');
         
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
+            $this->db->where('F.mobile_user_to_notify', $id);
+
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
+            $this->db->where('F.fb_user_to_notify',  $id);
         }
 
             
@@ -74,18 +79,14 @@ class Shop_model extends CI_Model
         $this->db->join('notification_events E', 'A.id = E.transaction_tb_id' ,'left');
         $this->db->join('notifications F', 'E.id = F.notification_event_id','left');
 
-        $this->db->where('F.user_to_notify',  0);
-
 
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
-            // $userId = 'M-' . $id;
-            $this->db->where('F.mobile_user_who_fired_event', $id);
+            $this->db->where('F.mobile_user_to_notify', $id);
 
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
-            // $userId = 'FB-' . $id;
-            $this->db->where('F.fb_user_who_fired_event',  $id);
+            $this->db->where('F.fb_user_to_notify',  $id);
         }
 
         $this->db->order_by('A.dateadded','DESC');

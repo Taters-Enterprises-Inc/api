@@ -101,12 +101,13 @@ class Shared extends CI_Controller {
 			case 'GET':
 
 		
-        $user_id = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['fb_user_id']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
+        $user_id = isset($_SESSION['userData']['oauth_uid']) ? $_SESSION['userData']['fb_user_id'] : $_SESSION['userData']['mobile_user_id'];
+        $type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' : 'mobile';
 
 		$data = array(
 
-			'Snackshop' => $this->notification_model->getUnseenNotificationsCount($user_id, 1),
-			'Catering'  => $this->notification_model->getUnseenNotificationsCount($user_id, 2),
+			'Snackshop' => $this->notification_model->getUnseenNotificationsCount($user_id, 1, $type),
+			'Catering'  => $this->notification_model->getUnseenNotificationsCount($user_id, 2, $type),
 		);
 
         $response = array(

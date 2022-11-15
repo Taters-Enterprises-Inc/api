@@ -182,10 +182,10 @@ class Transaction extends CI_Controller {
                             $this->notification_model->insertNotification($notifications_data);   
                         }
 
-                        //Mobile and FB user Client
-                        $clientUserId = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['fb_user_id']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
+                        //Mobile and FB user Client        
                         $notifications_data = array(
-                            "user_to_notify" => 0,
+                            "fb_user_to_notify" => $this->session->userData['fb_user_id'] ?? null,
+                            "mobile_user_to_notify" => $this->session->userData['mobile_user_id'] ?? null,
                             "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
                             "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
                             'notification_event_id' => $notification_event_id,
@@ -542,11 +542,10 @@ class Transaction extends CI_Controller {
                             $this->notification_model->insertNotification($notifications_data);   
                         }
 
-                        //mobile and fb user
-                        $clientUserId = isset($_SESSION['userData']['oauth_uid']) ? ('FB-' . $_SESSION['userData']['fb_user_id']) : ('M-' . $_SESSION['userData']['mobile_user_id']);
-                        
+                        //mobile or fb             
                         $notifications_data = array(
-                            "user_to_notify" => 0,
+                            "fb_user_to_notify" => $this->session->userData['fb_user_id'] ?? null,
+                            "mobile_user_to_notify" => $this->session->userData['mobile_user_id'] ?? null,
                             "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
                             "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
                             'notification_event_id' => $notification_event_id,
