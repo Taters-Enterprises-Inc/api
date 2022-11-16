@@ -143,6 +143,7 @@ $route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
 
 $route['admin/report-pmix/(:any)/(:any)'] = 'admin/report_pmix/$1/$2';
 $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/$2';
+$route['admin/survey-verification']= 'admin/survey_verification';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';

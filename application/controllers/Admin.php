@@ -24,6 +24,22 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 	}
 
+  public function survey_verification(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $survey = $this->admin_model->getSurveys();
+        $response = array(
+          "data" => $survey,
+          "message" => "Succesfully fetch survey verification"
+      );
+      
+      header('content-type: application/json');
+      echo json_encode($response);
+        break;
+        
+  }
+}
+
   public function report_transaction($startDate, $endDate){
 
     switch($this->input->server('REQUEST_METHOD')){

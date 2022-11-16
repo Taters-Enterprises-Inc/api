@@ -2,6 +2,25 @@
 
 class Admin_model extends CI_Model 
 {
+    public function __construct()
+    {
+		
+        $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
+    }
+
+    function getSurveys(){
+        $this->bsc_db->select('
+            A.reciept_no,
+            B.first_name,
+            B.last_name,
+        ');
+        $this->bsc_db->from('customer_survey_tb A');
+        $this->bsc_db->join('user_profile B', 'B.user_id = A.user_id');
+
+        $query_get_surveys = $this->bsc_db->get();
+        $get_survey = $query_get_surveys->result();
+        return $get_survey;
+    }
     
     function updateSettingStoreOperatingHours(
         $store_id,
