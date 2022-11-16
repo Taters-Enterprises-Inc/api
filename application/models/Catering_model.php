@@ -8,16 +8,13 @@ class Catering_model extends CI_Model
             
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'A.client_id = B.id' ,'left');
-        $this->db->join('notification_events C', 'A.id = C.catering_transaction_tb_id' ,'left');
-        $this->db->join('notifications D', 'C.id = D.notification_event_id','left');
+  
 
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
-            $this->db->where('D.mobile_user_to_notify', $id);
 
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
-            $this->db->where('D.fb_user_to_notify',  $id);
         }
             
         if($search){
@@ -50,24 +47,17 @@ class Catering_model extends CI_Model
 
             A.hash_key,
          
-
-            D.id as notification_id,
-            D.dateseen,
             
         ');
 
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'A.client_id = B.id' ,'left');
-        $this->db->join('notification_events C', 'A.id = C.catering_transaction_tb_id' ,'left');
-        $this->db->join('notifications D', 'C.id = D.notification_event_id','left');
 
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
-            $this->db->where('D.mobile_user_to_notify', $id);
 
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
-            $this->db->where('D.fb_user_to_notify',  $id);
         }
 
         $this->db->order_by('A.dateadded','DESC');

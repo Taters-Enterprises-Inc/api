@@ -104,14 +104,19 @@ class Shared extends CI_Controller {
         $user_id = isset($_SESSION['userData']['oauth_uid']) ? $_SESSION['userData']['fb_user_id'] : $_SESSION['userData']['mobile_user_id'];
         $type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' : 'mobile';
 
-		$data = array(
-
+		$count = array(
 			'Snackshop' => $this->notification_model->getUnseenNotificationsCount($user_id, 1, $type),
 			'Catering'  => $this->notification_model->getUnseenNotificationsCount($user_id, 2, $type),
 		);
 
+
         $response = array(
-            "data" => $data,
+			
+			"data" => array(
+				"Snackshop" => $this->notification_model->getNotifications($user_id, 1, true, $type),
+				"Catering" => $this->notification_model->getNotifications($user_id, 2, true, $type),
+           		"Total_Notifications" => $count,
+			  ),
             "message" => "Succesfully fetch notification"
         );
         
