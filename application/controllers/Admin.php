@@ -29,7 +29,7 @@ class Admin extends CI_Controller{
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
         $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
-        $end = date("Y-m-d", strtotime($endDate)) . " 59:59:59";
+        $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
         $data = $this->report_model->getReportTransaction($start, $end);
         header("Content-Type: application/vnd.ms-excel");
         header("Content-disposition: attachment; filename=transaction_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
@@ -112,7 +112,7 @@ class Admin extends CI_Controller{
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
         $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
-        $end = date("Y-m-d", strtotime($endDate)) . " 59:59:59";
+        $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
         $data = $this->report_model->getReportPmix($start, $end);
         header("Content-Type: application/vnd.ms-excel");
 
