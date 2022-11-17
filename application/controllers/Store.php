@@ -41,6 +41,7 @@ class Store extends CI_Controller {
 					$post['storeId'],
 					$post['address'],
 					$post['service'],
+					null,
 					$post['cateringStartDate'],
 					$post['cateringEndDate'],
 				);
