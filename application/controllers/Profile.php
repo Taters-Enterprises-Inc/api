@@ -12,6 +12,7 @@ class Profile extends CI_Controller {
 		parent::__construct();
 		$this->load->model('shop_model');
 		$this->load->model('catering_model');
+		$this->load->model('notification_model');
 		$this->load->model('deals_model');
 		$this->load->model('user_model');
 		$this->load->model('contact_model');
@@ -161,7 +162,6 @@ class Profile extends CI_Controller {
 						$snackshop_orders_count = $this->shop_model->getUserOrderHistoryCount('mobile',$get_mobile_user_details->id, $search);
 						$snackshop_orders = $this->shop_model->getUserOrderHistory('mobile',$get_mobile_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
 						
-
 						$pagination = array(
 							"total_rows" => $snackshop_orders_count,
 							"per_page" => $per_page,
@@ -171,7 +171,7 @@ class Profile extends CI_Controller {
 							'message' => 'Succesfully fetch history of orders',
 							"data" => array(
 							  "pagination" => $pagination,
-							  "orders" => $snackshop_orders
+							  "orders" => $snackshop_orders,
 							),
 						);
 		
@@ -181,8 +181,20 @@ class Profile extends CI_Controller {
 				}
 
 				return;
+			break;
+
+			case 'PUT': 
+				$post = json_decode(file_get_contents("php://input"), true);
+				$date_now = date('Y-m-d H:i:s');
+
+				$this->notification_model->seenNotification($post['notificationId'], $date_now);
+
+				header('content-type: application/json');
+				return;
 		}
 	}
+
+
 
 	public function catering_bookings(){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -255,6 +267,17 @@ class Profile extends CI_Controller {
 						return;
 				}
 				return;
+
+				break;
+
+				case 'PUT': 
+					$post = json_decode(file_get_contents("php://input"), true);
+					$date_now = date('Y-m-d H:i:s');
+	
+					$this->notification_model->seenNotification($post['notificationId'], $date_now);
+	
+					header('content-type: application/json');
+					return;
 		}
 	}
 

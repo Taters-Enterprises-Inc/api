@@ -28,9 +28,11 @@ class Shop_model extends CI_Model
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
+    
         
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
+
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
         }
@@ -61,15 +63,19 @@ class Shop_model extends CI_Model
             C.generated_raffle_code,
             C.application_status,
             A.hash_key,
+        
         ');
 
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
+    
+
 
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
+
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
         }
@@ -92,7 +98,7 @@ class Shop_model extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
-
+    
     function upload_payment($data,$file_name,$tracking_no,$transaction_id)
     { 
         date_default_timezone_set('Asia/Manila');
@@ -116,7 +122,8 @@ class Shop_model extends CI_Model
         }
         return $return_data;
     }
-    
+
+   
     public function get_facebook_details($id){
         $this->db->select("*");
         $this->db->from('fb_users');

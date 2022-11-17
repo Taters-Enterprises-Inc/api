@@ -167,19 +167,19 @@ class Admin extends CI_Controller{
         $response = array(
             "data" => array(
               "all" => array(
-                'notifications'=> $this->notification_model->getNotifications($user_id, null, false),
-                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true),
-                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, null),
+                'notifications'=> $this->notification_model->getNotifications($user_id, null, false, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true, 'admin'),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, null, 'admin'),
               ),
               "snackshop_order" => array(
-                'notifications'=> $this->notification_model->getNotifications($user_id, 1, false),
-                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true),
-                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 1),
+                'notifications'=> $this->notification_model->getNotifications($user_id, 1, false, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true, 'admin'),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 1, 'admin'),
               ),
               "catering_order" => array(
                 'notifications'=> $this->notification_model->getNotifications($user_id, 2, false),
                 "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true),
-                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 2),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 2, 'admin'),
               ),
             ),
             "message" => "Succesfully fetch notification"
