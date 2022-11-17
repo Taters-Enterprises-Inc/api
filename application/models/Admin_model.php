@@ -8,18 +8,75 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
-    function getSurveys(){
+    function getSurvey($survey_id){
         $this->bsc_db->select('
+            A.dateadded,
             A.reciept_no,
             B.first_name,
             B.last_name,
         ');
         $this->bsc_db->from('customer_survey_tb A');
-        $this->bsc_db->join('user_profile B', 'B.user_id = A.user_id');
+        $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
 
-        $query_get_surveys = $this->bsc_db->get();
-        $get_survey = $query_get_surveys->result();
-        return $get_survey;
+        $this->bsc_db->where('A.id', $survey_id);
+
+        $query = $this->bsc_db->get();
+        return $query->row();
+
+    }
+
+    public function getSurveyCount($status, $search){
+        $this->bsc_db->select('count(*) as all_count');
+            
+        $this->bsc_db->from('customer_survey_tb A');
+
+        if($status)
+            $this->bsc_db->where('A.status', $status);
+
+        if($search){
+            $this->bsc_db->group_start();
+            $this->bsc_db->or_like('A.reciept_no', $search);
+            $this->bsc_db->or_like('A.first_name', $search);
+            $this->bsc_db->or_like('A.middle_name', $search);
+            $this->bsc_db->or_like('A.last_name', $search);
+            $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->bsc_db->group_end();
+        }
+
+        $query = $this->bsc_db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getSurveys($row_no, $row_per_page, $status, $order_by,  $order, $search){
+        
+        $this->bsc_db->select("
+            A.id,
+            A.dateadded,
+            A.reciept_no,
+            B.first_name,
+            B.last_name,
+        ");
+
+        $this->bsc_db->from('customer_survey_tb A');
+        $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
+ 
+        if($status)
+            $this->bsc_db->where('A.status', $status);
+
+            if($search){
+                $this->bsc_db->group_start();
+                $this->bsc_db->or_like('A.reciept_no', $search);
+                $this->bsc_db->or_like('B.first_name', $search);
+                $this->bsc_db->or_like('B.last_name', $search);
+                $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+                $this->bsc_db->group_end();
+            }
+
+        $this->bsc_db->limit($row_per_page, $row_no);
+        $this->bsc_db->order_by($order_by, $order);
+
+        $query = $this->bsc_db->get();
+        return $query->result();
     }
     
     function updateSettingStoreOperatingHours(

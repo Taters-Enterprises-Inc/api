@@ -24,10 +24,10 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 	}
 
-  public function survey_verification(){
+  public function survey_verification($survey_id){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
-        $survey = $this->admin_model->getSurveys();
+        $survey = $this->admin_model->getSurvey($survey_id);
         $response = array(
           "data" => $survey,
           "message" => "Succesfully fetch survey verification"
@@ -37,6 +37,42 @@ class Admin extends CI_Controller{
       echo json_encode($response);
         break;
         
+  }
+}
+
+public function survey_verifications(){
+  switch($this->input->server('REQUEST_METHOD')){
+    case 'GET':
+    $per_page = $this->input->get('per_page') ?? 25;
+    $page_no = $this->input->get('page_no') ?? 0;
+    $status = $this->input->get('status') ?? null;
+    $order = $this->input->get('order') ?? 'desc';
+    $order_by = $this->input->get('order_by') ?? 'dateadded';
+    $search = $this->input->get('search');
+
+    if($page_no != 0){
+      $page_no = ($page_no - 1) * $per_page;
+    }
+    
+    $surveys_count = $this->admin_model->getSurveyCount($status, $search);
+    $surveyverification = $this->admin_model->getSurveys($page_no, $per_page, $status, $order_by, $order, $search);
+
+    $pagination = array(
+      "total_rows" => $surveys_count,
+      "per_page" => $per_page,
+    );
+
+    $response = array(
+      "message" => 'Successfully fetch survey verification',
+      "data" => array(
+        "pagination" => $pagination,
+        "surveyverification" => $surveyverification
+      ),
+    );
+  
+    header('content-type: application/json');
+    echo json_encode($response);
+    return;
   }
 }
 
