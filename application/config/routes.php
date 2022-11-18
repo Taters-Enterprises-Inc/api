@@ -146,6 +146,8 @@ $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/
 
 $route['admin/survey-verification/(:any)']= 'admin/survey_verification/$1';
 $route['admin/survey-verifications'] = 'admin/survey_verifications';
+$route['admin/survey-verification/survey-verification-change-status'] = 'admin/survey_verification_change_status';
+
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';

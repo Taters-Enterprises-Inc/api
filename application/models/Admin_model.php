@@ -78,6 +78,12 @@ class Admin_model extends CI_Model
         $query = $this->bsc_db->get();
         return $query->result();
     }
+
+    public function changeStatusSurveyVerification($survey_verification_id, $status){
+		$this->db->set('status', (int) $status);
+        $this->db->where('id', $survey_verification_id);
+        $this->db->update("customer_survey_tb");
+    }
     
     function updateSettingStoreOperatingHours(
         $store_id,

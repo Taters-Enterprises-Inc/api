@@ -76,6 +76,26 @@ public function survey_verifications(){
   }
 }
 
+public function survey_verification_change_status(){
+  switch($this->input->server('REQUEST_METHOD')){
+    case 'POST':
+      $_POST =  json_decode(file_get_contents("php://input"), true);
+      
+      $survey_verification_id = $this->input->post('surveyverificationId');
+      $status = $this->input->post('status');
+
+      $this->admin_model->changeStatusSurveyVerification($survey_verification_id, $status);
+
+      $response = array(
+        "message" => 'Successfully update survey verification status',
+      );
+
+      header('content-type: application/json');
+      echo json_encode($response);
+      return;
+  }
+}
+
   public function report_transaction($startDate, $endDate){
 
     switch($this->input->server('REQUEST_METHOD')){
