@@ -29,6 +29,7 @@ class Admin_model extends CI_Model
         $this->bsc_db->select('count(*) as all_count');
             
         $this->bsc_db->from('customer_survey_tb A');
+        $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
 
         if($status)
             $this->bsc_db->where('A.status', $status);
@@ -36,9 +37,8 @@ class Admin_model extends CI_Model
         if($search){
             $this->bsc_db->group_start();
             $this->bsc_db->or_like('A.reciept_no', $search);
-            $this->bsc_db->or_like('A.first_name', $search);
-            $this->bsc_db->or_like('A.middle_name', $search);
-            $this->bsc_db->or_like('A.last_name', $search);
+            $this->bsc_db->or_like('B.first_name', $search);
+            $this->bsc_db->or_like('B.last_name', $search);
             $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
             $this->bsc_db->group_end();
         }
