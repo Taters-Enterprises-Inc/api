@@ -10,6 +10,7 @@ class Admin_model extends CI_Model
 
     function getSurvey($survey_id){
         $this->bsc_db->select('
+            A.id,
             A.dateadded,
             A.reciept_no,
             B.first_name,
