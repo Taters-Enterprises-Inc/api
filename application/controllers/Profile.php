@@ -12,7 +12,6 @@ class Profile extends CI_Controller {
 		parent::__construct();
 		$this->load->model('shop_model');
 		$this->load->model('catering_model');
-		$this->load->model('notification_model');
 		$this->load->model('deals_model');
 		$this->load->model('user_model');
 		$this->load->model('contact_model');
@@ -131,7 +130,7 @@ class Profile extends CI_Controller {
 
 					header('content-type: application/json');
 					echo json_encode($response);
-					return;
+					break;
 				}
 
 				switch($logon_type){
@@ -156,7 +155,7 @@ class Profile extends CI_Controller {
 		
 						header('content-type: application/json');
 						echo json_encode($response);
-						return;
+						break;
 					case 'mobile':
 						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
 						$snackshop_orders_count = $this->shop_model->getUserOrderHistoryCount('mobile',$get_mobile_user_details->id, $search);
@@ -177,20 +176,9 @@ class Profile extends CI_Controller {
 		
 						header('content-type: application/json');
 						echo json_encode($response);
-						return;
+						break;
 				}
-
-				return;
-			break;
-
-			case 'PUT': 
-				$post = json_decode(file_get_contents("php://input"), true);
-				$date_now = date('Y-m-d H:i:s');
-
-				$this->notification_model->seenNotification($post['notificationId'], $date_now);
-
-				header('content-type: application/json');
-				return;
+				break;
 		}
 	}
 
@@ -243,7 +231,7 @@ class Profile extends CI_Controller {
 		
 						header('content-type: application/json');
 						echo json_encode($response);
-						return;
+						break;
 					case 'mobile':
 						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
 						$catering_bookings_count = $this->catering_model->getUserCateringBookingHistoryCount('mobile',$get_mobile_user_details->id, $search);
@@ -264,20 +252,9 @@ class Profile extends CI_Controller {
 		
 						header('content-type: application/json');
 						echo json_encode($response);
-						return;
+						break;
 				}
-				return;
-
 				break;
-
-				case 'PUT': 
-					$post = json_decode(file_get_contents("php://input"), true);
-					$date_now = date('Y-m-d H:i:s');
-	
-					$this->notification_model->seenNotification($post['notificationId'], $date_now);
-	
-					header('content-type: application/json');
-					return;
 		}
 	}
 

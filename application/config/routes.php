@@ -34,7 +34,6 @@ $route['shared/clear_all_session'] = 'shared/clear_all_session';
 $route['shared/upload_payment'] = 'shared/upload_payment';
 $route['shared/catering_upload_payment'] = 'shared/catering_upload_payment';
 $route['shared/contacts'] = 'shared/contacts';
-$route['shared/notifications'] = 'shared/notifications';
 
 // Facebook
 $route['facebook/login'] = 'user_authentication';
@@ -134,6 +133,9 @@ $route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
 
 $route['admin/report-pmix/(:any)/(:any)'] = 'admin/report_pmix/$1/$2';
 $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/$2';
+
+//Notification
+$route['notification'] = 'notification';
 
 //Others
 $route['404_override'] = '';
