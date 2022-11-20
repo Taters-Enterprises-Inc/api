@@ -136,6 +136,7 @@ $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/
 
 //Notification
 $route['notification'] = 'notification';
+$route['notification/(:num)/seen'] = 'notification/seen/$1';
 
 //Others
 $route['404_override'] = '';

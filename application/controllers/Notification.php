@@ -17,20 +17,27 @@ class Notification extends CI_Controller {
 	public function index(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
+				if(!isset($_SESSION['userData'])){
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode($response);
+				}
+
 				$user_id = isset($_SESSION['userData']['oauth_uid']) ? $_SESSION['userData']['fb_user_id'] : $_SESSION['userData']['mobile_user_id'];
 				$type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' : 'mobile';
 
-
 				$response = array(
 					"data" => array(
-						"snackshop" => array(
-							"notifications" => $this->notification_model->getNotifications($user_id, 1, true, $type),
-							"count" => $this->notification_model->getUnseenNotificationsCount($user_id, 1, $type),
+						"snackshop_order" => array(
+							'notifications'=> $this->notification_model->getNotifications($user_id, 1, false, $type),
+							"unseen_notifications" => $this->notification_model->getNotifications($user_id, 1, true, $type),
+							'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 1, $type),
 						),
-						"catering" => array(
-							"notifications" => $this->notification_model->getNotifications($user_id, 2, true, $type),
-							"count" => $this->notification_model->getUnseenNotificationsCount($user_id, 2, $type),
-						)
+						"catering_booking" => array(
+							'notifications'=> $this->notification_model->getNotifications($user_id, 2, false, $type),
+							"unseen_notifications" => $this->notification_model->getNotifications($user_id, 2, true, $type),
+							'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 2, $type),
+						),
 					),
 					"message" => "Succesfully fetch notification"
 				);
@@ -38,12 +45,16 @@ class Notification extends CI_Controller {
 				header('content-type: application/json');
 				echo json_encode($response);
 				break;
+     	}
+  	}
+
+	
+	public function seen($notification_id){
+		switch($this->input->server('REQUEST_METHOD')){
 			case 'PUT':
-				$post = json_decode(file_get_contents("php://input"), true);
 				$date_now = date('Y-m-d H:i:s');
-
-				$this->notification_model->seenNotification($post['notificationId'], $date_now);
-
+				$this->notification_model->seenNotification($notification_id, $date_now);
+				
 				$response = array(
 					"message" => "Succesfully seen notification"
 				);
@@ -51,7 +62,7 @@ class Notification extends CI_Controller {
 				header('content-type: application/json');
 				echo json_encode($response);
 				break;
-     	}
-  }
+		}
+	}
 
 }

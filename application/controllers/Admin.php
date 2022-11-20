@@ -173,12 +173,12 @@ class Admin extends CI_Controller{
               ),
               "snackshop_order" => array(
                 'notifications'=> $this->notification_model->getNotifications($user_id, 1, false, 'admin'),
-                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 1, true, 'admin'),
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 1, 'admin'),
               ),
-              "catering_order" => array(
-                'notifications'=> $this->notification_model->getNotifications($user_id, 2, false),
-                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true),
+              "catering_booking" => array(
+                'notifications'=> $this->notification_model->getNotifications($user_id, 2, false, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 2, true, 'admin'),
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 2, 'admin'),
               ),
             ),
