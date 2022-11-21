@@ -162,6 +162,10 @@ $route['bsc/stores'] = 'bsc/stores';
 $route['bsc/user/(:num)'] = 'bsc/user/$1';
 $route['bsc/user/status'] = 'bsc/user_status';
 
+//Notification
+$route['notification'] = 'notification';
+$route['notification/(:num)/seen'] = 'notification/seen/$1';
+
 //Others
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
