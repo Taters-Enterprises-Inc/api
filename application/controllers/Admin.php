@@ -66,7 +66,7 @@ public function survey_verifications(){
       "message" => 'Successfully fetch survey verification',
       "data" => array(
         "pagination" => $pagination,
-        "surveyverification" => $surveyverification
+        "surveys" => $surveyverification
       ),
     );
   
