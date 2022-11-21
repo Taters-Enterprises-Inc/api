@@ -207,6 +207,7 @@ class Admin_model extends CI_Model
         $this->db->from('products_tb P');
         $this->db->select('*');
         $this->db->join('order_items O', 'P.id = O.product_id' ,'left');
+        $this->db->join('dotcom_deals_tb D', 'D.id = O.deal_id' ,'left');
         $this->db->where('O.transaction_id', $id);
         $query_orders = $this->db->get();
         $orders = $query_orders->result();
@@ -221,7 +222,7 @@ class Admin_model extends CI_Model
         ");
         $this->db->from('deals_order_items A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
-        $this->db->where('A.redeems_id', $id);
+        $this->db->where('A.transaction_id', $id);
         $deals_query = $this->db->get();
         $deals = $deals_query->result();
 
@@ -1109,6 +1110,7 @@ class Admin_model extends CI_Model
 
     public function getSnackshopOrderItems($transaction_id){
         $this->db->select("
+            A.price,
             A.product_price,
             A.quantity,
             A.remarks,
@@ -1116,14 +1118,19 @@ class Admin_model extends CI_Model
             B.name,
             B.description,
             B.add_details,
+            C.name as deal_name,
+            C.description as deal_description,
+            C.promo_discount_percentage,
         ");
         $this->db->from('order_items A');
         $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->join('dotcom_deals_tb C', 'C.id = A.deal_id', 'left');
         $this->db->where('A.transaction_id', $transaction_id);
         $products_query = $this->db->get();
         $products = $products_query->result();
 
         $this->db->select("
+            A.price,
             A.product_price,
             A.quantity,
             A.remarks,
@@ -1133,7 +1140,7 @@ class Admin_model extends CI_Model
         ");
         $this->db->from('deals_order_items A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
-        $this->db->where('A.redeems_id', $transaction_id);
+        $this->db->where('A.transaction_id', $transaction_id);
         $deals_query = $this->db->get();
         $deals = $deals_query->result();
         
@@ -1234,6 +1241,8 @@ class Admin_model extends CI_Model
             A.event_class,
             A.company_name,
             A.remarks,
+            A.hash_key,
+
             A.purchase_amount,
             A.service_fee,
             A.night_diff_fee,

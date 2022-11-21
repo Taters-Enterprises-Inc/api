@@ -63,9 +63,10 @@ class Store_model extends CI_Model
     }
 
 	public function get_store_info($id){
-	  $this->db->select('store_id,region_id,name,delivery_hours,address,moh_notes');
-	  $this->db->from('store_tb');
-	  $this->db->where('store_id',$id);
+	  $this->db->select('A.store_id,B.region_store_id,A.name,A.delivery_hours,A.address,A.moh_notes');
+	  $this->db->from('store_tb A');
+	  $this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
+	  $this->db->where('A.store_id',$id);
 	  $query = $this->db->get();
 	  return $query->row();
 	}
@@ -99,7 +100,8 @@ class Store_model extends CI_Model
 			A.contact_number as contactno,
 			A.operating_hours as operatinghours, 
 			A.map_link as maplink, 
-			( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance 
+			( 3959 * acos( cos( radians('.$latitude.') ) * cos( radians( A.lat ) ) * cos( radians( A.lng ) - radians('.$longitude.') ) + sin( radians('.$latitude.') ) * sin( radians( A.lat ) ) ) ) AS distance, 
+			A.dateadded
 		');
 
 		$this->db->from('store_tb A');
@@ -156,6 +158,7 @@ class Store_model extends CI_Model
 			  'maplink'   => $value->maplink,
 			  'available_start_time' => $value->available_start_time,
 			  'available_end_time' => $value->available_end_time,
+			  'dateadded' => $value->dateadded,
 			);  
 		}
 	  

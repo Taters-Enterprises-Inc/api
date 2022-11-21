@@ -50,6 +50,7 @@ class Shop extends CI_Controller {
 				$variants = array_values(array_filter($variant));
 	
 				$query_result = $this->shop_model->fetch_product_sku($variants);
+
 				header('content-type: application/json');
 				echo json_encode(array(
 					'message'=> 'Successfully get product sku',
@@ -136,6 +137,23 @@ class Shop extends CI_Controller {
 				$hash = $this->input->get('hash');
 
 				$product = $this->shop_model->get_product($hash);
+				
+                $redeem_data = $this->session->redeem_data;
+                $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+				$promo_discount_percentage = null;
+
+                if($deal_products_promo_exclude){
+                    $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                    foreach($deal_products_promo_exclude as $value){
+                        if($value->product_id === $product->id){
+                            $promo_discount_percentage = null;
+                            break;
+                        }
+                    }
+
+					$product->promo_discount_percentage = $promo_discount_percentage;
+                }
 				
 				$product_size = $this->shop_model->fetch_product_variants($product->id,'size');
 				$product_flavor = $this->shop_model->fetch_product_variants($product->id,'flavor');
