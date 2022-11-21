@@ -54,6 +54,7 @@ class Admin_model extends CI_Model
             A.id,
             A.dateadded,
             A.reciept_no,
+            A.status,
             B.first_name,
             B.last_name,
         ");
