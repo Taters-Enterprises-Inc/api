@@ -135,7 +135,7 @@ class Profile extends CI_Controller {
 
 					header('content-type: application/json');
 					echo json_encode($response);
-					return;
+					break;
 				}
 
 				switch($logon_type){
@@ -160,13 +160,12 @@ class Profile extends CI_Controller {
 		
 						header('content-type: application/json');
 						echo json_encode($response);
-						return;
+						break;
 					case 'mobile':
 						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
 						$snackshop_orders_count = $this->shop_model->getUserOrderHistoryCount('mobile',$get_mobile_user_details->id, $search);
 						$snackshop_orders = $this->shop_model->getUserOrderHistory('mobile',$get_mobile_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
 						
-
 						$pagination = array(
 							"total_rows" => $snackshop_orders_count,
 							"per_page" => $per_page,
@@ -176,18 +175,19 @@ class Profile extends CI_Controller {
 							'message' => 'Succesfully fetch history of orders',
 							"data" => array(
 							  "pagination" => $pagination,
-							  "orders" => $snackshop_orders
+							  "orders" => $snackshop_orders,
 							),
 						);
 		
 						header('content-type: application/json');
 						echo json_encode($response);
-						return;
+						break;
 				}
-
-				return;
+				break;
 		}
 	}
+
+
 
 	public function catering_bookings(){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -236,7 +236,7 @@ class Profile extends CI_Controller {
 		
 						header('content-type: application/json');
 						echo json_encode($response);
-						return;
+						break;
 					case 'mobile':
 						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
 						$catering_bookings_count = $this->catering_model->getUserCateringBookingHistoryCount('mobile',$get_mobile_user_details->id, $search);
@@ -257,9 +257,9 @@ class Profile extends CI_Controller {
 		
 						header('content-type: application/json');
 						echo json_encode($response);
-						return;
+						break;
 				}
-				return;
+				break;
 		}
 	}
 
