@@ -154,6 +154,7 @@ class Popclub extends CI_Controller {
 							$redeem->store,
 							$redeem->address,
 							'SNACKSHOP',
+							$redeem->platform_id,
 						);
 
 						

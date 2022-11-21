@@ -7,6 +7,7 @@ if ( ! function_exists('set_store_sessions'))
         $store_id,
         $address,
         $service,
+        $platform_id,
         $catering_start_date=null,
         $catering_end_date=null
     ){
@@ -32,8 +33,6 @@ if ( ! function_exists('set_store_sessions'))
             'surcharge_minimum_rate'	=>	$surcharge_minimum_rate,
             'surcharge'					=>	$surcharge
         );
-
-        $CI->session->customer_address = $address;
 
         $opening = $CI->store_model->get_store_schedule($store_id);
         $moh_setup = $CI->store_model->fetch_moh_setup($store->region_store_id);
@@ -69,6 +68,11 @@ if ( ! function_exists('set_store_sessions'))
             $succeeding_hour_charge = $CI->get_succeeding_hour_charge($start_datetime, $end_datetime);
             $CI->session->set_userdata('catering_succeeding_hour_charge', (int) $succeeding_hour_charge);
         }
+
+        if($platform_id === 1 || !isset($address)){
+            return;
+        }
+        $CI->session->customer_address = $address;
 
         $customer_address= $CI->session->customer_address;
         $store_address = $opening->address;

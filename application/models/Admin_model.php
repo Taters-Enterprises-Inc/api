@@ -1158,6 +1158,8 @@ class Admin_model extends CI_Model
             A.event_class,
             A.company_name,
             A.remarks,
+            A.hash_key,
+
             A.purchase_amount,
             A.service_fee,
             A.night_diff_fee,
