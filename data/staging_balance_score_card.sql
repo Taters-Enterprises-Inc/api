@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 16, 2022 at 08:37 AM
+-- Generation Time: Nov 22, 2022 at 06:11 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -47,7 +47,7 @@ INSERT INTO `companies` (`id`, `name`) VALUES
 
 CREATE TABLE `customer_survey_answer` (
   `id` int(10) UNSIGNED NOT NULL,
-  `question_id` int(10) UNSIGNED DEFAULT NULL,
+  `offered_answer` int(10) UNSIGNED DEFAULT NULL,
   `other_text` varchar(265) DEFAULT NULL,
   `survey_id` int(10) UNSIGNED NOT NULL,
   `customer_survey_id` int(10) UNSIGNED NOT NULL
@@ -57,7 +57,7 @@ CREATE TABLE `customer_survey_answer` (
 -- Dumping data for table `customer_survey_answer`
 --
 
-INSERT INTO `customer_survey_answer` (`id`, `question_id`, `other_text`, `survey_id`, `customer_survey_id`) VALUES
+INSERT INTO `customer_survey_answer` (`id`, `offered_answer`, `other_text`, `survey_id`, `customer_survey_id`) VALUES
 (1, 2, NULL, 1, 1);
 
 -- --------------------------------------------------------
@@ -131,7 +131,26 @@ INSERT INTO `offered_answer` (`id`, `text`) VALUES
 (7, 'Online order : Pick-up'),
 (8, 'Walk-In'),
 (9, 'Yes'),
-(10, 'No');
+(10, 'No'),
+(11, 'Male\r\n'),
+(12, 'Female\r\n'),
+(13, 'Non-Binary / Third Gender\r\n'),
+(14, 'Prefer to self-describe\r\n'),
+(15, 'Prefer not to answer'),
+(16, 'Under 18'),
+(17, '18 to 24'),
+(18, '25 to 34'),
+(19, '35 to 44'),
+(20, '45 to 49'),
+(21, '50 to 64'),
+(22, '65 or above.'),
+(23, 'Asian\r\n'),
+(24, 'Native Hawaiian or other Native Islander\r\n'),
+(25, 'White or Caucassian\r\n'),
+(26, 'American Indian or Alaska Native\r\n'),
+(27, 'Hispanic or Latino\r\n'),
+(28, 'Black or African American\r\n'),
+(29, 'Other');
 
 -- --------------------------------------------------------
 
@@ -144,27 +163,34 @@ CREATE TABLE `survey` (
   `start_date` datetime DEFAULT NULL,
   `end_date` datetime DEFAULT NULL,
   `status` int(11) NOT NULL,
-  `description` varchar(265) NOT NULL
+  `description` varchar(265) NOT NULL,
+  `is_comment` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `survey`
 --
 
-INSERT INTO `survey` (`id`, `start_date`, `end_date`, `status`, `description`) VALUES
-(1, NULL, NULL, 1, 'Please rate your overall satisfaction with your Taters Experience.'),
-(2, NULL, NULL, 2, 'Please select your Visit Type.'),
-(3, NULL, NULL, 3, 'The friendlyness of the delivery driver.'),
-(4, NULL, NULL, 4, 'Taste of your food.'),
-(5, NULL, NULL, 5, 'The availability of the menu items.'),
-(6, NULL, NULL, 6, 'Speed of service'),
-(7, NULL, NULL, 7, 'Temperature of food'),
-(8, NULL, NULL, 8, 'The accuracy of order'),
-(9, NULL, NULL, 9, 'Portion of size you recieved.'),
-(10, NULL, NULL, 10, 'The overall value of the price you paid.'),
-(11, NULL, NULL, 11, 'Did you have a problem during your experience?'),
-(13, NULL, NULL, 13, 'Based on this visit, what is the likelihood that you will\r\nRecommend this Taters to others in the next 30 days?'),
-(14, NULL, NULL, 14, 'Please tell us in three or more sentences about your experience with Taters.');
+INSERT INTO `survey` (`id`, `start_date`, `end_date`, `status`, `description`, `is_comment`) VALUES
+(1, NULL, NULL, 1, 'Please rate your overall satisfaction with your Taters Experience.', 0),
+(2, NULL, NULL, 2, 'Please select your Visit Type.', 0),
+(3, NULL, NULL, 3, 'The friendlyness of the delivery driver.', 0),
+(4, NULL, NULL, 4, 'Taste of your food.', 0),
+(5, NULL, NULL, 5, 'The availability of the menu items.', 0),
+(6, NULL, NULL, 6, 'Speed of service', 0),
+(7, NULL, NULL, 7, 'Temperature of food', 0),
+(8, NULL, NULL, 8, 'The accuracy of order', 0),
+(9, NULL, NULL, 9, 'Portion of size you recieved.', 0),
+(10, NULL, NULL, 10, 'The overall value of the price you paid.', 0),
+(11, NULL, NULL, 11, 'Did you have a problem during your experience?', 0),
+(13, NULL, NULL, 13, 'Based on this visit, what is the likelihood that you will\r\nRecommend this Taters to others in the next 30 days?', 0),
+(14, NULL, NULL, 14, 'Please tell us in three or more sentences about your experience with Taters.', 1),
+(15, NULL, NULL, 15, 'If you were to choose the next store destination of Taters, where would you want it located?', 1),
+(16, NULL, NULL, 16, 'If you were to add a new permanent entree on the menu, what would you want to see?', 1),
+(17, NULL, NULL, 17, 'Was your order delivered when promised?', 0),
+(18, NULL, NULL, 18, 'Please select your Gender.\r\n', 0),
+(19, NULL, NULL, 19, 'Please select your age.', 0),
+(20, NULL, NULL, 20, 'Please select which of the following best describes your background.', 0);
 
 -- --------------------------------------------------------
 
@@ -237,7 +263,28 @@ INSERT INTO `survey_question_answer` (`id`, `survey_id`, `offered_answer_id`) VA
 (52, 13, 2),
 (53, 13, 3),
 (54, 13, 4),
-(55, 13, 5);
+(55, 13, 5),
+(57, 17, 9),
+(58, 17, 10),
+(59, 18, 11),
+(60, 18, 12),
+(61, 18, 13),
+(62, 18, 14),
+(63, 18, 15),
+(64, 19, 16),
+(65, 19, 17),
+(66, 19, 18),
+(67, 19, 19),
+(68, 19, 20),
+(69, 19, 21),
+(70, 19, 22),
+(71, 20, 23),
+(72, 20, 24),
+(73, 20, 25),
+(74, 20, 26),
+(75, 20, 27),
+(76, 20, 28),
+(77, 20, 29);
 
 -- --------------------------------------------------------
 
@@ -374,7 +421,7 @@ ALTER TABLE `customer_survey_answer`
   ADD PRIMARY KEY (`id`),
   ADD KEY `customer_survey_id` (`customer_survey_id`),
   ADD KEY `offered_answer_id` (`other_text`),
-  ADD KEY `question_id` (`question_id`),
+  ADD KEY `question_id` (`offered_answer`),
   ADD KEY `survey_id` (`survey_id`);
 
 --
@@ -500,19 +547,19 @@ ALTER TABLE `login_attempts`
 -- AUTO_INCREMENT for table `offered_answer`
 --
 ALTER TABLE `offered_answer`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `survey`
 --
 ALTER TABLE `survey`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `survey_question_answer`
 --
 ALTER TABLE `survey_question_answer`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -559,7 +606,7 @@ ALTER TABLE `user_stores`
 --
 ALTER TABLE `customer_survey_answer`
   ADD CONSTRAINT `customer_survey_answer_ibfk_1` FOREIGN KEY (`customer_survey_id`) REFERENCES `customer_survey_tb` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_answer_ibfk_3` FOREIGN KEY (`question_id`) REFERENCES `offered_answer` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_answer_ibfk_3` FOREIGN KEY (`offered_answer`) REFERENCES `offered_answer` (`id`) ON UPDATE NO ACTION,
   ADD CONSTRAINT `customer_survey_answer_ibfk_4` FOREIGN KEY (`survey_id`) REFERENCES `survey` (`id`) ON UPDATE NO ACTION;
 
 --

@@ -16,7 +16,7 @@ class Survey extends CI_Controller {
 		$this->load->model('survey_model');;
 	}
 
-	public function survey(){
+	public function index(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 

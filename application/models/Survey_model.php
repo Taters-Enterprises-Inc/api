@@ -21,6 +21,7 @@ class Survey_model extends CI_Model
 		$this->db->select('
 			A.id,
 			A.description,
+			A.is_comment,
 		
 		');
 

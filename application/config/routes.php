@@ -157,6 +157,10 @@ $route['bsc/stores'] = 'bsc/stores';
 $route['bsc/user/(:num)'] = 'bsc/user/$1';
 $route['bsc/user/status'] = 'bsc/user_status';
 
+//Survey
+$route['survey'] = 'survey';
+
+
 //Others
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
