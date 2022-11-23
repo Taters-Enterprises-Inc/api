@@ -165,6 +165,9 @@ $route['bsc/user/status'] = 'bsc/user_status';
 $route['notification'] = 'notification';
 $route['notification/(:num)/seen'] = 'notification/seen/$1';
 
+//Survey
+$route['survey'] = 'survey';
+
 //Others
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
