@@ -126,9 +126,10 @@ class Download extends CI_Controller {
 					foreach($remarks as $remarks_key => $remark){
 						$get_first_letter = substr($remark,8);
 						$quantity = (int)strtok($get_first_letter, " - ");
+						$name_first_letter_index = strpos($remark," - ") + 3;
 						$remarks[$remarks_key] = array(
 							'quantity' => $quantity,
-							'name' => substr($remark,21),
+							'name' => substr($remark,$name_first_letter_index),
 						);
 					}
 	
