@@ -887,10 +887,11 @@ public function survey_verification_change_status(){
         $update_on_click = $this->admin_model->update_catering_on_click($trans_id, $status);
         if ($status == 2) $generate_invoice = $this->admin_model->generate_catering_invoice_num($trans_id);
 
-        if ($status == 2) $tagname = "Confirm";
-        elseif ($status == 4) $tagname = "Contract Verified";
-        elseif ($status == 6) $tagname = "Initial Payment Verified";
-        elseif ($status == 8) $tagname = "Final Payment Verified";
+            if ($status == 2) $tagname = "Confirm";
+            elseif ($status == 4) $tagname = "Contract Verified";
+            elseif ($status == 6) $tagname = "Initial Payment Verified";
+            elseif ($status == 8) $tagname = "Final Payment Verified";
+            elseif ($status == 9) $tagname = "Catering booking completed";
 
         if ($fetch_data == 1) {
           $this->logs_model->insertCateringTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Booking Success');

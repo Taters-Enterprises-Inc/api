@@ -79,8 +79,6 @@ class Shop_model extends CI_Model
         } else if($type == 'facebook') {
             $this->db->where('B.fb_user_id', $id);
         }
-
-        $this->db->order_by('A.dateadded','DESC');
         
         if($search){
             $this->db->group_start();
