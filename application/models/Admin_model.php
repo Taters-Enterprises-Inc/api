@@ -2,6 +2,91 @@
 
 class Admin_model extends CI_Model 
 {
+    public function __construct()
+    {
+		
+        $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
+    }
+
+    function getSurvey($survey_id){
+        $this->bsc_db->select('
+            A.id,
+            A.dateadded,
+            A.reciept_no,
+            A.status,
+            B.first_name,
+            B.last_name,
+        ');
+        $this->bsc_db->from('customer_survey_tb A');
+        $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
+
+        $this->bsc_db->where('A.id', $survey_id);
+
+        $query = $this->bsc_db->get();
+        return $query->row();
+
+    }
+
+    public function getSurveyCount($status, $search){
+        $this->bsc_db->select('count(*) as all_count');
+            
+        $this->bsc_db->from('customer_survey_tb A');
+        $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
+
+        if($status)
+            $this->bsc_db->where('A.status', $status);
+
+        if($search){
+            $this->bsc_db->group_start();
+            $this->bsc_db->or_like('A.reciept_no', $search);
+            $this->bsc_db->or_like('B.first_name', $search);
+            $this->bsc_db->or_like('B.last_name', $search);
+            $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->bsc_db->group_end();
+        }
+
+        $query = $this->bsc_db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getSurveys($row_no, $row_per_page, $status, $order_by,  $order, $search){
+        
+        $this->bsc_db->select("
+            A.id,
+            A.dateadded,
+            A.reciept_no,
+            A.status,
+            B.first_name,
+            B.last_name,
+        ");
+
+        $this->bsc_db->from('customer_survey_tb A');
+        $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
+ 
+        if($status)
+            $this->bsc_db->where('A.status', $status);
+
+            if($search){
+                $this->bsc_db->group_start();
+                $this->bsc_db->or_like('A.reciept_no', $search);
+                $this->bsc_db->or_like('B.first_name', $search);
+                $this->bsc_db->or_like('B.last_name', $search);
+                $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+                $this->bsc_db->group_end();
+            }
+
+        $this->bsc_db->limit($row_per_page, $row_no);
+        $this->bsc_db->order_by($order_by, $order);
+
+        $query = $this->bsc_db->get();
+        return $query->result();
+    }
+
+    public function changeStatusSurveyVerification($survey_verification_id, $status){
+		$this->bsc_db->set('status', (int) $status);
+        $this->bsc_db->where('id', $survey_verification_id);
+        $this->bsc_db->update("customer_survey_tb");
+    }
     
     function updateSettingStoreOperatingHours(
         $store_id,
@@ -124,6 +209,7 @@ class Admin_model extends CI_Model
         $this->db->from('products_tb P');
         $this->db->select('*');
         $this->db->join('order_items O', 'P.id = O.product_id' ,'left');
+        $this->db->join('dotcom_deals_tb D', 'D.id = O.deal_id' ,'left');
         $this->db->where('O.transaction_id', $id);
         $query_orders = $this->db->get();
         $orders = $query_orders->result();
@@ -138,7 +224,7 @@ class Admin_model extends CI_Model
         ");
         $this->db->from('deals_order_items A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
-        $this->db->where('A.redeems_id', $id);
+        $this->db->where('A.transaction_id', $id);
         $deals_query = $this->db->get();
         $deals = $deals_query->result();
 
@@ -1026,6 +1112,7 @@ class Admin_model extends CI_Model
 
     public function getSnackshopOrderItems($transaction_id){
         $this->db->select("
+            A.price,
             A.product_price,
             A.quantity,
             A.remarks,
@@ -1033,14 +1120,19 @@ class Admin_model extends CI_Model
             B.name,
             B.description,
             B.add_details,
+            C.name as deal_name,
+            C.description as deal_description,
+            C.promo_discount_percentage,
         ");
         $this->db->from('order_items A');
         $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->join('dotcom_deals_tb C', 'C.id = A.deal_id', 'left');
         $this->db->where('A.transaction_id', $transaction_id);
         $products_query = $this->db->get();
         $products = $products_query->result();
 
         $this->db->select("
+            A.price,
             A.product_price,
             A.quantity,
             A.remarks,
@@ -1050,7 +1142,7 @@ class Admin_model extends CI_Model
         ");
         $this->db->from('deals_order_items A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
-        $this->db->where('A.redeems_id', $transaction_id);
+        $this->db->where('A.transaction_id', $transaction_id);
         $deals_query = $this->db->get();
         $deals = $deals_query->result();
         
@@ -1151,6 +1243,8 @@ class Admin_model extends CI_Model
             A.event_class,
             A.company_name,
             A.remarks,
+            A.hash_key,
+
             A.purchase_amount,
             A.service_fee,
             A.night_diff_fee,

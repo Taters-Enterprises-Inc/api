@@ -144,6 +144,10 @@ $route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
 $route['admin/report-pmix/(:any)/(:any)'] = 'admin/report_pmix/$1/$2';
 $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/$2';
 
+$route['admin/survey-verification/survey-verification-change-status'] = 'admin/survey_verification_change_status';
+$route['admin/survey-verification/(:any)']= 'admin/survey_verification/$1';
+$route['admin/survey-verifications'] = 'admin/survey_verifications';
+
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';
 $route['auth-bsc/logout'] = 'auth_bsc/logout';
@@ -157,9 +161,12 @@ $route['bsc/stores'] = 'bsc/stores';
 $route['bsc/user/(:num)'] = 'bsc/user/$1';
 $route['bsc/user/status'] = 'bsc/user_status';
 
+//Notification
+$route['notification'] = 'notification';
+$route['notification/(:num)/seen'] = 'notification/seen/$1';
+
 //Survey
 $route['survey'] = 'survey';
-
 
 //Others
 $route['404_override'] = '';

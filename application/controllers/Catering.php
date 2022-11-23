@@ -128,9 +128,10 @@ class Catering extends CI_Controller {
 						foreach($remarks as $remarks_key => $remark){
 							$get_first_letter = substr($remark,8);
 							$quantity = (int)strtok($get_first_letter, " - ");
+							$name_first_letter_index = strpos($remark," - ") + 3;
 							$remarks[$remarks_key] = array(
 								'quantity' => $quantity,
-								'name' => substr($remark,21),
+								'name' => substr($remark,$name_first_letter_index),
 							);
 						}
 		
@@ -243,7 +244,11 @@ class Catering extends CI_Controller {
 					return;
 				}
 				
-				$region_id = $_SESSION['cache_data']['region_id'];
+				if(isset($_SESSION['cache_data'])){
+					$region_id = $_SESSION['cache_data']['region_id'];
+					$addons = $this->catering_model->get_catering_addons($region_id);
+					$product_addons = $this->catering_model->get_catering_product_addons($region_id);
+				}
 				
 				$product_flavor = array();
 				$flavors = $this->catering_model->get_product_variants($product->id);
@@ -257,18 +262,17 @@ class Catering extends CI_Controller {
 					basename($product->product_image, '.jpg')
 				);
 
-				$addons = $this->catering_model->get_catering_addons($region_id);
-				$product_addons = $this->catering_model->get_catering_product_addons($region_id);
 				$product_prices = $this->catering_model->get_product_prices($product->id);
 				$product->base_price = $product->price;
 
 
 				$response = array(
 					'data' => array(
+						'region' => $region_id ?? null,
 						'product' => $product,
 						'product_flavor' => array_values($product_flavor),
-						'addons' => $addons,
-						'product_addons' => $product_addons,
+						'addons' => $addons ?? null,
+						'product_addons' => $product_addons ?? null,
 						'product_prices' => $product_prices,
 						'product_images' => $product_images,
 					),

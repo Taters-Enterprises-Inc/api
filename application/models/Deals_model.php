@@ -87,6 +87,16 @@ class Deals_model extends CI_Model
 		return $join_data;
 
     }
+	
+	public function getDealProductsPromoExclude($deal_id){
+		$this->db->select('product_id');
+		$this->db->from('deals_product_promo_exclude');
+		$this->db->where('deal_id',$deal_id);
+
+		$query = $this->db->get();
+
+		return $query->result();
+	}
 
 	public function getUserRedeems(){
 		if(!isset($_SESSION['userData'])){
@@ -191,7 +201,6 @@ class Deals_model extends CI_Model
             $this->db->where('B.fb_user_id', $id);
         }
 
-        $this->db->order_by('A.dateadded','DESC');
         
         if($search){
             $this->db->group_start();
@@ -224,7 +233,7 @@ class Deals_model extends CI_Model
         $this->db->trans_complete();
 	}
 
-	public function get_redeem($deal_id = null){
+	public function getRedeem($deal_id = null){
 		if($_SESSION['userData'] === null){
 			return;
 		}
@@ -262,11 +271,16 @@ class Deals_model extends CI_Model
 				B.product_image,
 				B.description,
 				B.original_price,
+				B.promo_discount_percentage,
 				B.minimum_purchase,
 				B.promo_price,
+				C.url_name as platform_url_name,
+				D.address,
 			');
 			$this->db->from('deals_redeems_tb A');
 			$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+			$this->db->join('dotcom_deals_platform C', 'C.id = A.platform_id');
+			$this->db->join('deals_client_tb D', 'D.id = A.client_id');
 			$this->db->where('A.client_id', $client->id);
 			$this->db->where('A.status', 1);
 
@@ -309,15 +323,14 @@ class Deals_model extends CI_Model
 			A.original_price,
 			A.promo_price,
 			A.minimum_purchase,
+			A.promo_discount_percentage,
 			A.description,
 			A.seconds_before_expiration,
 			A.available_start_time,
 			A.available_end_time,
+			A.available_start_datetime,
+			A.available_end_datetime,
 			A.available_days,
-			A.violator_free_item,
-			A.violator_save,
-			A.violator_free_product_id,
-			A.violator_percentage_discount,
 			A.status,
 			A.hash,
 			C.name as category_name,
@@ -327,6 +340,10 @@ class Deals_model extends CI_Model
 		  $this->db->join('dotcom_deals_platform_combination B', 'B.deal_id = A.id');
 		  $this->db->join('dotcom_deals_category C', 'C.id = B.platform_category_id');
 		  $this->db->where('A.hash',$hash);
+		  $this->db->group_start();
+		  $this->db->where('A.available_end_datetime >=',date('Y-m-d H:i:s'));
+		  $this->db->or_where('A.available_end_datetime',null);
+		  $this->db->group_end();
 		  $query = $this->db->get();
 		  return $query->row();
 		}
@@ -423,6 +440,8 @@ class Deals_model extends CI_Model
 			A.description,
 			A.available_start_time,
 			A.available_end_time,
+			A.available_start_datetime,
+			A.available_end_datetime,
 			A.available_days,
 			A.status,
 			A.hash,
@@ -465,6 +484,10 @@ class Deals_model extends CI_Model
 				$this->db->join('dotcom_deals_category C', 'C.id = B.platform_category_id');
 				$this->db->where('A.status',$is_available);
 				$this->db->where('B.platform_category_id',$deal_category->id);
+				$this->db->group_start();
+				$this->db->where('A.available_end_datetime >=',date('Y-m-d H:i:s'));
+				$this->db->or_where('A.available_end_datetime',null);
+				$this->db->group_end();
 
 				if($store_id != null){
 					$this->db->join('deals_region_da_log D','D.deal_id = A.id');
@@ -510,6 +533,11 @@ class Deals_model extends CI_Model
 		  $this->db->join('dotcom_deals_category C', 'C.id = B.platform_category_id');
 		  $this->db->where('A.status',$is_available);
 		  $this->db->where('B.platform_category_id',$deals_category->id);
+		  
+		  $this->db->group_start();
+		  $this->db->where('A.available_end_datetime >=',date('Y-m-d H:i:s'));
+		  $this->db->or_where('A.available_end_datetime',null);
+		  $this->db->group_end();
 
 		  if($store_id != null){
 			$this->db->join('deals_region_da_log D','D.deal_id = A.id');

@@ -126,9 +126,10 @@ class Download extends CI_Controller {
 					foreach($remarks as $remarks_key => $remark){
 						$get_first_letter = substr($remark,8);
 						$quantity = (int)strtok($get_first_letter, " - ");
+						$name_first_letter_index = strpos($remark," - ") + 3;
 						$remarks[$remarks_key] = array(
 							'quantity' => $quantity,
-							'name' => substr($remark,21),
+							'name' => substr($remark,$name_first_letter_index),
 						);
 					}
 	
@@ -178,11 +179,14 @@ class Download extends CI_Controller {
 			);
 			
 			$data['contract_data'] = $contract_data;
+			$file_name = $data['status'] == 1 ? 
+				'taters-caters-booking-summary-'.$query_result['clients_info']->tracking_no :
+				'taters-caters-contract-'.$query_result['clients_info']->tracking_no ;
 
 			$this->load->library('pdf');
 			$this->pdf->legalPotrait('contract_download',$contract_data);
 			$this->pdf->render();
-			$this->pdf->stream($hash_key);
+			$this->pdf->stream($file_name);
 		}
 
     }

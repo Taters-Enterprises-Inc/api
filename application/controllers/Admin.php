@@ -24,12 +24,84 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 	}
 
+  public function survey_verification($survey_id){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $survey = $this->admin_model->getSurvey($survey_id);
+        $response = array(
+          "data" => $survey,
+          "message" => "Succesfully fetch survey verification"
+      );
+      
+      header('content-type: application/json');
+      echo json_encode($response);
+        break;
+        
+  }
+}
+
+public function survey_verifications(){
+  switch($this->input->server('REQUEST_METHOD')){
+    case 'GET':
+    $per_page = $this->input->get('per_page') ?? 25;
+    $page_no = $this->input->get('page_no') ?? 0;
+    $status = $this->input->get('status') ?? null;
+    $order = $this->input->get('order') ?? 'desc';
+    $order_by = $this->input->get('order_by') ?? 'dateadded';
+    $search = $this->input->get('search');
+
+    if($page_no != 0){
+      $page_no = ($page_no - 1) * $per_page;
+    }
+    
+    $surveys_count = $this->admin_model->getSurveyCount($status, $search);
+    $surveyverification = $this->admin_model->getSurveys($page_no, $per_page, $status, $order_by, $order, $search);
+
+    $pagination = array(
+      "total_rows" => $surveys_count,
+      "per_page" => $per_page,
+    );
+
+    $response = array(
+      "message" => 'Successfully fetch survey verification',
+      "data" => array(
+        "pagination" => $pagination,
+        "surveys" => $surveyverification
+      ),
+    );
+  
+    header('content-type: application/json');
+    echo json_encode($response);
+    return;
+  }
+}
+
+public function survey_verification_change_status(){
+  switch($this->input->server('REQUEST_METHOD')){
+    case 'POST':
+      $_POST =  json_decode(file_get_contents("php://input"), true);
+      
+      $survey_verification_id = $this->input->post('surveyverificationId');
+      $status = $this->input->post('status');
+
+      $this->admin_model->changeStatusSurveyVerification($survey_verification_id, $status);
+
+      $response = array(
+        "message" => 'Successfully update survey verification status',
+      );
+
+      header('content-type: application/json');
+      echo json_encode($response);
+      return;
+  }
+}
+
   public function report_transaction($startDate, $endDate){
 
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
         $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
-        $end = date("Y-m-d", strtotime($endDate)) . " 59:59:59";
+        $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
         $data = $this->report_model->getReportTransaction($start, $end);
         header("Content-Type: application/vnd.ms-excel");
         header("Content-disposition: attachment; filename=transaction_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
@@ -112,7 +184,7 @@ class Admin extends CI_Controller{
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
         $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
-        $end = date("Y-m-d", strtotime($endDate)) . " 59:59:59";
+        $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
         $data = $this->report_model->getReportPmix($start, $end);
         header("Content-Type: application/vnd.ms-excel");
 
@@ -167,19 +239,19 @@ class Admin extends CI_Controller{
         $response = array(
             "data" => array(
               "all" => array(
-                'notifications'=> $this->notification_model->getNotifications($user_id, null, false),
-                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true),
-                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, null),
+                'notifications'=> $this->notification_model->getNotifications($user_id, null, false, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true, 'admin'),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, null, 'admin'),
               ),
               "snackshop_order" => array(
-                'notifications'=> $this->notification_model->getNotifications($user_id, 1, false),
-                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true),
-                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 1),
+                'notifications'=> $this->notification_model->getNotifications($user_id, 1, false, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 1, true, 'admin'),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 1, 'admin'),
               ),
-              "catering_order" => array(
-                'notifications'=> $this->notification_model->getNotifications($user_id, 2, false),
-                "unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true),
-                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 2),
+              "catering_booking" => array(
+                'notifications'=> $this->notification_model->getNotifications($user_id, 2, false, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 2, true, 'admin'),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 2, 'admin'),
               ),
             ),
             "message" => "Succesfully fetch notification"
@@ -815,10 +887,11 @@ class Admin extends CI_Controller{
         $update_on_click = $this->admin_model->update_catering_on_click($trans_id, $status);
         if ($status == 2) $generate_invoice = $this->admin_model->generate_catering_invoice_num($trans_id);
 
-        if ($status == 2) $tagname = "Confirm";
-        elseif ($status == 4) $tagname = "Contract Verified";
-        elseif ($status == 6) $tagname = "Initial Payment Verified";
-        elseif ($status == 8) $tagname = "Final Payment Verified";
+            if ($status == 2) $tagname = "Confirm";
+            elseif ($status == 4) $tagname = "Contract Verified";
+            elseif ($status == 6) $tagname = "Initial Payment Verified";
+            elseif ($status == 8) $tagname = "Final Payment Verified";
+            elseif ($status == 9) $tagname = "Catering booking completed";
 
         if ($fetch_data == 1) {
           $this->logs_model->insertCateringTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Booking Success');

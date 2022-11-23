@@ -14,6 +14,7 @@ class Transaction extends CI_Controller {
         
 		$this->load->model('transaction_model');
 		$this->load->model('shop_model');
+        $this->load->model('catering_model');
 		$this->load->model('deals_model');
 		$this->load->model('client_model');
         $this->load->model('notification_model');
@@ -155,6 +156,7 @@ class Transaction extends CI_Controller {
                             "text" => $message
                         );
                         
+                        //Store User
                         $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
                         $users = $this->store_model->getUsersStoreGroupsByStoreId($store_id);
                         foreach($users as $user){
@@ -168,7 +170,8 @@ class Transaction extends CI_Controller {
 
                             $this->notification_model->insertNotification($notifications_data);   
                         }
-                        
+
+                        //Admin user
                         $admin_users = $this->user_model->getUsersByGroupId(1);
                         foreach($admin_users as $user){
                             $notifications_data = array(
@@ -181,6 +184,7 @@ class Transaction extends CI_Controller {
                             $this->notification_model->insertNotification($notifications_data);   
                         }
                         
+                        //CSR Admin
                         $csr_admin_users = $this->user_model->getUsersByGroupId(10);
                         foreach($csr_admin_users as $user){
                             $notifications_data = array(
@@ -192,6 +196,19 @@ class Transaction extends CI_Controller {
                             );
                             $this->notification_model->insertNotification($notifications_data);   
                         }
+
+                        //Mobile and FB user Client        
+                        $notifications_data = array(
+                            "fb_user_to_notify" => $this->session->userData['fb_user_id'] ?? null,
+                            "mobile_user_to_notify" => $this->session->userData['mobile_user_id'] ?? null,
+                            "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                            "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                            'notification_event_id' => $notification_event_id,
+                            "dateadded" => date('Y-m-d H:i:s'),
+                        );
+                        $this->notification_model->insertNotification($notifications_data);   
+                    
+
 
                         $real_time_notification = array(
                             "store_id" => $store_id,
@@ -256,7 +273,9 @@ class Transaction extends CI_Controller {
                     if(isset($_SESSION['orders'])){
                         if(!empty($_SESSION['orders'])){
                             foreach ($_SESSION['orders'] as $row => $val) {
-                                $comp_total += $val['prod_calc_amount'];
+                                $promo_discount_percentage = $val['promo_discount_percentage'];
+                                $promo_discount = isset($promo_discount_percentage) ? $val['prod_calc_amount'] * $promo_discount_percentage : 0 ;
+                                $comp_total += $val['prod_calc_amount'] - $promo_discount;
                             }
                         }
                     }
@@ -274,11 +293,18 @@ class Transaction extends CI_Controller {
                     $distance_rate_price = (empty($this->session->distance_rate_price)) ? 0 : $this->session->distance_rate_price;
 
 					if(isset($_SESSION['redeem_data'])){
-                        if(isset($_SESSION['redeem_data']['minimum_purchase']) && $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total){
+                        if(
+                            isset($_SESSION['redeem_data']['minimum_purchase']) && 
+                            $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total
+                        ){
                             $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
-                            $this->session->unset_userdata('redeem_data');
-                            
                             $distance_rate_price = 0;
+                        }
+                        
+                        if(
+                            isset($_SESSION['redeem_data']['promo_discount_percentage'])
+                        ){
+                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
                         }
 					}
 
@@ -397,8 +423,8 @@ class Transaction extends CI_Controller {
                             foreach ($orders as $k => $value) {
 								if(isset($value['prod_id'])){
 									$remarks = (empty($value['prod_multiflavors'])) ? $value['prod_flavor'] : $value['prod_multiflavors'];
-	
-									$order_data_product[] = array(
+
+                                    $order_product =  array(
 										'transaction_id'      => $query_transaction_result['id'],
 										'combination_id'      => $k,
 										'product_id'          => $value['prod_id'],
@@ -414,7 +440,28 @@ class Transaction extends CI_Controller {
 										'product_price'       => $value['prod_price'],
 										'product_label'       => $value['prod_size'],
 										'product_discount'    => $value['prod_discount'],
+                                        'deal_id'             => null,
 									);
+
+                                    
+                                    $redeem_data = $this->session->redeem_data;
+                                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+
+                                    if($deal_products_promo_exclude){
+                                        $deal_id = $this->session->redeem_data['deal_id'];
+
+                                        foreach($deal_products_promo_exclude as $promo){
+                                            if($promo->product_id === $value['prod_id']){
+                                                $deal_id = null;
+                                                break;
+                                            }
+                                        }
+
+                                        $order_product['deal_id'] = $deal_id;
+                                    }
+	
+									$order_data_product[] = $order_product;
+
 									if($value['prod_category'] == 17) {
 										if (isset($this->session->userData['mobile_user_id'])) {
 											$type = 'mobile';
@@ -433,9 +480,9 @@ class Transaction extends CI_Controller {
 										);
 										$this->shop_model->insert_giftcard_user($data);
 									}
-								}else if($value['deal_id']){
+								}else if($value['deal_id'] && $value['minimum_purchase'] === null && $value['promo_discount_percentage'] === null){
 									$order_data_deal[] = array(
-										'redeems_id'  => $query_transaction_result['id'],
+										'transaction_id'  => $query_transaction_result['id'],
 										'deal_id'         => $value['deal_id'],
 										'price'			  => $value['deal_promo_price'],
 										'product_price'   => $value['deal_promo_price'],
@@ -456,14 +503,18 @@ class Transaction extends CI_Controller {
                         if(isset($_SESSION['orders'])){
                             $this->session->unset_userdata('orders');
                         }
+                        
 
                         if(isset($_SESSION['deals'])){
                             $this->session->unset_userdata('deals');
 
                             if(isset($_SESSION['redeem_data'])){
                                 $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
-                                $this->session->unset_userdata('redeem_data');
                             }
+                        }
+                        
+                        if(isset($_SESSION['redeem_data'])){
+                            $this->session->unset_userdata('redeem_data');
                         }
 
                         $message = $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!";
@@ -475,9 +526,12 @@ class Transaction extends CI_Controller {
                         );
                         
                         $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                        
+                        //store group
                         $users = $this->store_model->getUsersStoreGroupsByStoreId($store_id);
                         foreach($users as $user){
                             $notifications_data = array(
+        
                                 "user_to_notify" => $user->user_id,
                                 "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
                                 "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
@@ -488,6 +542,7 @@ class Transaction extends CI_Controller {
                             $this->notification_model->insertNotification($notifications_data);   
                         }
                         
+                        //admin
                         $admin_users = $this->user_model->getUsersByGroupId(1);
                         foreach($admin_users as $user){
                             $notifications_data = array(
@@ -500,6 +555,7 @@ class Transaction extends CI_Controller {
                             $this->notification_model->insertNotification($notifications_data);   
                         }
                         
+                        //csr admin
                         $csr_admin_users = $this->user_model->getUsersByGroupId(10);
                         foreach($csr_admin_users as $user){
                             $notifications_data = array(
@@ -512,6 +568,17 @@ class Transaction extends CI_Controller {
                             $this->notification_model->insertNotification($notifications_data);   
                         }
 
+                        //mobile or fb             
+                        $notifications_data = array(
+                            "fb_user_to_notify" => $this->session->userData['fb_user_id'] ?? null,
+                            "mobile_user_to_notify" => $this->session->userData['mobile_user_id'] ?? null,
+                            "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                            "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                            'notification_event_id' => $notification_event_id,
+                            "dateadded" => date('Y-m-d H:i:s'),
+                        );
+                        $this->notification_model->insertNotification($notifications_data);   
+                        
 
                         $realtime_notification = array(
                             "store_id" => $store_id,

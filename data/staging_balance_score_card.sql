@@ -70,8 +70,16 @@ CREATE TABLE `customer_survey_tb` (
   `id` int(10) UNSIGNED NOT NULL,
   `reciept_no` varchar(100) NOT NULL,
   `user_id` int(10) UNSIGNED DEFAULT NULL,
-  `dateadded` datetime NOT NULL
+  `dateadded` datetime NOT NULL,
+  `status` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `customer_survey_tb`
+--
+
+INSERT INTO `customer_survey_tb` (`id`, `reciept_no`, `user_id`, `dateadded`, `status`) VALUES
+(1, '6767', 1, '2022-11-16 08:54:41', 1);
 
 -- --------------------------------------------------------
 
@@ -315,7 +323,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `ip_address`, `username`, `password`, `email`, `activation_selector`, `activation_code`, `forgotten_password_selector`, `forgotten_password_code`, `forgotten_password_time`, `remember_selector`, `remember_code`, `created_on`, `last_login`, `active`) VALUES
-(1, '127.0.0.1', 'administrator', '$2y$08$200Z6ZZbp3RAEXoaWcMA6uJOFicwNZaqk4oDhqTUiFXFe63MG.Daa', 'admin@admin.com', NULL, '', NULL, NULL, NULL, NULL, NULL, 1268889823, 1666933581, 1);
+(1, '127.0.0.1', 'administrator', '$2y$08$200Z6ZZbp3RAEXoaWcMA6uJOFicwNZaqk4oDhqTUiFXFe63MG.Daa', 'admin@admin.com', NULL, '', NULL, NULL, NULL, NULL, NULL, 1268889823, 1668674052, 1);
 
 -- --------------------------------------------------------
 
@@ -529,7 +537,7 @@ ALTER TABLE `customer_survey_answer`
 -- AUTO_INCREMENT for table `customer_survey_tb`
 --
 ALTER TABLE `customer_survey_tb`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `groups`
@@ -614,33 +622,6 @@ ALTER TABLE `customer_survey_answer`
 --
 ALTER TABLE `customer_survey_tb`
   ADD CONSTRAINT `customer_survey_tb_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`) ON UPDATE NO ACTION;
-
---
--- Constraints for table `survey_question_answer`
---
-ALTER TABLE `survey_question_answer`
-  ADD CONSTRAINT `survey_question_answer_ibfk_1` FOREIGN KEY (`survey_id`) REFERENCES `survey` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `survey_question_answer_ibfk_2` FOREIGN KEY (`offered_answer_id`) REFERENCES `offered_answer` (`id`) ON UPDATE NO ACTION;
-
---
--- Constraints for table `users_groups`
---
-ALTER TABLE `users_groups`
-  ADD CONSTRAINT `fk_users_groups_groups1` FOREIGN KEY (`group_id`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `fk_users_groups_users1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
---
--- Constraints for table `user_profile`
---
-ALTER TABLE `user_profile`
-  ADD CONSTRAINT `user_profile_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `user_profile_ibfk_3` FOREIGN KEY (`user_status_id`) REFERENCES `user_status` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
---
--- Constraints for table `user_stores`
---
-ALTER TABLE `user_stores`
-  ADD CONSTRAINT `user_stores_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
