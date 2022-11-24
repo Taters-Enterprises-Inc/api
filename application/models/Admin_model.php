@@ -17,7 +17,7 @@ class Admin_model extends CI_Model
             B.first_name,
             B.last_name,
         ');
-        $this->bsc_db->from('customer_survey_tb A');
+        $this->bsc_db->from('customer_survey_responses A');
         $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
 
         $this->bsc_db->where('A.id', $survey_id);
@@ -30,7 +30,7 @@ class Admin_model extends CI_Model
     public function getSurveyCount($status, $search){
         $this->bsc_db->select('count(*) as all_count');
             
-        $this->bsc_db->from('customer_survey_tb A');
+        $this->bsc_db->from('customer_survey_responses A');
         $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
 
         if($status)
@@ -60,7 +60,7 @@ class Admin_model extends CI_Model
             B.last_name,
         ");
 
-        $this->bsc_db->from('customer_survey_tb A');
+        $this->bsc_db->from('customer_survey_responses A');
         $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
  
         if($status)
@@ -85,7 +85,7 @@ class Admin_model extends CI_Model
     public function changeStatusSurveyVerification($survey_verification_id, $status){
 		$this->bsc_db->set('status', (int) $status);
         $this->bsc_db->where('id', $survey_verification_id);
-        $this->bsc_db->update("customer_survey_tb");
+        $this->bsc_db->update("customer_survey_responses");
     }
     
     function updateSettingStoreOperatingHours(

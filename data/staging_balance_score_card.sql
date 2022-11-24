@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 22, 2022 at 06:11 AM
+-- Generation Time: Nov 24, 2022 at 11:46 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -42,44 +42,91 @@ INSERT INTO `companies` (`id`, `name`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `customer_survey_answer`
+-- Table structure for table `customer_survey_responses`
 --
 
-CREATE TABLE `customer_survey_answer` (
+CREATE TABLE `customer_survey_responses` (
   `id` int(10) UNSIGNED NOT NULL,
-  `offered_answer` int(10) UNSIGNED DEFAULT NULL,
-  `other_text` varchar(265) DEFAULT NULL,
-  `survey_id` int(10) UNSIGNED NOT NULL,
-  `customer_survey_id` int(10) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `customer_survey_answer`
---
-
-INSERT INTO `customer_survey_answer` (`id`, `offered_answer`, `other_text`, `survey_id`, `customer_survey_id`) VALUES
-(1, 2, NULL, 1, 1);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `customer_survey_tb`
---
-
-CREATE TABLE `customer_survey_tb` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `reciept_no` varchar(100) NOT NULL,
+  `receipt_no` varchar(100) DEFAULT NULL,
+  `transaction_id` int(10) UNSIGNED DEFAULT NULL,
   `user_id` int(10) UNSIGNED DEFAULT NULL,
-  `dateadded` datetime NOT NULL,
+  `dateadded` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `status` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `customer_survey_tb`
+-- Dumping data for table `customer_survey_responses`
 --
 
-INSERT INTO `customer_survey_tb` (`id`, `reciept_no`, `user_id`, `dateadded`, `status`) VALUES
-(1, '6767', 1, '2022-11-16 08:54:41', 1);
+INSERT INTO `customer_survey_responses` (`id`, `receipt_no`, `transaction_id`, `user_id`, `dateadded`, `status`) VALUES
+(1, '6767', NULL, 1, '2022-11-16 00:54:41', 1),
+(3, '5123', NULL, NULL, '0000-00-00 00:00:00', 1),
+(4, '5123', NULL, NULL, '2022-11-24 09:23:40', 1),
+(5, '5123', NULL, NULL, '2022-11-24 09:25:10', 1),
+(6, '5123', NULL, NULL, '2022-11-24 09:25:31', 1),
+(7, '5123', NULL, NULL, '2022-11-24 10:35:59', 1),
+(8, '5123', NULL, NULL, '2022-11-24 10:36:08', 1),
+(9, '5123', NULL, NULL, '2022-11-24 10:36:18', 1),
+(10, '5123', NULL, NULL, '2022-11-24 10:36:32', 1),
+(11, '5123', NULL, NULL, '2022-11-24 10:36:48', 1),
+(12, '5123', NULL, NULL, '2022-11-24 10:36:56', 1),
+(13, '5123', NULL, NULL, '2022-11-24 10:37:03', 1),
+(14, '5123', NULL, NULL, '2022-11-24 10:37:27', 1),
+(15, '5123', NULL, NULL, '2022-11-24 10:37:43', 1),
+(16, '5123', NULL, NULL, '2022-11-24 10:37:48', 1),
+(17, '5123', NULL, NULL, '2022-11-24 10:37:56', 1),
+(18, '5123', NULL, NULL, '2022-11-24 10:38:00', 1),
+(19, '5123', NULL, NULL, '2022-11-24 10:38:10', 1),
+(20, '5123', NULL, NULL, '2022-11-24 10:38:19', 1),
+(21, '5123', NULL, NULL, '2022-11-24 10:39:17', 1),
+(22, '5123', NULL, NULL, '2022-11-24 10:40:10', 1),
+(23, '5123', NULL, NULL, '2022-11-24 10:40:15', 1),
+(24, '5123', NULL, NULL, '2022-11-24 10:40:48', 1),
+(25, '5123', NULL, NULL, '2022-11-24 10:40:51', 1),
+(26, '5123', NULL, NULL, '2022-11-24 10:41:12', 1),
+(27, '5123', NULL, NULL, '2022-11-24 10:41:28', 1),
+(28, '5123', NULL, NULL, '2022-11-24 10:41:39', 1),
+(29, '5123', NULL, NULL, '2022-11-24 10:42:17', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_survey_response_answers`
+--
+
+CREATE TABLE `customer_survey_response_answers` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `survey_question_offered_answer_id` int(10) UNSIGNED DEFAULT NULL,
+  `other_text` varchar(265) DEFAULT NULL,
+  `survey_question_id` int(10) UNSIGNED NOT NULL,
+  `customer_survey_response_id` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `customer_survey_response_answers`
+--
+
+INSERT INTO `customer_survey_response_answers` (`id`, `survey_question_offered_answer_id`, `other_text`, `survey_question_id`, `customer_survey_response_id`) VALUES
+(1, 2, NULL, 1, 1),
+(2, 1, NULL, 1, 29),
+(3, 6, NULL, 2, 29),
+(4, 3, NULL, 3, 29),
+(5, 3, NULL, 4, 29),
+(6, 2, NULL, 5, 29),
+(7, 2, NULL, 6, 29),
+(8, 5, NULL, 7, 29),
+(9, 5, NULL, 8, 29),
+(10, 2, NULL, 9, 29),
+(11, 1, NULL, 10, 29),
+(12, 10, NULL, 11, 29),
+(13, 2, NULL, 13, 29),
+(14, NULL, 'test', 14, 29),
+(15, NULL, 'test', 15, 29),
+(16, NULL, 'test', 16, 29),
+(17, 9, NULL, 17, 29),
+(18, 13, NULL, 18, 29),
+(19, 20, NULL, 19, 29),
+(20, 25, NULL, 20, 29);
 
 -- --------------------------------------------------------
 
@@ -117,56 +164,10 @@ CREATE TABLE `login_attempts` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `offered_answer`
+-- Table structure for table `survey_questions`
 --
 
-CREATE TABLE `offered_answer` (
-  `id` int(10) UNSIGNED NOT NULL,
-  `text` varchar(265) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `offered_answer`
---
-
-INSERT INTO `offered_answer` (`id`, `text`) VALUES
-(1, 'Highly Satisfied'),
-(2, 'Satisfied'),
-(3, 'Neither Satisfied nor Dissatisfied'),
-(4, 'Dissastisfied'),
-(5, 'Highly Dissatisfied'),
-(6, 'Delivery'),
-(7, 'Online order : Pick-up'),
-(8, 'Walk-In'),
-(9, 'Yes'),
-(10, 'No'),
-(11, 'Male\r\n'),
-(12, 'Female\r\n'),
-(13, 'Non-Binary / Third Gender\r\n'),
-(14, 'Prefer to self-describe\r\n'),
-(15, 'Prefer not to answer'),
-(16, 'Under 18'),
-(17, '18 to 24'),
-(18, '25 to 34'),
-(19, '35 to 44'),
-(20, '45 to 49'),
-(21, '50 to 64'),
-(22, '65 or above.'),
-(23, 'Asian\r\n'),
-(24, 'Native Hawaiian or other Native Islander\r\n'),
-(25, 'White or Caucassian\r\n'),
-(26, 'American Indian or Alaska Native\r\n'),
-(27, 'Hispanic or Latino\r\n'),
-(28, 'Black or African American\r\n'),
-(29, 'Other');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `survey`
---
-
-CREATE TABLE `survey` (
+CREATE TABLE `survey_questions` (
   `id` int(10) UNSIGNED NOT NULL,
   `start_date` datetime DEFAULT NULL,
   `end_date` datetime DEFAULT NULL,
@@ -176,10 +177,10 @@ CREATE TABLE `survey` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `survey`
+-- Dumping data for table `survey_questions`
 --
 
-INSERT INTO `survey` (`id`, `start_date`, `end_date`, `status`, `description`, `is_comment`) VALUES
+INSERT INTO `survey_questions` (`id`, `start_date`, `end_date`, `status`, `description`, `is_comment`) VALUES
 (1, NULL, NULL, 1, 'Please rate your overall satisfaction with your Taters Experience.', 0),
 (2, NULL, NULL, 2, 'Please select your Visit Type.', 0),
 (3, NULL, NULL, 3, 'The friendlyness of the delivery driver.', 0),
@@ -203,20 +204,20 @@ INSERT INTO `survey` (`id`, `start_date`, `end_date`, `status`, `description`, `
 -- --------------------------------------------------------
 
 --
--- Table structure for table `survey_question_answer`
+-- Table structure for table `survey_question_answers`
 --
 
-CREATE TABLE `survey_question_answer` (
+CREATE TABLE `survey_question_answers` (
   `id` int(10) UNSIGNED NOT NULL,
-  `survey_id` int(10) UNSIGNED NOT NULL,
-  `offered_answer_id` int(10) UNSIGNED NOT NULL
+  `survey_question_id` int(10) UNSIGNED NOT NULL,
+  `survey_question_offered_answer_id` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `survey_question_answer`
+-- Dumping data for table `survey_question_answers`
 --
 
-INSERT INTO `survey_question_answer` (`id`, `survey_id`, `offered_answer_id`) VALUES
+INSERT INTO `survey_question_answers` (`id`, `survey_question_id`, `survey_question_offered_answer_id`) VALUES
 (1, 1, 1),
 (2, 1, 2),
 (3, 1, 3),
@@ -293,6 +294,52 @@ INSERT INTO `survey_question_answer` (`id`, `survey_id`, `offered_answer_id`) VA
 (75, 20, 27),
 (76, 20, 28),
 (77, 20, 29);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `survey_question_offered_answers`
+--
+
+CREATE TABLE `survey_question_offered_answers` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `text` varchar(265) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `survey_question_offered_answers`
+--
+
+INSERT INTO `survey_question_offered_answers` (`id`, `text`) VALUES
+(1, 'Highly Satisfied'),
+(2, 'Satisfied'),
+(3, 'Neither Satisfied nor Dissatisfied'),
+(4, 'Dissastisfied'),
+(5, 'Highly Dissatisfied'),
+(6, 'Delivery'),
+(7, 'Online order : Pick-up'),
+(8, 'Walk-In'),
+(9, 'Yes'),
+(10, 'No'),
+(11, 'Male\r\n'),
+(12, 'Female\r\n'),
+(13, 'Non-Binary / Third Gender\r\n'),
+(14, 'Prefer to self-describe\r\n'),
+(15, 'Prefer not to answer'),
+(16, 'Under 18'),
+(17, '18 to 24'),
+(18, '25 to 34'),
+(19, '35 to 44'),
+(20, '45 to 49'),
+(21, '50 to 64'),
+(22, '65 or above.'),
+(23, 'Asian\r\n'),
+(24, 'Native Hawaiian or other Native Islander\r\n'),
+(25, 'White or Caucassian\r\n'),
+(26, 'American Indian or Alaska Native\r\n'),
+(27, 'Hispanic or Latino\r\n'),
+(28, 'Black or African American\r\n'),
+(29, 'Other');
 
 -- --------------------------------------------------------
 
@@ -423,21 +470,22 @@ ALTER TABLE `companies`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `customer_survey_answer`
+-- Indexes for table `customer_survey_responses`
 --
-ALTER TABLE `customer_survey_answer`
+ALTER TABLE `customer_survey_responses`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `customer_survey_id` (`customer_survey_id`),
-  ADD KEY `offered_answer_id` (`other_text`),
-  ADD KEY `question_id` (`offered_answer`),
-  ADD KEY `survey_id` (`survey_id`);
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `transaction_id` (`transaction_id`);
 
 --
--- Indexes for table `customer_survey_tb`
+-- Indexes for table `customer_survey_response_answers`
 --
-ALTER TABLE `customer_survey_tb`
+ALTER TABLE `customer_survey_response_answers`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
+  ADD KEY `customer_survey_id` (`customer_survey_response_id`),
+  ADD KEY `offered_answer_id` (`other_text`),
+  ADD KEY `question_id` (`survey_question_offered_answer_id`),
+  ADD KEY `survey_id` (`survey_question_id`);
 
 --
 -- Indexes for table `groups`
@@ -452,24 +500,24 @@ ALTER TABLE `login_attempts`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `offered_answer`
+-- Indexes for table `survey_questions`
 --
-ALTER TABLE `offered_answer`
+ALTER TABLE `survey_questions`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `survey`
+-- Indexes for table `survey_question_answers`
 --
-ALTER TABLE `survey`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indexes for table `survey_question_answer`
---
-ALTER TABLE `survey_question_answer`
+ALTER TABLE `survey_question_answers`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `survey_id` (`survey_id`),
-  ADD KEY `question_id` (`offered_answer_id`);
+  ADD KEY `survey_id` (`survey_question_id`),
+  ADD KEY `question_id` (`survey_question_offered_answer_id`);
+
+--
+-- Indexes for table `survey_question_offered_answers`
+--
+ALTER TABLE `survey_question_offered_answers`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `users`
@@ -528,16 +576,16 @@ ALTER TABLE `companies`
   MODIFY `id` mediumint(8) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `customer_survey_answer`
+-- AUTO_INCREMENT for table `customer_survey_responses`
 --
-ALTER TABLE `customer_survey_answer`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE `customer_survey_responses`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
--- AUTO_INCREMENT for table `customer_survey_tb`
+-- AUTO_INCREMENT for table `customer_survey_response_answers`
 --
-ALTER TABLE `customer_survey_tb`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+ALTER TABLE `customer_survey_response_answers`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `groups`
@@ -552,22 +600,22 @@ ALTER TABLE `login_attempts`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `offered_answer`
+-- AUTO_INCREMENT for table `survey_questions`
 --
-ALTER TABLE `offered_answer`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
-
---
--- AUTO_INCREMENT for table `survey`
---
-ALTER TABLE `survey`
+ALTER TABLE `survey_questions`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
--- AUTO_INCREMENT for table `survey_question_answer`
+-- AUTO_INCREMENT for table `survey_question_answers`
 --
-ALTER TABLE `survey_question_answer`
+ALTER TABLE `survey_question_answers`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
+
+--
+-- AUTO_INCREMENT for table `survey_question_offered_answers`
+--
+ALTER TABLE `survey_question_offered_answers`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -610,18 +658,19 @@ ALTER TABLE `user_stores`
 --
 
 --
--- Constraints for table `customer_survey_answer`
+-- Constraints for table `customer_survey_responses`
 --
-ALTER TABLE `customer_survey_answer`
-  ADD CONSTRAINT `customer_survey_answer_ibfk_1` FOREIGN KEY (`customer_survey_id`) REFERENCES `customer_survey_tb` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_answer_ibfk_3` FOREIGN KEY (`offered_answer`) REFERENCES `offered_answer` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_answer_ibfk_4` FOREIGN KEY (`survey_id`) REFERENCES `survey` (`id`) ON UPDATE NO ACTION;
+ALTER TABLE `customer_survey_responses`
+  ADD CONSTRAINT `customer_survey_responses_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_2` FOREIGN KEY (`transaction_id`) REFERENCES `staging_newteishop`.`catering_transaction_tb` (`id`) ON UPDATE NO ACTION;
 
 --
--- Constraints for table `customer_survey_tb`
+-- Constraints for table `customer_survey_response_answers`
 --
-ALTER TABLE `customer_survey_tb`
-  ADD CONSTRAINT `customer_survey_tb_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`) ON UPDATE NO ACTION;
+ALTER TABLE `customer_survey_response_answers`
+  ADD CONSTRAINT `customer_survey_response_answers_ibfk_1` FOREIGN KEY (`customer_survey_response_id`) REFERENCES `customer_survey_responses` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_response_answers_ibfk_3` FOREIGN KEY (`survey_question_offered_answer_id`) REFERENCES `survey_question_offered_answers` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_response_answers_ibfk_4` FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
