@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 25, 2022 at 11:12 AM
+-- Generation Time: Nov 25, 2022 at 12:20 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -70,7 +70,9 @@ INSERT INTO `customer_survey_responses` (`id`, `order_no`, `transaction_id`, `ca
 (4, 'FDASFAS', NULL, NULL, 1, NULL, '2022-05-04 08:42:38', 3, NULL, '2022-11-25 08:43:09', 1),
 (5, NULL, 1, NULL, 2, NULL, '2022-11-25 15:54:54', 111, NULL, '2022-11-25 09:12:41', 2),
 (6, NULL, NULL, NULL, 2, NULL, '0000-00-00 00:00:00', 0, NULL, '2022-11-25 09:50:58', 2),
-(7, NULL, NULL, NULL, 4, 2, '2022-11-25 17:43:24', 122, NULL, '2022-11-25 10:05:56', 2);
+(7, NULL, NULL, NULL, 4, NULL, '2022-11-25 17:43:24', 122, NULL, '2022-11-25 10:42:30', 2),
+(8, NULL, NULL, 57, 3, NULL, '2022-11-25 18:45:00', 107, NULL, '2022-11-25 10:55:58', 2),
+(9, NULL, NULL, NULL, 4, 121, '2022-11-25 18:59:18', 122, NULL, '2022-11-25 11:08:43', 2);
 
 -- --------------------------------------------------------
 
@@ -223,7 +225,45 @@ INSERT INTO `customer_survey_response_answers` (`id`, `survey_question_offered_a
 (130, 9, NULL, 17, 7),
 (131, 11, NULL, 18, 7),
 (132, 19, NULL, 19, 7),
-(133, 28, NULL, 20, 7);
+(133, 28, NULL, 20, 7),
+(134, 1, NULL, 1, 8),
+(135, 6, NULL, 2, 8),
+(136, 3, NULL, 3, 8),
+(137, 2, NULL, 4, 8),
+(138, 3, NULL, 5, 8),
+(139, 4, NULL, 6, 8),
+(140, 2, NULL, 7, 8),
+(141, 1, NULL, 8, 8),
+(142, 3, NULL, 9, 8),
+(143, 5, NULL, 10, 8),
+(144, 9, NULL, 11, 8),
+(145, 2, NULL, 13, 8),
+(146, NULL, 'test', 14, 8),
+(147, NULL, 'test', 15, 8),
+(148, NULL, 'test', 16, 8),
+(149, 9, NULL, 17, 8),
+(150, 13, NULL, 18, 8),
+(151, 20, NULL, 19, 8),
+(152, 24, NULL, 20, 8),
+(153, 3, NULL, 1, 9),
+(154, 7, NULL, 2, 9),
+(155, 1, NULL, 3, 9),
+(156, 3, NULL, 4, 9),
+(157, 1, NULL, 5, 9),
+(158, 4, NULL, 6, 9),
+(159, 3, NULL, 7, 9),
+(160, 1, NULL, 8, 9),
+(161, 4, NULL, 9, 9),
+(162, 1, NULL, 10, 9),
+(163, 9, NULL, 11, 9),
+(164, 3, NULL, 13, 9),
+(165, NULL, 'testt', 14, 9),
+(166, NULL, 'test', 15, 9),
+(167, NULL, 'test', 16, 9),
+(168, 9, NULL, 17, 9),
+(169, 12, NULL, 18, 9),
+(170, 19, NULL, 19, 9),
+(171, 26, NULL, 20, 9);
 
 -- --------------------------------------------------------
 
@@ -594,7 +634,9 @@ ALTER TABLE `customer_survey_responses`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`),
   ADD KEY `transaction_id` (`transaction_id`),
-  ADD KEY `customer_survey_response_order_type_id` (`customer_survey_response_order_type_id`);
+  ADD KEY `customer_survey_response_order_type_id` (`customer_survey_response_order_type_id`),
+  ADD KEY `catering_transaction_id` (`catering_transaction_id`),
+  ADD KEY `deals_redeem_id` (`deals_redeem_id`);
 
 --
 -- Indexes for table `customer_survey_response_answers`
@@ -704,13 +746,13 @@ ALTER TABLE `companies`
 -- AUTO_INCREMENT for table `customer_survey_responses`
 --
 ALTER TABLE `customer_survey_responses`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `customer_survey_response_answers`
 --
 ALTER TABLE `customer_survey_response_answers`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=172;
 
 --
 -- AUTO_INCREMENT for table `customer_survey_response_order_types`
@@ -793,8 +835,10 @@ ALTER TABLE `user_stores`
 --
 ALTER TABLE `customer_survey_responses`
   ADD CONSTRAINT `customer_survey_responses_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_2` FOREIGN KEY (`transaction_id`) REFERENCES `staging_newteishop.backup.nov252022`.`catering_transaction_tb` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_3` FOREIGN KEY (`customer_survey_response_order_type_id`) REFERENCES `customer_survey_response_order_types` (`id`) ON UPDATE NO ACTION;
+  ADD CONSTRAINT `customer_survey_responses_ibfk_2` FOREIGN KEY (`transaction_id`) REFERENCES `staging_newteishop`.`transaction_tb` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_3` FOREIGN KEY (`catering_transaction_id`) REFERENCES `staging_newteishop`.`catering_transaction_tb` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_4` FOREIGN KEY (`customer_survey_response_order_type_id`) REFERENCES `customer_survey_response_order_types` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_5` FOREIGN KEY (`deals_redeem_id`) REFERENCES `staging_newteishop`.`deals_redeems_tb` (`id`) ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `customer_survey_response_answers`
