@@ -47,6 +47,7 @@ class Deals_model extends CI_Model
 			B.id,
 			B.dateadded,
 			B.store,
+			B.hash_key,
 			C.store_id,
 			C.name as store_name,
 			C.address as store_address,
