@@ -12,13 +12,20 @@ class Admin_model extends CI_Model
         $this->bsc_db->select('
             A.id,
             A.dateadded,
-            A.reciept_no,
+            A.order_no,
+            A.order_date,
             A.status,
-            B.first_name,
-            B.last_name,
+            B.name as store_name,
+            C.first_name,
+            C.last_name,
+            D.tracking_no,
         ');
         $this->bsc_db->from('customer_survey_responses A');
-        $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
+        $this->bsc_db->join($this->db->database.'.store_tb B', 'B.store_id = A.store_id');
+        $this->bsc_db->join('user_profile C', 'C.user_id = A.user_id','left');
+        $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
+        $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
+        $this->bsc_db->join($this->db->database.'.deals_redeems_tb F', 'F.id = A.deals_redeem_id','left');
 
         $this->bsc_db->where('A.id', $survey_id);
 
@@ -27,20 +34,28 @@ class Admin_model extends CI_Model
 
     }
 
-    public function getSurveyCount($status, $search){
+    public function getSurveysCount($status, $search){
         $this->bsc_db->select('count(*) as all_count');
             
         $this->bsc_db->from('customer_survey_responses A');
-        $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
+        $this->bsc_db->join($this->db->database.'.store_tb B', 'B.store_id = A.store_id');
+        $this->bsc_db->join('user_profile C', 'C.user_id = A.user_id', 'left');
+        $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
+        $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
+        $this->bsc_db->join($this->db->database.'.deals_redeems_tb F', 'F.id = A.deals_redeem_id','left');
 
         if($status)
             $this->bsc_db->where('A.status', $status);
 
         if($search){
             $this->bsc_db->group_start();
-            $this->bsc_db->or_like('A.reciept_no', $search);
-            $this->bsc_db->or_like('B.first_name', $search);
-            $this->bsc_db->or_like('B.last_name', $search);
+            $this->bsc_db->or_like('A.order_no', $search);
+            $this->bsc_db->or_like('B.name', $search);
+            $this->bsc_db->or_like('C.first_name', $search);
+            $this->bsc_db->or_like('C.last_name', $search);
+            $this->bsc_db->or_like('D.tracking_no', $search);
+            $this->bsc_db->or_like('E.tracking_no', $search);
+            $this->bsc_db->or_like('F.redeem_code', $search);
             $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
             $this->bsc_db->group_end();
         }
@@ -54,23 +69,38 @@ class Admin_model extends CI_Model
         $this->bsc_db->select("
             A.id,
             A.dateadded,
-            A.reciept_no,
+            A.order_date,
             A.status,
-            B.first_name,
-            B.last_name,
+            B.name as store_name,
+            C.first_name,
+            C.last_name,
+            A.order_no,
+            D.tracking_no as snackshop_tracking_no,
+            E.tracking_no as catering_tracking_no,
+            F.redeem_code as popclub_redeem_code,
+            G.name as order_type
         ");
 
         $this->bsc_db->from('customer_survey_responses A');
-        $this->bsc_db->join('user_profile B', 'B.user_id = B.user_id');
+        $this->bsc_db->join($this->db->database.'.store_tb B', 'B.store_id = A.store_id');
+        $this->bsc_db->join('user_profile C', 'C.user_id = A.user_id','left');
+        $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
+        $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
+        $this->bsc_db->join($this->db->database.'.deals_redeems_tb F', 'F.id = A.deals_redeem_id','left');
+        $this->bsc_db->join('customer_survey_response_order_types G', 'G.id = A.customer_survey_response_order_type_id');
  
         if($status)
             $this->bsc_db->where('A.status', $status);
 
             if($search){
                 $this->bsc_db->group_start();
-                $this->bsc_db->or_like('A.reciept_no', $search);
-                $this->bsc_db->or_like('B.first_name', $search);
-                $this->bsc_db->or_like('B.last_name', $search);
+                $this->bsc_db->or_like('A.order_no', $search);
+                $this->bsc_db->or_like('B.name', $search);
+                $this->bsc_db->or_like('C.first_name', $search);
+                $this->bsc_db->or_like('C.last_name', $search);
+                $this->bsc_db->or_like('D.tracking_no', $search);
+                $this->bsc_db->or_like('E.tracking_no', $search);
+                $this->bsc_db->or_like('F.redeem_code', $search);
                 $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
                 $this->bsc_db->group_end();
             }

@@ -34,7 +34,7 @@ class Deals_model extends CI_Model
 		$this->db->join('dotcom_deals_platform D','D.id = A.platform_id');
 
 
-		$this->db->where('hash_key',$hash_key);
+		$this->db->where('A.hash_key',$hash_key);
 		$query_deal_order_details = $this->db->get();
 		$deal_order_details = $query_deal_order_details->row();
 
@@ -44,6 +44,9 @@ class Deals_model extends CI_Model
 			A.add_address,
 			A.email,
 			A.payops,
+			B.id,
+			B.dateadded,
+			B.store,
 			C.store_id,
 			C.name as store_name,
 			C.address as store_address,
@@ -81,7 +84,7 @@ class Deals_model extends CI_Model
 		$deal_order_items = $query_deal_order_items->result();
 
 		$join_data['deals_redeems']=$deal_order_details;
-		$join_data['client_info'] = $client_info;
+		$join_data['clients_info'] = $client_info;
 		$join_data['deal_order_items']=$deal_order_items;
 
 		return $join_data;
@@ -266,6 +269,7 @@ class Deals_model extends CI_Model
 				A.status,
 				A.remarks,
 				A.platform_id,
+				A.hash_key as redeem_hash,
 				B.name,
 				B.hash AS deal_hash,
 				B.product_image,

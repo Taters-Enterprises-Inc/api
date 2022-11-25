@@ -13,7 +13,11 @@ class Survey extends CI_Controller {
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->model('survey_model');;
+
+		$this->load->model('survey_model');
+		$this->load->model('shop_model');
+		$this->load->model('catering_model');
+		$this->load->model('deals_model');
 	}
 
 	public function index(){
@@ -33,11 +37,58 @@ class Survey extends CI_Controller {
 				$_POST = json_decode(file_get_contents("php://input"), true);
 
 				$answers = $this->input->post('answers');
+				$order_no = $this->input->post('orderedNo');
+				$order_date = $this->input->post('orderedDate');
+				$store_id = $this->input->post('storeId');
+				$order_hash = $this->input->post('orderHash');
+				$service = $this->input->post('service');
 
-				$customer_survey = array(
-					"receipt_no" => '5123',
-					"status" => 1,
-				);
+				switch($service){
+					case 'SNACKSHOP':
+						$order_details = $this->shop_model->view_order($order_hash);
+						$customer_survey = array(
+							"transaction_id" => $order_details['clients_info']->id,
+							"order_date" =>  $order_details['clients_info']->dateadded,
+							"store_id" =>  $order_details['clients_info']->store,
+							'customer_survey_response_order_type_id' => 2,
+							"status" => 2,
+						);
+						break;
+					case 'CATERING':
+						$order_details = $this->catering_model->view_order($order_hash);
+
+						$customer_survey = array(
+							"catering_transaction_id" => $order_details['clients_info']->id,
+							"order_date" =>  $order_details['clients_info']->dateadded,
+							"store_id" =>  $order_details['clients_info']->store,
+							'customer_survey_response_order_type_id' => 3,
+							"status" => 2,
+						);
+						break;
+						
+					case 'POPCLUB-STORE-VISIT':
+						$order_details = $this->deals_model->getUserDeals($order_hash);
+
+						$customer_survey = array(
+							"deals_redeem_id" => $order_details['clients_info']->id,
+							"order_date" =>  $order_details['clients_info']->dateadded,
+							"store_id" =>  $order_details['clients_info']->store,
+							'customer_survey_response_order_type_id' => 4,
+							"status" => 2,
+						);
+						break;
+					default:  // WALK IN
+						$customer_survey = array(
+							"order_no" => $order_no,
+							"order_date" => $order_date,
+							"store_id" => $store_id,
+							'customer_survey_response_order_type_id' => 1,
+							"status" => 1,
+						);
+						
+						break;
+				}
+
 
 				$customer_survey_id = $this->survey_model->insertCustomerSurveyResponse($customer_survey);
 

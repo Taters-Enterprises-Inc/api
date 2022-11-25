@@ -31818,12 +31818,6 @@ ALTER TABLE `_product_variant_options_tb`
 ALTER TABLE `__teisid`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3674;
 
---
--- Constraints for dumped tables
---
-ALTER TABLE `store_tb` 
-ADD `dateadded` VARCHAR(256) NULL AFTER `map_link`;
-
 ALTER TABLE `notifications` CHANGE `user_to_notify` `user_to_notify` VARCHAR(11) NULL DEFAULT NULL;
 
 --
