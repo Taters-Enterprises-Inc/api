@@ -128,8 +128,8 @@ class Survey extends CI_Controller {
 				$survey_answer = $this->survey_model->getCustomerSurveyAnswer($hash, $service);
 
 				$response = array(
-					message => 'Successfully fetch survey answer',
-					data => $survey_answer,
+					"message" => 'Successfully fetch survey answer',
+					"data" => $survey_answer,
 				);
 
 				header('content-type: application/json');
