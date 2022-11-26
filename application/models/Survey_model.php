@@ -1,18 +1,56 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-/*
-  1 - New
-  4 - Declined
-  5 - Forfeited
-  6 - Completed
-*/
+class Survey_model extends CI_Model{
 
-class Survey_model extends CI_Model 
-{
     public function __construct(){
 		$this->newteishopDB =  $this->load->database('default', TRUE, TRUE);
         $this->db = $this->load->database('bsc', TRUE, TRUE);
     }
+
+	public function getCustomerSurveyAnswer($hash, $service){
+		$this->db->select('
+			A.id,
+			A.order_date,
+		');
+
+		$this->db->from('customer_survey_responses A');
+
+		switch($service){
+			case 'SNACKSHOP':
+				$this->db->join($this->newteishopDB->database.'.transaction_tb B', 'B.id = A.transaction_id');
+				$this->db->where('B.hash_key', $hash);
+				break;
+			case 'CATERING':
+
+				break;
+			case 'POPCLUB-STORE-VISIT':
+
+				break;
+		}
+
+		$query_customer_survey_response = $this->db->get();
+		$customer_survey_response = $query_customer_survey_response->row();
+
+		$this->db->select('
+			A.id, 
+			A.survey_question_offered_answer_id, 
+			A.survey_question_id, 
+			A.other_text,
+			A.customer_survey_response_id
+		');
+
+		$this->db->from('customer_survey_response_answers A');
+
+		$this->db->where('A.customer_survey_response_id', $customer_survey_response->id);
+
+		$query_customer_survey_response_answers = $this->db->get();
+		$customer_survey_response_answers = $query_customer_survey_response_answers->result();
+		
+		$data = $customer_survey_response;
+		$data->answers = $customer_survey_response_answers;
+
+		return $data;
+	}
 
 	public function insertCustomerSurveyResponse($data){
         $this->db->trans_start();

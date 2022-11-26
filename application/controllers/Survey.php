@@ -112,5 +112,30 @@ class Survey extends CI_Controller {
 				break;
 		}
 	}
+
+	public function answer(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$hash = $this->input->get('hash');
+				$service = $this->input->get('service');
+
+				if(!isset($hash) || !isset($service)){
+					$this->output->set_status_header('401');
+					echo json_encode(array( "message" => 'Missing queries!'));
+					break;
+				}
+
+				$survey_answer = $this->survey_model->getCustomerSurveyAnswer($hash, $service);
+
+				$response = array(
+					message => 'Successfully fetch survey answer',
+					data => $survey_answer,
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
 	
 }

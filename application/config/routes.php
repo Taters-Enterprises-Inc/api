@@ -167,6 +167,7 @@ $route['notification/(:num)/seen'] = 'notification/seen/$1';
 
 //Survey
 $route['survey'] = 'survey';
+$route['survey/answer'] = 'survey/answer';
 
 //Others
 $route['404_override'] = '';
