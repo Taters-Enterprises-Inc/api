@@ -21,9 +21,13 @@ class Survey_model extends CI_Model{
 				$this->db->where('B.hash_key', $hash);
 				break;
 			case 'CATERING':
+				$this->db->join($this->newteishopDB->database.'.catering_transaction_tb B', 'B.id = A.catering_transaction_id');
+				$this->db->where('B.hash_key', $hash);
 
 				break;
 			case 'POPCLUB-STORE-VISIT':
+				$this->db->join($this->newteishopDB->database.'.deals_redeems_tb B', 'B.id = A.deals_redeem_id');
+				$this->db->where('B.hash_key', $hash);
 
 				break;
 		}

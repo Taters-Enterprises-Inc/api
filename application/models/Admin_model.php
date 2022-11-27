@@ -12,13 +12,16 @@ class Admin_model extends CI_Model
         $this->bsc_db->select('
             A.id,
             A.dateadded,
-            A.order_no,
             A.order_date,
             A.status,
             B.name as store_name,
             C.first_name,
             C.last_name,
-            D.tracking_no,
+            A.order_no,
+            D.tracking_no as snackshop_tracking_no,
+            E.tracking_no as catering_tracking_no,
+            F.redeem_code as popclub_redeem_code,
+            G.name as order_type
         ');
         $this->bsc_db->from('customer_survey_responses A');
         $this->bsc_db->join($this->db->database.'.store_tb B', 'B.store_id = A.store_id');
@@ -26,12 +29,35 @@ class Admin_model extends CI_Model
         $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
         $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
         $this->bsc_db->join($this->db->database.'.deals_redeems_tb F', 'F.id = A.deals_redeem_id','left');
+        $this->bsc_db->join('customer_survey_response_order_types G', 'G.id = A.customer_survey_response_order_type_id');
 
         $this->bsc_db->where('A.id', $survey_id);
 
-        $query = $this->bsc_db->get();
-        return $query->row();
+        $query_customer_survey_response = $this->bsc_db->get();
+        $customer_survey_response = $query_customer_survey_response->row();
+        
+		$this->bsc_db->select('
+            A.id, 
+            A.other_text,
+            A.customer_survey_response_id,
+            B.description as question,
+            C.text as answer,
+        ');
 
+        $this->bsc_db->from('customer_survey_response_answers A');
+        $this->bsc_db->join('survey_questions B', 'B.id = A.survey_question_id', 'left');
+        $this->bsc_db->join('survey_question_offered_answers C', 'C.id = A.survey_question_offered_answer_id', 'left');
+        
+        $this->bsc_db->where('A.customer_survey_response_id', $customer_survey_response->id);
+        
+		$query_customer_survey_response_answers = $this->bsc_db->get();
+		$customer_survey_response_answers = $query_customer_survey_response_answers->result();
+
+        $data = $customer_survey_response;
+        
+        $data->answers = $customer_survey_response_answers;
+        
+        return $data;
     }
 
     public function getSurveysCount($status, $search){
@@ -43,6 +69,7 @@ class Admin_model extends CI_Model
         $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
         $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
         $this->bsc_db->join($this->db->database.'.deals_redeems_tb F', 'F.id = A.deals_redeem_id','left');
+        $this->bsc_db->join('customer_survey_response_order_types G', 'G.id = A.customer_survey_response_order_type_id');
 
         if($status)
             $this->bsc_db->where('A.status', $status);
