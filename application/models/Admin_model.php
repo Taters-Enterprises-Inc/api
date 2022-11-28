@@ -1237,12 +1237,13 @@ class Admin_model extends CI_Model
             B.mobile_user_id,
             
             C.name as store_name,
-            D.name AS discount_name
+            E.name AS discount_name
         ");
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
-        $this->db->join('discount D', 'D.id = A.discount_user_id','left');
+        $this->db->join('discount_users D', 'D.id = A.discount_user_id','left');
+        $this->db->join('discount E', 'E.id = D.discount_type_id','left');
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();
@@ -1342,12 +1343,13 @@ class Admin_model extends CI_Model
             C.contact_number as store_contact,
             C.email as store_email,
 
-            D.name AS discount_name
+            E.name AS discount_name
         ");
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
-        $this->db->join('discount D', 'D.id = A.discount_user_id','left');
+        $this->db->join('discount_users D', 'D.id = A.discount_user_id','left');
+        $this->db->join('discount E', 'E.id = D.discount_type_id','left');
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();
