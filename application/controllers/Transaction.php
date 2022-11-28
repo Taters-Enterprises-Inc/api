@@ -74,11 +74,11 @@ class Transaction extends CI_Controller {
                     );
 
                     $discount_value = "";
-                    $discount_id = null;
+                    $discount_user_id = null;
                     
                     if(isset($discount)){
                         $discount_value = (int)$comp_total * (float)$discount->percentage;
-                        $discount_id = $discount->discount_type_id;
+                        $discount_user_id = $discount->id;
                     }
                     
                     $client_id = $insert_client_details['id'];
@@ -110,7 +110,7 @@ class Transaction extends CI_Controller {
                         'custom_message'    => '',
                         'logon_type'        => $insert_client_details['logon_type'],
                         'discount'          => $discount_value,
-                        'discount_id'       => $discount_id,
+                        'discount_user_id'       => $discount_user_id,
                     );
 
                         
@@ -367,10 +367,10 @@ class Transaction extends CI_Controller {
                     $discount_type = '';
                     $discount_ref_no = '';
                     $discount_value = "";
-                    $discount_id = null;
+                    $discount_user_id = null;
                     if(isset($discount)){
                         $discount_value = (int)$comp_total * (float)$discount->percentage;
-                        $discount_id = $discount->discount_type_id;
+                        $discount_user_id = $discount->id;
                     }
                     
                     $client_id = $insert_client_details['id'];
@@ -393,7 +393,7 @@ class Transaction extends CI_Controller {
                         'reseller_discount' => "",
                         'payops'            => $payops,
                         'discount'          => $discount_value,
-                        'discount_id'       => $discount_id,
+                        'discount_user_id'       => $discount_user_id,
                         'giftcard_discount' => "",
                         'giftcard_number'   => "",
                         'voucher_id'        => $voucher_id,

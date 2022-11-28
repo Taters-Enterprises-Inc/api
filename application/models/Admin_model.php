@@ -999,7 +999,7 @@ class Admin_model extends CI_Model
         return $query->row();
     }
 
-    public function getDiscount($discount_id){
+    public function getDiscount($discount_user_id){
         $this->db->select("
             A.id,
             A.first_name,
@@ -1025,7 +1025,7 @@ class Admin_model extends CI_Model
         $this->db->join('fb_users C', 'C.id = A.fb_user_id','left');
         $this->db->join('mobile_users D', 'D.id = A.mobile_user_id','left');
 
-        $this->db->where('A.id', $discount_id);
+        $this->db->where('A.id', $discount_user_id);
 
         $query = $this->db->get();
         return $query->row();
@@ -1216,6 +1216,7 @@ class Admin_model extends CI_Model
             A.invoice_num,
 
             A.discount,
+            A.discount_user_id,
             A.reseller_discount,
             A.giftcard_discount,
             A.distance_price,
@@ -1241,7 +1242,7 @@ class Admin_model extends CI_Model
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
-        $this->db->join('discount D', 'D.id = A.discount_id','left');
+        $this->db->join('discount D', 'D.id = A.discount_user_id','left');
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();
@@ -1322,7 +1323,7 @@ class Admin_model extends CI_Model
             A.reference_num,
             A.store,
             A.discount,
-            A.discount_id,
+            A.discount_user_id,
             B.fb_user_id,
             B.mobile_user_id,
 
@@ -1346,7 +1347,7 @@ class Admin_model extends CI_Model
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
-        $this->db->join('discount D', 'D.id = A.discount_id','left');
+        $this->db->join('discount D', 'D.id = A.discount_user_id','left');
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();

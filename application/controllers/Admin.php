@@ -1423,10 +1423,10 @@ public function survey_verification_change_status(){
     }
   }
 
-  public function discount($discount_id){
+  public function discount($discount_user_id){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
-        $discount = $this->admin_model->getDiscount($discount_id);
+        $discount = $this->admin_model->getDiscount($discount_user_id);
 
         $response = array(
           "message" => 'Successfully fetch user discount request',

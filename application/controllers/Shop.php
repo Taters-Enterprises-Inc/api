@@ -75,6 +75,7 @@ class Shop extends CI_Controller {
                 } else {
                     $subtotal = $order_details['clients_info']->purchase_amount;
                     $delivery_fee = $order_details['clients_info']->distance_price;
+					
                     if($order_details['clients_info']->discount == NULL){
                         $voucher_amount = 0;
                     }else{
@@ -85,9 +86,9 @@ class Shop extends CI_Controller {
                     }else{
                         $giftcard_amount = $order_details['clients_info']->giftcard_discount;
                     }
+
                     $cod_fee = $order_details['clients_info']->cod_fee;
                     $grand_total = (int)$subtotal + (int)$delivery_fee + (int)$cod_fee - (double)$voucher_amount - (double)$giftcard_amount;
-                    // $grand_total = number_format($subtotal + $delivery_fee + $cod_fee - $voucher_amount,2);
                 }
 				
 				$query_logon  = $this->shop_model->get_logon_type($hash);
