@@ -1010,9 +1010,9 @@ class Admin_model extends CI_Model
             A.dateadded,
             A.id_front,
             A.id_back,
-            A.discount_type_id,
+            A.discount_id,
             A.status,
-            B.name as discount_type_name,
+            B.name as discount_name,
 
             C.first_name as fb_first_name,
             C.last_name as fb_last_name,
@@ -1021,7 +1021,7 @@ class Admin_model extends CI_Model
             D.last_name as mobile_last_name,
         ");
         $this->db->from('discount_users A');
-        $this->db->join('discount B', 'B.id = A.discount_type_id');
+        $this->db->join('discount B', 'B.id = A.discount_id');
         $this->db->join('fb_users C', 'C.id = A.fb_user_id','left');
         $this->db->join('mobile_users D', 'D.id = A.mobile_user_id','left');
 
@@ -1035,7 +1035,7 @@ class Admin_model extends CI_Model
         $this->db->select('count(*) as all_count');
             
         $this->db->from('discount_users A');
-        $this->db->join('discount B', 'B.id = A.discount_type_id');
+        $this->db->join('discount B', 'B.id = A.discount_id');
 
         if($status)
             $this->db->where('A.status', $status);
@@ -1094,13 +1094,13 @@ class Admin_model extends CI_Model
             A.birthday,
             A.id_number,
             A.dateadded,
-            A.discount_type_id,
+            A.discount_id,
             A.status,
-            B.name as discount_type_name,
+            B.name as discount_name,
             B.percentage,
         ");
         $this->db->from('discount_users A');
-        $this->db->join('discount B', 'B.id = A.discount_type_id');
+        $this->db->join('discount B', 'B.id = A.discount_id');
         
             
         if($status)
@@ -1237,13 +1237,14 @@ class Admin_model extends CI_Model
             B.mobile_user_id,
             
             C.name as store_name,
-            E.name AS discount_name
+            E.name AS discount_name,
+            E.percentage AS discount_percentage,
         ");
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         $this->db->join('discount_users D', 'D.id = A.discount_user_id','left');
-        $this->db->join('discount E', 'E.id = D.discount_type_id','left');
+        $this->db->join('discount E', 'E.id = D.discount_id','left');
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();
@@ -1343,13 +1344,14 @@ class Admin_model extends CI_Model
             C.contact_number as store_contact,
             C.email as store_email,
 
-            E.name AS discount_name
+            E.name AS discount_name,
+            E.percentage AS discount_percentage,
         ");
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         $this->db->join('discount_users D', 'D.id = A.discount_user_id','left');
-        $this->db->join('discount E', 'E.id = D.discount_type_id','left');
+        $this->db->join('discount E', 'E.id = D.discount_id','left');
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();

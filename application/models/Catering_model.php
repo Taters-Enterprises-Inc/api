@@ -225,7 +225,7 @@ class Catering_model extends CI_Model
             $this->db->from($table);
             $this->db->join('catering_transaction_tb B', $join_A ,'left');
             $this->db->join('discount_users C', 'C.id = B.discount_user_id' ,'left');
-            $this->db->join('discount D', 'D.id = C.discount_type_id' ,'left');
+            $this->db->join('discount D', 'D.id = C.discount_id' ,'left');
             $this->db->join('store_tb Z', 'Z.store_id = B.store' ,'left');
             $this->db->where('B.hash_key', $hash_key);
 

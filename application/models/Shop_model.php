@@ -185,8 +185,8 @@ class Shop_model extends CI_Model
                 "V.voucher_code",
                 "B.giftcard_discount",
                 "B.giftcard_number",
-                'E.name AS discount_name',
-                'E.percentage AS discount_percentage'
+                "E.name AS discount_name",
+                "E.percentage AS discount_percentage"
             );
             $join_A = "A.id = B.client_id";
             $this->db->select($select_column);  
@@ -195,7 +195,7 @@ class Shop_model extends CI_Model
             $this->db->join('store_tb Z', 'Z.store_id = B.store' ,'left');
             $this->db->join('voucher_logs_tb V', 'V.transaction_id = B.id' ,'left');
             $this->db->join('discount_users D', 'D.id = B.discount_user_id' ,'left');
-            $this->db->join('discount E', 'E.id = D.discount_type_id' ,'left');
+            $this->db->join('discount E', 'E.id = D.discount_id' ,'left');
             $this->db->where('B.hash_key', $hash_key);
             $query_info = $this->db->get();
             $info = $query_info->result();

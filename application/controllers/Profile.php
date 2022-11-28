@@ -365,7 +365,7 @@ class Profile extends CI_Controller {
 					'birthday' => $_POST['birthday'],
 					'id_number' => $_POST['idNumber'],
 					'dateadded' => date('Y-m-d H:i:s'),
-					'discount_type_id' => $_POST['discountTypeId'],
+					'discount_id' => $_POST['discountId'],
 					'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
 					'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
 					'status' => 1
@@ -421,7 +421,7 @@ class Profile extends CI_Controller {
 					is_uploaded_file($_FILES['idFront']['tmp_name']) &&
 					is_uploaded_file($_FILES['idBack']['tmp_name'])
 				){
-					if($birthday->format('Y') > ($currentYear->format('Y') - 60) && $_POST['discountTypeId'] == 1){
+					if($birthday->format('Y') > ($currentYear->format('Y') - 60) && $_POST['discountId'] == 1){
 
 						$this->output->set_status_header('401');
 						echo json_encode(array( "message" => 'Invalid birthday for senior citizen.'));
@@ -460,7 +460,7 @@ class Profile extends CI_Controller {
 							'id_front' => $id_front_data['file_name'],
 							'id_back' => $id_back_data['file_name'],
 							'dateadded' => date('Y-m-d H:i:s'),
-							'discount_type_id' => $_POST['discountTypeId'],
+							'discount_id' => $_POST['discountId'],
 							'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
 							'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
 							'status' => 1

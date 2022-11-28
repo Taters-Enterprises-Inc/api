@@ -25,7 +25,7 @@ class Discount_model extends CI_Model {
             id_number,
             id_front,
             id_back,
-            discount_type_id,
+            discount_id,
             status
         ');
 
@@ -46,15 +46,15 @@ class Discount_model extends CI_Model {
             A.id_number,
             A.id_front,
             A.id_back,
-            A.discount_type_id,
+            A.discount_id,
             A.status,
 
-            B.name AS discount_type_name,
+            B.name AS discount_name,
             B.percentage
         ');
 
         $this->db->from('discount_users A');
-        $this->db->join('discount B','B.id = discount_type_id');
+        $this->db->join('discount B','B.id = discount_id');
         
         if(isset($fb_user_id)){
             $this->db->where('fb_user_id', $fb_user_id);
@@ -78,15 +78,15 @@ class Discount_model extends CI_Model {
             A.id_number,
             A.id_front,
             A.id_back,
-            A.discount_type_id,
+            A.discount_id,
             A.status,
 
-            B.name AS discount_type_name,
+            B.name AS discount_name,
             B.percentage
         ');
 
         $this->db->from('discount_users A');
-        $this->db->join('discount B','B.id = discount_type_id');
+        $this->db->join('discount B','B.id = discount_id');
         $this->db->where('A.status', 3);
         
         if(isset($fb_user_id)){
