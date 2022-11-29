@@ -30,7 +30,7 @@ class Download extends CI_Controller {
 		$status_detail = $this->catering_model->fetch_status_detail($hash_key);
 
 		if(!empty($status_detail)){
-			$data['status'] = $status_detail->status;
+			$status = $status_detail->status;
 		}
         
         $catering_start_date = $query_result['clients_info']->start_datetime;
@@ -67,6 +67,7 @@ class Download extends CI_Controller {
 		}else{
 			$voucher_amount = $query_result['clients_info']->discount;
 		}
+
 		$cod_fee = $query_result['clients_info']->cod_fee;
 		$grand_total = (int)$subtotal + (int)$transportation_fee + (int)$service_fee + (int)$night_diff_charge + (int)$this->get_succeeding_hour_charge($catering_start_date,$catering_end_date) + (int)$cod_fee - (double)$voucher_amount ;
 
@@ -75,32 +76,7 @@ class Download extends CI_Controller {
 			show_error('Page is not available.');
 			exit();
 		} else {
-			$data['info'] = $query_result['clients_info'];
-
-			$order_design = array();
-			
-			$data['orders'] = $order_design;
-			$data['personnel'] = $query_result['personnel'];
-			$data['bank'] = $query_result['bank'];
-			$data['subtotal'] = $subtotal;
-			$data['night_diff_charge'] = $night_diff_charge;
-
-			$data['voucher_amount'] = $voucher_amount;
-			$data['transportation_fee'] = $transportation_fee;
-			$data['service_fee'] = $service_fee;
-			$data['cod_fee'] = $cod_fee;
-
-			if ($logon_type == 'facebook') {
-				$facebook_details = $this->catering_model->get_facebook_details($query_result['clients_info']->fb_user_id);
-				$data['firstname'] = $facebook_details->first_name;
-				$data['lastname'] = $facebook_details->last_name;
-			}
-
 			$succeeding_hour_charge =  (int)$this->get_succeeding_hour_charge($catering_start_date,$catering_end_date);
-
-            $data['succeeding_hour_charge'] = $succeeding_hour_charge;
-			$data['grand_total'] = $grand_total;
-
 
 			$no_of_pax = 0;
 			$package_price = 0;
@@ -171,12 +147,12 @@ class Download extends CI_Controller {
 				'grand_total' => $grand_total,
 				'succeeding_hour_charge' => $succeeding_hour_charge,
 				'night_diff_charge' => $night_diff_charge,
+				'cod_fee' => $cod_fee,
 				'is_download' => true,
-				'show_terms_and_condition' => $data['status'] == 1 ? false : true,
+				'show_terms_and_condition' => $status == 1 ? false : true,
 			);
-			
-			$data['contract_data'] = $contract_data;
-			$file_name = $data['status'] == 1 ? 
+
+			$file_name = $status == 1 ? 
 				'taters-caters-booking-summary-'.$query_result['clients_info']->tracking_no :
 				'taters-caters-contract-'.$query_result['clients_info']->tracking_no ;
 

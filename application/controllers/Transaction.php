@@ -57,7 +57,7 @@ class Transaction extends CI_Controller {
                     $payops = $post['payops'];
                     
                     $cod_fee = "0";
-                    if($this->session->moh == 2 && $payops == '3'){
+                    if($payops == '3'){
                         $cod_fee = $this->session->cash_delivery;
                     }
 
