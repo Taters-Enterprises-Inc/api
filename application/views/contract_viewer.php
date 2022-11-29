@@ -205,6 +205,15 @@
 			<td ></td>	
 			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= number_format($night_diff_charge,2,'.',',')?></td>
 		</tr>
+
+		<?php if($cod_fee): ?>
+			<tr>
+				<td ></td>	
+				<td >Cash On Delivery Charge:</td>		
+				<td ></td>	
+				<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= number_format($cod_fee,2,'.',',')?></td>
+			</tr>
+		<?php endif;?>
 		
 		<tr>
 			<td style="height: <?= $is_download != true ?  '40px' : '18px' ?>;"></td>	
