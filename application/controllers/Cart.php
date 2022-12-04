@@ -24,43 +24,25 @@ class Cart extends CI_Controller {
 				$prod_image_name = $this->input->post('prod_image_name');
 
                 $product_sku_price = 0;
-                $prod_flavor = NULL;
                 $prod_size = NULL;
-                if($this->input->post('prod_flavor') !== null || $this->input->post('prod_size') !== null ){
-
-                    if($this->input->post('prod_flavor') !== null  ){
-                        $varx[] = $this->input->post('prod_flavor');
-                        $prod_flavor = $this->shop_model->fetch_variants_details($this->input->post('prod_flavor'));
-                    }
-                    
-                    if($this->input->post('prod_size') !== null ){
-                        $varx[] = $this->input->post('prod_size');
-                        $prod_size = $this->shop_model->fetch_variants_details($this->input->post('prod_size'));
-                    }
-
-                    $varxz = array_values(array_filter($varx));
-                    $product_sku = $this->shop_model->fetch_product_sku($varxz);
-                    if(!empty($product_sku)){
-                        $product_sku_price = $product_sku->price;
-                    }else{
-                        $product_sku_price = $product_details->price;
-                    }
-                }
 
                 $product_price = (empty($varx)) ? $product_details->price : $product_sku_price;
                 $prod_calc_amount   = $this->input->post('prod_calc_amount');
+                $prod_qty = $this->input->post('prod_qty');
+
+                // will be remove on January 2023
+                $prod_qty = temporary_giftcard_promo_this_is_a_rush_solution_will_be_remove_soon($prod_id, $prod_qty);
 
                 $set_value['prod_id']               = $prod_id;
                 $set_value['prod_image_name']       = $prod_image_name;
                 $set_value['prod_name']             = $product_details->name;
-                $set_value['prod_qty']              = $this->input->post('prod_qty');
+                $set_value['prod_qty']              = $prod_qty;
                 $set_value['prod_price']            = $product_price;
                 $set_value['prod_calc_amount']      = $prod_calc_amount;
-                $set_value['prod_flavor']           = (empty($prod_flavor)) ? '' : $prod_flavor->name;
-                $set_value['prod_flavor_id']        = $this->input->post('prod_flavor') !== null  ? $this->input->post('prod_flavor'): '';
+                $set_value['prod_flavor_id']        = $this->input->post('prod_flavor') !== ""  ? $this->input->post('prod_flavor'): '';
                 $set_value['prod_with_drinks']      = $this->input->post('prod_with_drinks') ? 1 : 0;
                 $set_value['prod_size']             = (empty($prod_size)) ? '' : $prod_size->name;
-                $set_value['prod_size_id']          = $this->input->post('prod_size') !== null  ? $this->input->post('prod_size'): '';
+                $set_value['prod_size_id']          = $this->input->post('prod_size') !== ""  ? $this->input->post('prod_size'): '';
                 $set_value['prod_multiflavors']     = $this->input->post('flavors_details') !== null  ? $this->input->post('flavors_details'): '';
                 $set_value['prod_sku_id']           = $this->input->post('prod_sku_id');
                 $set_value['prod_sku']              = $this->input->post('prod_sku');

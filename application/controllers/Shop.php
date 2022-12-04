@@ -157,13 +157,19 @@ class Shop extends CI_Controller {
 					$product->promo_discount_percentage = $promo_discount_percentage;
                 }
 				
-				$product_size = $this->shop_model->fetch_product_variants($product->id,'size');
-				$product_flavor = $this->shop_model->fetch_product_variants($product->id,'flavor');
-				$product_date = $this->shop_model->fetch_product_variants($product->id,'date');
+				$product_size = $this->shop_model->getProductVariantsSize($product->id);
+				$flavors = $this->shop_model->getProductVariantsFlavor($product->id);
 				$product_images = $this->images->product_images(
 					'assets/images/shared/products/500',
 					basename($product->product_image, '.jpg')
 				);
+
+				$product_flavor = array();
+				foreach($flavors as $key => $flavor){
+					$product_flavor[$flavor->product_variant_id]['parent_name'] = $flavor->parent_name;
+					$product_flavor[$flavor->product_variant_id]['flavors'][] =  $flavor;
+				}
+
 				$youtube_video_ads = $this->shop_model->youtube_video_ads($product->id);
 				$suggested_products = $this->shop_model->get_suggested_product($product->id);
 
@@ -179,8 +185,7 @@ class Shop extends CI_Controller {
 						'product' => $product,
 						'addons' => $addons,
 						'product_size' => $product_size,
-						'product_flavor' => $product_flavor,
-						'product_date' => $product_date,
+						'product_flavor' => array_values($product_flavor),
 						'product_images' => $product_images,
 						'youtube_video_ads' => $youtube_video_ads,
 						'suggested_products' => $suggested_products,

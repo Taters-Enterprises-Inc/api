@@ -122,7 +122,25 @@ class Admin_model extends CI_Model
         $info = $query_info->result();
 
         $this->db->from('products_tb P');
-        $this->db->select('*');
+        $this->db->select('
+            P.id,
+            P.name,
+            P.price,
+            P.add_details,
+            P.add_remarks,
+            P.dateadded,
+            O.transaction_id,
+            O.quantity,
+            O.remarks,
+            O.promo_id,
+            O.promo_price,
+            O.product_price,
+            O.product_label,
+            O.addon_base_product,
+            O.addon_base_product_name,
+            D.alias,
+            D.promo_discount_percentage
+        ');
         $this->db->join('order_items O', 'P.id = O.product_id' ,'left');
         $this->db->join('dotcom_deals_tb D', 'D.id = O.deal_id' ,'left');
         $this->db->where('O.transaction_id', $id);
