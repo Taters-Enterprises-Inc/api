@@ -159,9 +159,12 @@ class Shop extends CI_Controller {
 				
 				$product_size = $this->shop_model->getProductVariantsSize($product->id);
 				$flavors = $this->shop_model->getProductVariantsFlavor($product->id);
+				
+				$product_image_extension = '.' . pathinfo($product->product_image)['extension'];
 				$product_images = $this->images->product_images(
 					'assets/images/shared/products/500',
-					basename($product->product_image, '.jpg')
+					basename($product->product_image,$product_image_extension),
+					$product_image_extension
 				);
 
 				$product_flavor = array();

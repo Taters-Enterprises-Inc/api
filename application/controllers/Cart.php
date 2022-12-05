@@ -68,9 +68,12 @@ class Cart extends CI_Controller {
                     $product_flavor = $this->shop_model->fetch_product_variants($order_item['prod_id'],'flavor');
                     $product_date = $this->shop_model->fetch_product_variants($order_item['prod_id'],'date');
                     $suggested_products = $this->shop_model->get_suggested_product($order_item['prod_id']);
+                    
+                    $product_image_extension = '.' . pathinfo($product->product_image)['extension'];
                     $product_images = $this->images->product_images(
                         'assets/images/shared/products/500',
-                        basename($product->product_image,'.jpg')
+                        basename($product->product_image,$product_image_extension),
+                        $product_image_extension
                     );
         
                     
