@@ -256,10 +256,12 @@ class Catering extends CI_Controller {
 					$product_flavor[$flavor->product_variant_id]['parent_name'] = $flavor->parent_name;
 					$product_flavor[$flavor->product_variant_id]['flavors'][] =  $flavor;
 				}
-
+				
+				$product_image_extension = '.' . pathinfo($product->product_image)['extension'];
 				$product_images = $this->images->product_images(
 					'assets/images/shared/products/500',
-					basename($product->product_image, '.jpg')
+					basename($product->product_image,$product_image_extension),
+					$product_image_extension
 				);
 
 				$product_prices = $this->catering_model->get_product_prices($product->id);
