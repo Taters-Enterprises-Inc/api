@@ -362,7 +362,7 @@ class Catering_model extends CI_Model
         return $query->result();
     }
     
-    public function get_product_variants($product_id)
+    public function getPackageVariants($product_id)
     {
         $this->db->select("B.id,B.name,B.product_variant_id, A.name as parent_name");
         $this->db->from('catering_package_variants_tb A');

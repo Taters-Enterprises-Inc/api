@@ -422,7 +422,7 @@ class Transaction extends CI_Controller {
 
                             foreach ($orders as $k => $value) {
 								if(isset($value['prod_id'])){
-									$remarks = (empty($value['prod_multiflavors'])) ? $value['prod_flavor'] : $value['prod_multiflavors'];
+									$remarks = (empty($value['prod_multiflavors'])) ? null : $value['prod_multiflavors'];
 
                                     $order_product =  array(
 										'transaction_id'      => $query_transaction_result['id'],

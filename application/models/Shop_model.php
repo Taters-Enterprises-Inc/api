@@ -362,17 +362,34 @@ class Shop_model extends CI_Model
         return $query->result();
     }
 	
-    function fetch_product_variants($product_id,$name)
-    {
+    function getProductVariantsSize($product_id){
         $this->db->select("B.id,B.name");
         $this->db->from('product_variants_tb A');
         $this->db->join('product_variant_options_tb B', 'B.product_variant_id = A.id','left');
         $this->db->where('A.product_id', $product_id);
-        $this->db->where('A.name', $name);
+        $this->db->where('A.name', 'size');
         $this->db->where('B.status', 1);
         $query = $this->db->get();
         return $query->result();
     }
+
+    function getProductVariantsFlavor($product_id){
+        $this->db->select("
+            B.id, 
+            B.name, 
+            B.product_variant_id,
+            A.name as parent_name
+        ");
+        $this->db->from('product_variants_tb A');
+        $this->db->join('product_variant_options_tb B', 'B.product_variant_id = A.id','left');
+        $this->db->where('A.product_id', $product_id);
+        $this->db->where('A.name !=', 'size');
+        $this->db->where('B.status', 1);
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    
 		
 	public function get_product($hash)
     {

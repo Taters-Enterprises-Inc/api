@@ -251,7 +251,7 @@ class Catering extends CI_Controller {
 				}
 				
 				$product_flavor = array();
-				$flavors = $this->catering_model->get_product_variants($product->id);
+				$flavors = $this->catering_model->getPackageVariants($product->id);
 				foreach($flavors as $key => $flavor){
 					$product_flavor[$flavor->product_variant_id]['parent_name'] = $flavor->parent_name;
 					$product_flavor[$flavor->product_variant_id]['flavors'][] =  $flavor;
