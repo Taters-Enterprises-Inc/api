@@ -28,15 +28,11 @@ class Cart extends CI_Controller {
 
                 $product_price = (empty($varx)) ? $product_details->price : $product_sku_price;
                 $prod_calc_amount   = $this->input->post('prod_calc_amount');
-                $prod_qty = $this->input->post('prod_qty');
-
-                // will be remove on January 2023
-                $prod_qty = temporary_giftcard_promo_this_is_a_rush_solution_will_be_remove_soon($prod_id, $prod_qty);
 
                 $set_value['prod_id']               = $prod_id;
                 $set_value['prod_image_name']       = $prod_image_name;
                 $set_value['prod_name']             = $product_details->name;
-                $set_value['prod_qty']              = $prod_qty;
+                $set_value['prod_qty']              = $this->input->post('prod_qty');
                 $set_value['prod_price']            = $product_price;
                 $set_value['prod_calc_amount']      = $prod_calc_amount;
                 $set_value['prod_flavor_id']        = $this->input->post('prod_flavor') !== ""  ? $this->input->post('prod_flavor'): '';
@@ -52,6 +48,9 @@ class Cart extends CI_Controller {
                 $set_value['promo_discount_percentage'] = $this->input->post('promo_discount_percentage');
 
                 $_SESSION['orders'][] = $set_value;
+                
+                // will be remove on January 2023
+                temporary_giftcard_promo_this_is_a_rush_solution_will_be_remove_soon();
 
 				$response = array(
 					'message' => 'Successfully add to cart item'
@@ -112,11 +111,15 @@ class Cart extends CI_Controller {
             case 'DELETE':
 				    $item_index = $this->input->get('item-index');
                     
+                    
                     if(isset($_SESSION['orders'])){
                         unset($_SESSION['orders'][$item_index]);
                         $reindexed_array = array_values($_SESSION['orders']);
                         $this->session->set_userdata('orders', $reindexed_array);
                     }
+                    
+                    // will be remove on January 2023
+                    temporary_giftcard_promo_this_is_a_rush_solution_will_be_remove_soon();
             
                     $response = array(
                         'message' => 'Successfully remove item from cart'
