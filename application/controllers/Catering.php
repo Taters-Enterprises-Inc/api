@@ -52,7 +52,7 @@ class Catering extends CI_Controller {
 					"message" => $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." Upload Contract!"
 				);
 
-				notify('admin-catering','booking-transaction', $real_time_notification);
+				notify('admin-catering','contract-booking', $real_time_notification);
 
                 header('content-type: application/json');
                 echo json_encode(array( "message" => 'Succesfully upload contract'));
