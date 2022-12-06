@@ -7,14 +7,19 @@ if ( ! function_exists('temporary_giftcard_promo_this_is_a_rush_solution_will_be
 
         $orders = $CI->session->orders;
         $total_product_qty = 0;
+        $is_free_item_exist = false;
 
         foreach($orders as $order){
             if($order['prod_id'] === 369){
                 $total_product_qty += $order['prod_qty'];
+
+                if($order['prod_calc_amount'] === 0){
+                    $is_free_item_exist = true;
+                }
             }
         }
 
-        if($total_product_qty >= 10){
+        if($total_product_qty >= 10 && $is_free_item_exist === false){
             $prod_id = $CI->input->post('prod_id');
             $product_details = $CI->shop_model->get_details($prod_id)[0];
             $prod_image_name = $CI->input->post('prod_image_name');
@@ -46,7 +51,7 @@ if ( ! function_exists('temporary_giftcard_promo_this_is_a_rush_solution_will_be
 
             $_SESSION['orders'][] = $set_value;
             
-        }else if ($total_product_qty < 10 && $total_product_qty > 0){
+        }else if ($total_product_qty < 10 && $total_product_qty > 0 && $is_free_item_exist === true){
             foreach($orders as $key => $order){
                 if($order['prod_id'] === 369 &&  $order['prod_calc_amount'] === 0){
                     unset($_SESSION['orders'][$key]);

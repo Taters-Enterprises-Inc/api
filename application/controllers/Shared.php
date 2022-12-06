@@ -123,6 +123,17 @@ class Shared extends CI_Controller {
 				
 				$user_id = $query_result['client_data']->client_id;
 				if ($query_result['upload_status'] == 1) {
+					$store_id = $this->session->cache_data['store_id'];
+
+					$message = "Eco Villaraza payed ordered on snackshop! #asdfjD1d";
+
+					$realtime_notification = array(
+						"store_id" => $store_id,
+						"message" => $message,
+					);
+
+					notify('admin-snackshop','payment-transaction', $realtime_notification);
+
 					$this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Uploading-notification-success');
 				} else {
 					$this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Uploading-notification-failed');
