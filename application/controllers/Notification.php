@@ -20,7 +20,7 @@ class Notification extends CI_Controller {
 				if(!isset($_SESSION['userData'])){
 					$this->output->set_status_header('401');
 					header('content-type: application/json');
-					echo json_encode($response);
+					echo json_encode(array("message"=>"Unauthorized user"));
 				}
 
 				$user_id = isset($_SESSION['userData']['oauth_uid']) ? $_SESSION['userData']['fb_user_id'] : $_SESSION['userData']['mobile_user_id'];
@@ -28,6 +28,11 @@ class Notification extends CI_Controller {
 
 				$response = array(
 					"data" => array(
+						"all" => array(
+							'notifications'=> $this->notification_model->getNotifications($user_id, null, false, $type),
+							"unseen_notifications" => $this->notification_model->getNotifications($user_id, null, true, $type),
+							'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, null, $type),
+						),
 						"snackshop_order" => array(
 							'notifications'=> $this->notification_model->getNotifications($user_id, 1, false, $type),
 							"unseen_notifications" => $this->notification_model->getNotifications($user_id, 1, true, $type),
@@ -37,6 +42,11 @@ class Notification extends CI_Controller {
 							'notifications'=> $this->notification_model->getNotifications($user_id, 2, false, $type),
 							"unseen_notifications" => $this->notification_model->getNotifications($user_id, 2, true, $type),
 							'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 2, $type),
+						),
+						"popclub_redeem" => array(
+							'notifications'=> $this->notification_model->getNotifications($user_id, 3, false, $type),
+							"unseen_notifications" => $this->notification_model->getNotifications($user_id, 3, true, $type),
+							'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 3, $type),
 						),
 					),
 					"message" => "Succesfully fetch notification"

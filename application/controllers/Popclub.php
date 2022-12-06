@@ -16,6 +16,8 @@ class Popclub extends CI_Controller {
 		$this->load->model('deals_model');
 		$this->load->model('transaction_model');
 		$this->load->model('client_model');
+		$this->load->model('notification_model');
+		$this->load->model('user_model');
 		$this->load->model('store_model');
 	}
 
@@ -384,16 +386,80 @@ class Popclub extends CI_Controller {
 							){
 							$_SESSION['deals'] = array($products);	
 						}
+
+						if($deal->platform_id === 1){
+
+							$customer_name = $this->session->userData['first_name'] . " " . $this->session->userData['last_name'];
+							$message =  $customer_name ." reedeem on popclub!";
+							
+							$notification_event_data = array(
+								"notification_event_type_id" => 3,
+								"deals_redeems_tb_id" => $query_transaction_result->id,
+								"text" => $message
+							);
+
+							$notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+							
+							//store group
+							$users = $this->store_model->getUsersStoreGroupsByStoreId($store_id);
+							foreach($users as $user){
+								$notifications_data = array(
+									"user_to_notify" => $user->user_id,
+									"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+									"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+									'notification_event_id' => $notification_event_id,
+									"dateadded" => date('Y-m-d H:i:s'),
+								);
+
+								$this->notification_model->insertNotification($notifications_data);   
+							}
+							
+							//admin
+							$admin_users = $this->user_model->getUsersByGroupId(1);
+							foreach($admin_users as $user){
+								$notifications_data = array(
+									"user_to_notify" => $user->user_id,
+									"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+									"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+									'notification_event_id' => $notification_event_id,
+									"dateadded" => date('Y-m-d H:i:s'),
+								);
+								$this->notification_model->insertNotification($notifications_data);   
+							}
+							
+							//csr admin
+							$csr_admin_users = $this->user_model->getUsersByGroupId(10);
+							foreach($csr_admin_users as $user){
+								$notifications_data = array(
+									"user_to_notify" => $user->user_id,
+									"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+									"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+									'notification_event_id' => $notification_event_id,
+									"dateadded" => date('Y-m-d H:i:s'),
+								);
+								$this->notification_model->insertNotification($notifications_data);   
+							}
+
+							//mobile or fb             
+							$notifications_data = array(
+								"fb_user_to_notify" => $this->session->userData['fb_user_id'] ?? null,
+								"mobile_user_to_notify" => $this->session->userData['mobile_user_id'] ?? null,
+								"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+								"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+								'notification_event_id' => $notification_event_id,
+								"dateadded" => date('Y-m-d H:i:s'),
+							);
+							$this->notification_model->insertNotification($notifications_data);   
+
+							$real_time_notification = array(
+								"store_id" => $store_id,
+								"message" => $message,
+							);
+	
+							notify('admin-popclub','popclub-store-visit-transaction', $real_time_notification);
+						}
 	
 						$_SESSION['redeem_data'] = $products;
-
-						
-                        $real_time_notification = array(
-                            "store_id" => $store_id,
-                            "message" => $this->session->userData['first_name'] . " " . $this->session->userData['last_name']." reedeem on popclub!"
-                        );
-
-                        notify('admin-popclub','popclub-store-visit-transaction', $real_time_notification);
 		
 						$response = array(
 							"message" => 'Successfully Redeem Code',

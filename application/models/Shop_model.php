@@ -55,6 +55,7 @@ class Shop_model extends CI_Model
     public function getUserOrderHistory($type, $id, $row_no, $row_per_page, $order_by,  $order, $search){
 
         $this->db->select('
+            A.id,
             A.dateadded,
             A.tracking_no,
             A.purchase_amount,
@@ -63,7 +64,6 @@ class Shop_model extends CI_Model
             C.generated_raffle_code,
             C.application_status,
             A.hash_key,
-        
         ');
 
         $this->db->from('transaction_tb A');
