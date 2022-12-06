@@ -113,6 +113,7 @@ class Deals_model extends CI_Model
     public function getUserPopclubRedeemHistory($type, $id, $row_no, $row_per_page, $order_by,  $order, $search){
 
         $this->db->select('
+			A.id,
 			A.status,
             A.dateadded,
             A.redeem_code,
