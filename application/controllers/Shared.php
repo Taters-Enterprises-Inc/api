@@ -125,7 +125,8 @@ class Shared extends CI_Controller {
 				if ($query_result['upload_status'] == 1) {
 					$store_id = $this->session->cache_data['store_id'];
 
-					$message = "Eco Villaraza payed ordered on snackshop! #asdfjD1d";
+					$customer_name = $this->session->userData['first_name'] . " " . $this->session->userData['last_name'];
+					$message =  $customer_name . " payed ordered on snackshop! " . $tracking_no;
 
 					$realtime_notification = array(
 						"store_id" => $store_id,
