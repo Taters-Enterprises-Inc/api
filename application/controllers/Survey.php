@@ -104,7 +104,7 @@ class Survey extends CI_Controller {
 				}
 
 				$response = array(
-					'message' => $answers[1]
+					'message' => 'Survey submitted!'
 				);
 
 				header('content-type: application/json');
