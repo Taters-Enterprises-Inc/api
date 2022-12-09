@@ -1,5 +1,5 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 //Shop
 $route['shop/product'] = 'shop/product';
 $route['shop/products'] = 'shop/products';
@@ -79,8 +79,8 @@ $route['transaction/catering'] = 'transaction/catering';
 $route['download/contract/(:any)'] = 'download/contract/$1';
 
 //Image
-$route['load-image/(:any)'] = 'image/load_image/$1';	
-$route['load-image-catering/(:any)'] = 'image/load_catering_image/$1';	
+$route['load-image/(:any)'] = 'image/load_image/$1';
+$route['load-image-catering/(:any)'] = 'image/load_catering_image/$1';
 $route['load-image-catering-contract/(:any)'] = 'image/load_catering_image_contract/$1';
 $route['load-image-user-discount/(:any)'] = 'image/load_image_user_discount/$1';
 
@@ -134,6 +134,7 @@ $route['admin/users'] = 'admin/users';
 $route['admin/user/(:any)'] = 'admin/user/$1';
 $route['admin/groups'] = 'admin/groups';
 $route['admin/setting/stores'] = 'admin/setting_stores';
+$route['admin/setting/caters-package'] = 'admin/getCaters_package';
 
 $route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
 $route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_logs/$1';
@@ -145,7 +146,7 @@ $route['admin/report-pmix/(:any)/(:any)'] = 'admin/report_pmix/$1/$2';
 $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/$2';
 
 $route['admin/survey-verification/survey-verification-change-status'] = 'admin/survey_verification_change_status';
-$route['admin/survey-verification/(:any)']= 'admin/survey_verification/$1';
+$route['admin/survey-verification/(:any)'] = 'admin/survey_verification/$1';
 $route['admin/survey-verifications'] = 'admin/survey_verifications';
 
 // BSC
