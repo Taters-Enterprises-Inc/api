@@ -148,6 +148,8 @@ $route['admin/survey-verification/survey-verification-change-status'] = 'admin/s
 $route['admin/survey-verification/(:any)']= 'admin/survey_verification/$1';
 $route['admin/survey-verifications'] = 'admin/survey_verifications';
 
+$route['admin/shop-products'] = 'admin/shop_products';
+
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';
 $route['auth-bsc/logout'] = 'auth_bsc/logout';

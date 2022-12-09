@@ -2,10 +2,61 @@
 
 class Admin_model extends CI_Model 
 {
-    public function __construct()
-    {
-		
+    public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
+    }
+
+    function getShopProducts($row_no, $row_per_page, $status, $order_by,  $order, $search){
+        $this->db->select('
+            id,
+            product_image,
+            name,
+            description,
+            price,
+            add_details,
+            status,
+        ');
+
+        $this->db->from('products_tb');
+    
+        if($status)
+            $this->db->where('status', $status);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->or_like('name', $search);
+            $this->db->or_like('description', $search);
+            $this->db->or_like('price', $search);
+            $this->db->or_like('add_details', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    public function getShopProductsCount($status, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('products_tb');
+
+        if($status)
+            $this->db->where('status', $status);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->or_like('name', $search);
+            $this->db->or_like('description', $search);
+            $this->db->or_like('price', $search);
+            $this->db->or_like('add_details', $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
     }
 
     function getSurvey($survey_id){
@@ -119,18 +170,18 @@ class Admin_model extends CI_Model
         if($status)
             $this->bsc_db->where('A.status', $status);
 
-            if($search){
-                $this->bsc_db->group_start();
-                $this->bsc_db->or_like('A.order_no', $search);
-                $this->bsc_db->or_like('B.name', $search);
-                $this->bsc_db->or_like('C.first_name', $search);
-                $this->bsc_db->or_like('C.last_name', $search);
-                $this->bsc_db->or_like('D.tracking_no', $search);
-                $this->bsc_db->or_like('E.tracking_no', $search);
-                $this->bsc_db->or_like('F.redeem_code', $search);
-                $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
-                $this->bsc_db->group_end();
-            }
+        if($search){
+            $this->bsc_db->group_start();
+            $this->bsc_db->or_like('A.order_no', $search);
+            $this->bsc_db->or_like('B.name', $search);
+            $this->bsc_db->or_like('C.first_name', $search);
+            $this->bsc_db->or_like('C.last_name', $search);
+            $this->bsc_db->or_like('D.tracking_no', $search);
+            $this->bsc_db->or_like('E.tracking_no', $search);
+            $this->bsc_db->or_like('F.redeem_code', $search);
+            $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->bsc_db->group_end();
+        }
 
         $this->bsc_db->limit($row_per_page, $row_no);
         $this->bsc_db->order_by($order_by, $order);
@@ -339,7 +390,7 @@ class Admin_model extends CI_Model
         return $this->db->get()->result();
     }
 
-    public function get_product_categories() {
+    public function getProductCategories() {
         $this->db->select("id, category_name as name");
         $this->db->from("category_tb");
         return $this->db->get()->result();
