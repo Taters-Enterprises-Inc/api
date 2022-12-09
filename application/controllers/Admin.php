@@ -471,6 +471,7 @@ public function survey_verification_change_status(){
 
   }
   
+  
   public function product_availability(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
@@ -1697,4 +1698,68 @@ public function survey_verification_change_status(){
     }
   }
 
+
+
+  public function setting_deals(){
+
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $store_id = $this->input->get('store_id');
+        $category_id = $this->input->get('category_id');
+        $status = $this->input->get('status') ?? 0;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'id';
+        $search = $this->input->get('search');
+
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+
+        $deals_count = $this->admin_model->getAllStoreDealsCount($store_id, $category_id, $search);
+        $deals = $this->admin_model->getAllStoreDeals($page_no, $per_page, $store_id, $category_id, $order_by, $order, $search);
+
+        $pagination = array(
+          "total_rows" => $deals_count,
+          "per_page" => $per_page,
+        );
+        $getData =  $this->admin_model->getStoreDealsById(1);
+        $response = array(
+          "message" => 'Successfully fetch deals',
+          "data" => array(
+            "pagination" => $pagination,
+            "deals" => $deals,
+            "test" => $getData
+          ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+      }
+
+    }
+
+
+
+    public function setting_edit_deals($user_id){
+      switch($this->input->server('REQUEST_METHOD')){
+        case 'GET': 
+       
+          $getData =  $this->admin_model->getStoreDealsById($user_id);
+          $response = array(
+            "message" => 'Successfully fetch deals',
+            "data" => array(
+              "deals" => $getData
+            ),
+          );
+    
+          header('content-type: application/json');
+          echo json_encode($response);
+          return;
+      }
+  }
+
+  
 }

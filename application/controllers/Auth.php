@@ -25,7 +25,7 @@ class Auth extends CI_Controller{
     }
 	
 	public function create_group(){
-		
+	
         switch($this->input->server('REQUEST_METHOD')){
             case 'POST':
 				$_POST =  json_decode(file_get_contents("php://input"), true);

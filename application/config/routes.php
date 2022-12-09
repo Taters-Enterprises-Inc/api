@@ -134,6 +134,10 @@ $route['admin/users'] = 'admin/users';
 $route['admin/user/(:any)'] = 'admin/user/$1';
 $route['admin/groups'] = 'admin/groups';
 $route['admin/setting/stores'] = 'admin/setting_stores';
+$route['admin/setting/deals'] = 'admin/setting_deals';
+$route['admin/setting/deals/(:any)'] = 'admin/setting_edit_deals/$1';
+
+
 
 $route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
 $route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_logs/$1';

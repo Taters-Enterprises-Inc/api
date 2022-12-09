@@ -601,7 +601,7 @@ class Admin_model extends CI_Model
     }
 
     function getStoreDeals($row_no, $row_per_page, $store_id, $category_id, $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.alias, B.name, A.store_id');
+        $this->db->select('A.id, B.alias, B.name, B.product_image, A.store_id');
         $this->db->from('deals_region_da_log A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
         $this->db->join('store_tb C', 'C.store_id = A.store_id');
@@ -626,7 +626,81 @@ class Admin_model extends CI_Model
         
         return $this->db->get()->result();
     }
+  
+    function getAllStoreDeals($row_no, $row_per_page, $store_id, $category_id, $order_by, $order, $search) {
+        $this->db->select('A.id, B.alias, B.name, B.product_image, A.store_id');
+        $this->db->from('deals_region_da_log A');
+        $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+        $this->db->join('store_tb C', 'C.store_id = A.store_id');
+        $this->db->join('dotcom_deals_store_menu_tb D', 'D.store_menu_tb_id = C.store_menu_type_id AND D.deal_id = B.id');
 
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->or_like('B.alias', $search);
+            $this->db->group_end();
+        }
+            
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        
+        if(isset($category_id)) $this->db->where('A.platform_category_id', $category_id);
+        
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        return $this->db->get()->result();
+    }
+    function getAllStoreDealsCount($store_id, $category_id, $search) {
+        $this->db->select('count(*) as all_count');
+
+        $this->db->from('deals_region_da_log A');
+        $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+        $this->db->join('store_tb C', 'C.store_id = A.store_id');
+        $this->db->join('dotcom_deals_store_menu_tb D', 'D.store_menu_tb_id = C.store_menu_type_id AND D.deal_id = B.id');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->or_like('B.alias', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->where('A.store_id', $store_id);
+        
+        if(isset($category_id)) $this->db->where('A.platform_category_id', $category_id);
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+    function getStoreDealsById($deals_id) {
+        $this->db->select('
+        A.id,
+        B.alias,
+        B.name,
+        B.product_image,
+        B.original_price,
+        B.promo_price,
+        B.promo_discount_percentage,
+        B.minimum_purchase,
+        B.description,
+        B.seconds_before_expiration,
+        B.available_start_time,
+        B.available_end_time,
+        B.available_start_datetime,
+        B.available_end_datetime,
+        B.available_days,
+        B.status,
+        A.store_id');
+        $this->db->from('deals_region_da_log A');
+        $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+        $this->db->join('store_tb C', 'C.store_id = A.store_id');
+        $this->db->join('dotcom_deals_store_menu_tb D', 'D.store_menu_tb_id = C.store_menu_type_id AND D.deal_id = B.id');
+        $this->db->where('B.status', 1);
+        $this->db->where('A.id', $deals_id);
+        
+        return $this->db->get()->result();
+    }
     
     function get_fname_lname_email($id){
         $this->db->select('first_name,last_name,email');
