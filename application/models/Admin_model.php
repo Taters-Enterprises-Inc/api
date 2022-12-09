@@ -386,11 +386,6 @@ class Admin_model extends CI_Model
 
 
 
-	function getAllCatersPackage()
-	{
-		$query = $this->db->get('catering_packages_tb');
-		return $query->result();
-	}
 
 
 	function getStoreCatersPackageCount($store_id, $category_id, $status, $search)
@@ -518,7 +513,25 @@ class Admin_model extends CI_Model
 
 		return $this->db->get()->result();
 	}
+
 	//Todo  get Catering
+
+	function getAllCatersPackage($row_no, $row_per_page, $order_by, $order, $search)
+	{
+		$countQuery = $this->db->query('SELECT COUNT(*) AS Totals FROM catering_packages_tb');
+
+		if ($search) {
+			$sqlResult = $this->db->query("SELECT * FROM catering_packages_tb WHERE name LIKE '%$search%'  ORDER BY $order_by $order LIMIT $row_per_page OFFSET $row_no");
+		} else {
+			$sqlResult = $this->db->query("SELECT * FROM catering_packages_tb ORDER BY $order_by $order LIMIT $row_per_page OFFSET $row_no ");
+		}
+		$result = array(
+			'results' => $sqlResult->result(),
+			'TotalPackage' => $countQuery->row()->Totals,
+		);
+		return $result;
+	}
+
 	function getStoreCatersPackages($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search)
 	{
 		$this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');

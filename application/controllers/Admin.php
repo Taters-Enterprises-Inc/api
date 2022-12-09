@@ -575,10 +575,32 @@ class Admin extends CI_Controller
 	{
 		switch ($this->input->server('REQUEST_METHOD')) {
 			case 'GET':
-				$data = $this->admin_model->getAllCatersPackage();
+
+				$per_page = $this->input->get('per_page') ?? 25;
+				$page_no = $this->input->get('page_no') ?? 0;
+				$search = $this->input->get('search');
+				$order = $this->input->get('order') ?? 'desc';
+				$order_by = $this->input->get('order_by') ?? 'id';
+
+				if ($page_no != 0) {
+					$page_no = ($page_no - 1) * $per_page;
+				}
+
+				$data = $this->admin_model->getAllCatersPackage($page_no, $per_page, $order_by, $order, $search);
+
+				$caters_packages_count = $data['TotalPackage'];
+
+				$pagination = array(
+					"total_rows" => $caters_packages_count,
+					"per_page" => $per_page,
+				);
+
+				unset($data['TotalPackage']);
+
 				$response = array(
-					'data' => $data,
-					'message' => "sucess"
+					'data' => $data['results'],
+					'message' => "sucess",
+					'pagination' => $pagination
 				);
 				header('content-type: application/json');
 				echo json_encode($response);
