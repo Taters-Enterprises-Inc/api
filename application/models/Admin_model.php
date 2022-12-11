@@ -4,8 +4,143 @@ class Admin_model extends CI_Model
 {
 	public function __construct()
 	{
-
 		$this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
+	}
+
+	function getShopProductStores($product_id)
+	{
+
+		$this->db->select('
+            A.store_id,
+            B.name,
+			C.region_store_id,
+        ');
+
+		$this->db->from('region_da_log A');
+		$this->db->join('store_tb B', 'B.store_id = A.store_id');
+		$this->db->join('region_store_combination_tb C', 'C.region_store_id = B.region_store_combination_id');
+
+		$this->db->where('A.product_id', $product_id);
+
+		$query_shop_product_stores = $this->db->get();
+		return $query_shop_product_stores->result();
+	}
+
+	function getShopProductVariantOptions($product_variant_id)
+	{
+		$this->db->select('
+            A.name,
+            C.sku,
+            C.price,
+        ');
+
+		$this->db->from('product_variant_options_tb A');
+		$this->db->join('product_variant_option_combinations_tb B', 'B.product_variant_option_id = A.id', 'left');
+		$this->db->join('product_skus_tb C', 'C.id = B.sku_id', 'left');
+		$this->db->where('A.product_variant_id', $product_variant_id);
+
+		$query_shop_product_variant_options = $this->db->get();
+		return $query_shop_product_variant_options->result();
+	}
+
+	function getShopProductVariants($product_id)
+	{
+		$this->db->select('
+            A.id,
+            A.product_id,
+            A.name, 
+            A.status
+        ');
+
+		$this->db->from('product_variants_tb A');
+		$this->db->where('A.product_id', $product_id);
+
+		$query_shop_product_variants = $this->db->get();
+		return $query_shop_product_variants->result();
+	}
+
+	function getShopProduct($product_id)
+	{
+		$this->db->select('
+            A.id,
+            A.name,
+            A.product_image,
+            A.description,
+            A.delivery_details,
+            A.price,
+            A.uom,
+            A.add_details,
+            A.status,
+            A.category,
+            A.num_flavor,
+            A.dateadded,
+        ');
+
+		$this->db->from('products_tb A');
+		$this->db->where('A.id', $product_id);
+
+		$query_product = $this->db->get();
+		return $query_product->row();
+	}
+	function insertShopProductCategory($data)
+	{
+		$this->db->trans_start();
+		$this->db->insert('product_category_tb', $data);
+		$this->db->trans_complete();
+	}
+	function insertShopProductVariantOptionCombination($data)
+	{
+		$this->db->trans_start();
+		$this->db->insert('product_variant_option_combinations_tb', $data);
+		$insert_id = $this->db->insert_id();
+		$this->db->trans_complete();
+		return $insert_id;
+	}
+
+	function insertShopProductSku($data)
+	{
+		$this->db->trans_start();
+		$this->db->insert('product_skus_tb', $data);
+		$insert_id = $this->db->insert_id();
+		$this->db->trans_complete();
+		return $insert_id;
+	}
+
+	function insertShopProductVariantOption($data)
+	{
+		$this->db->trans_start();
+		$this->db->insert('product_variant_options_tb', $data);
+		$insert_id = $this->db->insert_id();
+		$this->db->trans_complete();
+		return $insert_id;
+	}
+
+	function insertShopProductVariant($data)
+	{
+		$this->db->trans_start();
+		$this->db->insert('product_variants_tb', $data);
+		$insert_id = $this->db->insert_id();
+		$this->db->trans_complete();
+
+		return $insert_id;
+	}
+
+	function insertShopProductRegionDaLogs($data)
+	{
+		$this->db->trans_start();
+		$this->db->insert_batch('region_da_log', $data);
+		$this->db->trans_complete();
+	}
+
+
+	function insertShopProduct($data)
+	{
+		$this->db->trans_start();
+		$this->db->insert('products_tb', $data);
+		$insert_id = $this->db->insert_id();
+		$this->db->trans_complete();
+
+		return $insert_id;
 	}
 
 	function getSurvey($survey_id)
@@ -340,7 +475,6 @@ class Admin_model extends CI_Model
 		$this->db->from("dotcom_deals_category");
 		return $this->db->get()->result();
 	}
-
 
 	public function get_caters_package_categories()
 	{

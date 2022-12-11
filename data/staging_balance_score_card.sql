@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 07, 2022 at 11:41 AM
+-- Generation Time: Dec 09, 2022 at 12:14 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -642,11 +642,11 @@ ALTER TABLE `user_stores`
 -- Constraints for table `customer_survey_responses`
 --
 ALTER TABLE `customer_survey_responses`
-  ADD CONSTRAINT `customer_survey_responses_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_2` FOREIGN KEY (`transaction_id`) REFERENCES `staging_newteishop`.`transaction_tb` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_3` FOREIGN KEY (`catering_transaction_id`) REFERENCES `staging_newteishop`.`catering_transaction_tb` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_4` FOREIGN KEY (`customer_survey_response_order_type_id`) REFERENCES `customer_survey_response_order_types` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_5` FOREIGN KEY (`deals_redeem_id`) REFERENCES `staging_newteishop.backup.dec022022`.`deals_redeems_tb` (`id`) ON UPDATE NO ACTION;
+  ADD CONSTRAINT `customer_survey_responses_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `staging_newteishop`.`transaction_tb` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_2` FOREIGN KEY (`catering_transaction_id`) REFERENCES `staging_newteishop`.`catering_transaction_tb` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_3` FOREIGN KEY (`deals_redeem_id`) REFERENCES `staging_newteishop`.`deals_redeems_tb` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_5` FOREIGN KEY (`customer_survey_response_order_type_id`) REFERENCES `customer_survey_response_order_types` (`id`) ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `customer_survey_response_answers`

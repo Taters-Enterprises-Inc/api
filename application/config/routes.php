@@ -150,6 +150,7 @@ $route['admin/survey-verification/(:any)'] = 'admin/survey_verification/$1';
 $route['admin/survey-verifications'] = 'admin/survey_verifications';
 
 $route['admin/shop-products'] = 'admin/shop_products';
+$route['admin/shop-product'] = 'admin/shop_product';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';
