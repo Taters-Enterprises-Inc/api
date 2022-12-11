@@ -6,6 +6,55 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    function getShopProductStores($product_id){
+
+        $this->db->select('
+            A.store_id,
+            B.name,
+			C.region_store_id,
+        ');
+
+        $this->db->from('region_da_log A');
+        $this->db->join('store_tb B', 'B.store_id = A.store_id');
+		$this->db->join('region_store_combination_tb C', 'C.region_store_id = B.region_store_combination_id');
+
+        $this->db->where('A.product_id',$product_id);
+        
+        $query_shop_product_stores = $this->db->get();
+        return $query_shop_product_stores->result();
+    }
+
+    function getShopProductVariantOptions($product_variant_id){
+        $this->db->select('
+            A.name,
+            C.sku,
+            C.price,
+        ');
+
+        $this->db->from('product_variant_options_tb A');
+        $this->db->join('product_variant_option_combinations_tb B', 'B.product_variant_option_id = A.id','left');
+        $this->db->join('product_skus_tb C', 'C.id = B.sku_id','left');
+        $this->db->where('A.product_variant_id',$product_variant_id);
+
+        $query_shop_product_variant_options = $this->db->get();
+        return $query_shop_product_variant_options->result();
+    }
+
+    function getShopProductVariants($product_id){
+        $this->db->select('
+            A.id,
+            A.product_id,
+            A.name, 
+            A.status
+        ');
+
+        $this->db->from('product_variants_tb A');
+        $this->db->where('A.product_id',$product_id);
+
+        $query_shop_product_variants = $this->db->get();
+        return $query_shop_product_variants->result();
+    }
+
     function getShopProduct($product_id){
         $this->db->select('
             A.id,

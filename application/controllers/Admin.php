@@ -32,6 +32,20 @@ class Admin extends CI_Controller{
 
         $product = $this->admin_model->getShopProduct($product_id);
 
+        $product_variants = $this->admin_model->getShopProductVariants($product_id);
+
+        foreach($product_variants as $product_variant){
+          $variants = array(
+            "name" => $product_variant->name,
+          );
+
+          $variants['options'] = $this->admin_model->getShopProductVariantOptions($product_variant->id);
+        
+          $product->variants[] = $variants;
+        }
+
+        $product->stores = $this->admin_model->getShopProductStores($product_id);
+
         $response = array(
           "message" =>  'Successfully fetch product',
           "data" => $product,
