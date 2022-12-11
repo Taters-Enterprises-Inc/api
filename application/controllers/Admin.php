@@ -26,6 +26,20 @@ class Admin extends CI_Controller{
 
   public function shop_product(){
     switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $product_id = $this->input->get('product-id');
+
+        $product = $this->admin_model->getShopProduct($product_id);
+
+        $response = array(
+          "message" =>  'Successfully fetch product',
+          "data" => $product,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
       case 'POST':
 				if(
 					is_uploaded_file($_FILES['image500x500']['tmp_name']) &&

@@ -5,6 +5,29 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+
+    function getShopProduct($product_id){
+        $this->db->select('
+            A.id,
+            A.name,
+            A.product_image,
+            A.description,
+            A.delivery_details,
+            A.price,
+            A.uom,
+            A.add_details,
+            A.status,
+            A.category,
+            A.num_flavor,
+            A.dateadded,
+        ');
+
+        $this->db->from('products_tb A');
+        $this->db->where('A.id', $product_id);
+
+        $query_product = $this->db->get();
+        return $query_product->row();
+    }
     function insertShopProductCategory($data){
         $this->db->trans_start();
 		$this->db->insert('product_category_tb', $data);
