@@ -5,6 +5,84 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+    
+    function removeProductVariantOptionCombination($product_variant_option_combination_id){
+        $this->db->where('id', $product_variant_option_combination_id);
+        $this->db->delete('product_variant_option_combinations_tb');
+    }
+
+    function removeProductSku($product_sku_id){
+        $this->db->where('id', $product_sku_id);
+        $this->db->delete('product_skus_tb');
+    }
+
+    function removeProductVariantOption($product_variant_option_id){
+        $this->db->where('id', $product_variant_option_id);
+        $this->db->delete('product_variant_options_tb');
+    }
+    
+
+    function removeProductVariant($product_variant_id){
+        $this->db->where('id', $product_variant_id);
+        $this->db->delete('product_variants_tb');
+    }
+    
+
+    function getProductVariants($product_id){
+        $this->db->select('id');
+
+        $this->db->from('product_variants_tb');
+        $this->db->where('product_id', $product_id);
+        
+        $query_product_variants = $this->db->get();
+
+        return $query_product_variants->result();
+    }
+    
+
+    function getProductVariantOptions($product_variant_id){
+        $this->db->select('id');
+
+        $this->db->from('product_variant_options_tb');
+        $this->db->where('product_variant_id', $product_variant_id);
+        
+        $query_product_variants = $this->db->get();
+
+        return $query_product_variants->result();
+    }
+
+    
+    function getProductVariantOptionCombinations($product_variant_option_id){
+        $this->db->select('id, sku_id');
+
+        $this->db->from('product_variant_option_combinations_tb');
+        $this->db->where('product_variant_option_id', $product_variant_option_id);
+        
+        $query_product_variants = $this->db->get();
+
+        return $query_product_variants->result();
+    }
+
+    function removeShopProductVariantOptionCombination($product_id){
+        $this->db->where('product_id', $product_id);
+		$this->db->delete('product_variant_option_combinations_tb');
+    }
+
+    
+    function removeShopProductRegionDaLogs($product_id){
+        $this->db->where('product_id', $product_id);
+		$this->db->delete('region_da_log');
+    }
+
+
+    function updateShopProductCategory($product_id, $data){
+        $this->db->where('product_id', (int)$product_id);
+        $this->db->update('product_category_tb', $data);
+    }
+    function updateShopProduct($product_id, $data){
+        $this->db->where('id', $product_id);
+        $this->db->update('products_tb', $data);
+    }
 
     function getShopProductStores($product_id){
 
@@ -120,7 +198,6 @@ class Admin_model extends CI_Model
 		$this->db->insert_batch('region_da_log', $data);
         $this->db->trans_complete();
     }
-
 
     function insertShopProduct($data){
         $this->db->trans_start();
