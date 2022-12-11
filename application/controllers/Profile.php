@@ -186,9 +186,7 @@ class Profile extends CI_Controller {
 				break;
 		}
 	}
-
-
-
+	
 	public function catering_bookings(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':

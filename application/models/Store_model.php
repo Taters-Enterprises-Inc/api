@@ -172,9 +172,12 @@ class Store_model extends CI_Model
             A.store_id,
             A.name,
             B.name as menu_name,
+			C.region_store_id,
         ');
         $this->db->from('store_tb A');
         $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
+		$this->db->join('region_store_combination_tb C', 'C.region_store_id = A.region_store_combination_id');
+
         $query = $this->db->get();
         return $query->result();
     }

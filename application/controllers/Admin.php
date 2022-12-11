@@ -24,6 +24,137 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 	}
 
+  public function shop_product(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST':
+				if(
+					is_uploaded_file($_FILES['image500x500']['tmp_name']) &&
+					is_uploaded_file($_FILES['image250x250']['tmp_name']) &&
+					is_uploaded_file($_FILES['image150x150']['tmp_name']) &&
+					is_uploaded_file($_FILES['image75x75']['tmp_name']) 
+				){
+          $name = str_replace(' ', '-', strtolower($this->input->post('name')));
+          
+          $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$name, 'jpg');
+          if($image500x500_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image500x500_error));
+            return;
+          }
+          
+          $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$name, 'jpg');
+          if($image250x250_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image250x250_error));
+            return;
+          }
+
+          $image150x150_error = upload('image150x150','./assets/images/shared/products/150',$name, 'jpg');
+          if($image150x150_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image150x150_error));
+            return;
+          }
+
+          $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$name, 'jpg');
+          if($image75x75_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image75x75_error));
+            return;
+          }
+          
+          $product_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+
+          $data = array(
+            "name" => $this->input->post('name'),
+            "product_image" => $name.'.jpg',
+            "description" => $this->input->post('description'),
+            "delivery_details" => $this->input->post('deliveryDetails'),
+            "price" => $this->input->post('price'),
+            "uom" => $this->input->post('uom'),
+            "add_details" => $this->input->post('addDetails'),
+            "status" => 1,
+            "category" => $this->input->post('category'),
+            "num_flavor" => $this->input->post('numFlavor'),
+            'product_hash' => $product_hash,
+          );
+
+          $product_id = $this->admin_model->insertShopProduct($data);
+
+          $product_category = array(
+            "product_id" => $product_id,
+            "category_id" => $this->input->post('category'),
+          );
+
+          $this->admin_model->insertShopProductCategory($product_category);
+
+          $stores = json_decode($this->input->post('stores'), true);
+
+          foreach($stores as $store){
+            $data = array(
+              'region_id' => $store['region_store_id'],
+              'store_id' => $store['store_id'],
+              'product_id' => $product_id,
+              'status' => 1,
+            );
+            $region_da_logs[] = $data;
+          }
+
+          $this->admin_model->insertShopProductRegionDaLogs($region_da_logs);
+          
+          $variants = json_decode($this->input->post('variants'), true);
+          
+          foreach($variants as $variant){
+            $data = array(
+              'product_id' => $product_id,
+              'name' => $variant['name'],
+              'status' => 1,
+            );
+
+            $variant_id = $this->admin_model->insertShopProductVariant($data);
+
+            $options = $variant['options'];
+            foreach($options as $option){
+              $product_variant_option = array(
+                "product_variant_id" => $variant_id,
+                "name" => $option['name'],
+                "status" => 1,
+              );
+
+              $product_variant_option_id = $this->admin_model->insertShopProductVariantOption($product_variant_option);
+
+              if(isset($option['price']) && isset($option['sku'])){
+                $product_sku = array(
+                  "product_id" => $product_id,
+                  "sku" => $option['sku'],
+                  "price" => $option['price']
+                );
+
+                $sku_id = $this->admin_model->insertShopProductSku($product_sku);
+                
+                $product_variant_option_combination = array(
+                  "product_variant_option_id" => $product_variant_option_id,
+                  "sku_id" => $sku_id,
+                );
+
+                $this->admin_model->insertShopProductVariantOptionCombination($product_variant_option_combination);
+              }
+            }
+
+          }
+
+        }
+
+        $response = array(
+          "message" =>  'Successfully add product'
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
+
   public function shop_products(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':

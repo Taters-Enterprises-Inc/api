@@ -5,6 +5,59 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+    function insertShopProductCategory($data){
+        $this->db->trans_start();
+		$this->db->insert('product_category_tb', $data);
+        $this->db->trans_complete();
+    }
+    function insertShopProductVariantOptionCombination($data){
+        $this->db->trans_start();
+		$this->db->insert('product_variant_option_combinations_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return $insert_id;
+    }
+
+    function insertShopProductSku($data){
+        $this->db->trans_start();
+		$this->db->insert('product_skus_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return $insert_id;
+    }
+
+    function insertShopProductVariantOption($data){
+        $this->db->trans_start();
+		$this->db->insert('product_variant_options_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return $insert_id;
+    }
+
+    function insertShopProductVariant($data){
+        $this->db->trans_start();
+		$this->db->insert('product_variants_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    function insertShopProductRegionDaLogs($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+
+    function insertShopProduct($data){
+        $this->db->trans_start();
+		$this->db->insert('products_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
 
     function getShopProducts($row_no, $row_per_page, $status, $order_by,  $order, $search){
         $this->db->select('
@@ -382,7 +435,6 @@ class Admin_model extends CI_Model
         $this->db->from("dotcom_deals_category");
         return $this->db->get()->result();
     }
-    
     
     public function get_caters_package_categories() {
         $this->db->select("id, category_name as name");
