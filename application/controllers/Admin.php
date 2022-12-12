@@ -26,6 +26,133 @@ class Admin extends CI_Controller
 		$this->load->model('report_model');
 	}
 
+	public function edit_shop_product()
+	{
+		switch ($this->input->server('REQUEST_METHOD')) {
+			case 'POST':
+				if (
+					is_uploaded_file($_FILES['image500x500']['tmp_name']) &&
+					is_uploaded_file($_FILES['image250x250']['tmp_name']) &&
+					is_uploaded_file($_FILES['image150x150']['tmp_name']) &&
+					is_uploaded_file($_FILES['image75x75']['tmp_name'])
+				) {
+					$name = str_replace(' ', '-', strtolower($this->input->post('name')));
+					$product_id = $this->input->post('id');
+
+					$image500x500_error = upload('image500x500', './assets/images/shared/products/500', $name, 'jpg');
+					$image250x250_error = upload('image250x250', './assets/images/shared/products/250', $name, 'jpg');
+					$image150x150_error = upload('image150x150', './assets/images/shared/products/150', $name, 'jpg');
+					$image75x75_error = upload('image75x75', './assets/images/shared/products/75', $name, 'jpg');
+
+					$data = array(
+						"name" => $this->input->post('name'),
+						"product_image" => $name . '.jpg',
+						"description" => $this->input->post('description'),
+						"delivery_details" => $this->input->post('deliveryDetails'),
+						"price" => $this->input->post('price'),
+						"uom" => $this->input->post('uom'),
+						"add_details" => $this->input->post('addDetails'),
+						"category" => $this->input->post('category'),
+						"num_flavor" => $this->input->post('numFlavor'),
+					);
+
+					$product_id = $this->admin_model->updateShopProduct($product_id, $data);
+
+					$product_category = array(
+						"product_id" => $product_id,
+						"category_id" => $this->input->post('category'),
+					);
+
+					$this->admin_model->updateShopProductCategory($product_id, $product_category);
+
+					$stores = json_decode($this->input->post('stores'), true);
+
+
+					foreach ($stores as $store) {
+						$data = array(
+							'region_id' => $store['region_store_id'],
+							'store_id' => $store['store_id'],
+							'product_id' => $product_id,
+							'status' => 1,
+						);
+						$region_da_logs[] = $data;
+					}
+
+					$this->admin_model->removeShopProductRegionDaLogs($product_id);
+					$this->admin_model->insertShopProductRegionDaLogs($region_da_logs);
+
+					$variants = $this->input->post('variants') ? json_decode($this->input->post('variants'), true) : array();
+
+					$product_variants = $this->admin_model->getProductVariants($product_id);
+
+					foreach ($product_variants as $product_variant) {
+
+						$product_variant_options = $this->admin_model->getProductVariantOptions($product_variant->id);
+						$this->admin_model->removeProductVariant($product_variant->id);
+
+						foreach ($product_variant_options as $product_variant_option) {
+
+							$product_variant_option_combinations = $this->admin_model->getProductVariantOptions($product_variant_option->id);
+							$this->admin_model->removeProductVariantOption($product_variant_option->id);
+
+							foreach ($product_variant_option_combinations as $product_variant_option_combination) {
+
+								$this->admin_model->removeProductSku($product_variant_option_combination->sku_id);
+								$this->admin_model->removeProductVariantOptionCombination($product_variant_option_combination->id);
+							}
+						}
+					}
+
+					foreach ($variants as $variant) {
+						$data = array(
+							'product_id' => $product_id,
+							'name' => $variant['name'],
+							'status' => 1,
+						);
+
+						$variant_id = $this->admin_model->insertShopProductVariant($data);
+
+						$options = $variant['options'];
+						foreach ($options as $option) {
+							$product_variant_option = array(
+								"product_variant_id" => $variant_id,
+								"name" => $option['name'],
+								"status" => 1,
+							);
+
+							$product_variant_option_id = $this->admin_model->insertShopProductVariantOption($product_variant_option);
+
+							if (isset($option['price']) && isset($option['sku'])) {
+								$product_sku = array(
+									"product_id" => $product_id,
+									"sku" => $option['sku'],
+									"price" => $option['price']
+								);
+
+								$sku_id = $this->admin_model->insertShopProductSku($product_sku);
+
+								$product_variant_option_combination = array(
+									"product_variant_option_id" => $product_variant_option_id,
+									"sku_id" => $sku_id,
+								);
+
+								$this->admin_model->insertShopProductVariantOptionCombination($product_variant_option_combination);
+							}
+						}
+					}
+				}
+
+
+
+				$response = array(
+					"message" =>  'Successfully edit product'
+				);
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+
 	public function shop_product()
 	{
 		switch ($this->input->server('REQUEST_METHOD')) {
@@ -133,7 +260,7 @@ class Admin extends CI_Controller
 
 					$this->admin_model->insertShopProductRegionDaLogs($region_da_logs);
 
-					$variants = json_decode($this->input->post('variants'), true);
+					$variants = $this->input->post('variants') ? json_decode($this->input->post('variants'), true) : array();
 
 					foreach ($variants as $variant) {
 						$data = array(

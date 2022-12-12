@@ -83,6 +83,7 @@ $route['load-image/(:any)'] = 'image/load_image/$1';
 $route['load-image-catering/(:any)'] = 'image/load_catering_image/$1';
 $route['load-image-catering-contract/(:any)'] = 'image/load_catering_image_contract/$1';
 $route['load-image-user-discount/(:any)'] = 'image/load_image_user_discount/$1';
+$route['load-image-product/(:any)'] = 'image/load_image_product/$1';
 
 
 //Admin
@@ -153,6 +154,7 @@ $route['admin/survey-verifications'] = 'admin/survey_verifications';
 
 $route['admin/shop-products'] = 'admin/shop_products';
 $route['admin/shop-product'] = 'admin/shop_product';
+$route['admin/edit-shop-product'] = 'admin/edit_shop_product';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';

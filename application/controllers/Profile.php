@@ -387,7 +387,7 @@ class Profile extends CI_Controller {
 				$this->discount_model->updateDiscountUser($_POST['id'], $user_discount_data);
 
 				$response = array(
-					"message" => 'Edit application successfull'
+					"message" => 'Edit application successful'
 				);
 				header('content-type: application/json');
 				echo json_encode($response);
