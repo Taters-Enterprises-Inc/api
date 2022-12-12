@@ -152,6 +152,7 @@ $route['admin/survey-verifications'] = 'admin/survey_verifications';
 $route['admin/shop-products'] = 'admin/shop_products';
 $route['admin/shop-product'] = 'admin/shop_product';
 $route['admin/edit-shop-product'] = 'admin/edit_shop_product';
+$route['admin/delete-shop-product'] = 'admin/delete_shop_product';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';

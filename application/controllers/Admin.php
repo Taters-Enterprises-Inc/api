@@ -24,6 +24,47 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 	}
 
+  public function delete_shop_product(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'DELETE':
+        $product_id = $this->input->get('id');
+
+        $this->admin_model->removeShopProduct($product_id);
+        $this->admin_model->removeShopProductCategory($product_id);
+        $this->admin_model->removeShopProductRegionDaLogs($product_id);
+        
+        $product_variants = $this->admin_model->getProductVariants($product_id);
+
+        foreach($product_variants as $product_variant){
+
+          $product_variant_options = $this->admin_model->getProductVariantOptions($product_variant->id);
+          $this->admin_model->removeProductVariant($product_variant->id);
+
+          foreach($product_variant_options as $product_variant_option){
+
+            $product_variant_option_combinations = $this->admin_model->getProductVariantOptionCombinations($product_variant_option->id);
+            $this->admin_model->removeProductVariantOption($product_variant_option->id);
+            
+            foreach($product_variant_option_combinations as $product_variant_option_combination){
+              
+              $this->admin_model->removeProductSku($product_variant_option_combination->sku_id);
+              $this->admin_model->removeProductVariantOptionCombination($product_variant_option_combination->id);
+            }
+
+          }
+
+        }
+
+
+        $response = array(
+          "message" =>  'Successfully delete product'
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
   public function edit_shop_product(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
@@ -231,30 +272,30 @@ class Admin extends CI_Controller{
 					is_uploaded_file($_FILES['image150x150']['tmp_name']) &&
 					is_uploaded_file($_FILES['image75x75']['tmp_name']) 
 				){
-          $name = str_replace(' ', '-', strtolower($this->input->post('name')));
+          $product_image_name = str_replace(' ', '-', strtolower($this->input->post('name'))) . '-' . time() .'.jpg';
           
-          $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$name, 'jpg');
+          $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$product_image_name, 'jpg');
           if($image500x500_error){
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $image500x500_error));
             return;
           }
           
-          $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$name, 'jpg');
+          $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$product_image_name, 'jpg');
           if($image250x250_error){
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $image250x250_error));
             return;
           }
 
-          $image150x150_error = upload('image150x150','./assets/images/shared/products/150',$name, 'jpg');
+          $image150x150_error = upload('image150x150','./assets/images/shared/products/150',$product_image_name, 'jpg');
           if($image150x150_error){
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $image150x150_error));
             return;
           }
 
-          $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$name, 'jpg');
+          $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$product_image_name, 'jpg');
           if($image75x75_error){
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $image75x75_error));
@@ -265,7 +306,7 @@ class Admin extends CI_Controller{
 
           $data = array(
             "name" => $this->input->post('name'),
-            "product_image" => $name.'.jpg',
+            "product_image" => $product_image_name,
             "description" => $this->input->post('description'),
             "delivery_details" => $this->input->post('deliveryDetails'),
             "price" => $this->input->post('price'),
