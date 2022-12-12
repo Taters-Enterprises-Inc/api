@@ -727,7 +727,7 @@ class Admin extends CI_Controller
 				return;
 		}
 	}
-
+	//TODO KARL
 	public function getCaters_package()
 	{
 		switch ($this->input->server('REQUEST_METHOD')) {
@@ -761,6 +761,39 @@ class Admin extends CI_Controller
 				);
 				header('content-type: application/json');
 				echo json_encode($response);
+				return;
+		}
+	}
+
+	public function createCaters_package()
+	{
+		switch ($this->input->server('REQUEST_METHOD')) {
+			case 'POST':
+				// $formdata = $_POST['product_image'];
+
+				$config['upload_path']          = './assets/images/shared/products';
+				$config['allowed_types']        = 'jpeg|jpg|png';
+				$config['max_size']             = 2000;
+				$config['max_width']            = 0;
+				$config['max_height']           = 0;
+				$config['encrypt_name']         = TRUE;
+
+				$this->load->library('upload', $config);
+
+				if (!$this->upload->do_upload('product_image75x75')) { // Upload validation
+					// Failed-Upload
+					$error = $this->upload->display_errors();
+					$this->output->set_status_header('401');
+					echo json_encode(array("message" => $error));
+				} else {
+					// File-Uploaded-Successfull
+					$data = $this->upload->data(); // Get file details
+					// $file_name = $data['file_name'];
+
+					header('content-type: application/json');
+					echo json_encode(array("message" => 'Succesfully upload payment'));
+				}
+
 				return;
 		}
 	}

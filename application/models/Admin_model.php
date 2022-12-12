@@ -648,17 +648,34 @@ class Admin_model extends CI_Model
 		return $this->db->get()->result();
 	}
 
-	//Todo  get Catering
-
-	function getAllCatersPackage($row_no, $row_per_page, $order_by, $order, $search)
+	//TODO KARL
+	//- Add Package, Package Add-Ons and Product Add-ons (Catering)
+	//   - Admin only
+	//   - Can add size and flavor
+	//   - Can add photo
+	//   - Automatically generates region_da_log for the table DB entry
+	public function getAllCatersPackage($row_no, $row_per_page, $order_by, $order, $search)
 	{
-		$countQuery = $this->db->query('SELECT COUNT(*) AS Totals FROM catering_packages_tb');
+
+		$countQuery = $this->db->query("SELECT COUNT(*) AS Totals FROM catering_packages_tb");
 
 		if ($search) {
-			$sqlResult = $this->db->query("SELECT * FROM catering_packages_tb WHERE name LIKE '%$search%'  ORDER BY $order_by $order LIMIT $row_per_page OFFSET $row_no");
+			$sqlResult = $this->db->query(
+				"SELECT catering_packages_tb.*, catering_category_tb.category_name AS 'category' FROM catering_packages_tb 
+			LEFT JOIN catering_category_tb ON catering_category_tb.ID = catering_packages_tb.category
+			WHERE name LIKE '%$search%' 
+			ORDER BY catering_packages_tb.$order_by $order 
+			LIMIT $row_per_page OFFSET $row_no"
+			);
 		} else {
-			$sqlResult = $this->db->query("SELECT * FROM catering_packages_tb ORDER BY $order_by $order LIMIT $row_per_page OFFSET $row_no ");
+			$sqlResult = $this->db->query(
+				"SELECT catering_packages_tb.*, catering_category_tb.category_name AS 'category' FROM catering_packages_tb 
+			LEFT JOIN catering_category_tb ON catering_packages_tb.category= catering_category_tb.ID 
+			ORDER BY catering_packages_tb.$order_by $order 
+			LIMIT $row_per_page OFFSET $row_no"
+			);
 		}
+
 		$result = array(
 			'results' => $sqlResult->result(),
 			'TotalPackage' => $countQuery->row()->Totals,

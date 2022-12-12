@@ -135,6 +135,8 @@ $route['admin/user/(:any)'] = 'admin/user/$1';
 $route['admin/groups'] = 'admin/groups';
 $route['admin/setting/stores'] = 'admin/setting_stores';
 $route['admin/setting/caters-package'] = 'admin/getCaters_package';
+$route['admin/setting/caters-package/create-package'] = 'admin/createCaters_package';
+
 
 $route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
 $route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_logs/$1';
