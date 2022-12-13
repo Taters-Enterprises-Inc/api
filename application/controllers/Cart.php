@@ -64,9 +64,22 @@ class Cart extends CI_Controller {
                     $order_item = $_SESSION['orders'][$id];
                     $product = $this->shop_model->get_product_by_id($order_item['prod_id']);
                     $product_addson = $this->shop_model->get_product_addons_join($order_item['prod_id']);
-                    $product_size =  $this->shop_model->fetch_product_variants($order_item['prod_id'] ,'size');
-                    $product_flavor = $this->shop_model->fetch_product_variants($order_item['prod_id'],'flavor');
-                    $product_date = $this->shop_model->fetch_product_variants($order_item['prod_id'],'date');
+                
+                    // $product_size =  $this->shop_model->fetch_product_variants($order_item['prod_id'] ,'size');
+                    // $product_flavor = $this->shop_model->fetch_product_variants($order_item['prod_id'],'flavor');
+                    // $product_date = $this->shop_model->fetch_product_variants($order_item['prod_id'],'date');
+
+                    $product_size =  $this->shop_model->getProductVariantsSize($order_item['prod_id']);
+                    $flavors = $this->shop_model->getProductVariantsFlavor($order_item['prod_id']);
+                    
+                    
+                    $product_flavor = array();
+                    foreach($flavors as $key => $flavor){
+                        $product_flavor[$flavor->product_variant_id]['parent_name'] = $flavor->parent_name;
+                        $product_flavor[$flavor->product_variant_id]['flavors'][] =  $flavor;
+                    }
+
+
                     $suggested_products = $this->shop_model->get_suggested_product($order_item['prod_id']);
                     
                     $product_image_extension = '.' . pathinfo($product->product_image)['extension'];
@@ -81,10 +94,10 @@ class Cart extends CI_Controller {
                     "product"=>$product,
                     "order_item"=>$order_item,
                     "product_addson"=>$product_addson,
-                    "product_size"=> $product_size,
-                    "product_flavor"=>$product_flavor,
-                    "product_date"=>$product_date,
-                    "suggested_products"=>$suggested_products,
+                    "product_size"=> $product_size ?? null,
+                    "product_flavor"=>array_values($product_flavor),
+                    "product_date"=>$product_date ?? null,
+                    "suggested_products"=>$suggested_products ?? null,
                     "product_images"=>$product_images,
                     "cart_item"=>  $_SESSION['orders'][$id]
                 );
