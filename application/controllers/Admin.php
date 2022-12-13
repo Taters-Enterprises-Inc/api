@@ -24,6 +24,22 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 	}
 
+  public function shop_product_type(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $product_types = $this->admin_model->getProductTypes();
+
+        $response = array(
+          "message" => "Successfully product types",
+          "data" => $product_types,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
   public function delete_shop_product(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'DELETE':
@@ -314,72 +330,84 @@ class Admin extends CI_Controller{
               "add_details" => $this->input->post('addDetails'),
               "status" => 1,
               "category" => $this->input->post('category'),
+              "product_type_id" => $this->input->post('productType'),
               "num_flavor" => $this->input->post('numFlavor'),
               'product_hash' => $product_hash,
             );
 
             $product_id = $this->admin_model->insertShopProduct($data);
 
-            $product_category = array(
-              "product_id" => $product_id,
-              "category_id" => $this->input->post('category'),
-            );
 
-            $this->admin_model->insertShopProductCategory($product_category);
-
-            $stores = json_decode($this->input->post('stores'), true);
-
-            foreach($stores as $store){
-              $data = array(
-                'region_id' => $store['region_store_id'],
-                'store_id' => $store['store_id'],
-                'product_id' => $product_id,
-                'status' => 1,
-              );
-              $region_da_logs[] = $data;
-            }
-
-            $this->admin_model->insertShopProductRegionDaLogs($region_da_logs);
-            
-            $variants = $this->input->post('variants') ? json_decode($this->input->post('variants'), true) : array();
-            
-            foreach($variants as $variant){
-              $data = array(
-                'product_id' => $product_id,
-                'name' => $variant['name'],
-                'status' => 1,
-              );
-
-              $variant_id = $this->admin_model->insertShopProductVariant($data);
-
-              $options = $variant['options'];
-              foreach($options as $option){
-                $product_variant_option = array(
-                  "product_variant_id" => $variant_id,
-                  "name" => $option['name'],
-                  "status" => 1,
-                );
-
-                $product_variant_option_id = $this->admin_model->insertShopProductVariantOption($product_variant_option);
-
-                if(isset($option['price']) && isset($option['sku'])){
-                  $product_sku = array(
+            switch($this->input->post('productType')){
+              case "1": // Main
+                if($this->input->post('productType') === "1"){
+                  $product_category = array(
                     "product_id" => $product_id,
-                    "sku" => $option['sku'],
-                    "price" => $option['price']
+                    "category_id" => $this->input->post('category'),
                   );
 
-                  $sku_id = $this->admin_model->insertShopProductSku($product_sku);
+                  $this->admin_model->insertShopProductCategory($product_category);
                   
-                  $product_variant_option_combination = array(
-                    "product_variant_option_id" => $product_variant_option_id,
-                    "sku_id" => $sku_id,
+                  $stores = json_decode($this->input->post('stores'), true);
+      
+                  foreach($stores as $store){
+                    $data = array(
+                      'region_id' => $store['region_store_id'],
+                      'store_id' => $store['store_id'],
+                      'product_id' => $product_id,
+                      'status' => 1,
+                    );
+                    $region_da_logs[] = $data;
+                  }
+    
+                  $this->admin_model->insertShopProductRegionDaLogs($region_da_logs); 
+                }
+                
+                $variants = $this->input->post('variants') ? json_decode($this->input->post('variants'), true) : array();
+                
+                foreach($variants as $variant){
+                  $data = array(
+                    'product_id' => $product_id,
+                    'name' => $variant['name'],
+                    'status' => 1,
                   );
 
-                  $this->admin_model->insertShopProductVariantOptionCombination($product_variant_option_combination);
-                }
-              }
+                  $variant_id = $this->admin_model->insertShopProductVariant($data);
 
+                  $options = $variant['options'];
+                  foreach($options as $option){
+                    $product_variant_option = array(
+                      "product_variant_id" => $variant_id,
+                      "name" => $option['name'],
+                      "status" => 1,
+                    );
+
+                    $product_variant_option_id = $this->admin_model->insertShopProductVariantOption($product_variant_option);
+
+                    if(isset($option['price']) && isset($option['sku'])){
+                      $product_sku = array(
+                        "product_id" => $product_id,
+                        "sku" => $option['sku'],
+                        "price" => $option['price']
+                      );
+
+                      $sku_id = $this->admin_model->insertShopProductSku($product_sku);
+                      
+                      $product_variant_option_combination = array(
+                        "product_variant_option_id" => $product_variant_option_id,
+                        "sku_id" => $sku_id,
+                      );
+
+                      $this->admin_model->insertShopProductVariantOptionCombination($product_variant_option_combination);
+                    }
+                  }
+
+                }
+                
+                break;
+              case "2": // Addons
+
+                break;
             }
 
           }
@@ -458,61 +486,61 @@ class Admin extends CI_Controller{
     }
   }
 
-public function survey_verifications(){
-  switch($this->input->server('REQUEST_METHOD')){
-    case 'GET':
-    $per_page = $this->input->get('per_page') ?? 25;
-    $page_no = $this->input->get('page_no') ?? 0;
-    $status = $this->input->get('status') ?? null;
-    $order = $this->input->get('order') ?? 'desc';
-    $order_by = $this->input->get('order_by') ?? 'dateadded';
-    $search = $this->input->get('search');
+  public function survey_verifications(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+      $per_page = $this->input->get('per_page') ?? 25;
+      $page_no = $this->input->get('page_no') ?? 0;
+      $status = $this->input->get('status') ?? null;
+      $order = $this->input->get('order') ?? 'desc';
+      $order_by = $this->input->get('order_by') ?? 'dateadded';
+      $search = $this->input->get('search');
 
-    if($page_no != 0){
-      $page_no = ($page_no - 1) * $per_page;
-    }
-    
-    $surveys_count = $this->admin_model->getSurveysCount($status, $search);
-    $surveys = $this->admin_model->getSurveys($page_no, $per_page, $status, $order_by, $order, $search);
-
-    $pagination = array(
-      "total_rows" => $surveys_count,
-      "per_page" => $per_page,
-    );
-
-    $response = array(
-      "message" => 'Successfully fetch survey verification',
-      "data" => array(
-        "pagination" => $pagination,
-        "surveys" => $surveys
-      ),
-    );
-  
-    header('content-type: application/json');
-    echo json_encode($response);
-    return;
-  }
-}
-
-public function survey_verification_change_status(){
-  switch($this->input->server('REQUEST_METHOD')){
-    case 'POST':
-      $_POST =  json_decode(file_get_contents("php://input"), true);
+      if($page_no != 0){
+        $page_no = ($page_no - 1) * $per_page;
+      }
       
-      $survey_verification_id = $this->input->post('surveyverificationId');
-      $status = $this->input->post('status');
+      $surveys_count = $this->admin_model->getSurveysCount($status, $search);
+      $surveys = $this->admin_model->getSurveys($page_no, $per_page, $status, $order_by, $order, $search);
 
-      $this->admin_model->changeStatusSurveyVerification($survey_verification_id, $status);
-
-      $response = array(
-        "message" => 'Successfully update survey verification status',
+      $pagination = array(
+        "total_rows" => $surveys_count,
+        "per_page" => $per_page,
       );
 
+      $response = array(
+        "message" => 'Successfully fetch survey verification',
+        "data" => array(
+          "pagination" => $pagination,
+          "surveys" => $surveys
+        ),
+      );
+    
       header('content-type: application/json');
       echo json_encode($response);
       return;
+    }
   }
-}
+
+  public function survey_verification_change_status(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST':
+        $_POST =  json_decode(file_get_contents("php://input"), true);
+        
+        $survey_verification_id = $this->input->post('surveyverificationId');
+        $status = $this->input->post('status');
+
+        $this->admin_model->changeStatusSurveyVerification($survey_verification_id, $status);
+
+        $response = array(
+          "message" => 'Successfully update survey verification status',
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
 
   public function report_transaction($startDate, $endDate){
 

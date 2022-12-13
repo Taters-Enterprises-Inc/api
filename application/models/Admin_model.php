@@ -5,6 +5,17 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+
+    function getProductTypes(){
+        $this->db->select('
+            id,
+            name,
+        ');
+
+        $this->db->from('product_types');
+        $query_product_types = $this->db->get();
+        return $query_product_types->result();
+    }
     
     function updateShopProductStatus($product_id, $status){
         $this->db->set('status', $status);
@@ -164,6 +175,7 @@ class Admin_model extends CI_Model
             A.category,
             A.num_flavor,
             A.dateadded,
+            A.product_type_id,
         ');
 
         $this->db->from('products_tb A');
