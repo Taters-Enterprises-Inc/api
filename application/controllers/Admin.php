@@ -803,8 +803,6 @@ public function survey_verification_change_status(){
           $stores = $this->admin_model->getSettingStores($page_no, $per_page, $order_by, $order, $search, $store_id_array);
         }
 
-        
-        
         $pagination = array(
           "total_rows" => $stores_count,
           "per_page" => $per_page,

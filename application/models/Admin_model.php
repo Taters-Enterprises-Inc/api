@@ -491,6 +491,7 @@ class Admin_model extends CI_Model
             A.store_id,
             A.name,
             A.status,
+            A.store_image,
             A.catering_status,
             A.popclub_walk_in_status,
             A.popclub_online_delivery_status,
@@ -721,7 +722,7 @@ class Admin_model extends CI_Model
     }
 
     function getStoreCatersProductAddons($row_no, $row_per_page, $store_id,  $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.name, A.store_id, B.add_details');
+        $this->db->select('A.id, B.name, A.store_id, B.add_details, B.product_image');
 
         $this->db->from('catering_product_addons_tb	 A');
         $this->db->join('products_tb B', 'B.id = A.product_id');
@@ -743,8 +744,8 @@ class Admin_model extends CI_Model
     }
     
     function getStoreCatersPackageAddons($row_no, $row_per_page, $store_id,  $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.name, A.store_id, B.add_details');
-        $this->db->from('catering_package_addons_tb	 A');
+        $this->db->select('A.id, B.name, A.store_id, B.add_details, B.product_image');
+        $this->db->from('catering_package_addons_tb A');
         $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
 
         if($search){
@@ -764,7 +765,7 @@ class Admin_model extends CI_Model
     }
 
     function getStoreCatersPackages($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');
+        $this->db->select('A.id, B.name, A.store_id, B.product_image, B.add_details, C.category_name');
         $this->db->from('catering_region_da_log A');
         $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
         $this->db->join('catering_category_tb C', 'C.id = B.category');
@@ -789,7 +790,7 @@ class Admin_model extends CI_Model
     }
 
     function getStoreProducts($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');
+        $this->db->select('A.id, B.name, B.product_image, A.store_id, B.add_details, C.category_name');
         $this->db->from('region_da_log A');
         $this->db->join('products_tb B', 'B.id = A.product_id');
         $this->db->join('category_tb C', 'C.id = B.category');
@@ -870,7 +871,7 @@ class Admin_model extends CI_Model
     }
 
     function getStoreDeals($row_no, $row_per_page, $store_id, $category_id, $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.alias, B.name, A.store_id');
+        $this->db->select('A.id, B.alias, B.name, B.product_image, A.store_id');
         $this->db->from('deals_region_da_log A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
         $this->db->join('store_tb C', 'C.store_id = A.store_id');
