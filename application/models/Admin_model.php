@@ -771,6 +771,17 @@ class Admin_model extends CI_Model
 		return $result;
 	}
 
+	public function createNewCatersPackage($data)
+	{
+		$query = $this->db->insert("catering_packages_tb", $data);
+		$insert_id = $this->db->insert_id();
+		if ($query) {
+			return $insert_id;
+		} else {
+			return $query;
+		}
+	}
+
 	function getStoreCatersPackages($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search)
 	{
 		$this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');
@@ -856,7 +867,6 @@ class Admin_model extends CI_Model
 		$this->db->where("id", $id);
 		$this->db->update("deals_region_da_log");
 	}
-	// TODO Catering
 	function updateStoreCatersPackage($id, $status)
 	{
 		$this->db->set('status', $status);

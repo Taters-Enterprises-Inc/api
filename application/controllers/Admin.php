@@ -896,29 +896,75 @@ class Admin extends CI_Controller
 	{
 		switch ($this->input->server('REQUEST_METHOD')) {
 			case 'POST':
-				// $formdata = $_POST['product_image'];
+				$_POST['dateadded'] = date('d-m-y h:i:s');
 
-				$config['upload_path']          = './assets/images/shared/products';
-				$config['allowed_types']        = 'jpeg|jpg|png';
-				$config['max_size']             = 2000;
-				$config['max_width']            = 0;
-				$config['max_height']           = 0;
-				$config['encrypt_name']         = TRUE;
+				if ($_POST['package_type'] == 0) $_POST['add_remarks'] = 1;
 
-				$this->load->library('upload', $config);
+				//! below here will be change
+				$_POST['to_gc_value'] = null;
+				if ($_POST['note'] == '') $_POST['note'] = null;
+				if ($_POST['tags'] == '') $_POST['tags'] = null;
+				if ($_POST['product_code'] == '') $_POST['product_code'] = '0000';
+				if ($_POST['status'] == '') $_POST['status'] = 1;
+				if ($_POST['report_status'] == '') $_POST['report_status'] = 1;
+				if ($_POST['free_threshold'] == '') $_POST['free_threshold'] = 0;
+				$_POST['product_hash'] = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 
-				if (!$this->upload->do_upload('product_image75x75')) { // Upload validation
-					// Failed-Upload
-					$error = $this->upload->display_errors();
-					$this->output->set_status_header('401');
-					echo json_encode(array("message" => $error));
+
+				$insert = $this->admin_model->createNewCatersPackage($_POST);
+
+				if ($insert) {
+					$filepath75 = './assets/images/shared/products/75';
+					$filepath150 = './assets/images/shared/products/150';
+					$filepath250 = './assets/images/shared/products/250';
+					$filepath500 = './assets/images/shared/products/500';
+					//! Unique Folder
+
+					// if (!is_dir('./assets/images/shared/products/' . $insert)) {
+					// 	mkdir('./assets/images/shared/products/' . $insert);
+					// }
+					// $filepath75 = './assets/images/shared/products/CatersPackage-'.$insert;
+					// $filepath150 = './assets/images/shared/products/CatersPackage-'.$insert;
+					// $filepath250 = './assets/images/shared/products/CatersPackage-'.$insert;
+					// $filepath500 = './assets/images/shared/products/CatersPackage-'.$insert;
+					//! Unique Folder
+
+					$image75x75_error = upload('product_image500x500', $filepath75, $_POST['product_image'], 'jpg');
+					if ($image75x75_error) {
+						$this->output->set_status_header('401');
+						echo json_encode(array("message" => $image75x75_error));
+						return;
+					}
+
+					$image150x150_error = upload('product_image500x500', $filepath150, $_POST['product_image'], 'jpg');
+					if ($image150x150_error) {
+						$this->output->set_status_header('401');
+						echo json_encode(array("message" => $image150x150_error));
+						return;
+					}
+
+					$image250x250_error = upload('product_image500x500', $filepath250, $_POST['product_image'], 'jpg');
+					if ($image250x250_error) {
+						$this->output->set_status_header('401');
+						echo json_encode(array("message" => $image250x250_error));
+						return;
+					}
+
+					$image500x500_error = upload('product_image500x500', $filepath500, $_POST['product_image'], 'jpg');
+					if ($image500x500_error) {
+						$this->output->set_status_header('401');
+						echo json_encode(array("message" => $image500x500_error));
+						return;
+					}
 				} else {
-					// File-Uploaded-Successfull
-					$data = $this->upload->data(); // Get file details
-					// $file_name = $data['file_name'];
+					$response = array(
+						'message' => "Failed Register"
+					);
+
+
 
 					header('content-type: application/json');
-					echo json_encode(array("message" => 'Succesfully upload payment'));
+					echo json_encode(array("message" => 'Succesfully created new package'));
 				}
 
 				return;
