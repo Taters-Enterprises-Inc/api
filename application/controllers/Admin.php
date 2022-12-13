@@ -387,6 +387,18 @@ class Admin extends CI_Controller
 				header('content-type: application/json');
 				echo json_encode($response);
 				break;
+			case 'PUT':
+				$put = json_decode(file_get_contents("php://input"), true);
+
+				$this->admin_model->updateShopProductStatus($put['product_id'], $put['status']);
+
+				$response = array(
+					"message" => 'Successfully update status',
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
 		}
 	}
 
@@ -795,8 +807,6 @@ class Admin extends CI_Controller
 					$stores_count = $this->admin_model->getSettingStoresCount($search, $store_id_array);
 					$stores = $this->admin_model->getSettingStores($page_no, $per_page, $order_by, $order, $search, $store_id_array);
 				}
-
-
 
 				$pagination = array(
 					"total_rows" => $stores_count,
