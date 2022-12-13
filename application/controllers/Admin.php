@@ -1009,21 +1009,21 @@ class Admin extends CI_Controller
 					// $filepath500 = './assets/images/shared/products/CatersPackage-'.$insert;
 					//! Unique Folder
 
-					$image75x75_error = upload('product_image500x500', $filepath75, $_POST['product_image'], 'jpg');
+					$image75x75_error = upload('product_image75x75', $filepath75, $_POST['product_image'], 'jpg');
 					if ($image75x75_error) {
 						$this->output->set_status_header('401');
 						echo json_encode(array("message" => $image75x75_error));
 						return;
 					}
 
-					$image150x150_error = upload('product_image500x500', $filepath150, $_POST['product_image'], 'jpg');
+					$image150x150_error = upload('product_image150x150', $filepath150, $_POST['product_image'], 'jpg');
 					if ($image150x150_error) {
 						$this->output->set_status_header('401');
 						echo json_encode(array("message" => $image150x150_error));
 						return;
 					}
 
-					$image250x250_error = upload('product_image500x500', $filepath250, $_POST['product_image'], 'jpg');
+					$image250x250_error = upload('product_image250x250', $filepath250, $_POST['product_image'], 'jpg');
 					if ($image250x250_error) {
 						$this->output->set_status_header('401');
 						echo json_encode(array("message" => $image250x250_error));
@@ -1040,17 +1040,87 @@ class Admin extends CI_Controller
 					$response = array(
 						'message' => "Failed Register"
 					);
-
-
-
 					header('content-type: application/json');
-					echo json_encode(array("message" => 'Succesfully created new package'));
+					echo json_encode(array("message" => $response));
 				}
 
 				return;
 		}
 	}
 
+	public function updateCaters_package()
+	{
+
+		switch ($this->input->server('REQUEST_METHOD')) {
+
+			case 'POST':
+
+				$data = $this->admin_model->getCaterPackage($_POST["id"]);
+
+				if ($data['product_image'] != $_POST["product_image"]) {
+					$filepath75 = './assets/images/shared/products/75';
+					$filepath150 = './assets/images/shared/products/150';
+					$filepath250 = './assets/images/shared/products/250';
+					$filepath500 = './assets/images/shared/products/500';
+					$image75x75_error = upload('product_image75x75', $filepath75, $_POST['product_image'], 'jpg');
+					if ($image75x75_error) {
+						$this->output->set_status_header('401');
+						echo json_encode(array("message" => $image75x75_error));
+						return;
+					}
+
+					$image150x150_error = upload('product_image150x150', $filepath150, $_POST['product_image'], 'jpg');
+					if ($image150x150_error) {
+						$this->output->set_status_header('401');
+						echo json_encode(array("message" => $image150x150_error));
+						return;
+					}
+
+					$image250x250_error = upload('product_image250x250', $filepath250, $_POST['product_image'], 'jpg');
+					if ($image250x250_error) {
+						$this->output->set_status_header('401');
+						echo json_encode(array("message" => $image250x250_error));
+						return;
+					}
+
+					$image500x500_error = upload('product_image500x500', $filepath500, $_POST['product_image'], 'jpg');
+					if ($image500x500_error) {
+						$this->output->set_status_header('401');
+						echo json_encode(array("message" => $image500x500_error));
+						return;
+					}
+				}
+				unset($_POST['product_image75x75']);
+				unset($_POST['product_image150x150']);
+				unset($_POST['product_image250x250']);
+				unset($_POST['product_image500x500']);
+
+				$this->admin_model->updateCatersPackage($_POST);
+
+				$response = array(
+					'id' => $_POST["id"]
+				);
+				header('content-type: application/json');
+				echo json_encode($response);
+				return;
+		}
+	}
+	public function deleteCaters_package($id)
+	{
+
+		switch ($this->input->server('REQUEST_METHOD')) {
+
+			case 'DELETE':
+				$this->admin_model->removeCatersPackage($id);
+				$response = array(
+					"id" =>  $id
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				return;
+		}
+	}
 	public function caters_package_availability()
 	{
 		switch ($this->input->server('REQUEST_METHOD')) {

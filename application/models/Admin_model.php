@@ -782,6 +782,11 @@ class Admin_model extends CI_Model
 		);
 		return $result;
 	}
+	public function getCaterPackage($id)
+	{
+		$query = $this->db->get_where('catering_packages_tb', array('id' => $id));
+		return $query->result_array()[0];
+	}
 
 	public function createNewCatersPackage($data)
 	{
@@ -792,6 +797,19 @@ class Admin_model extends CI_Model
 		} else {
 			return $query;
 		}
+	}
+
+	function updateCatersPackage($data)
+	{
+		$this->db->set($data);
+		$this->db->where('id', $data['id']);
+		$this->db->update('catering_packages_tb');
+	}
+
+	function removeCatersPackage($id)
+	{
+		$this->db->where('id', $id);
+		$this->db->delete('catering_packages_tb');
 	}
 
 	function getStoreCatersPackages($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search)
