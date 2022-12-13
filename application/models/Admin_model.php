@@ -6,6 +6,13 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
     
+    function updateShopProductStatus($product_id, $status){
+        $this->db->set('status', $status);
+        $this->db->where("id", $product_id);
+        $this->db->update("products_tb");
+    }
+    
+    
     function removeShopProductCategory($product_id){
         $this->db->where('product_id', $product_id);
         $this->db->delete('product_category_tb');
