@@ -7,6 +7,18 @@ class Admin_model extends CI_Model
 		$this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
 	}
 
+	function removeShopProductCategory($product_id)
+	{
+		$this->db->where('product_id', $product_id);
+		$this->db->delete('product_category_tb');
+	}
+
+	function removeShopProduct($product_id)
+	{
+		$this->db->where('id', $product_id);
+		$this->db->delete('products_tb');
+	}
+
 	function removeProductVariantOptionCombination($product_variant_option_combination_id)
 	{
 		$this->db->where('id', $product_variant_option_combination_id);
