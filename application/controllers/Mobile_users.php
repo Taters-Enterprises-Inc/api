@@ -240,7 +240,7 @@ class Mobile_users extends CI_Controller
           
           header('content-type: application/json');
           $output = array(
-            "message"    =>  'Successfully registered user!',
+            "message" => 'Registration Completed! You can now access your account using the temporary password sent to your mobile number.',
           );
           echo json_encode($output);
           return;
