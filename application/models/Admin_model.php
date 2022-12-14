@@ -210,6 +210,8 @@ class Admin_model extends CI_Model
 		$this->db->insert('product_category_tb', $data);
 		$this->db->trans_complete();
 	}
+
+
 	function insertShopProductVariantOptionCombination($data)
 	{
 		$this->db->trans_start();
@@ -262,6 +264,61 @@ class Admin_model extends CI_Model
 		$this->db->trans_complete();
 
 		return $insert_id;
+	}
+
+	function getShopProducts($row_no, $row_per_page, $status, $order_by,  $order, $search)
+	{
+		$this->db->select('
+            id,
+            product_image,
+            name,
+            description,
+            price,
+            add_details,
+            status,
+        ');
+
+		$this->db->from('products_tb');
+
+		if ($status)
+			$this->db->where('status', $status);
+
+		if ($search) {
+			$this->db->group_start();
+			$this->db->or_like('name', $search);
+			$this->db->or_like('description', $search);
+			$this->db->or_like('price', $search);
+			$this->db->or_like('add_details', $search);
+			$this->db->group_end();
+		}
+
+		$this->db->limit($row_per_page, $row_no);
+		$this->db->order_by($order_by, $order);
+
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	public function getShopProductsCount($status, $search)
+	{
+		$this->db->select('count(*) as all_count');
+
+		$this->db->from('products_tb');
+
+		if ($status)
+			$this->db->where('status', $status);
+
+		if ($search) {
+			$this->db->group_start();
+			$this->db->or_like('name', $search);
+			$this->db->or_like('description', $search);
+			$this->db->or_like('price', $search);
+			$this->db->or_like('add_details', $search);
+			$this->db->group_end();
+		}
+
+		$query = $this->db->get();
+		return $query->row()->all_count;
 	}
 
 	function getSurvey($survey_id)
