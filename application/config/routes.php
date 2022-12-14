@@ -94,6 +94,7 @@ $route['auth/edit-user/(:any)'] = 'auth/edit_user/$1';
 $route['auth/create-group'] = 'auth/create_group';
 
 $route['admin/stores'] = 'admin/stores';
+$route['admin/products'] = 'admin/products';
 $route['admin/store'] = 'admin/store';
 $route['admin/store-operating-hours'] = 'admin/store_operating_hours';
 $route['admin/session'] = 'admin/session';
@@ -131,11 +132,6 @@ $route['admin/deal-categories'] = 'admin/deal_categories';
 $route['admin/product-categories'] = 'admin/product_categories';
 $route['admin/caters-package-categories'] = 'admin/caters_package_categories';
 
-$route['admin/users'] = 'admin/users';
-$route['admin/user/(:any)'] = 'admin/user/$1';
-$route['admin/groups'] = 'admin/groups';
-$route['admin/setting/stores'] = 'admin/setting_stores';
-
 $route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
 $route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_logs/$1';
 
@@ -149,11 +145,15 @@ $route['admin/survey-verification/survey-verification-change-status'] = 'admin/s
 $route['admin/survey-verification/(:any)']= 'admin/survey_verification/$1';
 $route['admin/survey-verifications'] = 'admin/survey_verifications';
 
-$route['admin/shop-products'] = 'admin/shop_products';
-$route['admin/shop-product'] = 'admin/shop_product';
-$route['admin/shop-product/type'] = 'admin/shop_product_type';
-$route['admin/edit-shop-product'] = 'admin/edit_shop_product';
-$route['admin/delete-shop-product'] = 'admin/delete_shop_product';
+$route['admin/setting/stores'] = 'admin/setting_stores';
+$route['admin/setting/users'] = 'admin/setting_users';
+$route['admin/setting/user/(:any)'] = 'admin/setting_user/$1';
+$route['admin/setting/groups'] = 'admin/setting_groups';
+$route['admin/setting/shop-products'] = 'admin/setting_shop_products';
+$route['admin/setting/shop-product'] = 'admin/setting_shop_product';
+$route['admin/setting/shop-product/type'] = 'admin/setting_shop_product_type';
+$route['admin/setting/edit-shop-product'] = 'admin/setting_edit_shop_product';
+$route['admin/setting/delete-shop-product'] = 'admin/setting_delete_shop_product';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';
