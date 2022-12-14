@@ -315,6 +315,7 @@ class Admin_model extends CI_Model
             description,
             price,
             add_details,
+            product_type_id,
             status,
         ');
 

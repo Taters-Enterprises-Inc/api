@@ -161,8 +161,8 @@ class Admin extends CI_Controller{
         }
 
 
-        switch($product->product_type_id){
-          case 1:
+        switch($this->input->post('productType')){
+          case "1":
             $data = array(
               "name" => $this->input->post('name'),
               "product_image" => $product_image_name,
@@ -173,6 +173,7 @@ class Admin extends CI_Controller{
               "add_details" => $this->input->post('addDetails'),
               "category" => $this->input->post('category'),
               "num_flavor" => $this->input->post('numFlavor'),
+              "product_type_id" => $this->input->pose('productType'),
             );
 
             $this->admin_model->updateShopProduct($product_id, $data);
@@ -269,32 +270,40 @@ class Admin extends CI_Controller{
             $this->admin_model->removeCateringProductAddons($product_id);
 
             break;
-          case 2:
+          case "2":
             $data = array(
               "name" => $this->input->post('name'),
               "product_image" => $product_image_name,
               "description" => $this->input->post('description'),
               "delivery_details" => $this->input->post('deliveryDetails'),
               "price" => $this->input->post('price'),
+              "product_type_id" => $this->input->post('productType'),
               "uom" => $this->input->post('uom'),
               "add_details" => $this->input->post('addDetails'),
               "num_flavor" => $this->input->post('numFlavor'),
+              "category" => ''
             );
 
             $this->admin_model->updateShopProduct($product_id, $data);
             
             $products = json_decode($this->input->post('products'), true);
-                
-            foreach($products as $value){
-              $data = array(
-                'product_id' => $value['id'],
-                'addon_product_id' => $product_id,
-              );
-              $product_with_addons[] = $data;
-            }
 
-            $this->admin_model->removeProductWithAddons($product_id);
-            $this->admin_model->insertProductWithAddons($product_with_addons);
+            if($products){
+
+              $product_with_addons = array();
+            
+              foreach($products as $value){
+                $data = array(
+                  'product_id' => $value['id'],
+                  'addon_product_id' => $product_id,
+                );
+                $product_with_addons[] = $data;
+              }
+  
+              $this->admin_model->removeProductWithAddons($product_id);
+              $this->admin_model->insertProductWithAddons($product_with_addons);
+            }
+              
 
             $stores = json_decode($this->input->post('stores'), true);
 
@@ -433,8 +442,6 @@ class Admin extends CI_Controller{
 
             switch($this->input->post('productType')){
               case "1": // Main
-                
-            
                 $product_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 
                 $data = array(
@@ -443,6 +450,7 @@ class Admin extends CI_Controller{
                   "description" => $this->input->post('description'),
                   "delivery_details" => $this->input->post('deliveryDetails'),
                   "price" => $this->input->post('price'),
+                  "category" => $this->input->post('category'),
                   "uom" => $this->input->post('uom'),
                   "add_details" => $this->input->post('addDetails'),
                   "status" => 1,
