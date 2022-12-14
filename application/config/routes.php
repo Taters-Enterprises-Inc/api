@@ -156,6 +156,7 @@ $route['admin/survey-verifications'] = 'admin/survey_verifications';
 
 $route['admin/shop-products'] = 'admin/shop_products';
 $route['admin/shop-product'] = 'admin/shop_product';
+$route['admin/shop-product/type'] = 'admin/shop_product_type';
 $route['admin/edit-shop-product'] = 'admin/edit_shop_product';
 $route['admin/delete-shop-product'] = 'admin/delete_shop_product';
 
