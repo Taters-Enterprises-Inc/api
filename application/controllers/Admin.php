@@ -1003,7 +1003,8 @@ class Admin extends CI_Controller
 				$response = array(
 					'data' => $data['results'],
 					'message' => "sucess",
-					'pagination' => $pagination
+					'pagination' => $pagination,
+					'DynamicPrices' => $data['DynamicPrices'],
 				);
 				header('content-type: application/json');
 				echo json_encode($response);
@@ -1015,6 +1016,7 @@ class Admin extends CI_Controller
 	{
 		switch ($this->input->server('REQUEST_METHOD')) {
 			case 'POST':
+
 				$_POST['dateadded'] = date('d-m-y h:i:s');
 
 				if ($_POST['package_type'] == 0) $_POST['add_remarks'] = 1;
@@ -1030,9 +1032,18 @@ class Admin extends CI_Controller
 				$_POST['product_hash'] = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 
 
-				$insert = $this->admin_model->createNewCatersPackage($_POST);
 
-				if ($insert) {
+				//? If there is an value in array format
+				$dynamicPriceData = array();
+				$tempVar = json_decode($_POST['dynamic_price']);
+				for ($i = 0; $i < count($tempVar); $i++) {
+					array_push($dynamicPriceData, (array) $tempVar[$i]);
+				}
+				unset($_POST['dynamic_price']);
+
+				$insert = $this->admin_model->createNewCatersPackage($_POST, $dynamicPriceData);
+
+				if ($insert >= 0) {
 					$filepath75 = './assets/images/shared/products/75';
 					$filepath150 = './assets/images/shared/products/150';
 					$filepath250 = './assets/images/shared/products/250';
@@ -1077,7 +1088,7 @@ class Admin extends CI_Controller
 					}
 				} else {
 					$response = array(
-						'message' => "Failed Register"
+						'message' => $insert
 					);
 					header('content-type: application/json');
 					echo json_encode(array("message" => $response));
@@ -1134,10 +1145,21 @@ class Admin extends CI_Controller
 				unset($_POST['product_image250x250']);
 				unset($_POST['product_image500x500']);
 
-				$this->admin_model->updateCatersPackage($_POST);
+
+
+				//? If there is an value in array format
+				$dynamicPriceData = array();
+				$tempVar = json_decode($_POST['dynamic_price']);
+				for ($i = 0; $i < count($tempVar); $i++) {
+					array_push($dynamicPriceData, (array) $tempVar[$i]);
+				}
+				unset($_POST['dynamic_price']);
+
+				$this->admin_model->updateCatersPackage($_POST, $dynamicPriceData);
 
 				$response = array(
-					'id' => $_POST["id"]
+					'id' => $_POST["id"],
+					'ids' => $dynamicPriceData
 				);
 				header('content-type: application/json');
 				echo json_encode($response);

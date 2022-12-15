@@ -846,6 +846,15 @@ class Admin_model extends CI_Model
 			ORDER BY catering_packages_tb.$order_by $order 
 			LIMIT $row_per_page OFFSET $row_no"
 			);
+			$tempid = "";
+			foreach ($sqlResult->result_array() as $row) {
+				if ($tempid != "")
+					$tempid = $tempid . "," . $row['id'];
+				else {
+					$tempid = $row['id'];
+				}
+			}
+			$getDynamicPrice = $this->db->query("SELECT * FROM catering_package_prices_tb WHERE package_id IN ($tempid)");
 		} else {
 			$sqlResult = $this->db->query(
 				"SELECT catering_packages_tb.*, catering_category_tb.category_name AS 'category' FROM catering_packages_tb 
@@ -853,11 +862,21 @@ class Admin_model extends CI_Model
 			ORDER BY catering_packages_tb.$order_by $order 
 			LIMIT $row_per_page OFFSET $row_no"
 			);
+			$tempid = "";
+			foreach ($sqlResult->result_array() as $row) {
+				if ($tempid != "")
+					$tempid = $tempid . "," . $row['id'];
+				else {
+					$tempid = $row['id'];
+				}
+			}
+			$getDynamicPrice = $this->db->query("SELECT * FROM catering_package_prices_tb WHERE package_id IN ($tempid)");
 		}
 
 		$result = array(
 			'results' => $sqlResult->result(),
 			'TotalPackage' => $countQuery->row()->Totals,
+			'DynamicPrices' => $getDynamicPrice->result(),
 		);
 		return $result;
 	}
@@ -867,26 +886,74 @@ class Admin_model extends CI_Model
 		return $query->result_array()[0];
 	}
 
-	public function createNewCatersPackage($data)
+	public function createNewCatersPackage($data, $dynamicPriceData)
 	{
-		$query = $this->db->insert("catering_packages_tb", $data);
+		$queryPackage = $this->db->insert("catering_packages_tb", $data);
 		$insert_id = $this->db->insert_id();
-		if ($query) {
+
+		$packageData = array(
+			'product_id' => $insert_id,
+			'category_id' => $data['category'],
+		);
+		$queryPackageCategory = $this->db->insert("catering_package_category_tb", $packageData);
+
+		if (count($dynamicPriceData) > 0) {
+			for ($i = 0; $i < count($dynamicPriceData); $i++) {
+				$dynamicPriceData[$i]['package_id'] = $insert_id;
+			}
+			$this->db->insert_batch("catering_package_prices_tb", $dynamicPriceData);
+		}
+
+		if ($queryPackage && $queryPackageCategory) {
 			return $insert_id;
 		} else {
-			return $query;
+			return $queryPackage;
 		}
 	}
 
-	function updateCatersPackage($data)
+	function updateCatersPackage($data, $dynamicPriceData)
 	{
 		$this->db->set($data);
 		$this->db->where('id', $data['id']);
 		$this->db->update('catering_packages_tb');
+
+		if (count($dynamicPriceData) > 0) {
+			$listOfId = array();
+			$newlylistOfId = array();
+			$listOfUpdatingId = array();
+			for ($i = 0; $i < count($dynamicPriceData); $i++) {
+				if (!$dynamicPriceData[$i]['id']) {
+					$this->db->insert("catering_package_prices_tb", $dynamicPriceData[$i]);
+					$insert_id = $this->db->insert_id();
+					array_push($newlylistOfId, $insert_id);
+				}
+				if ($dynamicPriceData[$i]['id']) {
+					array_push($listOfId, $dynamicPriceData[$i]['id']);
+					array_push($listOfUpdatingId, $dynamicPriceData[$i]);
+				}
+			}
+
+			$this->db->where('package_id', $data['id']);
+			$this->db->where_not_in('id', $newlylistOfId);
+			$this->db->delete('catering_package_prices_tb');
+
+			$this->db->insert_batch("catering_package_prices_tb", $listOfUpdatingId);
+		}
+
+		$this->db->set('category_id', $data['category']);
+		$this->db->where('product_id', $data['id']);
+		$this->db->update('catering_package_category_tb');
 	}
 
 	function removeCatersPackage($id)
 	{
+
+		$this->db->where('product_id', $id);
+		$this->db->delete('catering_package_category_tb');
+
+		$this->db->where('package_id', $id);
+		$this->db->delete('catering_package_prices_tb');
+
 		$this->db->where('id', $id);
 		$this->db->delete('catering_packages_tb');
 	}
