@@ -1196,6 +1196,15 @@ class Admin extends CI_Controller
 				$_POST['product_hash'] = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 
 
+				$variantData = array();
+				$tempVariantVar = json_decode($_POST['variants']);
+
+				for ($i = 0; $i < count($tempVariantVar); $i++) {
+					array_push($variantData, (array) $tempVariantVar[$i]);
+				}
+				// $this->output->set_status_header('401');
+				// echo json_encode(array("message" => $tempVariantVar));
+				// return;
 
 				//? If there is an value in array format
 				$dynamicPriceData = array();
@@ -1203,9 +1212,34 @@ class Admin extends CI_Controller
 				for ($i = 0; $i < count($tempVar); $i++) {
 					array_push($dynamicPriceData, (array) $tempVar[$i]);
 				}
+
+
+
 				unset($_POST['dynamic_price']);
+				unset($_POST['variants']);
 
 				$insert = $this->admin_model->createNewCatersPackage($_POST, $dynamicPriceData);
+
+				foreach ($variantData as $variant) {
+
+					$variantId = $this->admin_model->addNewVariantCatersPackage($insert, $variant);
+					$option = (array)$variant['variantOption'];
+					foreach ($option as $value) {
+						$tempVal = (array) $value;
+						$data = array(
+							'id' => "",
+							'product_variant_id' => $variantId,
+							'name' => $tempVal['name'],
+							'status' => 1,
+						);
+
+						$response = array(
+							'option' => $data,
+						);
+						$this->admin_model->addNewVariantOptionCatersPackage($data);
+					}
+				}
+
 
 				if ($insert >= 0) {
 					$filepath75 = './assets/images/shared/products/75';

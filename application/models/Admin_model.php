@@ -981,12 +981,33 @@ class Admin_model extends CI_Model
 			}
 			$this->db->insert_batch("catering_package_prices_tb", $dynamicPriceData);
 		}
-
 		if ($queryPackage && $queryPackageCategory) {
 			return $insert_id;
 		} else {
 			return $queryPackage;
 		}
+	}
+	public function addNewVariantCatersPackage($id, $variant)
+	{
+
+		unset($variant['variantOption']);
+		$variant['product_id'] = $id;
+		$variant['status'] = 1;
+		$this->db->insert("catering_package_variants_tb", $variant);
+		return $this->db->insert_id();
+
+		// if (count($variantOptions) > 0) {
+		// 	for ($i = 0; $i < count($variantOptions); $i++) {
+		// 		$variantOptions[$i]['product_variant_id'] = $insert_id;
+		// 		$variantOptions[$i]['status'] = 1;
+		// 	}
+		// 	$this->db->insert_batch("catering_package_variant_options_tb", $variantOptions);
+		// }
+	}
+
+	public function addNewVariantOptionCatersPackage($variantOptions)
+	{
+		$this->db->insert("catering_package_variant_options_tb", $variantOptions);
 	}
 
 	function updateCatersPackage($data, $dynamicPriceData)
