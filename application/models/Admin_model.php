@@ -969,11 +969,13 @@ class Admin_model extends CI_Model
 		$queryPackage = $this->db->insert("catering_packages_tb", $data);
 		$insert_id = $this->db->insert_id();
 
-		$packageData = array(
-			'product_id' => $insert_id,
-			'category_id' => $data['category'],
-		);
-		$queryPackageCategory = $this->db->insert("catering_package_category_tb", $packageData);
+		if ($data['category']) {
+			$packageData = array(
+				'product_id' => $insert_id,
+				'category_id' => $data['category'],
+			);
+			$this->db->insert("catering_package_category_tb", $packageData);
+		}
 
 		if (count($dynamicPriceData) > 0) {
 			for ($i = 0; $i < count($dynamicPriceData); $i++) {
@@ -981,12 +983,23 @@ class Admin_model extends CI_Model
 			}
 			$this->db->insert_batch("catering_package_prices_tb", $dynamicPriceData);
 		}
-		if ($queryPackage && $queryPackageCategory) {
+		if ($queryPackage) {
 			return $insert_id;
 		} else {
 			return $queryPackage;
 		}
 	}
+
+	function insertCataringPackageRegionDaLogs($data)
+	{
+		$this->db->insert_batch('catering_region_da_log', $data);
+	}
+
+	function insertCataringPackageAddonRegionDaLogs($data)
+	{
+		$this->db->insert_batch('catering_package_addons_tb', $data);
+	}
+
 	public function addNewVariantCatersPackage($id, $variant)
 	{
 
@@ -995,14 +1008,6 @@ class Admin_model extends CI_Model
 		$variant['status'] = 1;
 		$this->db->insert("catering_package_variants_tb", $variant);
 		return $this->db->insert_id();
-
-		// if (count($variantOptions) > 0) {
-		// 	for ($i = 0; $i < count($variantOptions); $i++) {
-		// 		$variantOptions[$i]['product_variant_id'] = $insert_id;
-		// 		$variantOptions[$i]['status'] = 1;
-		// 	}
-		// 	$this->db->insert_batch("catering_package_variant_options_tb", $variantOptions);
-		// }
 	}
 
 	public function addNewVariantOptionCatersPackage($variantOptions)
@@ -1046,6 +1051,15 @@ class Admin_model extends CI_Model
 
 	function removeCatersPackage($id)
 	{
+
+		$this->db->where('product_id', $id);
+		$this->db->delete('catering_region_da_log');
+
+		$this->db->where('product_id', $id);
+		$this->db->delete('catering_package_addons_tb');
+
+		$this->db->where('product_id', $id);
+		$this->db->delete('catering_package_variants_tb');
 
 		$this->db->where('product_id', $id);
 		$this->db->delete('catering_package_category_tb');

@@ -1184,6 +1184,9 @@ class Admin extends CI_Controller
 				$_POST['dateadded'] = date('d-m-y h:i:s');
 
 				if ($_POST['package_type'] == 0) $_POST['add_remarks'] = 1;
+				$stores = json_decode($_POST['stores'], true);
+				unset($_POST['stores']);
+
 
 				//! below here will be change
 				$_POST['to_gc_value'] = null;
@@ -1196,15 +1199,14 @@ class Admin extends CI_Controller
 				$_POST['product_hash'] = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 
 
+
 				$variantData = array();
 				$tempVariantVar = json_decode($_POST['variants']);
 
 				for ($i = 0; $i < count($tempVariantVar); $i++) {
 					array_push($variantData, (array) $tempVariantVar[$i]);
 				}
-				// $this->output->set_status_header('401');
-				// echo json_encode(array("message" => $tempVariantVar));
-				// return;
+
 
 				//? If there is an value in array format
 				$dynamicPriceData = array();
@@ -1219,6 +1221,34 @@ class Admin extends CI_Controller
 				unset($_POST['variants']);
 
 				$insert = $this->admin_model->createNewCatersPackage($_POST, $dynamicPriceData);
+
+				// header('content-type: application/json');
+				// echo json_encode(array("r1" => $stores, "r2" => $insert));
+				// return;
+
+				foreach ($stores as $store) {
+					$data = array(
+						'region_id' => $store['region_store_id'],
+						'store_id' => $store['store_id'],
+						'product_id' => $insert,
+						'status' => 1,
+					);
+					$da_log[] = $data;
+				}
+				if ($_POST['package_type'] == 0) {
+
+					$this->admin_model->insertCataringPackageRegionDaLogs($da_log);
+				} else {
+
+
+					// $response = array(
+					// 	'message' => $da_log
+					// );
+					// header('content-type: application/json');
+					// echo json_encode(array("message" => $response, "r1" => $stores));
+					// return;
+					$this->admin_model->insertCataringPackageAddonRegionDaLogs($da_log);
+				}
 
 				foreach ($variantData as $variant) {
 
