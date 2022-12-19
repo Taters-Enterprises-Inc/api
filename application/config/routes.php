@@ -65,6 +65,7 @@ $route['branches'] = 'branches';
 //Cart
 $route['cart/shop'] = 'cart/shop';
 $route['cart/catering'] = 'cart/catering';
+$route['cart/catering-product'] = 'cart/catering_product';
 
 //Transactions
 $route['transaction/shop'] = 'transaction/shop';
