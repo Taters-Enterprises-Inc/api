@@ -63,6 +63,36 @@ class Catering extends CI_Controller {
         }
 	}
 
+	
+	public function products(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$region_id = $this->input->get('region_id');
+
+				if($region_id == null){
+					$response = array(
+						'message' => 'Unable to process your request...'
+					);
+					header('content-type: application/json');
+					echo json_encode($response);
+					break;
+				}
+
+
+				$products = $this->catering_model->getCateringProductsPerCategory($region_id,'','','','','');
+
+				
+				$response = array(
+					'data' => $products,
+					'message' => "Successfully fetch products"
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				return;
+		}
+	}
+
 
 	public function orders(){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -105,7 +135,7 @@ class Catering extends CI_Controller {
 				$no_of_pax = 0;
 				$package_price = 0;
 
-				$all_of_orders = array_merge($order_details['order_details'], $order_details['addons']);
+				$all_of_orders = array_merge($order_details['order_details'],$order_details['products'], $order_details['addons']);
 
 				foreach($all_of_orders  as $key => $order){
 					if($order->status == 0){
@@ -203,7 +233,7 @@ class Catering extends CI_Controller {
 		}
 	}
 
-    public function products(){
+    public function packages(){
         
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
@@ -232,7 +262,7 @@ class Catering extends CI_Controller {
         }
     }
 	
-	public function product(){
+	public function package(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 				$hash = $this->input->get('hash');

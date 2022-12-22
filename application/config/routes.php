@@ -8,8 +8,9 @@ $route['shop/orders'] = 'shop/orders';
 $route['shop/get_product_sku'] = 'shop/get_product_sku';
 
 //Catering
+$route['catering/packages'] = 'catering/packages';
+$route['catering/package'] = 'catering/package';
 $route['catering/products'] = 'catering/products';
-$route['catering/product'] = 'catering/product';
 $route['catering/orders'] = 'catering/orders';
 $route['catering/upload_contract'] = 'catering/upload_contract';
 
@@ -113,6 +114,7 @@ $route['admin/popclub'] = 'admin/popclub';
 
 $route['admin/availability/deal'] = 'admin/deal_availability';
 $route['admin/availability/product'] = 'admin/product_availability';
+$route['admin/availability/caters-product'] = 'admin/caters_product_availability';
 $route['admin/availability/caters-package'] = 'admin/caters_package_availability';
 $route['admin/availability/caters-package-addon'] = 'admin/caters_package_addon_availability';
 $route['admin/availability/caters-product-addon'] = 'admin/caters_product_addon_availability';
