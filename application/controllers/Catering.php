@@ -80,10 +80,15 @@ class Catering extends CI_Controller {
 
 
 				$products = $this->catering_model->getCateringProductsPerCategory($region_id,'','','','','');
-
+				$addons = $this->catering_model->get_catering_addons($region_id);
+				$product_addons = $this->catering_model->get_catering_product_addons($region_id);
 				
 				$response = array(
-					'data' => $products,
+					'data' => array(
+						"products" =>  $products,
+						"addons" => $addons, 
+						"product_addons" => $product_addons,
+					),
 					'message' => "Successfully fetch products"
 				);
 
