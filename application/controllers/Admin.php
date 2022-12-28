@@ -24,6 +24,50 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 	}
 
+  public function catering_package_flavors($package_id){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $flavors = $this->admin_model->getCateringPackageFlavors($package_id);
+				foreach($flavors as $key => $flavor){
+					$package_flavor[$flavor->product_variant_id]['parent_name'] = $flavor->parent_name;
+					$package_flavor[$flavor->product_variant_id]['flavors'][] =  $flavor;
+				}
+
+        $response = array(
+          "message" => "Succesfully get package flavor!",
+          "data" => array_values($package_flavor),
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
+
+  public function catering_update_order_item_remarks(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST':
+        $_POST = json_decode(file_get_contents("php://input"), true);
+        
+        $order_item_id = $this->input->post('orderItemId');
+        $remarks = $this->input->post('remarks');
+
+        $this->admin_model->updateCateringOrderItemRemarks($order_item_id, $remarks);
+
+        
+        $response = array(
+          "message" => "Succesfully update remarks!"
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
+
   public function report_transaction($startDate, $endDate){
 
     switch($this->input->server('REQUEST_METHOD')){
@@ -149,7 +193,7 @@ class Admin extends CI_Controller{
         
         $response = array(
           "message" => "Succesfully seen notification"
-       );
+        );
         
         header('content-type: application/json');
         echo json_encode($response);
