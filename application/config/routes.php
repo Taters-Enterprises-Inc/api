@@ -106,6 +106,8 @@ $route['admin/admin-catering-privilege'] = 'admin/admin_catering_privilege';
 $route['admin/catering-update-status'] = 'admin/catering_update_status';
 $route['admin/catering'] = 'admin/catering';
 $route['admin/catering/(:any)'] = 'admin/catering_order/$1';
+$route['admin/catering-update-order-item-remarks'] = 'admin/catering_update_order_item_remarks';
+$route['admin/catering-package-flavors/(:num)'] = 'admin/catering_package_flavors/$1';
 
 $route['admin/print_view/(:any)'] = 'admin/print_view/$1';
 $route['admin/print_asdoc/(:any)'] = 'admin/print_asdoc/$1';

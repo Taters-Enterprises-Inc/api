@@ -5,7 +5,23 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
-    
+
+    function getCateringPackageFlavors($package_id){
+        $this->db->select("B.id,B.name,B.product_variant_id, A.name as parent_name");
+        $this->db->from('catering_package_variants_tb A');
+        $this->db->join('catering_package_variant_options_tb B', 'B.product_variant_id = A.id','left');
+        $this->db->where('A.product_id', $package_id);
+        $this->db->where('B.status', 1);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function updateCateringOrderItemRemarks($order_item_id, $remarks){
+        $this->db->set('remarks', $remarks);
+        $this->db->where("id", $order_item_id);
+        $this->db->update("catering_order_items");
+    }
+
     function removeProductWithAddons($product_addon_id){
         $this->db->where('addon_product_id', $product_addon_id);
 		$this->db->delete('product_with_addons');
@@ -497,7 +513,7 @@ class Admin_model extends CI_Model
         $this->bsc_db->where('id', $survey_verification_id);
         $this->bsc_db->update("customer_survey_responses");
     }
-    
+
     function updateSettingStoreOperatingHours(
         $store_id,
         $available_start_time,
@@ -1624,10 +1640,12 @@ class Admin_model extends CI_Model
 
     public function getCateringBookingItems($transaction_id){
         $this->db->select("
+            A.id,
             A.product_price,
             A.quantity,
             A.remarks,
             A.product_label,
+            B.id as product_id,
             B.name,
             B.description,
             B.add_details,
@@ -1640,10 +1658,12 @@ class Admin_model extends CI_Model
         $catering_packages = $query_catering_packages->result();
 
         $this->db->select("
+            B.id,
             B.product_price,
             B.quantity,
             B.remarks,
             B.product_label,
+            A.id as product_id,
             A.name,
             A.description,
             A.add_details,
