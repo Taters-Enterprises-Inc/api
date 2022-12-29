@@ -123,7 +123,7 @@ class Catering extends CI_Controller {
 					
 					$package_selection[] = $order;
 					if(!empty($order->remarks)){
-						$remarks = explode("<br/>",$order->remarks); 
+						$remarks = explode("<br>",$order->remarks); 
 	
 						foreach($remarks as $remarks_key => $remark){
 							$get_first_letter = substr($remark,8);
