@@ -866,6 +866,10 @@ class Admin extends CI_Controller{
             elseif ($status == 6) $tagname = "Initial Payment Verified";
             elseif ($status == 8) $tagname = "Final Payment Verified";
             elseif ($status == 9) $tagname = "Catering booking completed";
+            elseif ($status == 20) $tagname = "Booking Declined";
+            elseif ($status == 21) $tagname = "Contract Declined";
+            elseif ($status == 22) $tagname = "Initial Payment Declined";
+            elseif ($status == 23) $tagname = "Final Payment Declined";
 
             if ($fetch_data == 1) {
               $this->logs_model->insertCateringTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Booking Success');
