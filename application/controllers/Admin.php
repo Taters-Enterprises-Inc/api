@@ -1169,6 +1169,8 @@ class Admin extends CI_Controller
 					'message' => "sucess",
 					'pagination' => $pagination,
 					'DynamicPrices' => $data['DynamicPrices'],
+					'Variant' => $data['Variant'],
+					'VariantOption' => $data['VariantOption'],
 				);
 				header('content-type: application/json');
 				echo json_encode($response);
@@ -1241,12 +1243,6 @@ class Admin extends CI_Controller
 				} else {
 
 
-					// $response = array(
-					// 	'message' => $da_log
-					// );
-					// header('content-type: application/json');
-					// echo json_encode(array("message" => $response, "r1" => $stores));
-					// return;
 					$this->admin_model->insertCataringPackageAddonRegionDaLogs($da_log);
 				}
 
@@ -1383,11 +1379,104 @@ class Admin extends CI_Controller
 				}
 				unset($_POST['dynamic_price']);
 
+				//? If there is an value in array format
+				$variantDataUpdate = array();
+				$variantDataInsert = array();
+				$tempVariant = json_decode($_POST['variants'], true);
+				$getAllIdVariant = array();
+				$getAllIdVariantOption = array();
+				for ($i = 0; $i < count($tempVariant); $i++) {
+					if ($tempVariant[$i]['id']) {
+						array_push($variantDataUpdate, $tempVariant[$i]);
+					} else {
+						array_push($variantDataInsert, $tempVariant[$i]);
+					}
+
+					// ? This is for deleting the variants
+					array_push($getAllIdVariant, $tempVariant[$i]['id']);
+					$option = (array)$tempVariant[$i]['variantOption'];
+					foreach ($option as $value) {
+						array_push($getAllIdVariantOption, $value["id"]);
+					}
+					$this->admin_model->DeleteVariantOptionCatersPackage($getAllIdVariantOption, $tempVariant[$i]['id']);
+				}
+
+				unset($_POST['variants']);
+
+
+				// ? Deleting Variants
+				$this->admin_model->DeleteVariantCatersPackage($getAllIdVariant, $_POST["id"]);
+
+				// ? Updating Variants
+				foreach ($variantDataUpdate as $variant) {
+					$this->admin_model->UpdateVariantCatersPackage($variant);
+					$option = (array)$variant['variantOption'];
+
+					foreach ($option as $value) {
+						$tempVal = (array) $value;
+						if ($tempVal['id'] != "") {
+							$data = array(
+								'id' => $tempVal['id'],
+								'product_variant_id' => $tempVal['product_variant_id'],
+								'name' => $tempVal['name'],
+								'status' => 1,
+							);
+
+							$this->admin_model->UpdateVariantOptionCatersPackage($data);
+						} else if ($tempVal['id'] == "") {
+							$data = array(
+								'id' => "",
+								'product_variant_id' => $variant['id'],
+								'name' => $tempVal['name'],
+								'status' => 1,
+							);
+							// echo json_encode($data);
+
+							$this->admin_model->addNewVariantOptionCatersPackage($data);
+						}
+					}
+				}
+
+				// ? Inserrting Variants
+				foreach ($variantDataInsert as $variant) {
+					$variantId = $this->admin_model->addNewVariantCatersPackage($_POST["id"], $variant);
+					$option = (array)$variant['variantOption'];
+					foreach ($option as $value) {
+						$tempVal = (array) $value;
+						$data = array(
+							'id' => "",
+							'product_variant_id' => $variantId,
+							'name' => $tempVal['name'],
+							'status' => 1,
+						);
+
+						$this->admin_model->addNewVariantOptionCatersPackage($data);
+					}
+				}
+
+				// $stores = json_decode($_POST['stores'], true);
+				// unset($_POST['stores']);;
+
+				// $storeIDs = array();
+				// foreach ($stores as $value) {
+				// 	array_push($storeIDs, $value["store_id"]);
+				// }
+
+
+				// if ($_POST['package_type'] == 0) {
+				// 	$this->admin_model->RemoveSpecifiedCataringPackageRegionDaLogs($_POST["id"], $storeIDs);
+				// } else {
+
+				// 	$this->admin_model->RemoveSpecifiedPackageAddonRegionDaLogs($_POST["id"], $storeIDs);
+				// }
+
+
+
 				$this->admin_model->updateCatersPackage($_POST, $dynamicPriceData);
 
 				$response = array(
 					'id' => $_POST["id"],
-					'ids' => $dynamicPriceData
+					// 'ids' => $storeIDs
 				);
 				header('content-type: application/json');
 				echo json_encode($response);
