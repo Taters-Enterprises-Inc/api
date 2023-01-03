@@ -1171,6 +1171,7 @@ class Admin extends CI_Controller
 					'DynamicPrices' => $data['DynamicPrices'],
 					'Variant' => $data['Variant'],
 					'VariantOption' => $data['VariantOption'],
+					'stores' => $data['stores'],
 				);
 				header('content-type: application/json');
 				echo json_encode($response);
@@ -1405,7 +1406,8 @@ class Admin extends CI_Controller
 
 
 				// ? Deleting Variants
-				$this->admin_model->DeleteVariantCatersPackage($getAllIdVariant, $_POST["id"]);
+				if (!empty($getAllIdVariant))
+					$this->admin_model->DeleteVariantCatersPackage($getAllIdVariant, $_POST["id"]);
 
 				// ? Updating Variants
 				foreach ($variantDataUpdate as $variant) {
@@ -1454,21 +1456,21 @@ class Admin extends CI_Controller
 					}
 				}
 
-				// $stores = json_decode($_POST['stores'], true);
-				// unset($_POST['stores']);;
+				$stores = json_decode($_POST['stores'], true);
+				$storeIDs = array();
+				unset($_POST['stores']);;
 
-				// $storeIDs = array();
-				// foreach ($stores as $value) {
-				// 	array_push($storeIDs, $value["store_id"]);
-				// }
+				foreach ($stores as $value) {
+					array_push($storeIDs, $value["store_id"]);
+				}
 
 
-				// if ($_POST['package_type'] == 0) {
-				// 	$this->admin_model->RemoveSpecifiedCataringPackageRegionDaLogs($_POST["id"], $storeIDs);
-				// } else {
+				if ($_POST['package_type'] == '0') {
+					$this->admin_model->RemoveSpecifiedCataringPackageRegionDaLogs($_POST["id"], $storeIDs);
+				} else {
 
-				// 	$this->admin_model->RemoveSpecifiedPackageAddonRegionDaLogs($_POST["id"], $storeIDs);
-				// }
+					$this->admin_model->RemoveSpecifiedPackageAddonRegionDaLogs($_POST["id"], $storeIDs);
+				}
 
 
 

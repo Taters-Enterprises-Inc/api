@@ -934,6 +934,7 @@ class Admin_model extends CI_Model
 			}
 			$getDynamicPrice = $this->db->query("SELECT * FROM catering_package_prices_tb WHERE package_id IN ($tempid)");
 			$getVariant = $this->db->query("SELECT * FROM catering_package_variants_tb WHERE product_id IN ($tempid)");
+			$getCaterDalog = $this->db->query("SELECT * FROM catering_region_da_log WHERE product_id IN ($tempid)");
 
 			$tempidVariant = "";
 			foreach ($getVariant->result_array() as $row) {
@@ -961,6 +962,7 @@ class Admin_model extends CI_Model
 			}
 			$getDynamicPrice = $this->db->query("SELECT * FROM catering_package_prices_tb WHERE package_id IN ($tempid)");
 			$getVariant = $this->db->query("SELECT * FROM catering_package_variants_tb WHERE product_id IN ($tempid)");
+			$getCaterDalog = $this->db->query("SELECT * FROM catering_region_da_log WHERE product_id IN ($tempid)");
 
 			$tempidVariant = "";
 			foreach ($getVariant->result_array() as $row) {
@@ -973,12 +975,14 @@ class Admin_model extends CI_Model
 			$getVariantOption = $this->db->query("SELECT * FROM catering_package_variant_options_tb WHERE product_variant_id  IN ($tempidVariant)");
 		}
 
+
 		$result = array(
 			'results' => $sqlResult->result(),
 			'TotalPackage' => $countQuery->row()->Totals,
 			'DynamicPrices' => $getDynamicPrice->result(),
 			'Variant' => $getVariant->result(),
 			'VariantOption' => $getVariantOption->result(),
+			'stores' => $getCaterDalog->result(),
 		);
 		return $result;
 	}
