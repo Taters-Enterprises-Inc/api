@@ -2,88 +2,123 @@
 
 class Admin_model extends CI_Model 
 {
-    function getPopClubCompletedTransactionCount(){
+    function getPopClubCompletedTransactionCount($store){
         $this->db->select('count(*) as all_count');
         $this->db->from('deals_redeems_tb');
+
         $this->db->where('status', 6);
+        $this->db->where('platform_id', 1);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
 
         $query = $this->db->get();
         return $query->row()->all_count;
     }
 
-    function getPopClubTotalCompletedPurchaseAmount(){
+    function getPopClubTotalCompletedPurchaseAmount($store){
         $this->db->select_sum("purchase_amount");
         $this->db->from('deals_redeems_tb');
+
         $this->db->where('status', 6);
+        $this->db->where('platform_id', 1);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
 
         $query_transaction = $this->db->get();
         return $query_transaction->result();
     }
 
-    function getCateringCompletedTransactionCount(){
+    function getCateringCompletedTransactionCount($store){
         $this->db->select('count(*) as all_count');
         $this->db->from('catering_transaction_tb');
+
         $this->db->where('status', 9);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
 
         $query = $this->db->get();
         return $query->row()->all_count;
     }
 
-    function getCateringTotalCompletedPurchaseAmount(){
+    function getCateringTotalCompletedPurchaseAmount($store){
         $this->db->select_sum("purchase_amount");
         $this->db->from('catering_transaction_tb');
+
         $this->db->where('status', 9);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
 
         $query_transaction = $this->db->get();
         return $query_transaction->result();
     }
 
-    function getSnackshopCompletedTransactionCount(){
+    function getSnackshopCompletedTransactionCount($store){
         $this->db->select('count(*) as all_count');
         $this->db->from('transaction_tb');
+
         $this->db->where('status', 6);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
 
         $query = $this->db->get();
         return $query->row()->all_count;
     }
 
-    function getSnackshopTotalCompletedPurchaseAmount(){
+    function getSnackshopTotalCompletedPurchaseAmount($store){
         $this->db->select_sum("purchase_amount");
         $this->db->from('transaction_tb');
+        
         $this->db->where('status', 6);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
 
         $query_transaction = $this->db->get();
         return $query_transaction->result();
     }
 
-    function getSnackshopSales($start_date){
+    function getSnackshopSales($start_date, $store){
         $this->db->select("purchase_amount, dateadded");
         $this->db->from('transaction_tb');
         $this->db->where('status', 6);
 
         $this->db->where('DATE(dateadded) >= ', $start_date);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
 
         $query_transaction = $this->db->get();
         return $query_transaction->result();
     }
     
-    function getCateringSales($start_date){
+    function getCateringSales($start_date, $store){
         $this->db->select("purchase_amount, dateadded");
         $this->db->from('catering_transaction_tb');
         $this->db->where('status', 9);
 
         $this->db->where('DATE(dateadded) >= ', $start_date);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
 
         $query_transaction = $this->db->get();
         return $query_transaction->result();
     }
 
-    function getPopClubSales($start_date){
+    function getPopClubSales($start_date, $store){
         $this->db->select("purchase_amount, dateadded");
         $this->db->from('deals_redeems_tb');
         $this->db->where('status', 6);
 
         $this->db->where('DATE(dateadded) >= ', $start_date);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
 
         $query_transaction = $this->db->get();
         return $query_transaction->result();
