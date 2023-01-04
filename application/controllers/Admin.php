@@ -24,6 +24,229 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 	}
 
+  public function total_sales($services){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+          switch($services){
+            case 'snackshop':
+              $store_id_array = array();
+              $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+              foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+              
+              if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+                $snackshop_total_completed_transaction = 0;
+                $snackshop_total_purchase_amount = array((object)array( "purchase_amount" => 0));
+              }else{
+                $snackshop_total_completed_transaction = $this->admin_model->getSnackshopCompletedTransactionCount($store_id_array);
+                $snackshop_total_purchase_amount = $this->admin_model->getSnackshopTotalCompletedPurchaseAmount($store_id_array);
+              }
+              
+              $response = array(
+                "message" => "Succesfully get snackshop total sales",
+                "data" => array(
+                  "total_completed_transaction" => $snackshop_total_completed_transaction,
+                  "total_purchase_amount" => (int) $snackshop_total_purchase_amount[0]->purchase_amount,
+                ),
+              );
+              
+              header('content-type: application/json');
+              echo json_encode($response);
+              break;
+              
+            case 'catering':
+
+              $store_id_array = array();
+              $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+              foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+              
+              if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+                $catering_total_completed_transaction = 0;
+                $catering_total_purchase_amount = array((object)array( "purchase_amount" => 0));
+              }else{
+                $catering_total_completed_transaction = $this->admin_model->getCateringCompletedTransactionCount($store_id_array);
+                $catering_total_purchase_amount = $this->admin_model->getCateringTotalCompletedPurchaseAmount($store_id_array);
+              }
+              
+              $response = array(
+                "message" => "Succesfully get catering total sales",
+                "data" => array(
+                  "total_completed_transaction" => $catering_total_completed_transaction,
+                  "total_purchase_amount" => (int) $catering_total_purchase_amount[0]->purchase_amount,
+                ),
+              );
+              
+              header('content-type: application/json');
+              echo json_encode($response);
+              break;
+              
+            case 'popclub':
+              
+              $store_id_array = array();
+              $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+              foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+              
+              if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+                $popclub_total_completed_transaction = 0;
+                $popclub_total_purchase_amount = array((object)array( "purchase_amount" => 0));
+              }else{
+                $popclub_total_completed_transaction = $this->admin_model->getPopClubCompletedTransactionCount($store_id_array);
+                $popclub_total_purchase_amount = $this->admin_model->getPopClubTotalCompletedPurchaseAmount($store_id_array);
+              }
+
+              
+              $response = array(
+                "message" => "Succesfully get popclub total sales",
+                "data" => array(
+                  "total_completed_transaction" => $popclub_total_completed_transaction,
+                  "total_purchase_amount" => (int) $popclub_total_purchase_amount[0]->purchase_amount,
+                ),
+              );
+              
+              header('content-type: application/json');
+              echo json_encode($response);
+              break;
+              
+            case 'overall':
+
+              $store_id_array = array();
+              $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+              foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+              
+              if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+                $overall_total_completed_transaction = 0;
+                $overall_total_purchase_amount = 0;
+                
+              }else{
+                $snackshop_total_completed_transaction = $this->admin_model->getSnackshopCompletedTransactionCount($store_id_array);
+                $snackshop_total_purchase_amount = $this->admin_model->getSnackshopTotalCompletedPurchaseAmount($store_id_array);
+                
+                $catering_total_completed_transaction = $this->admin_model->getCateringCompletedTransactionCount($store_id_array);
+                $catering_total_purchase_amount = $this->admin_model->getCateringTotalCompletedPurchaseAmount($store_id_array);
+                
+                $popclub_total_completed_transaction = $this->admin_model->getPopClubCompletedTransactionCount($store_id_array);
+                $popclub_total_purchase_amount = $this->admin_model->getPopClubTotalCompletedPurchaseAmount($store_id_array);
+  
+                $overall_total_completed_transaction =
+                  $snackshop_total_completed_transaction +
+                  $catering_total_completed_transaction +
+                  $popclub_total_completed_transaction ;
+  
+                $overall_total_purchase_amount = 
+                  $snackshop_total_purchase_amount[0]->purchase_amount +
+                  $catering_total_purchase_amount[0]->purchase_amount +
+                  $popclub_total_purchase_amount[0]->purchase_amount;
+                
+              }
+              
+              $response = array(
+                "message" => "Succesfully get overall total sales",
+                "data" => array(
+                  "total_completed_transaction" => $overall_total_completed_transaction,
+                  "total_purchase_amount" => (int) $overall_total_purchase_amount,
+                ),
+              );
+              
+              header('content-type: application/json');
+              echo json_encode($response);
+              break;
+          }
+
+          break;
+    }
+
+  }
+
+  public function sales($services){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+          switch($services){
+            case 'overall':
+
+              $store_id_array = array();
+              $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+              foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+      
+              if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+                $another_filter = array();
+              }else{
+                $start_date = date('Y-m-d', strtotime('-1 month'));
+
+                $snackshop_sales = $this->admin_model->getSnackshopSales($start_date, $store_id_array);
+                $catering_sales = $this->admin_model->getCateringSales($start_date, $store_id_array);
+                $popclub_sales = $this->admin_model->getPopClubSales($start_date, $store_id_array);
+
+                $overall_sales = array_merge($snackshop_sales, $catering_sales, $popclub_sales);
+
+                usort($overall_sales, function ($a, $b) {
+                    return strtotime($a->dateadded) - strtotime($b->dateadded);
+                });
+
+
+                $filtered = array();
+                
+                foreach($overall_sales as $overall_sales_key => $sales){
+                  $is_exist = false;
+
+                  foreach($filtered as $filtered_key => $filter){
+                    if(date('Y-m-d', strtotime($filter->dateadded)) === date('Y-m-d', strtotime($sales->dateadded))){
+                      $filtered[$filtered_key]->purchase_amount += (int) $sales->purchase_amount;
+                      $is_exist = true;
+                      unset($overall_sales[$overall_sales_key]);  
+                    }
+                  }
+
+                  if(!$is_exist){
+                    $sales->dateadded = date('Y-m-d', strtotime($sales->dateadded));
+                    $sales->purchase_amount = (int)$sales->purchase_amount;
+                    $filtered[] = $sales;
+                    unset($overall_sales[$overall_sales_key]);
+                  }
+
+                }
+                $another_filter = array();
+                
+                foreach($filtered as $sales){
+
+                  while($start_date < date('Y-m-d', strtotime($sales->dateadded))){
+                    $another_filter[] = array(
+                      'dateadded' => $start_date,
+                      "purchase_amount" => 0,
+                    );
+                    
+                    $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+                  }
+                  $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+                  
+                  $another_filter[] = $sales;
+                }  
+              }
+
+              if(empty($another_filter)){
+                while($start_date < date('Y-m-d')){
+                  $another_filter[] = array(
+                    'dateadded' => $start_date,
+                    "purchase_amount" => 0,
+                  );
+                  
+                  $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+                }
+              }
+
+
+              
+              $response = array(
+                "message" => "Succesfully get snackshop sales",
+                "data" => $another_filter,
+              );
+              
+              header('content-type: application/json');
+              echo json_encode($response);
+              break;
+          }
+        break;
+    }
+  }
+
   public function catering_package_flavors($package_id){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':

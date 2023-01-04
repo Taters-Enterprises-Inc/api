@@ -136,6 +136,9 @@ $route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
 $route['admin/report-pmix/(:any)/(:any)'] = 'admin/report_pmix/$1/$2';
 $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/$2';
 
+$route['admin/sales/(:any)'] = 'admin/sales/$1';
+$route['admin/sales/(:any)/sum'] = 'admin/total_sales/$1';
+
 //Notification
 $route['notification'] = 'notification';
 $route['notification/(:num)/seen'] = 'notification/seen/$1';
