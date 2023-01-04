@@ -1172,6 +1172,7 @@ class Admin extends CI_Controller
 					'Variant' => $data['Variant'],
 					'VariantOption' => $data['VariantOption'],
 					'stores' => $data['stores'],
+					'storesAddons' => $data['storesAddons'],
 				);
 				header('content-type: application/json');
 				echo json_encode($response);
@@ -1472,9 +1473,22 @@ class Admin extends CI_Controller
 					$this->admin_model->RemoveSpecifiedPackageAddonRegionDaLogs($_POST["id"], $storeIDs);
 				}
 
+				foreach ($stores as $store) {
+					$StoresData = array(
+						'region_id' => $store['region_store_id'],
+						'store_id' => $store['store_id'],
+						'product_id' => $_POST["id"],
+						'status' => 1,
+					);
+					if ($_POST['package_type'] == 0) {
+						$this->admin_model->InsertSpecifiedCataringPackageRegionDaLogs($StoresData);
+					} else {
+						$this->admin_model->InsertSpecifiedCataringPackageAddonRegionDaLogs($StoresData);
+					}
+				}
 
-
-				$this->admin_model->updateCatersPackage($_POST, $dynamicPriceData);
+				if ($_POST['package_type'] == 0)
+					$this->admin_model->updateCatersPackage($_POST, $dynamicPriceData);
 
 				$response = array(
 					'id' => $_POST["id"],

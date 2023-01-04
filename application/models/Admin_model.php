@@ -935,6 +935,7 @@ class Admin_model extends CI_Model
 			$getDynamicPrice = $this->db->query("SELECT * FROM catering_package_prices_tb WHERE package_id IN ($tempid)");
 			$getVariant = $this->db->query("SELECT * FROM catering_package_variants_tb WHERE product_id IN ($tempid)");
 			$getCaterDalog = $this->db->query("SELECT * FROM catering_region_da_log WHERE product_id IN ($tempid)");
+			$getCaterAddonDalog = $this->db->query("SELECT * FROM catering_package_addons_tb WHERE product_id IN ($tempid)");
 
 			$tempidVariant = "";
 			foreach ($getVariant->result_array() as $row) {
@@ -963,6 +964,7 @@ class Admin_model extends CI_Model
 			$getDynamicPrice = $this->db->query("SELECT * FROM catering_package_prices_tb WHERE package_id IN ($tempid)");
 			$getVariant = $this->db->query("SELECT * FROM catering_package_variants_tb WHERE product_id IN ($tempid)");
 			$getCaterDalog = $this->db->query("SELECT * FROM catering_region_da_log WHERE product_id IN ($tempid)");
+			$getCaterAddonDalog = $this->db->query("SELECT * FROM catering_package_addons_tb WHERE product_id IN ($tempid)");
 
 			$tempidVariant = "";
 			foreach ($getVariant->result_array() as $row) {
@@ -983,6 +985,7 @@ class Admin_model extends CI_Model
 			'Variant' => $getVariant->result(),
 			'VariantOption' => $getVariantOption->result(),
 			'stores' => $getCaterDalog->result(),
+			'storesAddons' => $getCaterAddonDalog->result(),
 		);
 		return $result;
 	}
@@ -1028,6 +1031,29 @@ class Admin_model extends CI_Model
 		$this->db->insert_batch('catering_package_addons_tb', $data);
 	}
 
+	function InsertSpecifiedCataringPackageRegionDaLogs($StoreData)
+	{
+		$pID = $StoreData['product_id'];
+		$sID = $StoreData['store_id'];
+		$Check = $this->db->query("SELECT * FROM catering_region_da_log WHERE product_id = $pID AND store_id = ($sID)");
+		if ($Check->num_rows() < 1) {
+			$this->db->insert('catering_region_da_log', $StoreData);
+		}
+		// $this->db->where('product_id', );
+		// $this->db->where('store_id !=', $StoreData['store_id']);
+		// $this->db->delete('catering_region_da_log');
+	}
+
+	function InsertSpecifiedCataringPackageAddonRegionDaLogs($StoreData)
+	{
+
+		$pID = $StoreData['product_id'];
+		$sID = $StoreData['store_id'];
+		$Check = $this->db->query("SELECT * FROM catering_package_addons_tb WHERE product_id = $pID AND store_id = ($sID)");
+		if ($Check->num_rows() < 1) {
+			$this->db->insert('catering_package_addons_tb', $StoreData);
+		}
+	}
 
 	function RemoveSpecifiedCataringPackageRegionDaLogs($id, $ids)
 	{
