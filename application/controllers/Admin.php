@@ -24,6 +24,23 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 	}
 
+  public function store_menu(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $store_menus = $this->admin_model->getStoreMenus();
+        
+        $response = array(
+          "message" => "Succesfully get store menus",
+          "data" => $store_menus,
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
   public function total_sales($services){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':

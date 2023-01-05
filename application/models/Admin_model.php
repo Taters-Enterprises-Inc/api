@@ -5,7 +5,14 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
-    
+
+    function getStoreMenus(){
+        $this->db->select('id, name');
+        $this->db->from('store_menu_tb');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
     function getPopClubCompletedTransactionCount($store){
         $this->db->select('count(*) as all_count');
         $this->db->from('deals_redeems_tb');
