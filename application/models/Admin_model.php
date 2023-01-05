@@ -124,6 +124,16 @@ class Admin_model extends CI_Model
         return $query_transaction->result();
     }
 
+    function getSnackshopProductFlavors($product_id){
+        $this->db->select("B.id,B.name,B.product_variant_id, A.name as parent_name");
+        $this->db->from('product_variants_tb A');
+        $this->db->join('product_variant_options_tb B', 'B.product_variant_id = A.id','left');
+        $this->db->where('A.product_id', $product_id);
+        $this->db->where('B.status', 1);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     function getCateringPackageFlavors($package_id){
         $this->db->select("B.id,B.name,B.product_variant_id, A.name as parent_name");
         $this->db->from('catering_package_variants_tb A');
@@ -1231,6 +1241,7 @@ class Admin_model extends CI_Model
             A.quantity,
             A.remarks,
             A.product_label,
+            A.type,
             B.id as product_id,
             B.name,
             B.description,
@@ -1249,6 +1260,7 @@ class Admin_model extends CI_Model
             B.quantity,
             B.remarks,
             B.product_label,
+            B.type,
             A.id as product_id,
             A.name,
             A.description,
@@ -1266,6 +1278,7 @@ class Admin_model extends CI_Model
             B.quantity,
             B.remarks,
             B.product_label,
+            B.type,
             A.name,
             A.description,
             A.add_details,

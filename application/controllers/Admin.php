@@ -251,7 +251,17 @@ class Admin extends CI_Controller{
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
 
-        $flavors = $this->admin_model->getCateringPackageFlavors($package_id);
+        $type = $this->input->get('type');
+
+        switch($type){
+          case 'main':
+            $flavors = $this->admin_model->getCateringPackageFlavors($package_id);
+            break;
+          case 'product':
+            $flavors = $this->admin_model->getSnackshopProductFlavors($package_id);
+            break;
+        }
+
 				foreach($flavors as $key => $flavor){
 					$package_flavor[$flavor->product_variant_id]['parent_name'] = $flavor->parent_name;
 					$package_flavor[$flavor->product_variant_id]['flavors'][] =  $flavor;
