@@ -26,8 +26,18 @@ class Cart extends CI_Controller {
                 $product_sku_price = 0;
                 $prod_size = NULL;
                 
-                if($this->input->post('prod_size')){
+                if($this->input->post('prod_size') !== '' ){
+                    
+                    $varx[] = $this->input->post('prod_size');
                     $prod_size = $this->shop_model->fetch_variants_details($this->input->post('prod_size'));
+
+                    $varxz = array_values(array_filter($varx));
+                    $product_sku = $this->shop_model->fetch_product_sku($varxz);
+                    if(!empty($product_sku)){
+                        $product_sku_price = $product_sku->price;
+                    }else{
+                        $product_sku_price = $product_details->price;
+                    }
                 }
 
                 $product_price = (empty($varx)) ? $product_details->price : $product_sku_price;
