@@ -26,7 +26,7 @@ class Cart extends CI_Controller {
                 $product_sku_price = 0;
                 $prod_size = NULL;
                 
-                if($this->input->post('prod_size') !== null ){
+                if($this->input->post('prod_size') !== '' ){
                     
                     $varx[] = $this->input->post('prod_size');
                     $prod_size = $this->shop_model->fetch_variants_details($this->input->post('prod_size'));

@@ -2,7 +2,144 @@
 
 class Admin_model extends CI_Model 
 {
+    function getPopClubCompletedTransactionCount($store){
+        $this->db->select('count(*) as all_count');
+        $this->db->from('deals_redeems_tb');
+
+        $this->db->where('status', 6);
+        $this->db->where('platform_id', 1);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    function getPopClubTotalCompletedPurchaseAmount($store){
+        $this->db->select_sum("purchase_amount");
+        $this->db->from('deals_redeems_tb');
+
+        $this->db->where('status', 6);
+        $this->db->where('platform_id', 1);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query_transaction = $this->db->get();
+        return $query_transaction->result();
+    }
+
+    function getCateringCompletedTransactionCount($store){
+        $this->db->select('count(*) as all_count');
+        $this->db->from('catering_transaction_tb');
+
+        $this->db->where('status', 9);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    function getCateringTotalCompletedPurchaseAmount($store){
+        $this->db->select_sum("purchase_amount");
+        $this->db->from('catering_transaction_tb');
+
+        $this->db->where('status', 9);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query_transaction = $this->db->get();
+        return $query_transaction->result();
+    }
+
+    function getSnackshopCompletedTransactionCount($store){
+        $this->db->select('count(*) as all_count');
+        $this->db->from('transaction_tb');
+
+        $this->db->where('status', 6);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    function getSnackshopTotalCompletedPurchaseAmount($store){
+        $this->db->select_sum("purchase_amount");
+        $this->db->from('transaction_tb');
+        
+        $this->db->where('status', 6);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query_transaction = $this->db->get();
+        return $query_transaction->result();
+    }
+
+    function getSnackshopSales($start_date, $store){
+        $this->db->select("purchase_amount, dateadded");
+        $this->db->from('transaction_tb');
+        $this->db->where('status', 6);
+
+        $this->db->where('DATE(dateadded) >= ', $start_date);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query_transaction = $this->db->get();
+        return $query_transaction->result();
+    }
     
+    function getCateringSales($start_date, $store){
+        $this->db->select("purchase_amount, dateadded");
+        $this->db->from('catering_transaction_tb');
+        $this->db->where('status', 9);
+
+        $this->db->where('DATE(dateadded) >= ', $start_date);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query_transaction = $this->db->get();
+        return $query_transaction->result();
+    }
+
+    function getPopClubSales($start_date, $store){
+        $this->db->select("purchase_amount, dateadded");
+        $this->db->from('deals_redeems_tb');
+        $this->db->where('status', 6);
+
+        $this->db->where('DATE(dateadded) >= ', $start_date);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query_transaction = $this->db->get();
+        return $query_transaction->result();
+    }
+
+    function getCateringPackageFlavors($package_id){
+        $this->db->select("B.id,B.name,B.product_variant_id, A.name as parent_name");
+        $this->db->from('catering_package_variants_tb A');
+        $this->db->join('catering_package_variant_options_tb B', 'B.product_variant_id = A.id','left');
+        $this->db->where('A.product_id', $package_id);
+        $this->db->where('B.status', 1);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function updateCateringOrderItemRemarks($order_item_id, $remarks){
+        $this->db->set('remarks', $remarks);
+        $this->db->where("id", $order_item_id);
+        $this->db->update("catering_order_items");
+    }
+
     function updateSettingStoreOperatingHours(
         $store_id,
         $available_start_time,
@@ -1089,10 +1226,12 @@ class Admin_model extends CI_Model
 
     public function getCateringBookingItems($transaction_id){
         $this->db->select("
+            A.id,
             A.product_price,
             A.quantity,
             A.remarks,
             A.product_label,
+            B.id as product_id,
             B.name,
             B.description,
             B.add_details,
@@ -1105,10 +1244,12 @@ class Admin_model extends CI_Model
         $catering_packages = $query_catering_packages->result();
 
         $this->db->select("
+            B.id,
             B.product_price,
             B.quantity,
             B.remarks,
             B.product_label,
+            A.id as product_id,
             A.name,
             A.description,
             A.add_details,

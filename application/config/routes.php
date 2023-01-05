@@ -100,6 +100,8 @@ $route['admin/admin-catering-privilege'] = 'admin/admin_catering_privilege';
 $route['admin/catering-update-status'] = 'admin/catering_update_status';
 $route['admin/catering'] = 'admin/catering';
 $route['admin/catering/(:any)'] = 'admin/catering_order/$1';
+$route['admin/catering-update-order-item-remarks'] = 'admin/catering_update_order_item_remarks';
+$route['admin/catering-package-flavors/(:num)'] = 'admin/catering_package_flavors/$1';
 
 $route['admin/print_view/(:any)'] = 'admin/print_view/$1';
 $route['admin/print_asdoc/(:any)'] = 'admin/print_asdoc/$1';
@@ -136,6 +138,9 @@ $route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
 
 $route['admin/report-pmix/(:any)/(:any)'] = 'admin/report_pmix/$1/$2';
 $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/$2';
+
+$route['admin/sales/(:any)'] = 'admin/sales/$1';
+$route['admin/sales/(:any)/sum'] = 'admin/total_sales/$1';
 
 //Notification
 $route['notification'] = 'notification';
