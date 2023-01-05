@@ -13,6 +13,7 @@ class Admin_model extends CI_Model
         $query = $this->db->get();
         return $query->result();
     }
+
     function getPopClubCompletedTransactionCount($store){
         $this->db->select('count(*) as all_count');
         $this->db->from('deals_redeems_tb');
@@ -215,6 +216,7 @@ class Admin_model extends CI_Model
         ');
 
         $this->db->from('products_tb');
+        $this->db->where('status', 1);
 
         $query_products = $this->db->get();
         return $query_products->result();
