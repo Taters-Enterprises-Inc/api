@@ -1294,6 +1294,45 @@ class Admin extends CI_Controller{
         header('content-type: application/json');
         echo json_encode($response);
         return;
+      case 'POST':
+
+        if(is_uploaded_file($_FILES['image250x250']['tmp_name'])){
+          $store_image_name = str_replace(' ', '-', strtolower($this->input->post('name'))) . '-' . time() .'.jpg';
+          
+          $image250x250_error = upload('image250x250','./assets/images/shared/store_images/250',$store_image_name, 'jpg');
+
+          if($image250x250_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image250x250_error));
+            return;
+          }
+
+          $data = array(
+            "name" => $this->input->post('name'),
+            "address" => $this->input->post('address'),
+            "store_menu_type_id" => $this->input->post('storeMenu'),
+            "available_start_time" => $this->input->post('availableStartTime'),
+            "available_end_time" => $this->input->post('availableEndTime'),
+            "contact_number" => $this->input->post('phoneNumber'),
+            "contact_person" => $this->input->post('contactPerson'),
+            "email" => $this->input->post('email'),
+            "delivery_hours" => $this->input->post('deliveryHours'),
+            "operating_hours" => $this->input->post('operatingHours'),
+            "store_image" =>  $store_image_name,
+          );
+
+          $store_id = $this->admin_model->insertStore($data);
+
+
+        }
+
+        $response = array(
+          "message" => 'Successfully created a new store',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
       case 'PUT':
         $put = json_decode(file_get_contents("php://input"), true);
 

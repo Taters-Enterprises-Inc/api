@@ -6,6 +6,15 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    function insertStore($data){
+        $this->db->trans_start();
+		$this->db->insert('store_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
     function getStoreMenus(){
         $this->db->select('id, name');
         $this->db->from('store_menu_tb');
