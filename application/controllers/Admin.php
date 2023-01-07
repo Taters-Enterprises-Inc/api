@@ -1310,6 +1310,8 @@ class Admin extends CI_Controller{
           $data = array(
             "name" => $this->input->post('name'),
             "address" => $this->input->post('address'),
+            "lat" => $this->input->post('lat'),
+            "lng" => $this->input->post('lng'),
             "store_menu_type_id" => $this->input->post('storeMenu'),
             "available_start_time" => $this->input->post('availableStartTime'),
             "available_end_time" => $this->input->post('availableEndTime'),
