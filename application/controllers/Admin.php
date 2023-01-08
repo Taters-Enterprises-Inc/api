@@ -24,6 +24,40 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 	}
 
+  public function active_reseller_regions(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        
+        $regions = $this->admin_model->getActiveResellerRegions();
+        
+        $response = array(
+          "message" => "Succesfully get active reseller regions",
+          "data" => $regions,
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+  
+  public function regions(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        
+        $regions = $this->admin_model->getRegions();
+        
+        $response = array(
+          "message" => "Succesfully get regions",
+          "data" => $regions,
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
   public function store_menu(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -1196,32 +1230,7 @@ class Admin extends CI_Controller{
         break;
     }
   }
-
-  public function store_operating_hours(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'PUT':
-        $put = json_decode(file_get_contents("php://input"), true);
-        $store_id = $put['store_id'];
-        $available_start_time =  $put['available_start_time'];
-        $available_end_time =  $put['available_end_time'];
-
-        $this->admin_model->updateSettingStoreOperatingHours(
-          $store_id,
-          $available_start_time,
-          $available_end_time,
-        );
-
-        $response = array(
-          "message" => 'Successfully update operating hours',
-        );
   
-        header('content-type: application/json');
-        echo json_encode($response);
-        return;
-    }
-
-  }
-
   public function store(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -1232,18 +1241,6 @@ class Admin extends CI_Controller{
 
         $response = array(
           "data" => $store,
-          "message" => 'Successfully update status',
-        );
-  
-        header('content-type: application/json');
-        echo json_encode($response);
-        return;
-      case 'PUT':
-        $put = json_decode(file_get_contents("php://input"), true);
-
-        $this->admin_model->updateSettingStore($put['store_id'], $put['name_of_field_status'], $put['status']);
-
-        $response = array(
           "message" => 'Successfully update status',
         );
   
@@ -1321,11 +1318,35 @@ class Admin extends CI_Controller{
             "delivery_hours" => $this->input->post('deliveryHours'),
             "operating_hours" => $this->input->post('operatingHours'),
             "store_image" =>  $store_image_name,
+            'branch_status' => 1,
+            "region_id" => $this->input->post('region'),
+            "active_reseller_region_id" => $this->input->post('activeResellerRegion'),
           );
 
           $store_id = $this->admin_model->insertStore($data);
 
+          $services = $this->input->post('services') ? json_decode($this->input->post('services'), true) : array();
 
+          foreach($services as $service){
+            $this->admin_model->updateSettingStore($store_id, $service, 1);
+          }
+
+          $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
+          $region_da_logs = array();
+          
+          $this->admin_model->removeShopStoreRegionDaLogs($store_id);
+
+          foreach($products as $product){
+            $data = array(
+                'region_id' => $this->input->post('active_reseller_region_id'),
+                'store_id' => $store_id,
+                'product_id' => $product['id'],
+                'status' => 1,
+            );
+            $region_da_logs[] = $data;
+          }
+  
+          $this->admin_model->insertShopProductRegionDaLogs($region_da_logs); 
         }
 
         $response = array(
@@ -1335,18 +1356,6 @@ class Admin extends CI_Controller{
         header('content-type: application/json');
         echo json_encode($response);
         break;
-      case 'PUT':
-        $put = json_decode(file_get_contents("php://input"), true);
-
-        $this->admin_model->updateSettingStore($put['id'], $put['name_of_field_status'], $put['status']);
-
-        $response = array(
-          "message" => 'Successfully update status',
-        );
-  
-        header('content-type: application/json');
-        echo json_encode($response);
-        return;
     }
 
   }

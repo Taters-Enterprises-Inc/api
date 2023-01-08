@@ -174,6 +174,9 @@ $route['bsc/user/status'] = 'bsc/user_status';
 $route['admin/sales/(:any)'] = 'admin/sales/$1';
 $route['admin/sales/(:any)/sum'] = 'admin/total_sales/$1';
 
+$route['admin/regions'] = 'admin/regions';
+$route['admin/active-reseller-regions'] = 'admin/active_reseller_regions';
+
 //Notification
 $route['notification'] = 'notification';
 $route['notification/(:num)/seen'] = 'notification/seen/$1';

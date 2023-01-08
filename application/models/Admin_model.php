@@ -5,6 +5,31 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+    
+    function getRegions(){
+        $this->db->select('id, name');
+        $this->db->from('region_tb');
+        
+        $this->db->where('status', 1);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function getActiveResellerRegions(){
+        $this->db->select('id, name');
+        $this->db->from('region_tb');
+        
+        $this->db->where('on_reseller_status', 1);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function removeShopStoreRegionDaLogs($store_id){
+        $this->db->where('store_id', $store_id);
+		$this->db->delete('region_da_log');
+    }
 
     function insertStore($data){
         $this->db->trans_start();
@@ -684,20 +709,17 @@ class Admin_model extends CI_Model
     
     function updateSettingStore($store_id, $name_of_field_status, $status){
         switch($name_of_field_status){
-            case 'status':
+            case 'Snackshop':
                 $this->db->set('status', $status);
                 break;
-            case 'catering_status':
+            case 'Catering':
                 $this->db->set('catering_status', $status);
                 break;
-            case 'popclub_walk_in_status':
+            case 'PopClub Store Visit':
                 $this->db->set('popclub_walk_in_status', $status);
                 break;
-            case 'popclub_online_delivery_status':
+            case 'PopClub Online Delivery':
                 $this->db->set('popclub_online_delivery_status', $status);
-                break;
-            case 'branch_status':
-                $this->db->set('branch_status', $status);
                 break;
         }
         $this->db->where("store_id", $store_id);
