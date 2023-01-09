@@ -175,6 +175,9 @@ $route['bsc/stores'] = 'bsc/stores';
 $route['bsc/user/(:num)'] = 'bsc/user/$1';
 $route['bsc/user/status'] = 'bsc/user_status';
 
+$route['admin/sales/(:any)'] = 'admin/sales/$1';
+$route['admin/sales/(:any)/sum'] = 'admin/total_sales/$1';
+
 //Notification
 $route['notification'] = 'notification';
 $route['notification/(:num)/seen'] = 'notification/seen/$1';
