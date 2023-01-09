@@ -23,16 +23,48 @@ class Admin extends CI_Controller{
 		$this->load->model('notification_model');
 		$this->load->model('report_model');
 	}
+  
+  public function deals(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
 
-  public function active_reseller_regions(){
+        $deals = $this->admin_model->getDeals();
+
+        $response = array(
+          "message" => "Successfully deals",
+          "data" => $deals,
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+  
+  public function packages(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $packages = $this->admin_model->getPackages();
+
+        $response = array(
+          "message" => "Successfully packages",
+          "data" => $packages,
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
+  public function locales(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
         
-        $regions = $this->admin_model->getActiveResellerRegions();
+        $locales = $this->admin_model->getLocales();
         
         $response = array(
-          "message" => "Succesfully get active reseller regions",
-          "data" => $regions,
+          "message" => "Succesfully get locales",
+          "data" => $locales,
         );
         
         header('content-type: application/json');
@@ -1304,7 +1336,27 @@ class Admin extends CI_Controller{
             return;
           }
 
+          $region = array(
+            "name" => $this->input->post('activeResellerRegion'),
+            "status" => 1,
+            "on_reseller_status" => 1,
+            "sequence" => 0,
+          );
+
+          $active_reseller_region_id = $this->admin_model->insertRegion($region);
+          
+          $region_store_combination_data = array(
+            "region_id" => $this->input->post('region'),
+            "region_store_id" => $active_reseller_region_id,
+          );
+
+           $this->admin_model->insertRegionStoreCombination($region_store_combination_data);
+
+          $last_store_create = $this->admin_model->getLatestStoreCreated();
+          $store_id = $last_store_create->store_id + 1;
+
           $data = array(
+            "store_id" => $store_id,
             "name" => $this->input->post('name'),
             "address" => $this->input->post('address'),
             "lat" => $this->input->post('lat'),
@@ -1320,25 +1372,31 @@ class Admin extends CI_Controller{
             "store_image" =>  $store_image_name,
             'branch_status' => 1,
             "region_id" => $this->input->post('region'),
-            "active_reseller_region_id" => $this->input->post('activeResellerRegion'),
+            "active_reseller_region_id" => $active_reseller_region_id,
+            "region_store_combination_id" => $active_reseller_region_id,
+            "menu_type" => 1,
+            "store_hash" => $this->input->post('storeHash'),
+            "locale" => $this->input->post('locale'),
+            "delivery_rate" => $this->input->post('deliveryRate'),
+            "minimum_rate" => $this->input->post('minimumRate'),
+            "catering_delivery_rate" => $this->input->post('cateringDeliveryRate'),
+            "catering_minimum_rate" => $this->input->post('cateringMinimumRate'),
           );
 
-          $store_id = $this->admin_model->insertStore($data);
+          $store_primary_key = $this->admin_model->insertStore($data);
 
           $services = $this->input->post('services') ? json_decode($this->input->post('services'), true) : array();
 
           foreach($services as $service){
-            $this->admin_model->updateSettingStore($store_id, $service, 1);
+            $this->admin_model->updateSettingStore($store_primary_key, $service, 1);
           }
 
           $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
           $region_da_logs = array();
-          
-          $this->admin_model->removeShopStoreRegionDaLogs($store_id);
 
           foreach($products as $product){
             $data = array(
-                'region_id' => $this->input->post('active_reseller_region_id'),
+                'region_id' => $active_reseller_region_id,
                 'store_id' => $store_id,
                 'product_id' => $product['id'],
                 'status' => 1,
@@ -1347,6 +1405,22 @@ class Admin extends CI_Controller{
           }
   
           $this->admin_model->insertShopProductRegionDaLogs($region_da_logs); 
+          
+          $packages = $this->input->post('packages') ? json_decode($this->input->post('packages'), true) : array();
+          $catering_region_da_logs = array();
+
+          foreach($packages as $package){
+            $data = array(
+                'region_id' => $active_reseller_region_id,
+                'store_id' => $store_id,
+                'product_id' => $package['id'],
+                'status' => 1,
+            );
+            $catering_region_da_logs[] = $data;
+          }
+  
+          $this->admin_model->insertCateringPackageRegionDaLogs($catering_region_da_logs); 
+        
         }
 
         $response = array(

@@ -5,6 +5,43 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+    function insertRegion($data){
+        $this->db->trans_start();
+		$this->db->insert('region_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+
+    function insertRegionStoreCombination($data){
+        $this->db->trans_start();
+		$this->db->insert('region_store_combination_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    function getLatestStoreCreated(){
+        $this->db->select('store_id');
+        $this->db->from('store_tb');
+
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit(1);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+    
+    function getLocales(){
+        $this->db->select('id, locale_name as name');
+        $this->db->from('dotcom_locale_tb');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
     
     function getRegions(){
         $this->db->select('id, name');
@@ -243,6 +280,32 @@ class Admin_model extends CI_Model
         $this->db->trans_complete();
     }
 
+    function getDeals(){
+        $this->db->select('
+            id,
+            name,
+        ');
+
+        $this->db->from('dotcom_deals_tb');
+        $this->db->where('status', 1);
+
+        $query_products = $this->db->get();
+        return $query_products->result();
+    }
+
+    function getPackages(){
+        $this->db->select('
+            id,
+            name,
+        ');
+
+        $this->db->from('catering_packages_tb');
+        $this->db->where('status', 1);
+
+        $query_products = $this->db->get();
+        return $query_products->result();
+    }
+
     function getProducts(){
         $this->db->select('
             id,
@@ -476,6 +539,12 @@ class Admin_model extends CI_Model
     function insertShopProductRegionDaLogs($data){
         $this->db->trans_start();
 		$this->db->insert_batch('region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertCateringPackageRegionDaLogs($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('catering_region_da_log', $data);
         $this->db->trans_complete();
     }
 
@@ -722,7 +791,7 @@ class Admin_model extends CI_Model
                 $this->db->set('popclub_online_delivery_status', $status);
                 break;
         }
-        $this->db->where("store_id", $store_id);
+        $this->db->where("id", $store_id);
         $this->db->update("store_tb");
     }
     

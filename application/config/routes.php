@@ -176,6 +176,7 @@ $route['admin/sales/(:any)/sum'] = 'admin/total_sales/$1';
 
 $route['admin/regions'] = 'admin/regions';
 $route['admin/active-reseller-regions'] = 'admin/active_reseller_regions';
+$route['admin/locales'] = 'admin/locales';
 
 //Notification
 $route['notification'] = 'notification';
