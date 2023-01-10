@@ -263,8 +263,10 @@ class Admin extends CI_Controller{
         }
 
 				foreach($flavors as $key => $flavor){
-					$package_flavor[$flavor->product_variant_id]['parent_name'] = $flavor->parent_name;
-					$package_flavor[$flavor->product_variant_id]['flavors'][] =  $flavor;
+          if($flavor->parent_name !== 'size'){
+            $package_flavor[$flavor->product_variant_id]['parent_name'] = $flavor->parent_name;
+            $package_flavor[$flavor->product_variant_id]['flavors'][] =  $flavor;
+          }
 				}
 
         $response = array(
