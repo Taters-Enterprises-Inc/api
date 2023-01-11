@@ -128,6 +128,16 @@ class Admin_model extends CI_Model
         return $query_transaction->result();
     }
 
+    function getSnackshopProductFlavors($product_id){
+        $this->db->select("B.id,B.name,B.product_variant_id, A.name as parent_name");
+        $this->db->from('product_variants_tb A');
+        $this->db->join('product_variant_options_tb B', 'B.product_variant_id = A.id','left');
+        $this->db->where('A.product_id', $product_id);
+        $this->db->where('B.status', 1);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     function getCateringPackageFlavors($package_id){
         $this->db->select("B.id,B.name,B.product_variant_id, A.name as parent_name");
         $this->db->from('catering_package_variants_tb A');
@@ -836,6 +846,32 @@ class Admin_model extends CI_Model
         return $this->db->get()->result();
     }
 
+    function getStoreCateringProductCount($store_id, $category_id, $status, $search) {
+        $this->db->select('count(*) as all_count');
+
+        $this->db->from('catering_products A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->join('category_tb C', 'C.id = B.category');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->or_like('C.category_name', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
+        
+        if($status)
+            $this->db->where('A.status', $status);
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
     function getStoreProductCount($store_id, $category_id, $status, $search) {
         $this->db->select('count(*) as all_count');
 
@@ -1010,6 +1046,31 @@ class Admin_model extends CI_Model
         return $this->db->get()->result();
     }
 
+    function getStoreCateringProducts($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
+        $this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');
+        $this->db->from('catering_products A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->join('category_tb C', 'C.id = B.category');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->or_like('C.category_name', $search);
+            $this->db->group_end();
+        }
+            
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        return $this->db->get()->result();
+    }
+
     function getStoreProducts($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
         $this->db->select('A.id, B.name, B.product_image, A.store_id, B.add_details, C.category_name');
         $this->db->from('region_da_log A');
@@ -1089,6 +1150,11 @@ class Admin_model extends CI_Model
 		$this->db->set('status', $status);
         $this->db->where("id", $id);
         $this->db->update("region_da_log");
+    }
+    function updateStoreCateringProduct($id, $status){
+		$this->db->set('status', $status);
+        $this->db->where("id", $id);
+        $this->db->update("catering_products");
     }
 
     function getStoreDeals($row_no, $row_per_page, $store_id, $category_id, $status, $order_by, $order, $search) {
@@ -1767,6 +1833,7 @@ class Admin_model extends CI_Model
             A.quantity,
             A.remarks,
             A.product_label,
+            A.type,
             B.id as product_id,
             B.name,
             B.description,
@@ -1785,7 +1852,25 @@ class Admin_model extends CI_Model
             B.quantity,
             B.remarks,
             B.product_label,
+            B.type,
             A.id as product_id,
+            A.name,
+            A.description,
+            A.add_details,
+        "); 
+        $this->db->from('products_tb A');
+        $this->db->join('catering_order_items B', 'B.product_id = A.id' ,'left');
+        $this->db->where('B.transaction_id', $transaction_id);
+        $this->db->where('B.type', 'product');
+        $query_catering_products= $this->db->get();
+        $catering_products = $query_catering_products->result();
+
+        $this->db->select("
+            B.product_price,
+            B.quantity,
+            B.remarks,
+            B.product_label,
+            B.type,
             A.name,
             A.description,
             A.add_details,
@@ -1797,7 +1882,7 @@ class Admin_model extends CI_Model
         $query_catering_add_ons = $this->db->get();
         $catering_add_ons = $query_catering_add_ons->result();
 
-        return array_merge($catering_packages, $catering_add_ons);
+        return array_merge($catering_packages, $catering_products, $catering_add_ons);
     }
 
     public function getCateringBooking($tracking_no){

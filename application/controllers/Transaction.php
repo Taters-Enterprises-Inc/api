@@ -123,14 +123,13 @@ class Transaction extends CI_Controller {
                             $comp_total = 0;
 
                             foreach ($this->session->orders as $k => $value) {
-                                $remarks = (empty($value['prod_multiflavors'])) ? null : $value['prod_multiflavors'];
 
                                 $order_data[] = array(
                                     'transaction_id'      => $trans_id,
                                     'combination_id'      => $k,
                                     'product_id'          => $value['prod_id'],
                                     'quantity'            => $value['prod_qty'],
-                                    'remarks'             => $remarks,
+                                    'remarks'             => $value['prod_multiflavors'],
                                     'type'                => $value['prod_type'],
                                     'status'              => 1,
                                     'promo_id'            => "",
