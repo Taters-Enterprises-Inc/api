@@ -2,6 +2,17 @@
 
 class Shop_model extends CI_Model 
 {
+
+    public function getAutomaticDiscountBasketSizes($product_quantity, $date_now){
+        $this->db->select("id, discount");
+        $this->db->from('automatic_discount_basket_sizes');
+
+        $this->db->where("product_min_quantity <=", $product_quantity);
+        $this->db->where("start_datetime <=", $date_now);
+        $this->db->where("end_datetime >=", $date_now);
+        $query = $this->db->get();
+        return $query->result();
+    }
     
     //jepoy get store id by hash key
     public function get_store_id_by_hash_key($hash_key){

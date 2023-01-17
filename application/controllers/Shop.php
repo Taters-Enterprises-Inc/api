@@ -5,6 +5,8 @@ header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
+date_default_timezone_set('Asia/Manila');
+
 class Shop extends CI_Controller {
 
 	public function __construct()
@@ -14,6 +16,40 @@ class Shop extends CI_Controller {
 		$this->load->model('shop_model');
 		$this->load->model('user_model');
 		$this->load->library('images');
+	}
+
+	public function automatic_discount_basket_sizes(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				
+				$orders = $this->session->orders;
+
+				if($orders === null || empty($orders)){
+					$response = array(
+						"message" => "Doesn't have any orders.",
+					);
+					$this->output->set_status_header('401');
+					echo json_encode($response);
+				}
+
+				$total_quantity_of_orders = 0;
+
+				foreach($orders as $order){
+					$total_quantity_of_orders += $order['prod_qty'];
+				}
+
+				$date_now = date('Y-m-d H:i:s');
+				$discounts = $this->shop_model->getAutomaticDiscountBasketSizes($total_quantity_of_orders, $date_now);
+
+				$response = array(
+					"message" => "Successfully get automatic discount basket sizes.",
+					"data" => $discounts,
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
 	}
 	
     public function get_product_sku()

@@ -6,6 +6,7 @@ $route['shop/product'] = 'shop/product';
 $route['shop/products'] = 'shop/products';
 $route['shop/orders'] = 'shop/orders';
 $route['shop/get_product_sku'] = 'shop/get_product_sku';
+$route['shop/automatic-discount-basket-sizes'] = 'shop/automatic_discount_basket_sizes';
 
 //Catering
 $route['catering/products'] = 'catering/products';
