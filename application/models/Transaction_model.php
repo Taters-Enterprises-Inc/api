@@ -54,9 +54,9 @@ class Transaction_model extends CI_Model {
 		return  json_decode(json_encode(array('status'=>$this->db->trans_status(),'id'=>$id)), FALSE);
 	}
 
-	public function insertPopClubClientOrders($data){
+	public function insertPopClubClientOrder($data){
 		$this->db->trans_start();
-		$this->db->insert_batch('deals_order_items', $data);
+		$this->db->insert('deals_order_items', $data);
 		$this->db->trans_complete();
 		return  $this->db->trans_status();
 	}
