@@ -1101,8 +1101,6 @@ class Admin_model extends CI_Model
 
         $this->db->from('deals_region_da_log A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
-        $this->db->join('store_tb C', 'C.store_id = A.store_id');
-        $this->db->join('dotcom_deals_store_menu_tb D', 'D.store_menu_tb_id = C.store_menu_type_id AND D.deal_id = B.id');
 
         if($search){
             $this->db->group_start();
@@ -1161,8 +1159,6 @@ class Admin_model extends CI_Model
         $this->db->select('A.id, B.alias, B.name, B.product_image, A.store_id');
         $this->db->from('deals_region_da_log A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
-        $this->db->join('store_tb C', 'C.store_id = A.store_id');
-        $this->db->join('dotcom_deals_store_menu_tb D', 'D.store_menu_tb_id = C.store_menu_type_id AND D.deal_id = B.id');
 
         if($search){
             $this->db->group_start();
