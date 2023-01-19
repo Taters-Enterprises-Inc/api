@@ -57,6 +57,7 @@ $route['profile/contact/(:num)'] = 'profile/contact/$1';
 
 // Store
 $route['store'] = 'store';
+$route['store/product'] = 'store/product';
 $route['store/reset'] = 'store/reset';
 
 // Branches
