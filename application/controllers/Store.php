@@ -19,11 +19,34 @@ class Store extends CI_Controller {
 			case 'GET':
 				$address = $this->input->get('address');
 				$service = $this->input->get('service');
+				$hash = $this->input->get('hash');
+				$regions = array();
+	
+
+				if($hash){
+					switch($service){
+						case 'SNACKSHOP':
+							$region_da_logs = $this->store_model->getSnackShopRegionDaLogProduct($hash);
+							break;
+						case 'CATERING':
+							$region_da_logs = $this->store_model->getCateringRegionDaLogProduct($hash);
+							break;
+						case 'POPCLUB-STORE-VISIT':
+							$region_da_logs = $this->store_model->getPopClubRegionDaLogProduct($hash);
+							break;
+						case 'POPCLUB-ONLINE-DELIVERY':
+							$region_da_logs = $this->store_model->getPopClubRegionDaLogProduct($hash);
+							break;
+					}
+					foreach($region_da_logs as $region_da_log){
+						$regions[] = $region_da_log->store_id;
+					}
+				}
 
 				if($address){
-					$stores = $this->store_model->get_stores_available($this->google->geolocator($address)['lat'],$this->google->geolocator($address)['lng'],$service);
+					$stores = $this->store_model->get_stores_available($this->google->geolocator($address)['lat'],$this->google->geolocator($address)['lng'],$service, $regions);
 				}else{
-					$stores = $this->store_model->get_stores_available(0, 0, $service);
+					$stores = $this->store_model->get_stores_available(0, 0, $service, $regions);
 				}
 
 				$response = array(
@@ -35,15 +58,15 @@ class Store extends CI_Controller {
 				echo json_encode($response);
 				break;
 			case 'POST':
-				$post = json_decode(file_get_contents("php://input"), true);
+				$_POST = json_decode(file_get_contents("php://input"), true);
 				
 				set_store_sessions(
-					$post['storeId'],
-					$post['address'],
-					$post['service'],
+					$this->input->post('storeId'),
+					$this->input->post('address'),
+					$this->input->post('service'),
 					null,
-					$post['cateringStartDate'],
-					$post['cateringEndDate'],
+					$this->input->post('cateringStartDate'),
+					$this->input->post('cateringEndDate'),
 				);
 
 				$response = array(
