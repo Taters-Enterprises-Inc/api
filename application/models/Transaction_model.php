@@ -61,6 +61,13 @@ class Transaction_model extends CI_Model {
 		return  $this->db->trans_status();
 	}
     
+	public function insertPopClubClientOrders($data){
+		$this->db->trans_start();
+		$this->db->insert_batch('deals_order_items', $data);
+		$this->db->trans_complete();
+		return  $this->db->trans_status();
+	}
+    
     
 
 }

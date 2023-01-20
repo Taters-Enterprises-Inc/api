@@ -125,7 +125,7 @@ class Popclub extends CI_Controller {
 							'deal_remarks'=> $redeem->remarks,
 							'promo_discount_percentage' => $redeem->promo_discount_percentage,
 							'minimum_purchase' => $redeem->minimum_purchase,
-							'minimum_quantity' => $redeem->minimum_quantity,
+							'is_free_delivery' => $redeem->is_free_delivery,
 							'deal_original_price' => $redeem->original_price,
 							'deal_promo_price' => $redeem->promo_price,
 							'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),

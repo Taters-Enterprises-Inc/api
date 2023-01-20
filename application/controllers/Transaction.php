@@ -253,7 +253,6 @@ class Transaction extends CI_Controller {
 
                 if($insert_client_details['status'] == true){
                     $comp_total = 0;
-                    $total_quantity_orders = 0;
 
                     if(isset($_SESSION['orders'])){
                         if(!empty($_SESSION['orders'])){
@@ -261,7 +260,6 @@ class Transaction extends CI_Controller {
                                 $promo_discount_percentage = $val['promo_discount_percentage'];
                                 $promo_discount = isset($promo_discount_percentage) ? $val['prod_calc_amount'] * $promo_discount_percentage : 0 ;
                                 $comp_total += $val['prod_calc_amount'] - $promo_discount;
-                                $total_quantity_orders += $val['prod_qty'];
                             }
                         }
                     }
@@ -274,16 +272,18 @@ class Transaction extends CI_Controller {
 					if(isset($_SESSION['redeem_data'])){
                         if(
                             isset($_SESSION['redeem_data']['minimum_purchase']) && 
-                            $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total
+                            $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total && 
+                            $_SESSION['redeem_data']['is_free_delivery'] === 1
                         ){
                             $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
                             $distance_rate_price = 0;
                         }
 
                         if(
-                            isset($_SESSION['redeem_data']['minimum_quantity']) && 
+                            isset($_SESSION['redeem_data']['minimum_purchase']) && 
                             isset($_SESSION['redeem_data']['promo_discount_percentage']) && 
-                            $_SESSION['redeem_data']['minimum_quantity'] <= $total_quantity_orders
+                            $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total && 
+                            $_SESSION['redeem_data']['is_free_delivery'] === 0
                         ){
                             $discount = $comp_total *  (float) $_SESSION['redeem_data']['promo_discount_percentage'];
                         }
