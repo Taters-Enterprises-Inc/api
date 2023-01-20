@@ -222,7 +222,6 @@ class Shared extends CI_Controller {
 					'customer_address' 					=> $this->session->customer_address,
 					'userData' 							=> $this->session->userData,
 					'orders'							=> $this->session->orders,
-					'deals'								=> $this->session->deals,
 					'redeem_data' 						=> $this->session->redeem_data,
 					"km_radius"							=> $this->session->km_radius,
 					"km_min"							=> $this->session->km_min,
@@ -280,7 +279,6 @@ class Shared extends CI_Controller {
 
 	public function clear_redeems(){
 		unset($_SESSION['redeem_data']);
-		unset($_SESSION['deals']);
 		echo "<pre>";
 		print_r($_SESSION);
 	}
