@@ -5,6 +5,8 @@ header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
+date_default_timezone_set('Asia/Manila');
+
 class Shop extends CI_Controller {
 
 	public function __construct()
@@ -13,11 +15,30 @@ class Shop extends CI_Controller {
 		$this->load->model('store_model');
 		$this->load->model('shop_model');
 		$this->load->model('user_model');
+		$this->load->model('deals_model');
 		$this->load->library('images');
 	}
+
+	public function deals(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$store_id = $this->session->cache_data['store_id'];
+				$date_now = date('Y-m-d H:i:s');
+
+				$deals = $this->deals_model->getDealsPromoDiscountDeals($store_id, $date_now);
+
+				$response = array(
+					'data' => $deals,
+					'message' => 'Successfully fetch deals'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
 	
-    public function get_product_sku()
-    {
+    public function get_product_sku(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);
