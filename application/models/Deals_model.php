@@ -26,6 +26,8 @@ class Deals_model extends CI_Model
 			B.is_free_delivery,
 			B.available_start_time,
 			B.available_end_time,
+			B.available_start_datetime,
+			B.available_end_datetime,
 			B.available_days,
 			B.seconds_before_expiration,
 		');
