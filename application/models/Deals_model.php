@@ -10,8 +10,7 @@
 class Deals_model extends CI_Model 
 {
 	
-    public function __construct()
-    {
+    public function __construct(){
         $this->load->database();
 
 		$this->load->model('client_model');
@@ -92,6 +91,39 @@ class Deals_model extends CI_Model
 
     }
 	
+	public function getDealsPromoDiscountDeals($store_id, $date_now){
+		$this->db->select('
+			B.hash,
+			B.name,
+			B.description,
+			B.product_image,
+			B.promo_discount_percentage,
+			B.minimum_purchase,
+			B.is_free_delivery,
+			B.available_start_time,
+			B.available_end_time,
+			B.available_start_datetime,
+			B.available_end_datetime,
+			B.available_days,
+			B.seconds_before_expiration,
+		');
+
+		$this->db->from('deals_region_da_log A');
+		$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+		$this->db->where('A.store_id', $store_id);
+		$this->db->where('B.promo_discount_percentage !=', null);
+
+
+		$this->db->group_start();
+		$this->db->where('B.available_end_datetime >=', $date_now);
+		$this->db->or_where('B.available_end_datetime',null);		
+		$this->db->group_end();
+
+
+		$query = $this->db->get();
+		return $query->result();
+	}
+
 	public function getDealProductsPromoExclude($deal_id){
 		$this->db->select('product_id');
 		$this->db->from('deals_product_promo_exclude');
