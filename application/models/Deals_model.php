@@ -203,6 +203,7 @@ class Deals_model extends CI_Model
 				B.original_price,
 				B.promo_discount_percentage,
 				B.minimum_purchase,
+				B.is_free_delivery,
 				B.promo_price,
 				C.url_name as platform_url_name,
 				D.address,
@@ -239,6 +240,7 @@ class Deals_model extends CI_Model
 		$this->db->select('*');
 		$this->db->from('dotcom_deals_category');
 		$this->db->where('dotcom_deals_platform_id',$id);
+		$this->db->order_by('sequence', 'ASC');
 		$query = $this->db->get();
 		return $query->result();
 	}
@@ -253,6 +255,7 @@ class Deals_model extends CI_Model
 			A.original_price,
 			A.promo_price,
 			A.minimum_purchase,
+			A.is_free_delivery,
 			A.promo_discount_percentage,
 			A.description,
 			A.seconds_before_expiration,
@@ -398,6 +401,7 @@ class Deals_model extends CI_Model
 			$this->db->select('id');
 			$this->db->from('dotcom_deals_category');
 			$this->db->where('dotcom_deals_platform_id',$deals_platform->id);
+			$this->db->order_by('sequence','ASC');
 			$query_deals_category = $this->db->get();
 			$deals_category = $query_deals_category->result();
 		
@@ -425,6 +429,7 @@ class Deals_model extends CI_Model
 					$this->db->where('D.status',0);
 					$this->db->where('D.store_id',$store_id);
 				}
+				$this->db->order_by('A.dateadded','ASC');
 
 				$query = $this->db->get();
 				$dotcom_deals = array_merge($dotcom_deals, $query->result());
@@ -475,6 +480,8 @@ class Deals_model extends CI_Model
 			$this->db->where('D.status',0);
 			$this->db->where('D.store_id',$store_id);
 		  }
+
+		  $this->db->order_by('A.dateadded','ASC');
 	
 		  $query = $this->db->get();
 		  return $query->result();
