@@ -322,6 +322,7 @@ class Catering_model extends CI_Model
             A.price, A.category, 
             A.num_flavor, 
             A.add_remarks,
+            A.product_hash,
             A.note, 
             B.category_name, 
             A.to_gc_value
