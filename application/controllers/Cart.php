@@ -201,7 +201,7 @@ class Cart extends CI_Controller {
                     $items[] = $set_value;
                 }
 
-                $_SESSION['orders'] = $items;
+                $_SESSION['orders'] = array_merge($this->session->orders,$items);
                 
 				$response = array(
 					'message' => 'Successfully add to cart package'
