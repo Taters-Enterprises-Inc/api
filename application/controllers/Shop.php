@@ -17,6 +17,41 @@ class Shop extends CI_Controller {
 		$this->load->model('deals_model');
 		$this->load->library('images');
 	}
+	
+	private function unable_redeems(){
+		$redeems = $this->deals_model->getUserRedeems();
+		$today = date("Y-m-d H:i:s");
+		
+		$unable_redeems = array();
+		$forfeit_array_counter_array = array();
+		
+		foreach($redeems as $redeem){
+			$expire = date($redeem->expiration);
+			$date_redeemed = date($redeem->date_redeemed);
+
+			$is_the_same_day = date("Y-m-d H:i:s", strtotime('-1 day')) < $date_redeemed && 
+			date("Y-m-d H:i:s", strtotime('+1 day')) > $date_redeemed;
+
+			if($is_the_same_day && ($redeem->status === 5 || ( $redeem->status == 1 && $today >= $expire) ) ){
+				if(!isset($forfeit_array_counter_array[$redeem->deal_id])){
+					$forfeit_array_counter_array[$redeem->deal_id] = 1;
+				}else{
+					$forfeit_array_counter_array[$redeem->deal_id]++;
+				}
+			}
+
+			if($is_the_same_day &&
+				($redeem->status == 6 || (isset($forfeit_array_counter_array[$redeem->deal_id]) && $forfeit_array_counter_array[$redeem->deal_id] >= 3)) 
+			){
+				$unable_redeems[] = array(
+					"deal_id" => $redeem->deal_id,
+					"next_available_redeem" => date('Y-m-d H:i:s', strtotime("+1 day", strtotime($date_redeemed)))
+				);
+			} 
+		}
+
+		return $unable_redeems;
+	}
 
 	public function deals(){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -26,8 +61,23 @@ class Shop extends CI_Controller {
 
 				$deals = $this->deals_model->getDealsPromoDiscountDeals($store_id, $date_now);
 
+				$available_deals = array();
+				$unable_redeems = $this->unable_redeems();
+
+				foreach($deals as $deal){
+					$isAvailable = true;
+					foreach($unable_redeems as $unable_redeem){
+						if($deal->id === $unable_redeem['deal_id']){
+							$isAvailable = false;
+							break;
+						}
+					}
+					if($isAvailable){
+						$available_deals[] = $deal;
+					}
+				}
 				$response = array(
-					'data' => $deals,
+					'data' => $available_deals,
 					'message' => 'Successfully fetch deals'
 				);
 
