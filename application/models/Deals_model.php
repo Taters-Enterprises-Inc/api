@@ -18,6 +18,7 @@ class Deals_model extends CI_Model
 
 	public function getDealsPromoDiscountDeals($store_id, $date_now){
 		$this->db->select('
+			B.id,
 			B.hash,
 			B.name,
 			B.description,
