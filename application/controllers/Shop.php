@@ -5,6 +5,8 @@ header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
+date_default_timezone_set('Asia/Manila');
+
 class Shop extends CI_Controller {
 
 	public function __construct()
@@ -13,11 +15,80 @@ class Shop extends CI_Controller {
 		$this->load->model('store_model');
 		$this->load->model('shop_model');
 		$this->load->model('user_model');
+		$this->load->model('deals_model');
 		$this->load->library('images');
 	}
 	
-    public function get_product_sku()
-    {
+	private function unable_redeems(){
+		$redeems = $this->deals_model->getUserRedeems();
+		$today = date("Y-m-d H:i:s");
+		
+		$unable_redeems = array();
+		$forfeit_array_counter_array = array();
+		
+		foreach($redeems as $redeem){
+			$expire = date($redeem->expiration);
+			$date_redeemed = date($redeem->date_redeemed);
+
+			$is_the_same_day = date("Y-m-d H:i:s", strtotime('-1 day')) < $date_redeemed && 
+			date("Y-m-d H:i:s", strtotime('+1 day')) > $date_redeemed;
+
+			if($is_the_same_day && ($redeem->status === 5 || ( $redeem->status == 1 && $today >= $expire) ) ){
+				if(!isset($forfeit_array_counter_array[$redeem->deal_id])){
+					$forfeit_array_counter_array[$redeem->deal_id] = 1;
+				}else{
+					$forfeit_array_counter_array[$redeem->deal_id]++;
+				}
+			}
+
+			if($is_the_same_day &&
+				($redeem->status == 6 || (isset($forfeit_array_counter_array[$redeem->deal_id]) && $forfeit_array_counter_array[$redeem->deal_id] >= 3)) 
+			){
+				$unable_redeems[] = array(
+					"deal_id" => $redeem->deal_id,
+					"next_available_redeem" => date('Y-m-d H:i:s', strtotime("+1 day", strtotime($date_redeemed)))
+				);
+			} 
+		}
+
+		return $unable_redeems;
+	}
+
+	public function deals(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$store_id = $this->session->cache_data['store_id'];
+				$date_now = date('Y-m-d H:i:s');
+
+				$deals = $this->deals_model->getDealsPromoDiscountDeals($store_id, $date_now);
+
+				$available_deals = array();
+				$unable_redeems = $this->unable_redeems();
+
+				foreach($deals as $deal){
+					$isAvailable = true;
+					foreach($unable_redeems as $unable_redeem){
+						if($deal->id === $unable_redeem['deal_id']){
+							$isAvailable = false;
+							break;
+						}
+					}
+					if($isAvailable){
+						$available_deals[] = $deal;
+					}
+				}
+				$response = array(
+					'data' => $available_deals,
+					'message' => 'Successfully fetch deals'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+	
+    public function get_product_sku(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);
