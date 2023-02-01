@@ -133,6 +133,16 @@ class Deals_model extends CI_Model
 
 		return $query->result();
 	}
+	
+	public function getDealProductsPromoInclude($deal_id){
+		$this->db->select('product_id');
+		$this->db->from('deals_product_promo_include');
+		$this->db->where('deal_id',$deal_id);
+
+		$query = $this->db->get();
+
+		return $query->result();
+	}
 
 	public function getUserRedeems(){
 		if(!isset($_SESSION['userData'])){

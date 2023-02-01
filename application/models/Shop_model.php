@@ -226,7 +226,7 @@ class Shop_model extends CI_Model
             $query_orders = $this->db->get();
             $orders = $query_orders->result();
 
-            $select_col = array("D.name", 'D.product_image', 'O.quantity', 'O.remarks', "O.price",);
+            $select_col = array("D.id" ,"D.name","D.promo_discount_percentage", 'D.product_image', 'O.quantity', 'O.remarks', "O.price");
 			$this->db->from('dotcom_deals_tb D');
             $this->db->select($select_col);
             $this->db->join('deals_order_items O', 'D.id = O.deal_id' ,'left');
@@ -559,6 +559,7 @@ class Shop_model extends CI_Model
                     
                     $redeem_data = $this->session->redeem_data;
                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
                     $promo_discount_percentage = null;
 
                     if($deal_products_promo_exclude){
@@ -571,6 +572,16 @@ class Shop_model extends CI_Model
                             }
                         }
                     }
+                    
+                    if($deal_products_promo_include){
+                        foreach($deal_products_promo_include as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                                break;
+                            }
+                        }
+                    }
+
 
                     $return_data[$val->sequence]['category_id']          = $val->category_id;
                     $return_data[$val->sequence]['category_name']        = $val->category_name;
@@ -596,6 +607,7 @@ class Shop_model extends CI_Model
                     
                     $redeem_data = $this->session->redeem_data;
                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
                     $promo_discount_percentage = null;
 
                     if($deal_products_promo_exclude){
@@ -609,6 +621,16 @@ class Shop_model extends CI_Model
                         }
 
                     }
+                    
+                    if($deal_products_promo_include){
+                        foreach($deal_products_promo_include as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                                break;
+                            }
+                        }
+                    }
+
 
                     $return_data[$val->sequence]['category_id']          = $val->category_id;
                     $return_data[$val->sequence]['category_name']        = $val->category_name;
@@ -634,6 +656,7 @@ class Shop_model extends CI_Model
 
                     $redeem_data = $this->session->redeem_data;
                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
                     $promo_discount_percentage = null;
 
                     if($deal_products_promo_exclude){
@@ -646,6 +669,15 @@ class Shop_model extends CI_Model
                             }
                         }
 
+                    }
+
+                    if($deal_products_promo_include){
+                        foreach($deal_products_promo_include as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                                break;
+                            }
+                        }
                     }
 
 
@@ -673,6 +705,7 @@ class Shop_model extends CI_Model
 
                     $redeem_data = $this->session->redeem_data;
                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
                     $promo_discount_percentage = null;
 
                     if($deal_products_promo_exclude){
@@ -684,8 +717,15 @@ class Shop_model extends CI_Model
                                 break;
                             }
                         }
-
-
+                    }
+                    
+                    if($deal_products_promo_include){
+                        foreach($deal_products_promo_include as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                                break;
+                            }
+                        }
                     }
 
                     $return_data[0]['category_id'] = $val->category_id;
@@ -711,6 +751,7 @@ class Shop_model extends CI_Model
                     
                     $redeem_data = $this->session->redeem_data;
                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
                     $promo_discount_percentage = null;
 
                     if($deal_products_promo_exclude){
@@ -722,7 +763,15 @@ class Shop_model extends CI_Model
                                 break;
                             }
                         }
-
+                    }
+                    
+                    if($deal_products_promo_include){
+                        foreach($deal_products_promo_include as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                                break;
+                            }
+                        }
                     }
 
                     $return_data[]['category_products'][] = array(
