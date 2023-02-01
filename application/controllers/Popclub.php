@@ -129,6 +129,7 @@ class Popclub extends CI_Controller {
 							'deal_original_price' => $redeem->original_price,
 							'deal_promo_price' => $redeem->promo_price,
 							'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),
+							'deal_products_promo_include' => $this->deals_model->getDealProductsPromoInclude($redeem->deal_id),
 						);
 
 						$_SESSION['popclub_data'] = [
@@ -277,6 +278,7 @@ class Popclub extends CI_Controller {
 							'deal_original_price' => $deal->original_price,
 							'deal_promo_price' => $deal->promo_price,
 							'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($deal->id),
+							'deal_products_promo_include' => $this->deals_model->getDealProductsPromoInclude($redeem->deal_id),
 						);
 
 						if($deal->platform_id === 1){
