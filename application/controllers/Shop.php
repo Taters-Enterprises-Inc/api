@@ -13,6 +13,7 @@ class Shop extends CI_Controller {
 		$this->load->model('store_model');
 		$this->load->model('shop_model');
 		$this->load->model('user_model');
+		$this->load->model('deals_model');
 		$this->load->library('images');
 	}
 	
@@ -111,6 +112,34 @@ class Shop extends CI_Controller {
 				$store_id = $this->store_model->get_store_id_by_hash_key($hash);
 				$delivery_hours = $this->store_model->get_delivery_hours($store_id);
 
+				$deal = $order_details['deals_details'][0];
+
+                $deal_products_promo_exclude = $this->deals_model->getDealProductsPromoExclude($deal->id);
+                $deal_products_promo_include = $this->deals_model->getDealProductsPromoInclude($deal->id);
+
+				$promo_discount_percentage = null;
+
+				foreach($order_details['order_details'] as $key => $product){
+					if($deal_products_promo_exclude){
+						foreach($deal_products_promo_exclude as $value){
+							if($value->product_id === $product->product_id){
+								$order_details['order_details'][$key]->promo_discount_percentage = null;
+							}else{
+								$order_details['order_details'][$key]->promo_discount_percentage = (float)$deal->promo_discount_percentage;
+							}
+						}
+					}else if($deal_products_promo_include){
+						foreach($deal_products_promo_include as $value){
+							if($value->product_id === $product->product_id){
+								$order_details['order_details'][$key]->promo_discount_percentage = (float)$deal->promo_discount_percentage;
+							}else{
+								$order_details['order_details'][$key]->promo_discount_percentage = null;
+							}
+						}
+					}
+				}
+
+
 				
 				$response = array(
 					'data' => array(
@@ -142,6 +171,7 @@ class Shop extends CI_Controller {
 				
                 $redeem_data = $this->session->redeem_data;
                 $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
 				$promo_discount_percentage = null;
 
                 if($deal_products_promo_exclude){
@@ -150,6 +180,17 @@ class Shop extends CI_Controller {
                     foreach($deal_products_promo_exclude as $value){
                         if($value->product_id === $product->id){
                             $promo_discount_percentage = null;
+                            break;
+                        }
+                    }
+
+					$product->promo_discount_percentage = $promo_discount_percentage;
+                }
+				if($deal_products_promo_include){
+
+                    foreach($deal_products_promo_include as $value){
+                        if($value->product_id === $product->id){
+							$promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
                             break;
                         }
                     }
