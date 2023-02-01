@@ -112,28 +112,30 @@ class Shop extends CI_Controller {
 				$store_id = $this->store_model->get_store_id_by_hash_key($hash);
 				$delivery_hours = $this->store_model->get_delivery_hours($store_id);
 
-				$deal = $order_details['deals_details'][0];
+				if(isset($order_details['deals_details']) && !empty($order_details['deals_details'])){
+					$deal = $order_details['deals_details'][0];
 
-                $deal_products_promo_exclude = $this->deals_model->getDealProductsPromoExclude($deal->id);
-                $deal_products_promo_include = $this->deals_model->getDealProductsPromoInclude($deal->id);
+					$deal_products_promo_exclude = $this->deals_model->getDealProductsPromoExclude($deal->id);
+					$deal_products_promo_include = $this->deals_model->getDealProductsPromoInclude($deal->id);
 
-				$promo_discount_percentage = null;
+					$promo_discount_percentage = null;
 
-				foreach($order_details['order_details'] as $key => $product){
-					if($deal_products_promo_exclude){
-						foreach($deal_products_promo_exclude as $value){
-							if($value->product_id === $product->product_id){
-								$order_details['order_details'][$key]->promo_discount_percentage = null;
-							}else{
-								$order_details['order_details'][$key]->promo_discount_percentage = (float)$deal->promo_discount_percentage;
+					foreach($order_details['order_details'] as $key => $product){
+						if($deal_products_promo_exclude){
+							foreach($deal_products_promo_exclude as $value){
+								if($value->product_id === $product->product_id){
+									$order_details['order_details'][$key]->promo_discount_percentage = null;
+								}else{
+									$order_details['order_details'][$key]->promo_discount_percentage = (float)$deal->promo_discount_percentage;
+								}
 							}
-						}
-					}else if($deal_products_promo_include){
-						foreach($deal_products_promo_include as $value){
-							if($value->product_id === $product->product_id){
-								$order_details['order_details'][$key]->promo_discount_percentage = (float)$deal->promo_discount_percentage;
-							}else{
-								$order_details['order_details'][$key]->promo_discount_percentage = null;
+						}else if($deal_products_promo_include){
+							foreach($deal_products_promo_include as $value){
+								if($value->product_id === $product->product_id){
+									$order_details['order_details'][$key]->promo_discount_percentage = (float)$deal->promo_discount_percentage;
+								}else{
+									$order_details['order_details'][$key]->promo_discount_percentage = null;
+								}
 							}
 						}
 					}

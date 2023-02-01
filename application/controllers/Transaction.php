@@ -421,6 +421,7 @@ class Transaction extends CI_Controller {
                                     $redeem_data = $this->session->redeem_data;
                                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
                                     $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
+                                    $deal_id = null;
 
                                     if($deal_products_promo_exclude){
                                         $deal_id = $this->session->redeem_data['deal_id'];
