@@ -74,21 +74,21 @@ class Cart extends CI_Controller {
 				echo json_encode($response);
 				break;
             case 'GET':
-                    $id = $this->input->get('id');
-                    $order_item = $_SESSION['orders'][$id];
-                    $product = $this->shop_model->get_product_by_id($order_item['prod_id']);
-                    $product_addson = $this->shop_model->get_product_addons_join($order_item['prod_id']);
-                    $product_size =  $this->shop_model->fetch_product_variants($order_item['prod_id'] ,'size');
-                    $product_flavor = $this->shop_model->fetch_product_variants($order_item['prod_id'],'flavor');
-                    $product_date = $this->shop_model->fetch_product_variants($order_item['prod_id'],'date');
-                    $suggested_products = $this->shop_model->get_suggested_product($order_item['prod_id']);
-                    
-                    $product_image_extension = '.' . pathinfo($product->product_image)['extension'];
-                    $product_images = $this->images->product_images(
-                        'assets/images/shared/products/500',
-                        basename($product->product_image,$product_image_extension),
-                        $product_image_extension
-                    );
+                $id = $this->input->get('id');
+                $order_item = $_SESSION['orders'][$id];
+                $product = $this->shop_model->get_product_by_id($order_item['prod_id']);
+                $product_addson = $this->shop_model->get_product_addons_join($order_item['prod_id']);
+                $product_size =  $this->shop_model->fetch_product_variants($order_item['prod_id'] ,'size');
+                $product_flavor = $this->shop_model->fetch_product_variants($order_item['prod_id'],'flavor');
+                $product_date = $this->shop_model->fetch_product_variants($order_item['prod_id'],'date');
+                $suggested_products = $this->shop_model->get_suggested_product($order_item['prod_id']);
+                
+                $product_image_extension = '.' . pathinfo($product->product_image)['extension'];
+                $product_images = $this->images->product_images(
+                    'assets/images/shared/products/500',
+                    basename($product->product_image,$product_image_extension),
+                    $product_image_extension
+                );
         
                     
                 $data = array(
@@ -124,11 +124,10 @@ class Cart extends CI_Controller {
                 header('content-type: application/json');
                 echo json_encode($response);
             
-            break;
+                break;
             case 'DELETE':
 				    $item_index = $this->input->get('item-index');
-                    
-                    
+
                     if(isset($_SESSION['orders'])){
                         unset($_SESSION['orders'][$item_index]);
                         $reindexed_array = array_values($_SESSION['orders']);
@@ -233,6 +232,21 @@ class Cart extends CI_Controller {
                         unset($_SESSION['orders'][$item_index]);
                         $reindexed_array = array_values($_SESSION['orders']);
                         $this->session->set_userdata('orders', $reindexed_array);
+
+                        $orders = $_SESSION['orders'];
+                        $total_calc_amount = 0;
+
+                        foreach($orders as $order){
+                            $total_calc_amount += $order['prod_calc_amount'];
+                        }
+
+                        foreach($orders as $key => $order){
+                            if($order['free_threshold'] > $total_calc_amount){
+                                unset($_SESSION['orders'][$key]);
+                                $reindexed_array = array_values($_SESSION['orders']);
+                                $this->session->set_userdata('orders', $reindexed_array);
+                            }
+                        }
                     }
             
                     $response = array(
