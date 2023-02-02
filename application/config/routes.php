@@ -40,6 +40,7 @@ $route['shared/contacts'] = 'shared/contacts';
 $route['shared/available-user-discount'] = 'shared/available_user_discount';
 $route['shared/stores'] = 'shared/stores';
 $route['shared/companies'] = 'shared/companies';
+$route['shop/survey'] = 'shop/survey';
 
 // Facebook
 $route['facebook/login'] = 'user_authentication';

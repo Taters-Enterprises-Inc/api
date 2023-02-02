@@ -17,8 +17,36 @@ class Shared extends CI_Controller {
 		$this->load->model('logs_model');
 		$this->load->model('store_model');
 		$this->load->model('bsc_model');
+		$this->load->model('survey_model');
 		$this->load->model('discount_model');
 		$this->load->library('form_validation');
+	}
+	
+
+	public function survey(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$hash = $this->input->get('hash');
+				$service = $this->input->get('service');
+				
+				if(!isset($hash) || !isset($service)){
+					$this->output->set_status_header('401');
+					echo json_encode(array( "message" => 'Missing queries!'));
+					break;
+				}
+
+
+				$is_customer_survey_exist = $this->survey_model->isCustomerSurveyAnswerExist($hash, $service);
+
+				$response = array(
+					'data' => $is_customer_survey_exist,
+					'message' => 'Successfully fetch deals'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
 	}
 
     public function contacts(){
