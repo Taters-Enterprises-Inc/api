@@ -159,6 +159,9 @@
                             <span span class="text-xs text-secondary"><?php echo $value->alias;?></span><br>
                           <?php endif;?>
                           <?php echo $value->name;?><br>
+                          <?php if(isset($value->description)):?>
+                          <?php echo $value->description;?><br>
+                          <?php endif;?>
                           <?php if(isset($value->add_details)):?>
                             <span span class="text-xs text-secondary"><?php echo $value->add_details;?></span>
                           <?php endif;?>

@@ -1154,6 +1154,7 @@ class Admin_model extends CI_Model
 
     public function getSnackshopOrderItems($transaction_id){
         $this->db->select("
+            A.id as order_item_id,
             A.price,
             A.product_price,
             A.quantity,
@@ -1162,8 +1163,6 @@ class Admin_model extends CI_Model
             B.name,
             B.description,
             B.add_details,
-            C.name as deal_name,
-            C.description as deal_description,
             C.promo_discount_percentage,
         ");
         $this->db->from('order_items A');
@@ -1174,6 +1173,7 @@ class Admin_model extends CI_Model
         $products = $products_query->result();
 
         $this->db->select("
+            A.id as deal_order_item_id,
             A.price,
             A.product_price,
             A.quantity,

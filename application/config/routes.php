@@ -5,6 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['shop/product'] = 'shop/product';
 $route['shop/products'] = 'shop/products';
 $route['shop/orders'] = 'shop/orders';
+$route['shop/deals'] = 'shop/deals';
 $route['shop/get_product_sku'] = 'shop/get_product_sku';
 
 //Catering
