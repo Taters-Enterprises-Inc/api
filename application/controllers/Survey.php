@@ -42,6 +42,8 @@ class Survey extends CI_Controller {
 				$store_id = $this->input->post('storeId');
 				$order_hash = $this->input->post('orderHash');
 				$service = $this->input->post('service');
+				$fb_user_id = $this->session->userData['fb_user_id'];
+				$mobile_user_id = $this->session->userData['mobile_user_id'];
 
 				switch($service){
 					case 'SNACKSHOP':
@@ -51,6 +53,8 @@ class Survey extends CI_Controller {
 							"order_date" =>  $order_details['clients_info']->dateadded,
 							"store_id" =>  $order_details['clients_info']->store,
 							'customer_survey_response_order_type_id' => 2,
+							"fb_user_id" => $fb_user_id,
+							"mobile_user_id" => $mobile_user_id,
 							"status" => 2,
 						);
 						break;
@@ -62,6 +66,8 @@ class Survey extends CI_Controller {
 							"order_date" =>  $order_details['clients_info']->dateadded,
 							"store_id" =>  $order_details['clients_info']->store,
 							'customer_survey_response_order_type_id' => 3,
+							"fb_user_id" => $fb_user_id,
+							"mobile_user_id" => $mobile_user_id,
 							"status" => 2,
 						);
 						break;
@@ -74,6 +80,8 @@ class Survey extends CI_Controller {
 							"order_date" =>  $order_details['clients_info']->dateadded,
 							"store_id" =>  $order_details['clients_info']->store,
 							'customer_survey_response_order_type_id' => 4,
+							"fb_user_id" => $fb_user_id,
+							"mobile_user_id" => $mobile_user_id,
 							"status" => 2,
 						);
 						break;
@@ -83,6 +91,8 @@ class Survey extends CI_Controller {
 							"order_date" => $order_date,
 							"store_id" => $store_id,
 							'customer_survey_response_order_type_id' => 1,
+							"fb_user_id" => $fb_user_id,
+							"mobile_user_id" => $mobile_user_id,
 							"status" => 1,
 						);
 						
