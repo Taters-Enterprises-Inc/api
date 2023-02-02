@@ -93,6 +93,7 @@ class Deals_model extends CI_Model
 	
 	public function getDealsPromoDiscountDeals($store_id, $date_now){
 		$this->db->select('
+			B.id,
 			B.hash,
 			B.name,
 			B.description,
@@ -127,6 +128,16 @@ class Deals_model extends CI_Model
 	public function getDealProductsPromoExclude($deal_id){
 		$this->db->select('product_id');
 		$this->db->from('deals_product_promo_exclude');
+		$this->db->where('deal_id',$deal_id);
+
+		$query = $this->db->get();
+
+		return $query->result();
+	}
+	
+	public function getDealProductsPromoInclude($deal_id){
+		$this->db->select('product_id');
+		$this->db->from('deals_product_promo_include');
 		$this->db->where('deal_id',$deal_id);
 
 		$query = $this->db->get();

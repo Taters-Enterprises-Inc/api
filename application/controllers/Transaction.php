@@ -438,6 +438,8 @@ class Transaction extends CI_Controller {
                                     
                                     $redeem_data = $this->session->redeem_data;
                                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
+                                    $deal_id = null;
 
                                     if($deal_products_promo_exclude){
                                         $deal_id = $this->session->redeem_data['deal_id'];
@@ -445,6 +447,17 @@ class Transaction extends CI_Controller {
                                         foreach($deal_products_promo_exclude as $promo){
                                             if($promo->product_id === $value['prod_id']){
                                                 $deal_id = null;
+                                                break;
+                                            }
+                                        }
+
+                                        $order_product['deal_id'] = $deal_id;
+                                    }
+                                    
+                                    if($deal_products_promo_include){
+                                        foreach($deal_products_promo_include as $promo){
+                                            if($promo->product_id === $value['prod_id']){
+                                                $deal_id = $this->session->redeem_data['deal_id'];
                                                 break;
                                             }
                                         }
