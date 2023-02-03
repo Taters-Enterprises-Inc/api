@@ -23,23 +23,19 @@ class Shared extends CI_Controller {
 	}
 	
 
-	public function survey(){
+	public function survey($service, $hash){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-				$hash = $this->input->get('hash');
-				$service = $this->input->get('service');
-				
 				if(!isset($hash) || !isset($service)){
 					$this->output->set_status_header('401');
 					echo json_encode(array( "message" => 'Missing queries!'));
 					break;
 				}
 
-
-				$is_customer_survey_exist = $this->survey_model->isCustomerSurveyAnswerExist($hash, $service);
+				$customer_survey = $this->survey_model->getCustomerSurveyResponseInOrderService($service,$hash);
 
 				$response = array(
-					'data' => $is_customer_survey_exist,
+					'data' => $customer_survey,
 					'message' => 'Successfully fetch deals'
 				);
 

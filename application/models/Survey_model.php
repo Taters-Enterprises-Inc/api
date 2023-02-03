@@ -7,36 +7,27 @@ class Survey_model extends CI_Model{
         $this->db = $this->load->database('bsc', TRUE, TRUE);
     }
 
-	public function isCustomerSurveyAnswerExist($hash, $service){
-		$this->db->select('A.id');
+	public function getCustomerSurveyResponseInOrderService($service, $hash){
+		$this->db->select('A.id, A.hash');
 		
 		$this->db->from('customer_survey_responses A');
 
 		switch($service){
-			case 'SNACKSHOP':
+			case 'snackshop':
 				$this->db->join($this->newteishopDB->database.'.transaction_tb B', 'B.id = A.transaction_id');
 				$this->db->where('B.hash_key', $hash);
 				break;
-			case 'CATERING':
+			case 'catering':
 				$this->db->join($this->newteishopDB->database.'.catering_transaction_tb B', 'B.id = A.catering_transaction_id');
-				$this->db->where('B.hash_key', $hash);
-				break;
-			case 'POPCLUB-STORE-VISIT':
-				$this->db->join($this->newteishopDB->database.'.deals_redeems_tb B', 'B.id = A.deals_redeem_id');
 				$this->db->where('B.hash_key', $hash);
 				break;
 		}
 
 		$query = $this->db->get();
-
-		if($query->row()){
-			return true;
-		} else {
-			return false;
-		}
+		return $query->row();
 	}
 
-	public function getCustomerSurveyAnswer($hash, $service){
+	public function getCustomerSurveyAnswer($hash){
 		$this->db->select('
 			A.id,
 			A.order_date,
@@ -44,22 +35,7 @@ class Survey_model extends CI_Model{
 
 		$this->db->from('customer_survey_responses A');
 
-		switch($service){
-			case 'SNACKSHOP':
-				$this->db->join($this->newteishopDB->database.'.transaction_tb B', 'B.id = A.transaction_id');
-				$this->db->where('B.hash_key', $hash);
-				break;
-			case 'CATERING':
-				$this->db->join($this->newteishopDB->database.'.catering_transaction_tb B', 'B.id = A.catering_transaction_id');
-				$this->db->where('B.hash_key', $hash);
-
-				break;
-			case 'POPCLUB-STORE-VISIT':
-				$this->db->join($this->newteishopDB->database.'.deals_redeems_tb B', 'B.id = A.deals_redeem_id');
-				$this->db->where('B.hash_key', $hash);
-
-				break;
-		}
+		$this->db->where('A.hash', $hash);
 
 		$query_customer_survey_response = $this->db->get();
 		$customer_survey_response = $query_customer_survey_response->row();
