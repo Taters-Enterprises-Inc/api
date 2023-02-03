@@ -115,7 +115,7 @@ class Survey extends CI_Controller {
 					$customer_survey_answer = array(
 						"customer_survey_response_id" => $customer_survey_id,
 						"survey_question_id" => $answer['surveyQuestionId'],
-						'survey_question_offered_answer_id' => $answer['surveyQuestionOfferedAnswerId'] ?? null,
+						'survey_question_answer_id' => $answer['surveyQuestionAnswerId'] ?? null,
 						'other_text' => $answer['otherText'] ?? null,
 					);
 

@@ -45,12 +45,13 @@ class Survey_model extends CI_Model{
 			A.other_text,
 			A.customer_survey_response_id,
 			B.description as question,
-			C.text as answer,
+			D.text as answer,
 		');
 
 		$this->db->from('customer_survey_response_answers A');
 		$this->db->join('survey_questions B', 'B.id = A.survey_question_id');
-		$this->db->join('survey_question_offered_answers C', 'C.id = A.survey_question_offered_answer_id', 'left');
+		$this->db->join('survey_question_answers C', 'C.id = A.survey_question_answer_id', 'left');
+		$this->db->join('survey_question_offered_answers D', 'D.id = C.survey_question_offered_answer_id', 'left');
 
 		$this->db->where('A.customer_survey_response_id', $customer_survey_response->id);
 
@@ -81,6 +82,7 @@ class Survey_model extends CI_Model{
 		$this->db->select('
 			A.id,
 			A.description,
+			A.is_short_comment,
 			A.is_comment,
 		');
 
@@ -91,6 +93,7 @@ class Survey_model extends CI_Model{
 
 		foreach($survey_details as $key => $survey){
 			$this->db->select('
+				A.id,
 				A.survey_question_offered_answer_id,
 				B.text,
 			');
