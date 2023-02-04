@@ -94,6 +94,7 @@ class Shop_model extends CI_Model
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses E', 'E.transaction_id = A.id', 'left');
     
         
         if ($type == 'mobile') {
@@ -123,6 +124,7 @@ class Shop_model extends CI_Model
         $this->db->select('
             A.id,
             A.dateadded,
+            A.status,
             A.tracking_no,
             A.purchase_amount,
             A.distance_price,
@@ -138,7 +140,6 @@ class Shop_model extends CI_Model
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
         $this->db->join($this->bscDB->database.'.customer_survey_responses E', 'E.transaction_id = A.id', 'left');
-    
 
 
         if ($type == 'mobile') {

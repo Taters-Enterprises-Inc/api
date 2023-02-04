@@ -82,8 +82,8 @@ class Survey_model extends CI_Model{
 		$this->db->select('
 			A.id,
 			A.description,
-			A.is_short_comment,
-			A.is_comment,
+			A.is_text_field,
+			A.is_text_area,
 		');
 
 		$this->db->from('survey_questions A');
