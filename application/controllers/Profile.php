@@ -195,6 +195,10 @@ class Profile extends CI_Controller {
 				$order = $this->input->get('order') ?? 'desc';
 				$order_by = $this->input->get('order_by') ?? 'dateadded';
 				$search = $this->input->get('search');
+				
+				if($page_no != 0){
+					$page_no = ($page_no - 1) * $per_page;
+				}
 		
 				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
 					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
@@ -258,7 +262,11 @@ class Profile extends CI_Controller {
 				break;
 		}
 	}
+<<<<<<< HEAD
 	
+=======
+
+>>>>>>> main
 	public function catering_bookings(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
@@ -267,6 +275,10 @@ class Profile extends CI_Controller {
 				$order = $this->input->get('order') ?? 'desc';
 				$order_by = $this->input->get('order_by') ?? 'dateadded';
 				$search = $this->input->get('search');
+				
+				if($page_no != 0){
+					$page_no = ($page_no - 1) * $per_page;
+				}
 
 				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
 					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
@@ -341,6 +353,10 @@ class Profile extends CI_Controller {
 				$order = $this->input->get('order') ?? 'desc';
 				$order_by = $this->input->get('order_by') ?? 'dateadded';
 				$search = $this->input->get('search');
+				
+				if($page_no != 0){
+					$page_no = ($page_no - 1) * $per_page;
+				}
 				
 				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
 					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
