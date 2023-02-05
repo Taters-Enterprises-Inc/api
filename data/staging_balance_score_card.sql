@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 05, 2023 at 12:51 PM
+-- Generation Time: Feb 05, 2023 at 02:28 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -61,19 +61,6 @@ CREATE TABLE `customer_survey_responses` (
   `hash` varchar(265) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
---
--- Dumping data for table `customer_survey_responses`
---
-
-INSERT INTO `customer_survey_responses` (`id`, `order_no`, `fb_user_id`, `mobile_user_id`, `transaction_id`, `catering_transaction_id`, `customer_survey_response_order_type_id`, `order_date`, `store_id`, `user_id`, `dateadded`, `status`, `hash`) VALUES
-(1, NULL, 156, NULL, 5533, NULL, 2, '2023-02-03 19:00:45', 61, NULL, '2023-02-03 11:15:07', 2, '331fc2ec767b817797a4'),
-(2, 'test', 156, NULL, NULL, NULL, 1, '2022-02-04 10:09:38', 3, NULL, '2023-02-04 10:14:42', 1, '5dda46b30ed55a6bceeb'),
-(3, NULL, 156, NULL, 5534, NULL, 2, '2023-02-04 18:15:41', 111, NULL, '2023-02-04 10:15:58', 2, '0e4703c44b5a3a96800f'),
-(4, NULL, 156, NULL, NULL, 67, 3, '2023-02-04 19:04:51', 111, NULL, '2023-02-04 11:13:05', 2, '1a984af4aa136433e70e'),
-(5, NULL, 156, NULL, NULL, 68, 3, '2023-02-04 22:51:55', 107, NULL, '2023-02-04 14:53:11', 2, 'e396820a7150e6f06f36'),
-(6, NULL, 156, NULL, 5535, NULL, 2, '2023-02-04 18:28:05', 113, NULL, '2023-02-04 15:13:49', 2, '06feaa0b6b595b82dcef'),
-(7, NULL, 156, NULL, NULL, 69, 3, '2023-02-04 23:19:59', 107, NULL, '2023-02-05 03:50:04', 2, '4c9e89710b64ed2582f8');
-
 -- --------------------------------------------------------
 
 --
@@ -87,67 +74,6 @@ CREATE TABLE `customer_survey_response_answers` (
   `customer_survey_response_id` int(10) UNSIGNED NOT NULL,
   `other_text` varchar(265) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `customer_survey_response_answers`
---
-
-INSERT INTO `customer_survey_response_answers` (`id`, `survey_question_id`, `survey_question_answer_id`, `customer_survey_response_id`, `other_text`) VALUES
-(1, 1, NULL, 1, 'test'),
-(2, 2, NULL, 1, 'test'),
-(3, 3, NULL, 1, 'test'),
-(4, 4, 1, 1, NULL),
-(5, 5, 3, 1, NULL),
-(6, 6, 5, 1, NULL),
-(7, 7, 10, 1, NULL),
-(8, 1, NULL, 2, 'test'),
-(9, 2, NULL, 2, 'test'),
-(10, 3, NULL, 2, 'test'),
-(11, 4, 1, 2, NULL),
-(12, 5, 3, 2, NULL),
-(13, 6, 5, 2, NULL),
-(14, 7, 11, 2, NULL),
-(15, 8, 14, 2, NULL),
-(16, 1, NULL, 3, 'test'),
-(17, 2, NULL, 3, 'test'),
-(18, 3, NULL, 3, 'test'),
-(19, 4, 1, 3, NULL),
-(20, 5, 3, 3, NULL),
-(21, 6, 5, 3, NULL),
-(22, 7, 10, 3, NULL),
-(23, 8, 14, 3, NULL),
-(24, 1, NULL, 4, 'test'),
-(25, 2, NULL, 4, 'test'),
-(26, 3, NULL, 4, 'test'),
-(27, 4, 1, 4, NULL),
-(28, 5, 3, 4, NULL),
-(29, 6, 5, 4, NULL),
-(30, 7, 10, 4, NULL),
-(31, 8, 14, 4, NULL),
-(32, 1, NULL, 5, 'test'),
-(33, 2, NULL, 5, 'test'),
-(34, 3, NULL, 5, 'test'),
-(35, 4, 1, 5, NULL),
-(36, 5, 3, 5, NULL),
-(37, 6, 5, 5, NULL),
-(38, 7, 10, 5, NULL),
-(39, 8, 14, 5, NULL),
-(40, 1, NULL, 6, 'test'),
-(41, 2, NULL, 6, 'test'),
-(42, 3, NULL, 6, 'test'),
-(43, 4, 1, 6, NULL),
-(44, 5, 3, 6, NULL),
-(45, 6, 5, 6, NULL),
-(46, 7, 10, 6, NULL),
-(47, 8, 15, 6, NULL),
-(48, 1, NULL, 7, 'test'),
-(49, 2, NULL, 7, 'test'),
-(50, 3, NULL, 7, 'test'),
-(51, 4, 1, 7, NULL),
-(52, 5, 3, 7, NULL),
-(53, 6, 5, 7, NULL),
-(54, 7, 10, 7, NULL),
-(55, 8, 14, 7, NULL);
 
 -- --------------------------------------------------------
 
@@ -591,13 +517,13 @@ ALTER TABLE `companies`
 -- AUTO_INCREMENT for table `customer_survey_responses`
 --
 ALTER TABLE `customer_survey_responses`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `customer_survey_response_answers`
 --
 ALTER TABLE `customer_survey_response_answers`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `customer_survey_response_order_types`
