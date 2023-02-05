@@ -24,8 +24,17 @@ class Survey extends CI_Controller {
 	public function index(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-				$survey_details = $this->survey_model->getSurveyQuestions();
+				$raw_survey_details = $this->survey_model->getSurveyQuestions();
+				$survey_details = array();
 				
+
+				foreach($raw_survey_details as $raw_survey_detail){
+					$survey_details[$raw_survey_detail->survey_section_id]['test'] = $raw_survey_detail->section_name;
+					$survey_details[$raw_survey_detail->survey_section_id]['surveys'][] = $raw_survey_detail;
+				}
+
+				$survey_details = array_values($survey_details);
+
 				$response = array(
 					'data' => $survey_details,
 					'message' => 'Successfully fetch surveys'

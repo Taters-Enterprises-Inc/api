@@ -84,9 +84,12 @@ class Survey_model extends CI_Model{
 			A.description,
 			A.is_text_field,
 			A.is_text_area,
+			A.survey_section_id,
+			B.name as section_name,
 		');
 
 		$this->db->from('survey_questions A');
+		$this->db->join('survey_question_sections B', 'B.id = A.survey_section_id', 'left');
 
 		$query_survey_details = $this->db->get();
 		$survey_details = $query_survey_details->result();
