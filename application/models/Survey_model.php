@@ -26,8 +26,8 @@ class Survey_model extends CI_Model{
 		$query = $this->db->get();
 		return $query->row();
 	}
-
-	public function getCustomerSurveyAnswer($hash){
+	
+	public function getCustomerSurveyAnswers($hash){
 		$this->db->select('
 			A.id,
 			A.order_date,
@@ -42,7 +42,8 @@ class Survey_model extends CI_Model{
 
 		$this->db->select('
 			A.id, 
-			A.other_text,
+			A.text,
+			A.others,
 			A.customer_survey_response_id,
 			B.description as question,
 			D.text as answer,
@@ -58,8 +59,32 @@ class Survey_model extends CI_Model{
 		$query_customer_survey_response_answers = $this->db->get();
 		$customer_survey_response_answers = $query_customer_survey_response_answers->result();
 		
+		$this->db->select('
+			A.id, 
+			A.others,
+			A.customer_survey_response_id,
+			A.rate,
+			B.description as question,
+			D.name,
+			D.lowest_rate_text,
+			D.lowest_rate,
+			D.highest_rate_text,
+			D.highest_rate,
+		');
+
+		$this->db->from('customer_survey_response_ratings A');
+		$this->db->join('survey_questions B', 'B.id = A.survey_question_id');
+		$this->db->join('survey_question_ratings C', 'C.id = A.survey_question_rating_id', 'left');
+		$this->db->join('survey_question_offered_ratings D', 'D.id = C.survey_question_offered_rating_id', 'left');
+
+		$this->db->where('A.customer_survey_response_id', $customer_survey_response->id);
+
+		$query_customer_survey_response_ratings = $this->db->get();
+		$customer_survey_response_ratings = $query_customer_survey_response_ratings->result();
+		
 		$data = $customer_survey_response;
 		$data->answers = $customer_survey_response_answers;
+		$data->ratings = $customer_survey_response_ratings;
 
 		return $data;
 	}
@@ -70,6 +95,12 @@ class Survey_model extends CI_Model{
 		$insert_id = $this->db->insert_id();
         $this->db->trans_complete();
 		return $insert_id;
+	}
+
+	public function insertCustomerSurveyResponseRating($data){
+        $this->db->trans_start();
+		$this->db->insert('customer_survey_response_ratings', $data);
+        $this->db->trans_complete();
 	}
 
 	public function insertCustomerSurveyResponseAnswer($data){
@@ -84,6 +115,7 @@ class Survey_model extends CI_Model{
 			A.description,
 			A.is_text_field,
 			A.is_text_area,
+			A.others,
 			A.survey_section_id,
 			B.name as section_name,
 		');
@@ -108,8 +140,29 @@ class Survey_model extends CI_Model{
 			$query_survey_answers= $this->db->get();
 			$survey_answers = $query_survey_answers->result();
 			$survey_details[$key]->answers = $survey_answers;
-
 		}
+		
+		foreach($survey_details as $key => $survey){
+			$this->db->select('
+				A.id,
+				A.survey_question_offered_rating_id,
+				B.name,
+				B.description,
+				B.lowest_rate_text,
+				B.lowest_rate,
+				B.highest_rate_text,
+				B.highest_rate,
+			');
+
+			$this->db->from('survey_question_ratings A');
+			$this->db->join('survey_question_offered_ratings B','B.id = A.survey_question_offered_rating_id','left');
+			$this->db->where('A.survey_question_id',$survey->id);
+
+			$query_survey_ratings= $this->db->get();
+			$survey_ratings = $query_survey_ratings->result();
+			$survey_details[$key]->ratings = $survey_ratings;
+		}
+
 
 		return $survey_details;
 

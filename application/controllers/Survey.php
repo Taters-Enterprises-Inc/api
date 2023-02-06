@@ -26,10 +26,9 @@ class Survey extends CI_Controller {
 			case 'GET':
 				$raw_survey_details = $this->survey_model->getSurveyQuestions();
 				$survey_details = array();
-				
 
 				foreach($raw_survey_details as $raw_survey_detail){
-					$survey_details[$raw_survey_detail->survey_section_id]['test'] = $raw_survey_detail->section_name;
+					$survey_details[$raw_survey_detail->survey_section_id]['section_name'] = $raw_survey_detail->section_name;
 					$survey_details[$raw_survey_detail->survey_section_id]['surveys'][] = $raw_survey_detail;
 				}
 
@@ -121,14 +120,29 @@ class Survey extends CI_Controller {
 				$customer_survey_id = $this->survey_model->insertCustomerSurveyResponse($customer_survey);
 
 				foreach($answers as $answer){
-					$customer_survey_answer = array(
-						"customer_survey_response_id" => $customer_survey_id,
-						"survey_question_id" => $answer['surveyQuestionId'],
-						'survey_question_answer_id' => $answer['surveyQuestionAnswerId'] ?? null,
-						'other_text' => $answer['otherText'] ?? null,
-					);
+					if(isset($answer['surveyQuestionRatingId'])){
+						$customer_survey_rating = array(
+							"customer_survey_response_id" => $customer_survey_id,
+							"survey_question_id" => $answer['surveyQuestionId'],
+							'survey_question_rating_id' => $answer['surveyQuestionRatingId'],
+							'rate' => $answer['rate'],
+							'others' => $answer['others'] ?? null,
+						);
 
-					$this->survey_model->insertCustomerSurveyResponseAnswer($customer_survey_answer);
+	
+						$this->survey_model->insertCustomerSurveyResponseRating($customer_survey_rating);
+					}else{
+						$survey_question_answer_id = $answer['surveyQuestionAnswerId'] ?? null;
+						$customer_survey_answer = array(
+							"customer_survey_response_id" => $customer_survey_id,
+							"survey_question_id" => $answer['surveyQuestionId'],
+							'survey_question_answer_id' => $survey_question_answer_id != 'others' ?  $survey_question_answer_id : null,
+							'text' => $answer['text'] ?? null,
+							'others' => $answer['others'] ?? null,
+						);
+	
+						$this->survey_model->insertCustomerSurveyResponseAnswer($customer_survey_answer);
+					}
 				}
 				
 				$notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
@@ -170,7 +184,7 @@ class Survey extends CI_Controller {
 					break;
 				}
 
-				$survey_answer = $this->survey_model->getCustomerSurveyAnswer($hash);
+				$survey_answer = $this->survey_model->getCustomerSurveyAnswers($hash);
 
 				$response = array(
 					"message" => 'Successfully fetch survey answer',

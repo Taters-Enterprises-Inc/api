@@ -539,7 +539,8 @@ class Admin_model extends CI_Model
         
 		$this->bsc_db->select('
             A.id, 
-            A.other_text,
+            A.text,
+            A.others,
             A.customer_survey_response_id,
             B.description as question,
             C.text as answer,

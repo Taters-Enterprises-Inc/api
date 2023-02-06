@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 05, 2023 at 02:28 PM
+-- Generation Time: Feb 06, 2023 at 11:53 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -72,7 +72,8 @@ CREATE TABLE `customer_survey_response_answers` (
   `survey_question_id` int(10) UNSIGNED NOT NULL,
   `survey_question_answer_id` int(10) UNSIGNED DEFAULT NULL,
   `customer_survey_response_id` int(10) UNSIGNED NOT NULL,
-  `other_text` varchar(265) DEFAULT NULL
+  `text` varchar(265) DEFAULT NULL,
+  `others` varchar(265) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -95,6 +96,21 @@ INSERT INTO `customer_survey_response_order_types` (`id`, `name`) VALUES
 (2, 'Snackshop'),
 (3, 'Catering'),
 (4, 'Popclub Store Visit');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_survey_response_ratings`
+--
+
+CREATE TABLE `customer_survey_response_ratings` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `rate` int(11) NOT NULL,
+  `survey_question_id` int(10) UNSIGNED NOT NULL,
+  `survey_question_rating_id` int(10) UNSIGNED NOT NULL,
+  `customer_survey_response_id` int(10) UNSIGNED NOT NULL,
+  `others` varchar(265) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -138,39 +154,41 @@ CREATE TABLE `login_attempts` (
 CREATE TABLE `survey_questions` (
   `id` int(10) UNSIGNED NOT NULL,
   `description` varchar(265) NOT NULL,
-  `is_text_field` tinyint(1) UNSIGNED NOT NULL,
-  `is_text_area` tinyint(1) NOT NULL,
+  `is_text_field` tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
+  `is_text_area` tinyint(1) NOT NULL DEFAULT 0,
+  `others` int(11) NOT NULL DEFAULT 0,
   `survey_section_id` int(10) UNSIGNED DEFAULT NULL,
-  `status` int(11) NOT NULL
+  `status` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `survey_questions`
 --
 
-INSERT INTO `survey_questions` (`id`, `description`, `is_text_field`, `is_text_area`, `survey_section_id`, `status`) VALUES
-(1, 'Name', 1, 0, 1, 1),
-(2, 'Tel. No.', 1, 0, 1, 1),
-(3, 'E-mail', 1, 0, 1, 1),
-(4, 'Gender', 0, 0, 1, 1),
-(5, 'Are you ?', 0, 0, 1, 1),
-(6, 'Age', 0, 0, 1, 1),
-(7, 'How often do you visit our store?', 0, 0, 2, 1),
-(8, 'How did you hear about us?', 0, 0, 2, 1),
-(9, 'Taste', 0, 0, 3, 0),
-(10, 'Freshness', 0, 0, 3, 0),
-(11, 'Temperature', 0, 0, 3, 0),
-(12, 'Presentation', 0, 0, 3, 0),
-(13, 'Courtesy', 0, 0, 4, 0),
-(14, 'Cheerfulness', 0, 0, 4, 0),
-(15, 'Speed of Service', 0, 0, 4, 0),
-(16, 'Knowledge of staff', 0, 0, 4, 0),
-(17, 'Appearance of staff', 0, 0, 4, 0),
-(18, 'Cleanliness', 0, 0, 5, 0),
-(19, 'Comfort', 0, 0, 5, 0),
-(20, 'Decor', 0, 0, 5, 0),
-(21, 'Price', 0, 0, 6, 0),
-(22, 'Variety', 0, 0, 6, 0);
+INSERT INTO `survey_questions` (`id`, `description`, `is_text_field`, `is_text_area`, `others`, `survey_section_id`, `status`) VALUES
+(1, 'Name', 1, 0, 0, 1, 1),
+(2, 'Tel. No.', 1, 0, 0, 1, 1),
+(3, 'E-mail', 1, 0, 0, 1, 1),
+(4, 'Gender', 0, 0, 0, 1, 1),
+(5, 'Are you ?', 0, 0, 0, 1, 1),
+(6, 'Age', 0, 0, 0, 1, 1),
+(7, 'How often do you visit our store?', 0, 0, 0, 2, 1),
+(8, 'How did you hear about us?', 1, 0, 1, 2, 1),
+(9, 'Taste', 0, 0, 0, 3, 1),
+(10, 'Freshness', 0, 0, 0, 3, 1),
+(11, 'Temperature', 0, 0, 0, 3, 1),
+(12, 'Presentation', 0, 0, 0, 3, 1),
+(13, 'Courtesy', 0, 0, 0, 4, 1),
+(14, 'Cheerfulness', 0, 0, 0, 4, 1),
+(15, 'Speed of Service', 0, 0, 0, 4, 1),
+(16, 'Knowledge of staff', 0, 0, 0, 4, 1),
+(17, 'Appearance of staff', 0, 0, 0, 4, 1),
+(18, 'Cleanliness', 0, 0, 0, 5, 1),
+(19, 'Comfort', 0, 0, 0, 5, 1),
+(20, 'Decor', 0, 0, 0, 5, 1),
+(21, 'Price', 0, 0, 0, 6, 1),
+(22, 'Variety', 0, 0, 0, 6, 1),
+(23, 'Overall Experience', 0, 1, 0, 7, 1);
 
 -- --------------------------------------------------------
 
@@ -242,6 +260,76 @@ INSERT INTO `survey_question_offered_answers` (`id`, `text`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `survey_question_offered_ratings`
+--
+
+CREATE TABLE `survey_question_offered_ratings` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(265) NOT NULL,
+  `description` varchar(265) NOT NULL,
+  `lowest_rate_text` varchar(265) NOT NULL,
+  `lowest_rate` int(11) NOT NULL,
+  `highest_rate_text` varchar(265) NOT NULL,
+  `highest_rate` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `survey_question_offered_ratings`
+--
+
+INSERT INTO `survey_question_offered_ratings` (`id`, `name`, `description`, `lowest_rate_text`, `lowest_rate`, `highest_rate_text`, `highest_rate`) VALUES
+(1, 'Priority Rank', 'Please rate your priorities on a scale of 1 to 10. ', 'Lowest', 10, 'Highest', 1),
+(2, 'Satisfaction Rating', 'Please rate your overall satisfaction on a scale of 1 to 5', 'Dissatisfied', 1, 'Highly Satisfied', 5);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `survey_question_ratings`
+--
+
+CREATE TABLE `survey_question_ratings` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `survey_question_id` int(10) UNSIGNED NOT NULL,
+  `survey_question_offered_rating_id` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `survey_question_ratings`
+--
+
+INSERT INTO `survey_question_ratings` (`id`, `survey_question_id`, `survey_question_offered_rating_id`) VALUES
+(1, 9, 1),
+(2, 9, 2),
+(3, 10, 1),
+(4, 10, 2),
+(5, 11, 1),
+(6, 11, 2),
+(7, 12, 1),
+(8, 12, 2),
+(9, 13, 1),
+(10, 13, 2),
+(11, 14, 1),
+(12, 14, 2),
+(13, 15, 1),
+(14, 15, 2),
+(15, 16, 1),
+(16, 16, 2),
+(17, 17, 1),
+(18, 17, 2),
+(19, 18, 1),
+(20, 18, 2),
+(21, 19, 1),
+(22, 19, 2),
+(23, 20, 1),
+(24, 20, 2),
+(25, 21, 1),
+(26, 21, 2),
+(27, 22, 1),
+(28, 22, 2);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `survey_question_sections`
 --
 
@@ -260,7 +348,8 @@ INSERT INTO `survey_question_sections` (`id`, `name`) VALUES
 (3, 'Food and Drinks'),
 (4, 'Service'),
 (5, 'Ambience'),
-(6, 'Our Menu');
+(6, 'Our Menu'),
+(7, 'Overall Experience');
 
 -- --------------------------------------------------------
 
@@ -408,7 +497,7 @@ ALTER TABLE `customer_survey_responses`
 ALTER TABLE `customer_survey_response_answers`
   ADD PRIMARY KEY (`id`),
   ADD KEY `customer_survey_id` (`customer_survey_response_id`),
-  ADD KEY `offered_answer_id` (`other_text`),
+  ADD KEY `offered_answer_id` (`text`),
   ADD KEY `survey_question_id` (`survey_question_id`),
   ADD KEY `survey_question_answer_id` (`survey_question_answer_id`);
 
@@ -417,6 +506,15 @@ ALTER TABLE `customer_survey_response_answers`
 --
 ALTER TABLE `customer_survey_response_order_types`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `customer_survey_response_ratings`
+--
+ALTER TABLE `customer_survey_response_ratings`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `survey_question_id` (`survey_question_id`),
+  ADD KEY `customer_survey_response_id` (`customer_survey_response_id`),
+  ADD KEY `customer_survey_response_ratings_ibfk_2` (`survey_question_rating_id`);
 
 --
 -- Indexes for table `groups`
@@ -450,6 +548,20 @@ ALTER TABLE `survey_question_answers`
 --
 ALTER TABLE `survey_question_offered_answers`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `survey_question_offered_ratings`
+--
+ALTER TABLE `survey_question_offered_ratings`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `survey_question_ratings`
+--
+ALTER TABLE `survey_question_ratings`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `survey_question_id` (`survey_question_id`),
+  ADD KEY `survey_offered_rating_id` (`survey_question_offered_rating_id`);
 
 --
 -- Indexes for table `survey_question_sections`
@@ -532,6 +644,12 @@ ALTER TABLE `customer_survey_response_order_types`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT for table `customer_survey_response_ratings`
+--
+ALTER TABLE `customer_survey_response_ratings`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `groups`
 --
 ALTER TABLE `groups`
@@ -547,7 +665,7 @@ ALTER TABLE `login_attempts`
 -- AUTO_INCREMENT for table `survey_questions`
 --
 ALTER TABLE `survey_questions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `survey_question_answers`
@@ -562,10 +680,22 @@ ALTER TABLE `survey_question_offered_answers`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
+-- AUTO_INCREMENT for table `survey_question_offered_ratings`
+--
+ALTER TABLE `survey_question_offered_ratings`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `survey_question_ratings`
+--
+ALTER TABLE `survey_question_ratings`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+
+--
 -- AUTO_INCREMENT for table `survey_question_sections`
 --
 ALTER TABLE `survey_question_sections`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -627,6 +757,14 @@ ALTER TABLE `customer_survey_response_answers`
   ADD CONSTRAINT `customer_survey_response_answers_ibfk_3` FOREIGN KEY (`survey_question_answer_id`) REFERENCES `survey_question_answers` (`id`) ON UPDATE NO ACTION;
 
 --
+-- Constraints for table `customer_survey_response_ratings`
+--
+ALTER TABLE `customer_survey_response_ratings`
+  ADD CONSTRAINT `customer_survey_response_ratings_ibfk_1` FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_response_ratings_ibfk_2` FOREIGN KEY (`survey_question_rating_id`) REFERENCES `survey_question_ratings` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_response_ratings_ibfk_3` FOREIGN KEY (`customer_survey_response_id`) REFERENCES `customer_survey_responses` (`id`) ON UPDATE NO ACTION;
+
+--
 -- Constraints for table `survey_questions`
 --
 ALTER TABLE `survey_questions`
@@ -638,6 +776,13 @@ ALTER TABLE `survey_questions`
 ALTER TABLE `survey_question_answers`
   ADD CONSTRAINT `survey_question_answers_ibfk_1` FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON UPDATE NO ACTION,
   ADD CONSTRAINT `survey_question_answers_ibfk_2` FOREIGN KEY (`survey_question_offered_answer_id`) REFERENCES `survey_question_offered_answers` (`id`) ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `survey_question_ratings`
+--
+ALTER TABLE `survey_question_ratings`
+  ADD CONSTRAINT `survey_question_ratings_ibfk_1` FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `survey_question_ratings_ibfk_2` FOREIGN KEY (`survey_question_offered_rating_id`) REFERENCES `survey_question_offered_ratings` (`id`) ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
