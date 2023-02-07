@@ -13,6 +13,7 @@ class Shop_model extends CI_Model
             
         $this->db->from('notifications A');
         $this->db->join('notification_events B', 'B.id = A.notification_event_id');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses C', 'C.id = B.customer_survey_response_id', 'left');
         $this->db->where('B.notification_event_type_id', 4);
     
         
@@ -42,10 +43,12 @@ class Shop_model extends CI_Model
             A.id,
             A.dateadded,
             B.text,
+            C.hash as survey_hash,
         ');
 
         $this->db->from('notifications A');
         $this->db->join('notification_events B', 'B.id = A.notification_event_id');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses C', 'C.id = B.customer_survey_response_id', 'left');
         $this->db->where('B.notification_event_type_id', 4);
 
         if ($type == 'mobile') {

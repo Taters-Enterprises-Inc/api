@@ -55,7 +55,7 @@ class Survey extends CI_Controller {
 				$mobile_user_id = $this->session->userData['mobile_user_id'] ?? null;
                 $generated_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 
-				$message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore";
+				$message = "Thank you, check your survey. ";
 
 				switch($service){
 					case 'snackshop':
@@ -118,6 +118,8 @@ class Survey extends CI_Controller {
 
 
 				$customer_survey_id = $this->survey_model->insertCustomerSurveyResponse($customer_survey);
+
+				$notification_event_data['customer_survey_response_id'] = $customer_survey_id;
 
 				foreach($answers as $answer){
 					if(isset($answer['surveyQuestionRatingId'])){
