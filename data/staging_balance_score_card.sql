@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 06, 2023 at 11:53 AM
+-- Generation Time: Feb 07, 2023 at 05:07 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -156,6 +156,7 @@ CREATE TABLE `survey_questions` (
   `description` varchar(265) NOT NULL,
   `is_text_field` tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
   `is_text_area` tinyint(1) NOT NULL DEFAULT 0,
+  `is_email` int(10) UNSIGNED NOT NULL DEFAULT 0,
   `others` int(11) NOT NULL DEFAULT 0,
   `survey_section_id` int(10) UNSIGNED DEFAULT NULL,
   `status` int(11) NOT NULL DEFAULT 0
@@ -165,30 +166,30 @@ CREATE TABLE `survey_questions` (
 -- Dumping data for table `survey_questions`
 --
 
-INSERT INTO `survey_questions` (`id`, `description`, `is_text_field`, `is_text_area`, `others`, `survey_section_id`, `status`) VALUES
-(1, 'Name', 1, 0, 0, 1, 1),
-(2, 'Tel. No.', 1, 0, 0, 1, 1),
-(3, 'E-mail', 1, 0, 0, 1, 1),
-(4, 'Gender', 0, 0, 0, 1, 1),
-(5, 'Are you ?', 0, 0, 0, 1, 1),
-(6, 'Age', 0, 0, 0, 1, 1),
-(7, 'How often do you visit our store?', 0, 0, 0, 2, 1),
-(8, 'How did you hear about us?', 1, 0, 1, 2, 1),
-(9, 'Taste', 0, 0, 0, 3, 1),
-(10, 'Freshness', 0, 0, 0, 3, 1),
-(11, 'Temperature', 0, 0, 0, 3, 1),
-(12, 'Presentation', 0, 0, 0, 3, 1),
-(13, 'Courtesy', 0, 0, 0, 4, 1),
-(14, 'Cheerfulness', 0, 0, 0, 4, 1),
-(15, 'Speed of Service', 0, 0, 0, 4, 1),
-(16, 'Knowledge of staff', 0, 0, 0, 4, 1),
-(17, 'Appearance of staff', 0, 0, 0, 4, 1),
-(18, 'Cleanliness', 0, 0, 0, 5, 1),
-(19, 'Comfort', 0, 0, 0, 5, 1),
-(20, 'Decor', 0, 0, 0, 5, 1),
-(21, 'Price', 0, 0, 0, 6, 1),
-(22, 'Variety', 0, 0, 0, 6, 1),
-(23, 'Overall Experience', 0, 1, 0, 7, 1);
+INSERT INTO `survey_questions` (`id`, `description`, `is_text_field`, `is_text_area`, `is_email`, `others`, `survey_section_id`, `status`) VALUES
+(1, 'Name', 1, 0, 0, 0, 1, 1),
+(2, 'Tel. No.', 1, 0, 0, 0, 1, 1),
+(3, 'E-mail', 1, 0, 1, 0, 1, 1),
+(4, 'Gender', 0, 0, 0, 0, 1, 1),
+(5, 'Are you ?', 0, 0, 0, 0, 1, 1),
+(6, 'Age', 0, 0, 0, 0, 1, 1),
+(7, 'How often do you visit our store?', 0, 0, 0, 0, 2, 1),
+(8, 'How did you hear about us?', 1, 0, 0, 1, 2, 1),
+(9, 'Taste', 0, 0, 0, 0, 3, 1),
+(10, 'Freshness', 0, 0, 0, 0, 3, 1),
+(11, 'Temperature', 0, 0, 0, 0, 3, 1),
+(12, 'Presentation', 0, 0, 0, 0, 3, 1),
+(13, 'Courtesy', 0, 0, 0, 0, 4, 1),
+(14, 'Cheerfulness', 0, 0, 0, 0, 4, 1),
+(15, 'Speed of Service', 0, 0, 0, 0, 4, 1),
+(16, 'Knowledge of staff', 0, 0, 0, 0, 4, 1),
+(17, 'Appearance of staff', 0, 0, 0, 0, 4, 1),
+(18, 'Cleanliness', 0, 0, 0, 0, 5, 1),
+(19, 'Comfort', 0, 0, 0, 0, 5, 1),
+(20, 'Decor', 0, 0, 0, 0, 5, 1),
+(21, 'Price', 0, 0, 0, 0, 6, 1),
+(22, 'Variety', 0, 0, 0, 0, 6, 1),
+(23, 'Overall Experience', 0, 1, 0, 0, 7, 1);
 
 -- --------------------------------------------------------
 
