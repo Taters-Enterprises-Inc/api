@@ -3,6 +3,11 @@
 class Catering_model extends CI_Model 
 {
     
+    public function __construct(){
+		$this->db =  $this->load->database('default', TRUE, TRUE);
+        $this->bscDB = $this->load->database('bsc', TRUE, TRUE);
+    }
+    
     public function getUserCateringBookingHistoryCount($type, $id, $search){
         $this->db->select('count(*) as all_count');
             
@@ -45,10 +50,12 @@ class Catering_model extends CI_Model
             A.cod_fee,
             A.distance_price,
             A.hash_key,
+            E.hash as survey_hash,
         ');
 
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'A.client_id = B.id' ,'left');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses E', 'E.catering_transaction_id = A.id', 'left');
 
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);

@@ -515,48 +515,87 @@ class Admin_model extends CI_Model
             A.dateadded,
             A.order_date,
             A.status,
+            A.fb_user_id,
+            A.mobile_user_id,
             B.name as store_name,
-            C.first_name,
-            C.last_name,
             A.order_no,
-            D.tracking_no as snackshop_tracking_no,
-            E.tracking_no as catering_tracking_no,
-            F.redeem_code as popclub_redeem_code,
-            G.name as order_type
+            C.tracking_no as snackshop_tracking_no,
+            D.tracking_no as catering_tracking_no,
+            E.name as order_type,
         ');
         $this->bsc_db->from('customer_survey_responses A');
         $this->bsc_db->join($this->db->database.'.store_tb B', 'B.store_id = A.store_id');
-        $this->bsc_db->join('user_profile C', 'C.user_id = A.user_id','left');
-        $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
-        $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
-        $this->bsc_db->join($this->db->database.'.deals_redeems_tb F', 'F.id = A.deals_redeem_id','left');
-        $this->bsc_db->join('customer_survey_response_order_types G', 'G.id = A.customer_survey_response_order_type_id');
+        $this->bsc_db->join($this->db->database.'.transaction_tb C', 'C.id = A.transaction_id','left');
+        $this->bsc_db->join($this->db->database.'.catering_transaction_tb D', 'D.id = A.catering_transaction_id','left');
+        $this->bsc_db->join('customer_survey_response_order_types E', 'E.id = A.customer_survey_response_order_type_id');
 
         $this->bsc_db->where('A.id', $survey_id);
 
         $query_customer_survey_response = $this->bsc_db->get();
         $customer_survey_response = $query_customer_survey_response->row();
+
+        $this->db->select('first_name, last_name');
+
+        if($customer_survey_response->fb_user_id){
+            $this->db->from('fb_users');
+            $this->db->where('id',$customer_survey_response->fb_user_id);
+        }else if($customer_survey_response->mobile_user_id){
+            $this->db->from('mobile_users');
+            $this->db->where('id',$customer_survey_response->fb_user_id);
+        }
         
+		$query_user = $this->db->get();
+		$user = $query_user->row();
+
+        $customer_survey_response->user = $user;
+
 		$this->bsc_db->select('
             A.id, 
-            A.other_text,
+            A.text,
+            A.others,
             A.customer_survey_response_id,
             B.description as question,
-            C.text as answer,
+            D.text as answer,
         ');
 
         $this->bsc_db->from('customer_survey_response_answers A');
         $this->bsc_db->join('survey_questions B', 'B.id = A.survey_question_id', 'left');
-        $this->bsc_db->join('survey_question_offered_answers C', 'C.id = A.survey_question_offered_answer_id', 'left');
+        $this->bsc_db->join('survey_question_answers C', 'C.id = A.survey_question_answer_id', 'left');
+        $this->bsc_db->join('survey_question_offered_answers D', 'D.id = C.survey_question_offered_answer_id', 'left');
         
         $this->bsc_db->where('A.customer_survey_response_id', $customer_survey_response->id);
         
 		$query_customer_survey_response_answers = $this->bsc_db->get();
 		$customer_survey_response_answers = $query_customer_survey_response_answers->result();
+        
+		$this->bsc_db->select('
+            A.id, 
+            A.others,
+            A.customer_survey_response_id,
+            A.rate,
+            B.description as question,
+            C.survey_question_offered_rating_id,
+            D.name,
+            D.lowest_rate_text,
+            D.lowest_rate,
+            D.highest_rate_text,
+            D.highest_rate,
+        ');
+
+        $this->bsc_db->from('customer_survey_response_ratings A');
+        $this->bsc_db->join('survey_questions B', 'B.id = A.survey_question_id', 'left');
+        $this->bsc_db->join('survey_question_ratings C', 'C.id = A.survey_question_rating_id', 'left');
+        $this->bsc_db->join('survey_question_offered_ratings D', 'D.id = C.survey_question_offered_rating_id', 'left');
+        
+        $this->bsc_db->where('A.customer_survey_response_id', $customer_survey_response->id);
+        
+        $query_customer_survey_response_ratings = $this->bsc_db->get();
+        $customer_survey_response_ratings = $query_customer_survey_response_ratings->result();
 
         $data = $customer_survey_response;
         
         $data->answers = $customer_survey_response_answers;
+        $data->ratings = $customer_survey_response_ratings;
         
         return $data;
     }
@@ -569,7 +608,6 @@ class Admin_model extends CI_Model
         $this->bsc_db->join('user_profile C', 'C.user_id = A.user_id', 'left');
         $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
         $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
-        $this->bsc_db->join($this->db->database.'.deals_redeems_tb F', 'F.id = A.deals_redeem_id','left');
         $this->bsc_db->join('customer_survey_response_order_types G', 'G.id = A.customer_survey_response_order_type_id');
 
         if($status)
@@ -605,7 +643,6 @@ class Admin_model extends CI_Model
             A.order_no,
             D.tracking_no as snackshop_tracking_no,
             E.tracking_no as catering_tracking_no,
-            F.redeem_code as popclub_redeem_code,
             G.name as order_type
         ");
 
@@ -614,7 +651,6 @@ class Admin_model extends CI_Model
         $this->bsc_db->join('user_profile C', 'C.user_id = A.user_id','left');
         $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
         $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
-        $this->bsc_db->join($this->db->database.'.deals_redeems_tb F', 'F.id = A.deals_redeem_id','left');
         $this->bsc_db->join('customer_survey_response_order_types G', 'G.id = A.customer_survey_response_order_type_id');
  
         if($status)
@@ -628,7 +664,6 @@ class Admin_model extends CI_Model
             $this->bsc_db->or_like('C.last_name', $search);
             $this->bsc_db->or_like('D.tracking_no', $search);
             $this->bsc_db->or_like('E.tracking_no', $search);
-            $this->bsc_db->or_like('F.redeem_code', $search);
             $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
             $this->bsc_db->group_end();
         }

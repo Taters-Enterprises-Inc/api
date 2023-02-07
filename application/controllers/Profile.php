@@ -23,6 +23,82 @@ class Profile extends CI_Controller {
 		$this->ion_auth->set_message_delimiters('', '');
 		$this->ion_auth->set_error_delimiters('', '');
 	}
+	
+	public function inbox(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$per_page = $this->input->get('per_page') ?? 25;
+				$page_no = $this->input->get('page_no') ?? 0;
+				$order = $this->input->get('order') ?? 'desc';
+				$order_by = $this->input->get('order_by') ?? 'dateadded';
+				$search = $this->input->get('search');
+				
+				if($page_no != 0){
+					$page_no = ($page_no - 1) * $per_page;
+				}
+		
+				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
+					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
+
+				if(!isset($logon_type)){
+
+					$response = array(
+						'message' => 'Error user not found',
+					);
+
+					header('content-type: application/json');
+					echo json_encode($response);
+					break;
+				}
+
+				switch($logon_type){
+					case 'facebook':
+						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+						$inbox_count = $this->shop_model->getUserInboxHistoryCount('facebook',$get_fb_user_details->id, $search);
+						$inbox = $this->shop_model->getUserInboxHistory('facebook',$get_fb_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						
+
+						$pagination = array(
+							"total_rows" => $inbox_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Succesfully fetch history of inbox',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "inbox" => $inbox
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						break;
+					case 'mobile':
+						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+						$inbox_count = $this->shop_model->getUserInboxHistoryCount('mobile',$get_mobile_user_details->id, $search);
+						$inbox = $this->shop_model->getUserInboxHistory('mobile',$get_mobile_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						
+						$pagination = array(
+							"total_rows" => $inbox_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Succesfully fetch history of inbox',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "inbox" => $inbox,
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						break;
+				}
+				break;
+		}
+	}
 
 	public function contact($id){
 		switch($this->input->server('REQUEST_METHOD')){

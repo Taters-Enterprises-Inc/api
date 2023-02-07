@@ -18,13 +18,22 @@ class Survey extends CI_Controller {
 		$this->load->model('shop_model');
 		$this->load->model('catering_model');
 		$this->load->model('deals_model');
+		$this->load->model('notification_model');
 	}
 
 	public function index(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
-				$survey_details = $this->survey_model->getSurveyQuestions();
-				
+				$raw_survey_details = $this->survey_model->getSurveyQuestions();
+				$survey_details = array();
+
+				foreach($raw_survey_details as $raw_survey_detail){
+					$survey_details[$raw_survey_detail->survey_section_id]['section_name'] = $raw_survey_detail->section_name;
+					$survey_details[$raw_survey_detail->survey_section_id]['surveys'][] = $raw_survey_detail;
+				}
+
+				$survey_details = array_values($survey_details);
+
 				$response = array(
 					'data' => $survey_details,
 					'message' => 'Successfully fetch surveys'
@@ -42,39 +51,49 @@ class Survey extends CI_Controller {
 				$store_id = $this->input->post('storeId');
 				$order_hash = $this->input->post('orderHash');
 				$service = $this->input->post('service');
+				$fb_user_id = $this->session->userData['fb_user_id'] ?? null;
+				$mobile_user_id = $this->session->userData['mobile_user_id'] ?? null;
+                $generated_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+
+				$message = "Thank you, check your survey. ";
 
 				switch($service){
-					case 'SNACKSHOP':
+					case 'snackshop':
 						$order_details = $this->shop_model->view_order($order_hash);
 						$customer_survey = array(
 							"transaction_id" => $order_details['clients_info']->id,
 							"order_date" =>  $order_details['clients_info']->dateadded,
 							"store_id" =>  $order_details['clients_info']->store,
 							'customer_survey_response_order_type_id' => 2,
+							"fb_user_id" => $fb_user_id,
+							"mobile_user_id" => $mobile_user_id,
 							"status" => 2,
+							"hash" => $generated_hash,
+						);
+								
+						$notification_event_data = array(
+							"notification_event_type_id" => 4,
+							"transaction_tb_id" => $order_details['clients_info']->id,
+							"text" => $message
 						);
 						break;
-					case 'CATERING':
+					case 'catering':
 						$order_details = $this->catering_model->view_order($order_hash);
-
 						$customer_survey = array(
 							"catering_transaction_id" => $order_details['clients_info']->id,
 							"order_date" =>  $order_details['clients_info']->dateadded,
 							"store_id" =>  $order_details['clients_info']->store,
 							'customer_survey_response_order_type_id' => 3,
+							"fb_user_id" => $fb_user_id,
+							"mobile_user_id" => $mobile_user_id,
 							"status" => 2,
+							"hash" => $generated_hash,
 						);
-						break;
 						
-					case 'POPCLUB-STORE-VISIT':
-						$order_details = $this->deals_model->getUserDeals($order_hash);
-
-						$customer_survey = array(
-							"deals_redeem_id" => $order_details['clients_info']->id,
-							"order_date" =>  $order_details['clients_info']->dateadded,
-							"store_id" =>  $order_details['clients_info']->store,
-							'customer_survey_response_order_type_id' => 4,
-							"status" => 2,
+						$notification_event_data = array(
+							"notification_event_type_id" => 4,
+							"transaction_tb_id" => $order_details['clients_info']->id,
+							"text" => $message
 						);
 						break;
 					default:  // WALK IN
@@ -83,7 +102,15 @@ class Survey extends CI_Controller {
 							"order_date" => $order_date,
 							"store_id" => $store_id,
 							'customer_survey_response_order_type_id' => 1,
+							"fb_user_id" => $fb_user_id,
+							"mobile_user_id" => $mobile_user_id,
 							"status" => 1,
+							"hash" => $generated_hash,
+						);
+						
+						$notification_event_data = array(
+							"notification_event_type_id" => 4,
+							"text" => $message
 						);
 						
 						break;
@@ -92,19 +119,55 @@ class Survey extends CI_Controller {
 
 				$customer_survey_id = $this->survey_model->insertCustomerSurveyResponse($customer_survey);
 
-				foreach($answers as $answer){
-					$customer_survey_answer = array(
-						"customer_survey_response_id" => $customer_survey_id,
-						"survey_question_id" => $answer['surveyQuestionId'],
-						'survey_question_offered_answer_id' => $answer['surveyQuestionOfferedAnswerId'] ?? null,
-						'other_text' => $answer['otherText'] ?? null,
-					);
+				$notification_event_data['customer_survey_response_id'] = $customer_survey_id;
 
-					$this->survey_model->insertCustomerSurveyResponseAnswer($customer_survey_answer);
+				foreach($answers as $answer){
+					if(isset($answer['surveyQuestionRatingId'])){
+						$customer_survey_rating = array(
+							"customer_survey_response_id" => $customer_survey_id,
+							"survey_question_id" => $answer['surveyQuestionId'],
+							'survey_question_rating_id' => $answer['surveyQuestionRatingId'],
+							'rate' => $answer['rate'],
+							'others' => $answer['others'] ?? null,
+						);
+
+	
+						$this->survey_model->insertCustomerSurveyResponseRating($customer_survey_rating);
+					}else{
+						$survey_question_answer_id = $answer['surveyQuestionAnswerId'] ?? null;
+						$customer_survey_answer = array(
+							"customer_survey_response_id" => $customer_survey_id,
+							"survey_question_id" => $answer['surveyQuestionId'],
+							'survey_question_answer_id' => $survey_question_answer_id != 'others' ?  $survey_question_answer_id : null,
+							'text' => $answer['text'] ?? null,
+							'others' => $answer['others'] ?? null,
+						);
+	
+						$this->survey_model->insertCustomerSurveyResponseAnswer($customer_survey_answer);
+					}
 				}
+				
+				$notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+
+				//mobile or fb             
+				$notifications_data = array(
+					"fb_user_to_notify" => $this->session->userData['fb_user_id'] ?? null,
+					"mobile_user_to_notify" => $this->session->userData['mobile_user_id'] ?? null,
+					"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+					"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+					'notification_event_id' => $notification_event_id,
+					"dateadded" => date('Y-m-d H:i:s'),
+				);
+				
+				$this->notification_model->insertNotification($notifications_data);   
+				
 
 				$response = array(
-					'message' => 'Survey submitted!'
+					'message' => 'Survey submitted!',
+					"data" => array(
+						"hash" => $generated_hash,
+					),
+					"test" => $customer_survey,
 				);
 
 				header('content-type: application/json');
@@ -113,19 +176,17 @@ class Survey extends CI_Controller {
 		}
 	}
 
-	public function answer(){
+	public function answer($hash){
 		switch($this->input->server('REQUEST_METHOD')){
-			case 'GET':
-				$hash = $this->input->get('hash');
-				$service = $this->input->get('service');
+		case 'GET':
 
-				if(!isset($hash) || !isset($service)){
+				if(!isset($hash)){
 					$this->output->set_status_header('401');
 					echo json_encode(array( "message" => 'Missing queries!'));
 					break;
 				}
 
-				$survey_answer = $this->survey_model->getCustomerSurveyAnswer($hash, $service);
+				$survey_answer = $this->survey_model->getCustomerSurveyAnswers($hash);
 
 				$response = array(
 					"message" => 'Successfully fetch survey answer',

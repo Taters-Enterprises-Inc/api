@@ -2138,7 +2138,6 @@ class Admin extends CI_Controller{
         $pagination = array(
           "total_rows" => $orders_count,
           "per_page" => $per_page,
-          "test" => $store_id_array,
         );
 
         $response = array(

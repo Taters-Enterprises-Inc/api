@@ -40,6 +40,7 @@ $route['shared/contacts'] = 'shared/contacts';
 $route['shared/available-user-discount'] = 'shared/available_user_discount';
 $route['shared/stores'] = 'shared/stores';
 $route['shared/companies'] = 'shared/companies';
+$route['shared/survey/(:any)/(:hash)'] = 'shared/survey/$1/$2';
 
 // Facebook
 $route['facebook/login'] = 'user_authentication';
@@ -61,6 +62,7 @@ $route['profile/catering-bookings'] = 'profile/catering_bookings';
 $route['profile/user-discount'] = 'profile/user_discount';
 $route['profile/update-user-discount'] = 'profile/update_user_discount';
 $route['profile/contact/(:num)'] = 'profile/contact/$1';
+$route['profile/inbox'] = 'profile/inbox';
 
 // Store
 $route['store'] = 'store';
@@ -184,7 +186,7 @@ $route['notification/(:num)/seen'] = 'notification/seen/$1';
 
 //Survey
 $route['survey'] = 'survey';
-$route['survey/answer'] = 'survey/answer';
+$route['survey/answer/(:any)'] = 'survey/answer/$1';
 
 //Others
 $route['404_override'] = '';

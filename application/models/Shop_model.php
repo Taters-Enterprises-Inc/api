@@ -3,7 +3,76 @@
 class Shop_model extends CI_Model 
 {
     
-    //jepoy get store id by hash key
+    public function __construct(){
+		$this->db =  $this->load->database('default', TRUE, TRUE);
+        $this->bscDB = $this->load->database('bsc', TRUE, TRUE);
+    }
+    
+    public function getUserInboxHistoryCount($type, $id, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('notifications A');
+        $this->db->join('notification_events B', 'B.id = A.notification_event_id');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses C', 'C.id = B.customer_survey_response_id', 'left');
+        $this->db->where('B.notification_event_type_id', 4);
+    
+        
+        if ($type == 'mobile') {
+            $this->db->where('A.mobile_user_to_notify', $id);
+
+        } else if($type == 'facebook') {
+            $this->db->where('A.fb_user_to_notify', $id);
+        }
+
+            
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.text', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getUserInboxHistory($type, $id, $row_no, $row_per_page, $order_by,  $order, $search){
+
+        $this->db->select('
+            A.id,
+            A.dateadded,
+            B.text,
+            C.hash as survey_hash,
+        ');
+
+        $this->db->from('notifications A');
+        $this->db->join('notification_events B', 'B.id = A.notification_event_id');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses C', 'C.id = B.customer_survey_response_id', 'left');
+        $this->db->where('B.notification_event_type_id', 4);
+
+        if ($type == 'mobile') {
+            $this->db->where('A.mobile_user_to_notify', $id);
+
+        } else if($type == 'facebook') {
+            $this->db->where('A.fb_user_to_notify', $id);
+        }
+        
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.text', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+            
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
     public function get_store_id_by_hash_key($hash_key){
         $this->db->select('store');
         $this->db->where('hash_key', $hash_key);
@@ -28,6 +97,7 @@ class Shop_model extends CI_Model
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses E', 'E.transaction_id = A.id', 'left');
     
         
         if ($type == 'mobile') {
@@ -57,6 +127,7 @@ class Shop_model extends CI_Model
         $this->db->select('
             A.id,
             A.dateadded,
+            A.status,
             A.tracking_no,
             A.purchase_amount,
             A.distance_price,
@@ -64,13 +135,14 @@ class Shop_model extends CI_Model
             C.generated_raffle_code,
             C.application_status,
             A.hash_key,
+            E.hash as survey_hash,
         ');
 
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
-    
+        $this->db->join($this->bscDB->database.'.customer_survey_responses E', 'E.transaction_id = A.id', 'left');
 
 
         if ($type == 'mobile') {
