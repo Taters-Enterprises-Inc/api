@@ -66,6 +66,7 @@ class Survey extends CI_Controller {
 						
 						$customer_survey = array(
 							"transaction_id" => $order_details['clients_info']->id,
+							"order_no" => $order_details['clients_info']->invoice_num,
 							"order_date" =>  $order_details['clients_info']->dateadded,
 							"store_id" =>  $order_details['clients_info']->store,
 							'customer_survey_response_order_type_id' => 2,
@@ -94,6 +95,7 @@ class Survey extends CI_Controller {
 
 						$customer_survey = array(
 							"catering_transaction_id" => $order_details['clients_info']->id,
+							"order_no" => $order_details['clients_info']->invoice_num,
 							"order_date" =>  $order_details['clients_info']->dateadded,
 							"store_id" =>  $order_details['clients_info']->store,
 							'customer_survey_response_order_type_id' => 3,
