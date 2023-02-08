@@ -23,6 +23,13 @@ class User_Authentication extends CI_Controller {
 		if($this->facebook->is_authenticated()){
 			// Get user info from facebook
 			$fbUser = $this->facebook->request('get', '/me?fields=id,first_name,last_name,email,link,gender,picture');
+            $login_point = $_SESSION['fb_login_point'];
+            
+            if(isset($fbUser['error'])){
+                $result = false;
+                redirect($login_point);	
+                return;
+            }
 
             // Preparing data for database insertion
             $userData['oauth_provider'] = 'facebook';
@@ -51,8 +58,8 @@ class User_Authentication extends CI_Controller {
 			// Facebook logout URL
 			$data['logoutURL'] = $this->facebook->logout_url();
             $result = true;
-            $login_point = $_SESSION['fb_login_point'];
 			redirect($login_point);	
+            return;
 		}else{
 			// Facebook authentication url
             $data['authURL'] =  $this->facebook->login_url();

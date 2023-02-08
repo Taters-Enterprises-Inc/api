@@ -38,14 +38,13 @@ class Notification_model extends CI_Model {
             A.dateseen,
             B.text,
             B.notification_event_type_id,
+            B.customer_survey_response_id,
             
             C.id as transaction_tb_id,
             D.id as catering_transaction_tb_id,
-            E.id as deals_redeems_tb_id,
             
             C.tracking_no,
             D.tracking_no as catering_tracking_no,
-            E.redeem_code,
             
         ');
 
@@ -54,7 +53,6 @@ class Notification_model extends CI_Model {
         
         $this->db->join('transaction_tb C', 'C.id = B.transaction_tb_id','left');
         $this->db->join('catering_transaction_tb D', 'D.id = B.catering_transaction_tb_id','left');
-        $this->db->join('deals_redeems_tb E', 'E.id = B.deals_redeems_tb_id','left');
 
         if($is_unseen){
             $this->db->where('A.dateseen', NULL);

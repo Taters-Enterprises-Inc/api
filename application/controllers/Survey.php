@@ -18,7 +18,9 @@ class Survey extends CI_Controller {
 		$this->load->model('shop_model');
 		$this->load->model('catering_model');
 		$this->load->model('deals_model');
+		$this->load->model('user_model');
 		$this->load->model('notification_model');
+		$this->load->model('store_model');
 	}
 
 	public function index(){
@@ -54,10 +56,14 @@ class Survey extends CI_Controller {
 				$fb_user_id = $this->session->userData['fb_user_id'] ?? null;
 				$mobile_user_id = $this->session->userData['mobile_user_id'] ?? null;
                 $generated_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+				$admin_and_csr_notification_event_message = '';
 
 				switch($service){
 					case 'snackshop':
 						$order_details = $this->shop_model->view_order($order_hash);
+						$store_id = $order_details['clients_info']->store;
+						$admin_and_csr_notification_event_message = $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." feedbacks in snackshop!";
+						
 						$customer_survey = array(
 							"transaction_id" => $order_details['clients_info']->id,
 							"order_date" =>  $order_details['clients_info']->dateadded,
@@ -69,14 +75,23 @@ class Survey extends CI_Controller {
 							"hash" => $generated_hash,
 						);
 								
-						$notification_event_data = array(
+						$mobile_and_fb_survey_notification_event_data = array(
 							"notification_event_type_id" => 6,
 							"transaction_tb_id" => $order_details['clients_info']->id,
-							"text" => 'Giftcard instruction.'
+							"text" => 'Gift instruction.'
+						);
+						
+						$admin_and_csr_notification_event_data = array(
+							"notification_event_type_id" => 7,
+							"transaction_tb_id" => $order_details['clients_info']->id,
+							"text" => $admin_and_csr_notification_event_message,
 						);
 						break;
 					case 'catering':
 						$order_details = $this->catering_model->view_order($order_hash);
+						$store_id = $order_details['clients_info']->store;
+						$admin_and_csr_notification_event_message = $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." feedbacks in catering!";
+
 						$customer_survey = array(
 							"catering_transaction_id" => $order_details['clients_info']->id,
 							"order_date" =>  $order_details['clients_info']->dateadded,
@@ -88,13 +103,21 @@ class Survey extends CI_Controller {
 							"hash" => $generated_hash,
 						);
 						
-						$notification_event_data = array(
+						$mobile_and_fb_survey_notification_event_data = array(
 							"notification_event_type_id" => 6,
 							"catering_transaction_tb_id" => $order_details['clients_info']->id,
-							"text" => 'Giftcard instruction.'
+							"text" => 'Gift instruction.'
+						);
+
+						$admin_and_csr_notification_event_data = array(
+							"notification_event_type_id" => 7,
+							"catering_transaction_tb_id" => $order_details['clients_info']->id,
+							"text" => $admin_and_csr_notification_event_message,
 						);
 						break;
 					default:  // WALK IN
+						$admin_and_csr_notification_event_message =  $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." feedbacks in walk-in!";
+
 						$customer_survey = array(
 							"order_no" => $order_no,
 							"order_date" => $order_date,
@@ -106,18 +129,22 @@ class Survey extends CI_Controller {
 							"hash" => $generated_hash,
 						);
 						
-						$notification_event_data = array(
+						$mobile_and_fb_survey_notification_event_data = array(
 							"notification_event_type_id" => 5,
 							"text" => "Thank you, check your survey. ",
 						);
 						
+						$admin_and_csr_notification_event_data = array(
+							"notification_event_type_id" => 7,
+							"text" => $admin_and_csr_notification_event_message,
+						);
 						break;
 				}
 
 
 				$customer_survey_id = $this->survey_model->insertCustomerSurveyResponse($customer_survey);
 
-				$notification_event_data['customer_survey_response_id'] = $customer_survey_id;
+				$mobile_and_fb_survey_notification_event_data['customer_survey_response_id'] = $customer_survey_id;
 
 				foreach($answers as $answer){
 					if(isset($answer['surveyQuestionRatingId'])){
@@ -145,19 +172,71 @@ class Survey extends CI_Controller {
 					}
 				}
 				
-				$notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+				$mobile_and_fb_survey_notification_event_id = $this->notification_model->insertAndGetNotificationEvent($mobile_and_fb_survey_notification_event_data);
+				
 
 				//mobile or fb             
-				$notifications_data = array(
+				$mobile_and_fb_survey_notification_data = array(
 					"fb_user_to_notify" => $this->session->userData['fb_user_id'] ?? null,
 					"mobile_user_to_notify" => $this->session->userData['mobile_user_id'] ?? null,
 					"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
 					"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
-					'notification_event_id' => $notification_event_id,
+					'notification_event_id' => $mobile_and_fb_survey_notification_event_id,
 					"dateadded" => date('Y-m-d H:i:s'),
 				);
 				
-				$this->notification_model->insertNotification($notifications_data);   
+				$this->notification_model->insertNotification($mobile_and_fb_survey_notification_data);   
+
+				$admin_and_csr_notification_event_data['customer_survey_response_id'] = $customer_survey_id;
+				
+				$admin_and_csr_notification_event_id = $this->notification_model->insertAndGetNotificationEvent($admin_and_csr_notification_event_data);
+				
+				//store group
+				$users = $this->store_model->getUsersStoreGroupsByStoreId($store_id);
+				foreach($users as $user){
+					$admin_and_csr_notification_event_data = array(
+						"user_to_notify" => $user->user_id,
+						"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+						"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+						'notification_event_id' => $admin_and_csr_notification_event_id,
+						"dateadded" => date('Y-m-d H:i:s'),
+					);
+
+					$this->notification_model->insertNotification($admin_and_csr_notification_event_data);   
+				}
+                        
+				//admin
+				$admin_users = $this->user_model->getUsersByGroupId(1);
+				foreach($admin_users as $user){
+					$admin_and_csr_notification_event_data = array(
+						"user_to_notify" => $user->user_id,
+						"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+						"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+						'notification_event_id' => $admin_and_csr_notification_event_id,
+						"dateadded" => date('Y-m-d H:i:s'),
+					);
+					$this->notification_model->insertNotification($admin_and_csr_notification_event_data);   
+				}
+				
+				//csr admin
+				$csr_admin_users = $this->user_model->getUsersByGroupId(10);
+				foreach($csr_admin_users as $user){
+					$admin_and_csr_notification_event_data = array(
+						"user_to_notify" => $user->user_id,
+						"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+						"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+						'notification_event_id' => $admin_and_csr_notification_event_id,
+						"dateadded" => date('Y-m-d H:i:s'),
+					);
+					$this->notification_model->insertNotification($admin_and_csr_notification_event_data);   
+				}
+				
+				$realtime_notification = array(
+					"store_id" => $store_id,
+					"message" => $admin_and_csr_notification_event_message,
+				);
+
+				notify('admin-survey-verification','new-survey', $realtime_notification);
 				
 
 				$response = array(
