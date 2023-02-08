@@ -48,6 +48,7 @@ class Shop_model extends CI_Model
             A.dateadded,
             B.notification_event_type_id,
             B.text,
+            C.order_no,
             C.hash as survey_hash,
             D.hash_key as transaction_hash,
             E.hash_key as catering_transaction_hash,
