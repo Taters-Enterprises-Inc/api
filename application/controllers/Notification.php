@@ -49,9 +49,9 @@ class Notification extends CI_Controller {
 							'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 3, $type),
 						),
 						"inbox" => array(
-							'notifications'=> $this->notification_model->getNotifications($user_id, 4, false, $type),
-							"unseen_notifications" => $this->notification_model->getNotifications($user_id, 4, true, $type),
-							'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 4, $type),
+							'notifications'=> $this->notification_model->getNotifications($user_id, [4,5,6], false, $type),
+							"unseen_notifications" => $this->notification_model->getNotifications($user_id, [4,5,6], true, $type),
+							'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, [4,5,6], $type),
 						),
 					),
 					"message" => "Succesfully fetch notification"

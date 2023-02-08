@@ -5,6 +5,25 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+
+
+    public function getCustomerSurveyResponse($survey_verification_id){
+        $this->bsc_db->select('
+            A.id,
+            A.transaction_id,
+            A.catering_transaction_id,
+            A.fb_user_id,
+            A.mobile_user_id,
+        ');
+
+        $this->bsc_db->from('customer_survey_responses A');
+        $this->bsc_db->where('A.id', $survey_verification_id);
+
+        $query_customer_survey_response = $this->bsc_db->get();
+
+        return $query_customer_survey_response->row();
+    }
+
     
     function getPopClubCompletedTransactionCount($store){
         $this->db->select('count(*) as all_count');
@@ -541,7 +560,7 @@ class Admin_model extends CI_Model
             $this->db->where('id',$customer_survey_response->fb_user_id);
         }else if($customer_survey_response->mobile_user_id){
             $this->db->from('mobile_users');
-            $this->db->where('id',$customer_survey_response->fb_user_id);
+            $this->db->where('id',$customer_survey_response->mobile_user_id);
         }
         
 		$query_user = $this->db->get();

@@ -208,7 +208,6 @@ class Transaction extends CI_Controller {
                         $this->notification_model->insertNotification($notifications_data);   
                     
 
-
                         $real_time_notification = array(
                             "store_id" => $store_id,
                             "message" => $message,
@@ -579,7 +578,6 @@ class Transaction extends CI_Controller {
                             "dateadded" => date('Y-m-d H:i:s'),
                         );
                         $this->notification_model->insertNotification($notifications_data);   
-                        
 
                         $realtime_notification = array(
                             "store_id" => $store_id,

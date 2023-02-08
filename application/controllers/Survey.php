@@ -55,8 +55,6 @@ class Survey extends CI_Controller {
 				$mobile_user_id = $this->session->userData['mobile_user_id'] ?? null;
                 $generated_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 
-				$message = "Thank you, check your survey. ";
-
 				switch($service){
 					case 'snackshop':
 						$order_details = $this->shop_model->view_order($order_hash);
@@ -72,9 +70,9 @@ class Survey extends CI_Controller {
 						);
 								
 						$notification_event_data = array(
-							"notification_event_type_id" => 4,
+							"notification_event_type_id" => 6,
 							"transaction_tb_id" => $order_details['clients_info']->id,
-							"text" => $message
+							"text" => 'Giftcard instruction.'
 						);
 						break;
 					case 'catering':
@@ -91,9 +89,9 @@ class Survey extends CI_Controller {
 						);
 						
 						$notification_event_data = array(
-							"notification_event_type_id" => 4,
-							"transaction_tb_id" => $order_details['clients_info']->id,
-							"text" => $message
+							"notification_event_type_id" => 6,
+							"catering_transaction_tb_id" => $order_details['clients_info']->id,
+							"text" => 'Giftcard instruction.'
 						);
 						break;
 					default:  // WALK IN
@@ -109,8 +107,8 @@ class Survey extends CI_Controller {
 						);
 						
 						$notification_event_data = array(
-							"notification_event_type_id" => 4,
-							"text" => $message
+							"notification_event_type_id" => 5,
+							"text" => "Thank you, check your survey. ",
 						);
 						
 						break;

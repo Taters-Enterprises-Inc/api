@@ -973,6 +973,31 @@ class Admin extends CI_Controller{
         $status = $this->input->post('status');
 
         $this->admin_model->changeStatusSurveyVerification($survey_verification_id, $status);
+        $surveyVerification = $this->admin_model->getCustomerSurveyResponse($survey_verification_id);
+
+        if((int)$status === 2){
+						$notification_event_data = array(
+							"notification_event_type_id" => 6,
+							"transaction_tb_id" => $surveyVerification->transaction_id,
+							"catering_transaction_tb_id" => $surveyVerification->catering_transaction_id,
+              'customer_survey_response_id' => $surveyVerification->id,
+							"text" => 'Gift instruction text.'
+						);
+                        
+            $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                            
+            //mobile or fb             
+            $notifications_data = array(
+                "fb_user_to_notify" => $surveyVerification->fb_user_id,
+                "mobile_user_to_notify" => $surveyVerification->mobile_user_id,
+                "fb_user_who_fired_event" => $surveyVerification->fb_user_id,
+                "mobile_user_who_fired_event" => $surveyVerification->mobile_user_id,
+                'notification_event_id' => $notification_event_id,
+                "dateadded" => date('Y-m-d H:i:s'),
+            );
+            
+            $this->notification_model->insertNotification($notifications_data); 
+        }
 
         $response = array(
           "message" => 'Successfully update survey verification status',
@@ -1623,8 +1648,9 @@ class Admin extends CI_Controller{
       case 'POST': 
 				$_POST =  json_decode(file_get_contents("php://input"), true);
 
-        $fb_user_id = $this->input->post('fb_user_id');
-        $mobile_user_id = $this->input->post('mobile_user_id');
+        $fb_user_id = $this->input->post('fbUserId');
+        $mobile_user_id = $this->input->post('mobileUserId');
+
 
         $password = $this->input->post('password');
         
@@ -1651,6 +1677,7 @@ class Admin extends CI_Controller{
         elseif ($from_status_id == 6) $from_status = "Initial Payment Verified";
         elseif ($from_status_id == 7) $from_status = "Final Payment Uploaded";
         elseif ($from_status_id == 8) $from_status = "Final payment verified";
+        elseif ($from_status_id == 9) $from_status = "Catering booking completed";
         elseif ($from_status_id == 20) $from_status = "Booking denied";
         elseif ($from_status_id == 21) $from_status = "Contract denied";
         elseif ($from_status_id == 22) $from_status = "Initial Payment denied";
@@ -1664,6 +1691,7 @@ class Admin extends CI_Controller{
         elseif ($to_status_id == 6) $to_status = "Initial Payment Verified";
         elseif ($to_status_id == 7) $to_status = "Final Payment Uploaded";
         elseif ($to_status_id == 8) $to_status = "Final payment verified";
+        elseif ($to_status_id == 9) $to_status = "Catering booking completed";
         elseif ($to_status_id == 20) $to_status = "Booking denied";
         elseif ($to_status_id == 21) $to_status = "Contract denied";
         elseif ($to_status_id == 22) $to_status = "Initial Payment denied";
@@ -1695,6 +1723,29 @@ class Admin extends CI_Controller{
           elseif ($request == "change_status"){
             $this->logs_model->insertCateringTransactionLogs($user_id, 1, $transaction_id, 'Change booking status from ' . $from_status . ' to ' . $to_status);
             
+            
+            if($to_status_id === 9){
+              $notification_event_data = array(
+                "notification_event_type_id" => 4,
+                "catering_transaction_tb_id" => $transaction_id,
+                "text" => 'Please try our feedback now.'
+              );
+                          
+              $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                              
+              //mobile or fb             
+              $notifications_data = array(
+                  "fb_user_to_notify" => $fb_user_id,
+                  "mobile_user_to_notify" => $mobile_user_id,
+                  "fb_user_who_fired_event" => $fb_user_id,
+                  "mobile_user_who_fired_event" => $mobile_user_id,
+                  'notification_event_id' => $notification_event_id,
+                  "dateadded" => date('Y-m-d H:i:s'),
+              );
+              
+              $this->notification_model->insertNotification($notifications_data); 
+            }
+
             $real_time_notification = array(
                 "fb_user_id" => $fb_user_id,
                 "mobile_user_id" => $mobile_user_id,
@@ -1725,8 +1776,8 @@ class Admin extends CI_Controller{
       case 'POST': 
 				$_POST =  json_decode(file_get_contents("php://input"), true);
 
-        $fb_user_id = $this->input->post('fb_user_id');
-        $mobile_user_id = $this->input->post('mobile_user_id');
+        $fb_user_id = $this->input->post('fbUserId');
+        $mobile_user_id = $this->input->post('mobileUserId');
 
         $password = $this->input->post('password');
         
@@ -1791,6 +1842,29 @@ class Admin extends CI_Controller{
           elseif ($request == "change_status"){
             $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Change order status from ' . $from_status . ' to ' . $to_status);
             
+            
+            if($to_status_id === 6){
+              $notification_event_data = array(
+                "notification_event_type_id" => 4,
+                "transaction_tb_id" => $transaction_id,
+                "text" => 'Please try our feedback now.'
+              );
+                          
+              $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                              
+              //mobile or fb             
+              $notifications_data = array(
+                  "fb_user_to_notify" => $fb_user_id,
+                  "mobile_user_to_notify" => $mobile_user_id,
+                  "fb_user_who_fired_event" => $fb_user_id,
+                  "mobile_user_who_fired_event" => $mobile_user_id,
+                  'notification_event_id' => $notification_event_id,
+                  "dateadded" => date('Y-m-d H:i:s'),
+              );
+              
+              $this->notification_model->insertNotification($notifications_data); 
+            }
+
             $real_time_notification = array(
                 "fb_user_id" => $fb_user_id,
                 "mobile_user_id" => $mobile_user_id,
@@ -1843,6 +1917,29 @@ class Admin extends CI_Controller{
         if ($fetch_data == 1) {
           $this->logs_model->insertCateringTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Booking Success');
           
+          
+          if($status === 9){
+						$notification_event_data = array(
+							"notification_event_type_id" => 4,
+							"catering_transaction_tb_id" => $trans_id,
+							"text" => 'Please try our feedback now.'
+						);
+                        
+            $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                            
+            //mobile or fb             
+            $notifications_data = array(
+                "fb_user_to_notify" => $fb_user_id,
+                "mobile_user_to_notify" => $mobile_user_id,
+                "fb_user_who_fired_event" => $fb_user_id,
+                "mobile_user_who_fired_event" => $mobile_user_id,
+                'notification_event_id' => $notification_event_id,
+                "dateadded" => date('Y-m-d H:i:s'),
+            );
+            
+            $this->notification_model->insertNotification($notifications_data); 
+          }
+
           $real_time_notification = array(
             "fb_user_id" => (int) $fb_user_id,
             "mobile_user_id" => (int) $mobile_user_id,
@@ -1887,10 +1984,32 @@ class Admin extends CI_Controller{
         if ($fetch_data == 1) {
           $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Order Success');
           $this->status_notification($trans_id, 9, $user_id);
+
+          if($status === 6){
+						$notification_event_data = array(
+							"notification_event_type_id" => 4,
+							"transaction_tb_id" => $trans_id,
+							"text" => 'Please try our feedback now.'
+						);
+                        
+            $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                            
+            //mobile or fb             
+            $notifications_data = array(
+                "fb_user_to_notify" => $fb_user_id,
+                "mobile_user_to_notify" => $mobile_user_id,
+                "fb_user_who_fired_event" => $fb_user_id,
+                "mobile_user_who_fired_event" => $mobile_user_id,
+                'notification_event_id' => $notification_event_id,
+                "dateadded" => date('Y-m-d H:i:s'),
+            );
+            
+            $this->notification_model->insertNotification($notifications_data); 
+          }
           
           $real_time_notification = array(
-              "fb_user_id" => (int) $fb_user_id,
-              "mobile_user_id" => (int) $mobile_user_id,
+              "fb_user_id" => $fb_user_id,
+              "mobile_user_id" => $mobile_user_id,
               "status" => $status,
           );
 

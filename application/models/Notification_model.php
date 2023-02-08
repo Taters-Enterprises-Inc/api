@@ -4,9 +4,9 @@ date_default_timezone_set('Asia/Manila');
 class Notification_model extends CI_Model {
 
     public function __construct(){
-        $this->load->database();
+        $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
-
+    
     public function insertAndGetNotificationEvent(
         $notification_event_data
     ){
@@ -61,7 +61,7 @@ class Notification_model extends CI_Model {
         }
 
         if(isset($notification_event_type_id)){
-            $this->db->where('B.notification_event_type_id',$notification_event_type_id);
+            $this->db->where_in('B.notification_event_type_id',$notification_event_type_id);
         }
 
         if($type =='mobile'){
@@ -94,7 +94,7 @@ class Notification_model extends CI_Model {
         $this->db->where('A.dateseen', NULL);
         
         if(isset($notification_event_type_id)){
-            $this->db->where('B.notification_event_type_id',$notification_event_type_id);
+            $this->db->where_in('B.notification_event_type_id',$notification_event_type_id);
         }
 
         if($type =='mobile'){
