@@ -969,21 +969,43 @@ class Admin extends CI_Controller{
       case 'POST':
         $_POST =  json_decode(file_get_contents("php://input"), true);
         
-        $survey_verification_id = $this->input->post('surveyverificationId');
+        $survey_verification_id = $this->input->post('surveyVerificationId');
         $status = $this->input->post('status');
+        $invoice_no = $this->input->post('invoiceNo');
 
         $this->admin_model->changeStatusSurveyVerification($survey_verification_id, $status);
         $surveyVerification = $this->admin_model->getCustomerSurveyResponse($survey_verification_id);
 
         if((int)$status === 2){
 						$notification_event_data = array(
-							"notification_event_type_id" => 6,
+							"notification_event_type_id" => 4,
 							"transaction_tb_id" => $surveyVerification->transaction_id,
 							"catering_transaction_tb_id" => $surveyVerification->catering_transaction_id,
               'customer_survey_response_id' => $surveyVerification->id,
-							"text" => 'Gift instruction text.'
+							"text" => 'Claim your gift!'
+						);
+            
+						$notification_message_data = array(
+							"title" => "Claim your gift!",
+							"body" => "Here are the steps to claim your gift:
+							
+									1. Send an email to stacey@rafflepress.com within 7 days to claim your prize
+									2. Please confirm that it’s OK for us to publish your name on our social media channels and website
+									3. This is optional, but if you’re as excited as we are about your win, take a selfie and share it with us!
+
+									If you have any questions, just hit reply on this email and I’ll be happy to help!
+              ",
+							"message_from" => "Taters Enterprises Inc.",
+							"contact_number" => "(+64) 977-275-5595",
+							"email" => "tei.csr@tatersgroup.com",
+							"image_title" => $invoice_no,
+							"image_url" => "https://www.ilovetaters.com/api/assets/images/home/cards/taters_branches.jpg",
 						);
                         
+            $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+
+            $notification_event_data['notification_message_id'] = $notification_message_id;
+
             $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
                             
             //mobile or fb             
@@ -1172,9 +1194,9 @@ class Admin extends CI_Controller{
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 3, 'admin'),
               ),
               "survey_verification" => array(
-                'notifications'=> $this->notification_model->getNotifications($user_id, 7, false, 'admin'),
-                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 7, true, 'admin'),
-                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 7, 'admin'),
+                'notifications'=> $this->notification_model->getNotifications($user_id, 5, false, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 5, true, 'admin'),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 5, 'admin'),
               ),
             ),
             "message" => "Succesfully fetch notification"
@@ -1660,6 +1682,7 @@ class Admin extends CI_Controller{
         $password = $this->input->post('password');
         
         $transaction_id = $this->input->post('transactionId');
+        $transaction_hash = $this->input->post('transactionHash');
 
         $from_store_id = $this->input->post('fromStoreId');
         $to_store_id = $this->input->post('toStoreId');
@@ -1733,9 +1756,22 @@ class Admin extends CI_Controller{
               $notification_event_data = array(
                 "notification_event_type_id" => 4,
                 "catering_transaction_tb_id" => $transaction_id,
-                "text" => 'Please try our feedback now.'
+                "text" => "Answer the feedback, and you'll have a free gift!",
+              );
+              
+              $notification_message_data = array(
+                "title" => "Answer the feedback, and you'll have a free gift!",
+                "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
+                "message_from" => "Taters Enterprises Inc.",
+                "contact_number" => "(+64) 977-275-5595",
+                "email" => "tei.csr@tatersgroup.com",
+                "internal_link_title" => "Feedback Questionnaire",
+                "internal_link_url" => "/feedback/catering/". $transaction_hash,
               );
                           
+              $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+              $notification_event_data['notification_message_id'] = $notification_message_id;
+
               $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
                               
               //mobile or fb             
@@ -1787,6 +1823,7 @@ class Admin extends CI_Controller{
         $password = $this->input->post('password');
         
         $transaction_id = $this->input->post('transactionId');
+        $transaction_hash = $this->input->post('transactionHash');
 
         $from_store_id = $this->input->post('fromStoreId');
         $to_store_id = $this->input->post('toStoreId');
@@ -1852,9 +1889,21 @@ class Admin extends CI_Controller{
               $notification_event_data = array(
                 "notification_event_type_id" => 4,
                 "transaction_tb_id" => $transaction_id,
-                "text" => 'Please try our feedback now.'
+                "text" => "Answer the feedback, and you'll have a free gift!"
+              );
+              
+              $notification_message_data = array(
+                "title" => "Answer the feedback, and you'll have a free gift!",
+                "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
+                "message_from" => "Taters Enterprises Inc.",
+                "contact_number" => "(+64) 977-275-5595",
+                "email" => "tei.csr@tatersgroup.com",
+                "internal_link_title" => "Feedback Questionnaires",
+                "internal_link_url" => "/feedback/snackshop/". $transaction_hash,
               );
                           
+              $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+              $notification_event_data['notification_message_id'] = $notification_message_id;
               $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
                               
               //mobile or fb             
@@ -1900,6 +1949,7 @@ class Admin extends CI_Controller{
       case 'POST': 
         $_POST = json_decode(file_get_contents("php://input"), true);
         $trans_id = (int) $this->input->post('transactionId');
+        $transaction_hash = $this->input->post('transactionHash');
         $status = $this->input->post('status');
         $fetch_data = $this->admin_model->update_catering_status($trans_id, $status);
         $user_id = $this->session->admin['user_id'];
@@ -1927,9 +1977,22 @@ class Admin extends CI_Controller{
 						$notification_event_data = array(
 							"notification_event_type_id" => 4,
 							"catering_transaction_tb_id" => $trans_id,
-							"text" => 'Please try our feedback now.'
+							"text" => "Answer the feedback, and you'll have a free gift!"
+						);
+            
+						$notification_message_data = array(
+              "title" => "Answer the feedback, and you'll have a free gift!",
+              "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
+							"message_from" => "Taters Enterprises Inc.",
+							"contact_number" => "(+64) 977-275-5595",
+							"email" => "tei.csr@tatersgroup.com",
+							"internal_link_title" => "Feedback Questionnaires",
+							"internal_link_url" => "/feedback/catering/". $transaction_hash,
 						);
                         
+            $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+            $notification_event_data['notification_message_id'] = $notification_message_id;
+
             $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
                             
             //mobile or fb             
@@ -1970,6 +2033,7 @@ class Admin extends CI_Controller{
       case 'POST': 
         $_POST = json_decode(file_get_contents("php://input"), true);
         $trans_id = (int) $this->input->post('transactionId');
+        $transaction_hash = $this->input->post('transactionHash');
         $user_id = $this->session->admin['user_id'];
         $status = $this->input->post('status');
         $fetch_data = $this->admin_model->update_shop_status($trans_id, $status);
@@ -1994,9 +2058,21 @@ class Admin extends CI_Controller{
 						$notification_event_data = array(
 							"notification_event_type_id" => 4,
 							"transaction_tb_id" => $trans_id,
-							"text" => 'Please try our feedback now.'
+							"text" => 'You have a survey.'
+						);
+
+						$notification_message_data = array(
+							"title" => "You have a survey",
+							"body" => "Survey message",
+							"message_from" => "Taters Enterprises Inc.",
+							"contact_number" => "(+64) 977-275-5595",
+							"email" => "tei.csr@tatersgroup.com",
+							"internal_link_title" => "Feedback Questionnaires",
+							"internal_link_url" => "/feedback/snackshop/". $transaction_hash,
 						);
                         
+            $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+            $notification_event_data['notification_message_id'] = $notification_message_id;
             $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
                             
             //mobile or fb             

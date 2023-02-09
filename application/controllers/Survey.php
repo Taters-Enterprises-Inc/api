@@ -48,7 +48,7 @@ class Survey extends CI_Controller {
 				$_POST = json_decode(file_get_contents("php://input"), true);
 
 				$answers = $this->input->post('answers');
-				$order_no = $this->input->post('orderedNo');
+				$invoice_no = $this->input->post('invoiceNo');
 				$order_date = $this->input->post('orderedDate');
 				$store_id = $this->input->post('storeId');
 				$order_hash = $this->input->post('orderHash');
@@ -62,11 +62,12 @@ class Survey extends CI_Controller {
 					case 'snackshop':
 						$order_details = $this->shop_model->view_order($order_hash);
 						$store_id = $order_details['clients_info']->store;
+						$invoice_no = $order_details['clients_info']->invoice_num;
 						$admin_and_csr_notification_event_message = $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." feedbacks in snackshop!";
 						
 						$customer_survey = array(
 							"transaction_id" => $order_details['clients_info']->id,
-							"order_no" => $order_details['clients_info']->invoice_num,
+							"invoice_no" => $order_details['clients_info']->invoice_num,
 							"order_date" =>  $order_details['clients_info']->dateadded,
 							"store_id" =>  $order_details['clients_info']->store,
 							'customer_survey_response_order_type_id' => 2,
@@ -77,25 +78,43 @@ class Survey extends CI_Controller {
 						);
 								
 						$mobile_and_fb_survey_notification_event_data = array(
-							"notification_event_type_id" => 6,
+							"notification_event_type_id" => 4,
 							"transaction_tb_id" => $order_details['clients_info']->id,
-							"text" => 'Gift instruction.'
+							"text" => 'Claim Your Gift!'
 						);
 						
 						$admin_and_csr_notification_event_data = array(
-							"notification_event_type_id" => 7,
+							"notification_event_type_id" => 5,
 							"transaction_tb_id" => $order_details['clients_info']->id,
 							"text" => $admin_and_csr_notification_event_message,
+						);
+						
+						$mobile_and_fb_survey_notification_message_data = array(
+							"title" => "Claim Your Gift!",
+							"body" => "Here are the steps to claim your prize:
+							
+									1. Send an email to stacey@rafflepress.com within 7 days to claim your prize
+									2. Please confirm that it’s OK for us to publish your name on our social media channels and website
+									3. This is optional, but if you’re as excited as we are about your win, take a selfie and share it with us!
+
+									If you have any questions, just hit reply on this email and I’ll be happy to help!
+									",
+							"message_from" => "Taters Enterprises Inc.",
+							"contact_number" => "(+64) 977-275-5595",
+							"email" => "tei.csr@tatersgroup.com",
+							"image_title" => $invoice_no,
+							"image_url" => "https://www.ilovetaters.com/api/assets/images/home/cards/taters_branches.jpg",
 						);
 						break;
 					case 'catering':
 						$order_details = $this->catering_model->view_order($order_hash);
 						$store_id = $order_details['clients_info']->store;
+						$invoice_no = $order_details['clients_info']->invoice_num;
 						$admin_and_csr_notification_event_message = $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." feedbacks in catering!";
 
 						$customer_survey = array(
 							"catering_transaction_id" => $order_details['clients_info']->id,
-							"order_no" => $order_details['clients_info']->invoice_num,
+							"invoice_no" => $order_details['clients_info']->invoice_num,
 							"order_date" =>  $order_details['clients_info']->dateadded,
 							"store_id" =>  $order_details['clients_info']->store,
 							'customer_survey_response_order_type_id' => 3,
@@ -106,22 +125,41 @@ class Survey extends CI_Controller {
 						);
 						
 						$mobile_and_fb_survey_notification_event_data = array(
-							"notification_event_type_id" => 6,
+							"notification_event_type_id" => 4,
 							"catering_transaction_tb_id" => $order_details['clients_info']->id,
-							"text" => 'Gift instruction.'
+							"text" => 'Claim Your Gift!'
 						);
 
 						$admin_and_csr_notification_event_data = array(
-							"notification_event_type_id" => 7,
+							"notification_event_type_id" => 5,
 							"catering_transaction_tb_id" => $order_details['clients_info']->id,
 							"text" => $admin_and_csr_notification_event_message,
 						);
+
+						
+						$mobile_and_fb_survey_notification_message_data = array(
+							"title" => "Claim your gift!",
+							"body" => "Here are the steps to claim your gift:
+							
+									1. Send an email to stacey@rafflepress.com within 7 days to claim your prize
+									2. Please confirm that it’s OK for us to publish your name on our social media channels and website
+									3. This is optional, but if you’re as excited as we are about your win, take a selfie and share it with us!
+
+									If you have any questions, just hit reply on this email and I’ll be happy to help!
+									",
+							"message_from" => "Taters Enterprises Inc.",
+							"contact_number" => "(+64) 977-275-5595",
+							"email" => "tei.csr@tatersgroup.com",
+							"image_title" => $invoice_no,
+							"image_url" => "https://www.ilovetaters.com/api/assets/images/home/cards/taters_branches.jpg",
+						);
+
 						break;
 					default:  // WALK IN
 						$admin_and_csr_notification_event_message =  $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." feedbacks in walk-in!";
 
 						$customer_survey = array(
-							"order_no" => $order_no,
+							"invoice_no	" => $invoice_no,
 							"order_date" => $order_date,
 							"store_id" => $store_id,
 							'customer_survey_response_order_type_id' => 1,
@@ -132,21 +170,32 @@ class Survey extends CI_Controller {
 						);
 						
 						$mobile_and_fb_survey_notification_event_data = array(
-							"notification_event_type_id" => 5,
-							"text" => "Thank you, check your survey. ",
+							"notification_event_type_id" => 4,
+							"text" => "Thank you for completing our survey",
 						);
 						
 						$admin_and_csr_notification_event_data = array(
-							"notification_event_type_id" => 7,
+							"notification_event_type_id" => 5,
 							"text" => $admin_and_csr_notification_event_message,
 						);
+
+						$mobile_and_fb_survey_notification_message_data = array(
+							"title" => "Thank you for completing our survey",
+							"body" => "Your feedback is really important to us and we really appreciate the time you have taken. Feedback like this helps us constantly improve our customer experiences by knowing what we are doing right and what we can work on. We appreciate you taking the time to send us this helpful response.",
+							"closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+							"closing_salutation" => "Best wishes,",
+							"message_from" => "Taters Enterprises Inc.",
+							"contact_number" => "(+64) 977-275-5595",
+							"email" => "tei.csr@tatersgroup.com",
+							"internal_link_title" => "Survey Answer",
+							"internal_link_url" => "/feedback/complete/".$generated_hash,
+						);
+						
 						break;
 				}
 
 
 				$customer_survey_id = $this->survey_model->insertCustomerSurveyResponse($customer_survey);
-
-				$mobile_and_fb_survey_notification_event_data['customer_survey_response_id'] = $customer_survey_id;
 
 				foreach($answers as $answer){
 					if(isset($answer['surveyQuestionRatingId'])){
@@ -173,6 +222,11 @@ class Survey extends CI_Controller {
 						$this->survey_model->insertCustomerSurveyResponseAnswer($customer_survey_answer);
 					}
 				}
+
+				$mobile_and_fb_survey_notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($mobile_and_fb_survey_notification_message_data);
+
+				$mobile_and_fb_survey_notification_event_data['customer_survey_response_id'] = $customer_survey_id;
+				$mobile_and_fb_survey_notification_event_data['notification_message_id'] = $mobile_and_fb_survey_notification_message_id;
 				
 				$mobile_and_fb_survey_notification_event_id = $this->notification_model->insertAndGetNotificationEvent($mobile_and_fb_survey_notification_event_data);
 				
@@ -277,5 +331,6 @@ class Survey extends CI_Controller {
 				break;
 		}
 	}
+
 	
 }

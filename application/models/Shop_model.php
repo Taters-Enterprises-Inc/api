@@ -48,10 +48,22 @@ class Shop_model extends CI_Model
             A.dateadded,
             B.notification_event_type_id,
             B.text,
-            C.order_no,
+            C.invoice_no,
             C.hash as survey_hash,
             D.hash_key as transaction_hash,
             E.hash_key as catering_transaction_hash,
+
+            F.title,
+            F.body,
+            F.closing,
+            F.closing_salutation,
+            F.image_title,
+            F.image_url,
+            F.internal_link_title,
+            F.internal_link_url,
+            F.message_from,
+            F.email,
+            F.contact_number,
         ');
 
         $this->db->from('notifications A');
@@ -59,9 +71,10 @@ class Shop_model extends CI_Model
         $this->db->join($this->bscDB->database.'.customer_survey_responses C', 'C.id = B.customer_survey_response_id', 'left');
         $this->db->join('transaction_tb D', 'D.id = B.transaction_tb_id', 'left');
         $this->db->join('catering_transaction_tb E', 'E.id = B.catering_transaction_tb_id', 'left');
+
+        $this->db->join('notification_messages F', 'F.id = B.notification_message_id', 'left');
+
         $this->db->or_where('B.notification_event_type_id', 4);
-        $this->db->or_where('B.notification_event_type_id', 5);
-        $this->db->or_where('B.notification_event_type_id', 6);
 
         if ($type == 'mobile') {
             $this->db->where('A.mobile_user_to_notify', $id);

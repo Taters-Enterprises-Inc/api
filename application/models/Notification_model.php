@@ -7,6 +7,12 @@ class Notification_model extends CI_Model {
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
     
+    public function insertNotificationMessageAndGetId(
+        $notification_message_data
+    ){
+        $this->db->insert('notification_messages',$notification_message_data);
+        return $this->db->insert_id();
+    }
     public function insertAndGetNotificationEvent(
         $notification_event_data
     ){
@@ -59,7 +65,7 @@ class Notification_model extends CI_Model {
         }
 
         if(isset($notification_event_type_id)){
-            $this->db->where_in('B.notification_event_type_id',$notification_event_type_id);
+            $this->db->where('B.notification_event_type_id',$notification_event_type_id);
         }
 
         if($type =='mobile'){
@@ -92,7 +98,7 @@ class Notification_model extends CI_Model {
         $this->db->where('A.dateseen', NULL);
         
         if(isset($notification_event_type_id)){
-            $this->db->where_in('B.notification_event_type_id',$notification_event_type_id);
+            $this->db->where('B.notification_event_type_id',$notification_event_type_id);
         }
 
         if($type =='mobile'){

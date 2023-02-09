@@ -537,7 +537,7 @@ class Admin_model extends CI_Model
             A.fb_user_id,
             A.mobile_user_id,
             B.name as store_name,
-            A.order_no,
+            A.invoice_no,
             C.tracking_no as snackshop_tracking_no,
             D.tracking_no as catering_tracking_no,
             E.name as order_type,
@@ -634,7 +634,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->bsc_db->group_start();
-            $this->bsc_db->or_like('A.order_no', $search);
+            $this->bsc_db->or_like('A.invoice_no', $search);
             $this->bsc_db->or_like('B.name', $search);
             $this->bsc_db->or_like('C.first_name', $search);
             $this->bsc_db->or_like('C.last_name', $search);
@@ -659,7 +659,7 @@ class Admin_model extends CI_Model
             B.name as store_name,
             C.first_name,
             C.last_name,
-            A.order_no,
+            A.invoice_no,
             D.tracking_no as snackshop_tracking_no,
             E.tracking_no as catering_tracking_no,
             G.name as order_type
@@ -677,7 +677,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->bsc_db->group_start();
-            $this->bsc_db->or_like('A.order_no', $search);
+            $this->bsc_db->or_like('A.invoice_no', $search);
             $this->bsc_db->or_like('B.name', $search);
             $this->bsc_db->or_like('C.first_name', $search);
             $this->bsc_db->or_like('C.last_name', $search);
@@ -1839,6 +1839,7 @@ class Admin_model extends CI_Model
             A.tracking_no,
             A.purchase_amount,
             A.invoice_num,
+            A.hash_key,
 
             A.discount,
             A.discount_user_id,
@@ -1943,6 +1944,7 @@ class Admin_model extends CI_Model
             A.serving_time,
             A.tracking_no,
             A.invoice_num,
+            A.hash_key,
             A.logon_type,
             A.serving_time,
             A.start_datetime,
@@ -1951,7 +1953,6 @@ class Admin_model extends CI_Model
             A.event_class,
             A.company_name,
             A.remarks,
-            A.hash_key,
 
             A.purchase_amount,
             A.service_fee,
