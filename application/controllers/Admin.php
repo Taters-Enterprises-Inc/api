@@ -2058,12 +2058,12 @@ class Admin extends CI_Controller{
 						$notification_event_data = array(
 							"notification_event_type_id" => 4,
 							"transaction_tb_id" => $trans_id,
-							"text" => 'You have a survey.'
+              "text" => "Answer the feedback, and you'll have a free gift!",
 						);
 
 						$notification_message_data = array(
-							"title" => "You have a survey",
-							"body" => "Survey message",
+              "title" => "Answer the feedback, and you'll have a free gift!",
+              "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
 							"message_from" => "Taters Enterprises Inc.",
 							"contact_number" => "(+64) 977-275-5595",
 							"email" => "tei.csr@tatersgroup.com",
