@@ -23,6 +23,89 @@ class Admin extends CI_Controller{
 		$this->load->model('notification_model');
 		$this->load->model('report_model');
 	}
+  
+  public function deals(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $deals = $this->admin_model->getDeals();
+
+        $response = array(
+          "message" => "Successfully deals",
+          "data" => $deals,
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+  
+  public function packages(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $packages = $this->admin_model->getPackages();
+
+        $response = array(
+          "message" => "Successfully packages",
+          "data" => $packages,
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
+  public function locales(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        
+        $locales = $this->admin_model->getLocales();
+        
+        $response = array(
+          "message" => "Succesfully get locales",
+          "data" => $locales,
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+  
+  public function regions(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        
+        $regions = $this->admin_model->getRegions();
+        
+        $response = array(
+          "message" => "Succesfully get regions",
+          "data" => $regions,
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
+  public function store_menu(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $store_menus = $this->admin_model->getStoreMenus();
+        
+        $response = array(
+          "message" => "Succesfully get store menus",
+          "data" => $store_menus,
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
 
   public function total_sales($services){
     switch($this->input->server('REQUEST_METHOD')){
@@ -1243,32 +1326,7 @@ class Admin extends CI_Controller{
         break;
     }
   }
-
-  public function store_operating_hours(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'PUT':
-        $put = json_decode(file_get_contents("php://input"), true);
-        $store_id = $put['store_id'];
-        $available_start_time =  $put['available_start_time'];
-        $available_end_time =  $put['available_end_time'];
-
-        $this->admin_model->updateSettingStoreOperatingHours(
-          $store_id,
-          $available_start_time,
-          $available_end_time,
-        );
-
-        $response = array(
-          "message" => 'Successfully update operating hours',
-        );
   
-        header('content-type: application/json');
-        echo json_encode($response);
-        return;
-    }
-
-  }
-
   public function store(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -1279,18 +1337,6 @@ class Admin extends CI_Controller{
 
         $response = array(
           "data" => $store,
-          "message" => 'Successfully update status',
-        );
-  
-        header('content-type: application/json');
-        echo json_encode($response);
-        return;
-      case 'PUT':
-        $put = json_decode(file_get_contents("php://input"), true);
-
-        $this->admin_model->updateSettingStore($put['store_id'], $put['name_of_field_status'], $put['status']);
-
-        $response = array(
           "message" => 'Successfully update status',
         );
   
@@ -1341,18 +1387,113 @@ class Admin extends CI_Controller{
         header('content-type: application/json');
         echo json_encode($response);
         return;
-      case 'PUT':
-        $put = json_decode(file_get_contents("php://input"), true);
+      case 'POST':
 
-        $this->admin_model->updateSettingStore($put['id'], $put['name_of_field_status'], $put['status']);
+        if(is_uploaded_file($_FILES['image250x250']['tmp_name'])){
+          $store_image_name = str_replace(' ', '-', strtolower($this->input->post('name'))) . '-' . time() .'.jpg';
+          
+          $image250x250_error = upload('image250x250','./assets/images/shared/store_images/250',$store_image_name, 'jpg');
+
+          if($image250x250_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image250x250_error));
+            return;
+          }
+
+          $region = array(
+            "name" => $this->input->post('activeResellerRegion'),
+            "status" => 1,
+            "on_reseller_status" => 1,
+            "sequence" => 0,
+          );
+
+          $active_reseller_region_id = $this->admin_model->insertRegion($region);
+          
+          $region_store_combination_data = array(
+            "region_id" => $this->input->post('region'),
+            "region_store_id" => $active_reseller_region_id,
+          );
+
+           $this->admin_model->insertRegionStoreCombination($region_store_combination_data);
+
+          $last_store_create = $this->admin_model->getLatestStoreCreated();
+          $store_id = $last_store_create->store_id + 1;
+
+          $data = array(
+            "store_id" => $store_id,
+            "name" => $this->input->post('name'),
+            "address" => $this->input->post('address'),
+            "lat" => $this->input->post('lat'),
+            "lng" => $this->input->post('lng'),
+            "store_menu_type_id" => $this->input->post('storeMenu'),
+            "available_start_time" => $this->input->post('availableStartTime'),
+            "available_end_time" => $this->input->post('availableEndTime'),
+            "contact_number" => $this->input->post('phoneNumber'),
+            "contact_person" => $this->input->post('contactPerson'),
+            "email" => $this->input->post('email'),
+            "delivery_hours" => $this->input->post('deliveryHours'),
+            "operating_hours" => $this->input->post('operatingHours'),
+            "store_image" =>  $store_image_name,
+            'branch_status' => 1,
+            "region_id" => $this->input->post('region'),
+            "active_reseller_region_id" => $active_reseller_region_id,
+            "region_store_combination_id" => $active_reseller_region_id,
+            "menu_type" => 1,
+            "store_hash" => $this->input->post('storeHash'),
+            "locale" => $this->input->post('locale'),
+            "delivery_rate" => $this->input->post('deliveryRate'),
+            "minimum_rate" => $this->input->post('minimumRate'),
+            "catering_delivery_rate" => $this->input->post('cateringDeliveryRate'),
+            "catering_minimum_rate" => $this->input->post('cateringMinimumRate'),
+          );
+
+          $store_primary_key = $this->admin_model->insertStore($data);
+
+          $services = $this->input->post('services') ? json_decode($this->input->post('services'), true) : array();
+
+          foreach($services as $service){
+            $this->admin_model->updateSettingStore($store_primary_key, $service, 1);
+          }
+
+          $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
+          $region_da_logs = array();
+
+          foreach($products as $product){
+            $data = array(
+                'region_id' => $active_reseller_region_id,
+                'store_id' => $store_id,
+                'product_id' => $product['id'],
+                'status' => 1,
+            );
+            $region_da_logs[] = $data;
+          }
+  
+          $this->admin_model->insertShopProductRegionDaLogs($region_da_logs); 
+          
+          $packages = $this->input->post('packages') ? json_decode($this->input->post('packages'), true) : array();
+          $catering_region_da_logs = array();
+
+          foreach($packages as $package){
+            $data = array(
+                'region_id' => $active_reseller_region_id,
+                'store_id' => $store_id,
+                'product_id' => $package['id'],
+                'status' => 1,
+            );
+            $catering_region_da_logs[] = $data;
+          }
+  
+          $this->admin_model->insertCateringPackageRegionDaLogs($catering_region_da_logs); 
+        
+        }
 
         $response = array(
-          "message" => 'Successfully update status',
+          "message" => 'Successfully created a new store',
         );
   
         header('content-type: application/json');
         echo json_encode($response);
-        return;
+        break;
     }
 
   }

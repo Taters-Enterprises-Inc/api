@@ -103,6 +103,7 @@ $route['admin/stores'] = 'admin/stores';
 $route['admin/products'] = 'admin/products';
 $route['admin/store'] = 'admin/store';
 $route['admin/store-operating-hours'] = 'admin/store_operating_hours';
+$route['admin/store-menu'] = 'admin/store_menu';
 $route['admin/session'] = 'admin/session';
 $route['admin/payment'] = 'admin/payment';
 $route['admin/reference-num'] = 'admin/reference_num';
@@ -179,6 +180,10 @@ $route['bsc/user/status'] = 'bsc/user_status';
 
 $route['admin/sales/(:any)'] = 'admin/sales/$1';
 $route['admin/sales/(:any)/sum'] = 'admin/total_sales/$1';
+
+$route['admin/regions'] = 'admin/regions';
+$route['admin/active-reseller-regions'] = 'admin/active_reseller_regions';
+$route['admin/locales'] = 'admin/locales';
 
 //Notification
 $route['notification'] = 'notification';

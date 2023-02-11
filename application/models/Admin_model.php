@@ -5,6 +5,36 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+    
+    function insertRegion($data){
+        $this->db->trans_start();
+		$this->db->insert('region_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+
+    function insertRegionStoreCombination($data){
+        $this->db->trans_start();
+		$this->db->insert('region_store_combination_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    function getLatestStoreCreated(){
+        $this->db->select('store_id');
+        $this->db->from('store_tb');
+
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit(1);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
 
 
     public function getCustomerSurveyResponse($survey_verification_id){
@@ -25,6 +55,56 @@ class Admin_model extends CI_Model
     }
 
     
+    function getLocales(){
+        $this->db->select('id, locale_name as name');
+        $this->db->from('dotcom_locale_tb');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function getRegions(){
+        $this->db->select('id, name');
+        $this->db->from('region_tb');
+        
+        $this->db->where('status', 1);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function getActiveResellerRegions(){
+        $this->db->select('id, name');
+        $this->db->from('region_tb');
+        
+        $this->db->where('on_reseller_status', 1);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function removeShopStoreRegionDaLogs($store_id){
+        $this->db->where('store_id', $store_id);
+		$this->db->delete('region_da_log');
+    }
+
+    function insertStore($data){
+        $this->db->trans_start();
+		$this->db->insert('store_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    function getStoreMenus(){
+        $this->db->select('id, name');
+        $this->db->from('store_menu_tb');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     function getPopClubCompletedTransactionCount($store){
         $this->db->select('count(*) as all_count');
         $this->db->from('deals_redeems_tb');
@@ -230,6 +310,32 @@ class Admin_model extends CI_Model
         $this->db->trans_complete();
     }
 
+    function getDeals(){
+        $this->db->select('
+            id,
+            name,
+        ');
+
+        $this->db->from('dotcom_deals_tb');
+        $this->db->where('status', 1);
+
+        $query_products = $this->db->get();
+        return $query_products->result();
+    }
+
+    function getPackages(){
+        $this->db->select('
+            id,
+            name,
+        ');
+
+        $this->db->from('catering_packages_tb');
+        $this->db->where('status', 1);
+
+        $query_products = $this->db->get();
+        return $query_products->result();
+    }
+
     function getProducts(){
         $this->db->select('
             id,
@@ -237,6 +343,7 @@ class Admin_model extends CI_Model
         ');
 
         $this->db->from('products_tb');
+        $this->db->where('status', 1);
 
         $query_products = $this->db->get();
         return $query_products->result();
@@ -462,6 +569,12 @@ class Admin_model extends CI_Model
     function insertShopProductRegionDaLogs($data){
         $this->db->trans_start();
 		$this->db->insert_batch('region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertCateringPackageRegionDaLogs($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('catering_region_da_log', $data);
         $this->db->trans_complete();
     }
 
@@ -730,23 +843,20 @@ class Admin_model extends CI_Model
     
     function updateSettingStore($store_id, $name_of_field_status, $status){
         switch($name_of_field_status){
-            case 'status':
+            case 'Snackshop':
                 $this->db->set('status', $status);
                 break;
-            case 'catering_status':
+            case 'Catering':
                 $this->db->set('catering_status', $status);
                 break;
-            case 'popclub_walk_in_status':
+            case 'PopClub Store Visit':
                 $this->db->set('popclub_walk_in_status', $status);
                 break;
-            case 'popclub_online_delivery_status':
+            case 'PopClub Online Delivery':
                 $this->db->set('popclub_online_delivery_status', $status);
                 break;
-            case 'branch_status':
-                $this->db->set('branch_status', $status);
-                break;
         }
-        $this->db->where("store_id", $store_id);
+        $this->db->where("id", $store_id);
         $this->db->update("store_tb");
     }
     
