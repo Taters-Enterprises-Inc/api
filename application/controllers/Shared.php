@@ -17,8 +17,32 @@ class Shared extends CI_Controller {
 		$this->load->model('logs_model');
 		$this->load->model('store_model');
 		$this->load->model('bsc_model');
+		$this->load->model('survey_model');
 		$this->load->model('discount_model');
 		$this->load->library('form_validation');
+	}
+	
+
+	public function survey($service, $hash){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				if(!isset($hash) || !isset($service)){
+					$this->output->set_status_header('401');
+					echo json_encode(array( "message" => 'Missing queries!'));
+					break;
+				}
+
+				$customer_survey = $this->survey_model->getCustomerSurveyResponseInOrderService($service,$hash);
+
+				$response = array(
+					'data' => $customer_survey,
+					'message' => 'Successfully fetch deals'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
 	}
 
     public function contacts(){
@@ -221,7 +245,6 @@ class Shared extends CI_Controller {
 					'customer_address' 					=> $this->session->customer_address,
 					'userData' 							=> $this->session->userData,
 					'orders'							=> $this->session->orders,
-					'deals'								=> $this->session->deals,
 					'redeem_data' 						=> $this->session->redeem_data,
 					"km_radius"							=> $this->session->km_radius,
 					"km_min"							=> $this->session->km_min,
@@ -279,7 +302,6 @@ class Shared extends CI_Controller {
 
 	public function clear_redeems(){
 		unset($_SESSION['redeem_data']);
-		unset($_SESSION['deals']);
 		echo "<pre>";
 		print_r($_SESSION);
 	}

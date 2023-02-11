@@ -2,6 +2,37 @@
 
 class Store_model extends CI_Model 
 {
+	
+	public function getSnackShopRegionDaLogProduct($hash){
+		$this->db->select('A.store_id');
+		$this->db->from('region_da_log A');
+		$this->db->join('products_tb B', 'B.id = A.product_id');
+		$this->db->where('B.product_hash', $hash);
+		$this->db->where('A.status', 0);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	public function getCateringRegionDaLogProduct($hash){
+		$this->db->select('A.store_id');
+		$this->db->from('catering_region_da_log A');
+		$this->db->join('catering_packages_tb B', 'B.id = A.product_id');
+		$this->db->where('B.product_hash', $hash);
+		$this->db->where('A.status', 0);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
+	public function getPopClubRegionDaLogProduct($hash){
+		$this->db->select('A.store_id');
+		$this->db->from('deals_region_da_log A');
+		$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+		$this->db->where('B.hash', $hash);
+		$this->db->where('A.status', 0);
+		$query = $this->db->get();
+		return $query->result();
+	}
+
 	public function getUsersStoreGroupsByStoreId($store_id){
 		$this->db->select('user_id');
 		
@@ -74,7 +105,8 @@ class Store_model extends CI_Model
 	public function get_stores_available(
 		$latitude = 0,
 		$longitude = 0,
-		$service='SNACKSHOP'
+		$service='SNACKSHOP',
+		$regions=null
 	){
 		$this->db->select('
 			A.id,
@@ -127,6 +159,10 @@ class Store_model extends CI_Model
 			case 'POPCLUB-ONLINE-DELIVERY':
 				$this->db->where('A.popclub_online_delivery_status', 1);
 				break;
+		}
+
+		if($regions){
+			$this->db->where_in('A.store_id', $regions);
 		}
 		
 		$this->db->order_by('distance', 'ASC');

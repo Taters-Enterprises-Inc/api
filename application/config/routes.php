@@ -4,11 +4,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['shop/product'] = 'shop/product';
 $route['shop/products'] = 'shop/products';
 $route['shop/orders'] = 'shop/orders';
+$route['shop/deals'] = 'shop/deals';
 $route['shop/get_product_sku'] = 'shop/get_product_sku';
 
 //Catering
+$route['catering/packages'] = 'catering/packages';
+$route['catering/package'] = 'catering/package';
 $route['catering/products'] = 'catering/products';
-$route['catering/product'] = 'catering/product';
 $route['catering/orders'] = 'catering/orders';
 $route['catering/upload_contract'] = 'catering/upload_contract';
 
@@ -38,6 +40,7 @@ $route['shared/contacts'] = 'shared/contacts';
 $route['shared/available-user-discount'] = 'shared/available_user_discount';
 $route['shared/stores'] = 'shared/stores';
 $route['shared/companies'] = 'shared/companies';
+$route['shared/survey/(:any)/(:hash)'] = 'shared/survey/$1/$2';
 
 // Facebook
 $route['facebook/login'] = 'user_authentication';
@@ -59,9 +62,11 @@ $route['profile/catering-bookings'] = 'profile/catering_bookings';
 $route['profile/user-discount'] = 'profile/user_discount';
 $route['profile/update-user-discount'] = 'profile/update_user_discount';
 $route['profile/contact/(:num)'] = 'profile/contact/$1';
+$route['profile/inbox'] = 'profile/inbox';
 
 // Store
 $route['store'] = 'store';
+$route['store/product'] = 'store/product';
 $route['store/reset'] = 'store/reset';
 
 // Branches
@@ -70,6 +75,7 @@ $route['branches'] = 'branches';
 //Cart
 $route['cart/shop'] = 'cart/shop';
 $route['cart/catering'] = 'cart/catering';
+$route['cart/catering-product'] = 'cart/catering_product';
 
 //Transactions
 $route['transaction/shop'] = 'transaction/shop';
@@ -127,6 +133,7 @@ $route['admin/discounts'] = 'admin/discounts';
 
 $route['admin/availability/deal'] = 'admin/deal_availability';
 $route['admin/availability/product'] = 'admin/product_availability';
+$route['admin/availability/caters-product'] = 'admin/caters_product_availability';
 $route['admin/availability/caters-package'] = 'admin/caters_package_availability';
 $route['admin/availability/caters-package-addon'] = 'admin/caters_package_addon_availability';
 $route['admin/availability/caters-product-addon'] = 'admin/caters_product_addon_availability';
@@ -184,7 +191,7 @@ $route['notification/(:num)/seen'] = 'notification/seen/$1';
 
 //Survey
 $route['survey'] = 'survey';
-$route['survey/answer'] = 'survey/answer';
+$route['survey/answer/(:any)'] = 'survey/answer/$1';
 
 //Others
 $route['404_override'] = '';

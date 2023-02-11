@@ -81,7 +81,7 @@ class Download extends CI_Controller {
 			$no_of_pax = 0;
 			$package_price = 0;
 
-			$all_of_orders = array_merge($query_result['order_details'], $query_result['addons']);
+			$all_of_orders = array_merge($query_result['order_details'],$query_result['products'], $query_result['addons']);
 
 			foreach($all_of_orders  as $key => $order){
 				if($order->status == 0){

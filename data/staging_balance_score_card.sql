@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 09, 2022 at 12:14 PM
+-- Generation Time: Feb 07, 2023 at 05:07 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -48,15 +48,17 @@ INSERT INTO `companies` (`id`, `name`) VALUES
 CREATE TABLE `customer_survey_responses` (
   `id` int(10) UNSIGNED NOT NULL,
   `order_no` varchar(100) DEFAULT NULL,
+  `fb_user_id` int(10) UNSIGNED DEFAULT NULL,
+  `mobile_user_id` int(10) UNSIGNED DEFAULT NULL,
   `transaction_id` int(10) UNSIGNED DEFAULT NULL,
   `catering_transaction_id` int(10) UNSIGNED DEFAULT NULL,
   `customer_survey_response_order_type_id` int(10) UNSIGNED NOT NULL,
-  `deals_redeem_id` int(10) UNSIGNED DEFAULT NULL,
   `order_date` datetime NOT NULL,
   `store_id` int(10) UNSIGNED NOT NULL,
   `user_id` int(10) UNSIGNED DEFAULT NULL,
   `dateadded` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `status` int(11) NOT NULL
+  `status` int(11) NOT NULL,
+  `hash` varchar(265) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -67,10 +69,11 @@ CREATE TABLE `customer_survey_responses` (
 
 CREATE TABLE `customer_survey_response_answers` (
   `id` int(10) UNSIGNED NOT NULL,
-  `survey_question_offered_answer_id` int(10) UNSIGNED DEFAULT NULL,
-  `other_text` varchar(265) DEFAULT NULL,
   `survey_question_id` int(10) UNSIGNED NOT NULL,
-  `customer_survey_response_id` int(10) UNSIGNED NOT NULL
+  `survey_question_answer_id` int(10) UNSIGNED DEFAULT NULL,
+  `customer_survey_response_id` int(10) UNSIGNED NOT NULL,
+  `text` varchar(265) DEFAULT NULL,
+  `others` varchar(265) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -93,6 +96,21 @@ INSERT INTO `customer_survey_response_order_types` (`id`, `name`) VALUES
 (2, 'Snackshop'),
 (3, 'Catering'),
 (4, 'Popclub Store Visit');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `customer_survey_response_ratings`
+--
+
+CREATE TABLE `customer_survey_response_ratings` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `rate` int(11) NOT NULL,
+  `survey_question_id` int(10) UNSIGNED NOT NULL,
+  `survey_question_rating_id` int(10) UNSIGNED NOT NULL,
+  `customer_survey_response_id` int(10) UNSIGNED NOT NULL,
+  `others` varchar(265) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -135,37 +153,43 @@ CREATE TABLE `login_attempts` (
 
 CREATE TABLE `survey_questions` (
   `id` int(10) UNSIGNED NOT NULL,
-  `start_date` datetime DEFAULT NULL,
-  `end_date` datetime DEFAULT NULL,
-  `status` int(11) NOT NULL,
   `description` varchar(265) NOT NULL,
-  `is_comment` tinyint(1) NOT NULL
+  `is_text_field` tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
+  `is_text_area` tinyint(1) NOT NULL DEFAULT 0,
+  `is_email` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `others` int(11) NOT NULL DEFAULT 0,
+  `survey_section_id` int(10) UNSIGNED DEFAULT NULL,
+  `status` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `survey_questions`
 --
 
-INSERT INTO `survey_questions` (`id`, `start_date`, `end_date`, `status`, `description`, `is_comment`) VALUES
-(1, NULL, NULL, 1, 'Please rate your overall satisfaction with your Taters Experience.', 0),
-(2, NULL, NULL, 2, 'Please select your Visit Type.', 0),
-(3, NULL, NULL, 3, 'The friendlyness of the delivery driver.', 0),
-(4, NULL, NULL, 4, 'Taste of your food.', 0),
-(5, NULL, NULL, 5, 'The availability of the menu items.', 0),
-(6, NULL, NULL, 6, 'Speed of service', 0),
-(7, NULL, NULL, 7, 'Temperature of food', 0),
-(8, NULL, NULL, 8, 'The accuracy of order', 0),
-(9, NULL, NULL, 9, 'Portion of size you recieved.', 0),
-(10, NULL, NULL, 10, 'The overall value of the price you paid.', 0),
-(11, NULL, NULL, 11, 'Did you have a problem during your experience?', 0),
-(13, NULL, NULL, 13, 'Based on this visit, what is the likelihood that you will\r\nRecommend this Taters to others in the next 30 days?', 0),
-(14, NULL, NULL, 14, 'Please tell us in three or more sentences about your experience with Taters.', 1),
-(15, NULL, NULL, 15, 'If you were to choose the next store destination of Taters, where would you want it located?', 1),
-(16, NULL, NULL, 16, 'If you were to add a new permanent entree on the menu, what would you want to see?', 1),
-(17, NULL, NULL, 17, 'Was your order delivered when promised?', 0),
-(18, NULL, NULL, 18, 'Please select your Gender.\r\n', 0),
-(19, NULL, NULL, 19, 'Please select your age.', 0),
-(20, NULL, NULL, 20, 'Please select which of the following best describes your background.', 0);
+INSERT INTO `survey_questions` (`id`, `description`, `is_text_field`, `is_text_area`, `is_email`, `others`, `survey_section_id`, `status`) VALUES
+(1, 'Name', 1, 0, 0, 0, 1, 1),
+(2, 'Tel. No.', 1, 0, 0, 0, 1, 1),
+(3, 'E-mail', 1, 0, 1, 0, 1, 1),
+(4, 'Gender', 0, 0, 0, 0, 1, 1),
+(5, 'Are you ?', 0, 0, 0, 0, 1, 1),
+(6, 'Age', 0, 0, 0, 0, 1, 1),
+(7, 'How often do you visit our store?', 0, 0, 0, 0, 2, 1),
+(8, 'How did you hear about us?', 1, 0, 0, 1, 2, 1),
+(9, 'Taste', 0, 0, 0, 0, 3, 1),
+(10, 'Freshness', 0, 0, 0, 0, 3, 1),
+(11, 'Temperature', 0, 0, 0, 0, 3, 1),
+(12, 'Presentation', 0, 0, 0, 0, 3, 1),
+(13, 'Courtesy', 0, 0, 0, 0, 4, 1),
+(14, 'Cheerfulness', 0, 0, 0, 0, 4, 1),
+(15, 'Speed of Service', 0, 0, 0, 0, 4, 1),
+(16, 'Knowledge of staff', 0, 0, 0, 0, 4, 1),
+(17, 'Appearance of staff', 0, 0, 0, 0, 4, 1),
+(18, 'Cleanliness', 0, 0, 0, 0, 5, 1),
+(19, 'Comfort', 0, 0, 0, 0, 5, 1),
+(20, 'Decor', 0, 0, 0, 0, 5, 1),
+(21, 'Price', 0, 0, 0, 0, 6, 1),
+(22, 'Variety', 0, 0, 0, 0, 6, 1),
+(23, 'Overall Experience', 0, 1, 0, 0, 7, 1);
 
 -- --------------------------------------------------------
 
@@ -184,82 +208,22 @@ CREATE TABLE `survey_question_answers` (
 --
 
 INSERT INTO `survey_question_answers` (`id`, `survey_question_id`, `survey_question_offered_answer_id`) VALUES
-(1, 1, 1),
-(2, 1, 2),
-(3, 1, 3),
-(4, 1, 4),
-(5, 1, 5),
-(6, 2, 6),
-(7, 2, 7),
-(8, 2, 8),
-(9, 3, 1),
-(10, 3, 2),
-(11, 3, 3),
-(12, 3, 4),
-(13, 3, 5),
-(14, 4, 1),
-(15, 4, 2),
-(16, 4, 3),
-(17, 4, 4),
-(18, 4, 5),
-(19, 5, 1),
-(20, 5, 2),
-(21, 5, 3),
-(22, 5, 4),
-(23, 5, 5),
-(24, 6, 1),
-(25, 6, 2),
-(26, 6, 3),
-(27, 6, 4),
-(28, 6, 5),
-(29, 7, 1),
-(30, 7, 2),
-(31, 7, 3),
-(32, 7, 4),
-(33, 7, 5),
-(34, 8, 1),
-(35, 8, 2),
-(36, 8, 3),
-(37, 8, 4),
-(38, 8, 5),
-(39, 9, 1),
-(40, 9, 2),
-(41, 9, 3),
-(42, 9, 4),
-(43, 9, 5),
-(44, 10, 1),
-(45, 10, 2),
-(46, 10, 3),
-(47, 10, 4),
-(48, 10, 5),
-(49, 11, 9),
-(50, 11, 10),
-(51, 13, 1),
-(52, 13, 2),
-(53, 13, 3),
-(54, 13, 4),
-(55, 13, 5),
-(57, 17, 9),
-(58, 17, 10),
-(59, 18, 11),
-(60, 18, 12),
-(61, 18, 13),
-(62, 18, 14),
-(63, 18, 15),
-(64, 19, 16),
-(65, 19, 17),
-(66, 19, 18),
-(67, 19, 19),
-(68, 19, 20),
-(69, 19, 21),
-(70, 19, 22),
-(71, 20, 23),
-(72, 20, 24),
-(73, 20, 25),
-(74, 20, 26),
-(75, 20, 27),
-(76, 20, 28),
-(77, 20, 29);
+(1, 4, 1),
+(2, 4, 2),
+(3, 5, 3),
+(4, 5, 4),
+(5, 6, 5),
+(6, 6, 6),
+(7, 6, 7),
+(8, 6, 8),
+(9, 6, 9),
+(10, 7, 10),
+(11, 7, 11),
+(12, 7, 12),
+(13, 7, 13),
+(14, 8, 14),
+(15, 8, 15),
+(16, 8, 16);
 
 -- --------------------------------------------------------
 
@@ -277,35 +241,116 @@ CREATE TABLE `survey_question_offered_answers` (
 --
 
 INSERT INTO `survey_question_offered_answers` (`id`, `text`) VALUES
-(1, 'Highly Satisfied'),
-(2, 'Satisfied'),
-(3, 'Neither Satisfied nor Dissatisfied'),
-(4, 'Dissastisfied'),
-(5, 'Highly Dissatisfied'),
-(6, 'Delivery'),
-(7, 'Online order : Pick-up'),
-(8, 'Walk-In'),
-(9, 'Yes'),
-(10, 'No'),
-(11, 'Male\r\n'),
-(12, 'Female\r\n'),
-(13, 'Non-Binary / Third Gender\r\n'),
-(14, 'Prefer to self-describe\r\n'),
-(15, 'Prefer not to answer'),
-(16, 'Under 18'),
-(17, '18 to 24'),
-(18, '25 to 34'),
-(19, '35 to 44'),
-(20, '45 to 49'),
-(21, '50 to 64'),
-(22, '65 or above.'),
-(23, 'Asian\r\n'),
-(24, 'Native Hawaiian or other Native Islander\r\n'),
-(25, 'White or Caucassian\r\n'),
-(26, 'American Indian or Alaska Native\r\n'),
-(27, 'Hispanic or Latino\r\n'),
-(28, 'Black or African American\r\n'),
-(29, 'Other');
+(1, 'Male'),
+(2, 'Female'),
+(3, 'Employed'),
+(4, 'Self-Employed'),
+(5, '15 - 20'),
+(6, '21 - 27'),
+(7, '28 - 34'),
+(8, '35 - 40'),
+(9, 'over 40'),
+(10, 'First time'),
+(11, 'At least once a week'),
+(12, 'At least once a month'),
+(13, 'Rarely'),
+(14, 'Advertisement'),
+(15, 'Word of Mouth'),
+(16, 'Promotional leaflet');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `survey_question_offered_ratings`
+--
+
+CREATE TABLE `survey_question_offered_ratings` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(265) NOT NULL,
+  `description` varchar(265) NOT NULL,
+  `lowest_rate_text` varchar(265) NOT NULL,
+  `lowest_rate` int(11) NOT NULL,
+  `highest_rate_text` varchar(265) NOT NULL,
+  `highest_rate` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `survey_question_offered_ratings`
+--
+
+INSERT INTO `survey_question_offered_ratings` (`id`, `name`, `description`, `lowest_rate_text`, `lowest_rate`, `highest_rate_text`, `highest_rate`) VALUES
+(1, 'Priority Rank', 'Please rate your priorities on a scale of 1 to 10. ', 'Lowest', 10, 'Highest', 1),
+(2, 'Satisfaction Rating', 'Please rate your overall satisfaction on a scale of 1 to 5', 'Dissatisfied', 1, 'Highly Satisfied', 5);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `survey_question_ratings`
+--
+
+CREATE TABLE `survey_question_ratings` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `survey_question_id` int(10) UNSIGNED NOT NULL,
+  `survey_question_offered_rating_id` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `survey_question_ratings`
+--
+
+INSERT INTO `survey_question_ratings` (`id`, `survey_question_id`, `survey_question_offered_rating_id`) VALUES
+(1, 9, 1),
+(2, 9, 2),
+(3, 10, 1),
+(4, 10, 2),
+(5, 11, 1),
+(6, 11, 2),
+(7, 12, 1),
+(8, 12, 2),
+(9, 13, 1),
+(10, 13, 2),
+(11, 14, 1),
+(12, 14, 2),
+(13, 15, 1),
+(14, 15, 2),
+(15, 16, 1),
+(16, 16, 2),
+(17, 17, 1),
+(18, 17, 2),
+(19, 18, 1),
+(20, 18, 2),
+(21, 19, 1),
+(22, 19, 2),
+(23, 20, 1),
+(24, 20, 2),
+(25, 21, 1),
+(26, 21, 2),
+(27, 22, 1),
+(28, 22, 2);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `survey_question_sections`
+--
+
+CREATE TABLE `survey_question_sections` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `name` varchar(365) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `survey_question_sections`
+--
+
+INSERT INTO `survey_question_sections` (`id`, `name`) VALUES
+(1, 'Personal Information'),
+(2, 'Information Taters'),
+(3, 'Food and Drinks'),
+(4, 'Service'),
+(5, 'Ambience'),
+(6, 'Our Menu'),
+(7, 'Overall Experience');
 
 -- --------------------------------------------------------
 
@@ -444,7 +489,8 @@ ALTER TABLE `customer_survey_responses`
   ADD KEY `transaction_id` (`transaction_id`),
   ADD KEY `customer_survey_response_order_type_id` (`customer_survey_response_order_type_id`),
   ADD KEY `catering_transaction_id` (`catering_transaction_id`),
-  ADD KEY `deals_redeem_id` (`deals_redeem_id`);
+  ADD KEY `fb_user_id` (`fb_user_id`),
+  ADD KEY `mobile_user_id` (`mobile_user_id`);
 
 --
 -- Indexes for table `customer_survey_response_answers`
@@ -452,15 +498,24 @@ ALTER TABLE `customer_survey_responses`
 ALTER TABLE `customer_survey_response_answers`
   ADD PRIMARY KEY (`id`),
   ADD KEY `customer_survey_id` (`customer_survey_response_id`),
-  ADD KEY `offered_answer_id` (`other_text`),
-  ADD KEY `question_id` (`survey_question_offered_answer_id`),
-  ADD KEY `survey_id` (`survey_question_id`);
+  ADD KEY `offered_answer_id` (`text`),
+  ADD KEY `survey_question_id` (`survey_question_id`),
+  ADD KEY `survey_question_answer_id` (`survey_question_answer_id`);
 
 --
 -- Indexes for table `customer_survey_response_order_types`
 --
 ALTER TABLE `customer_survey_response_order_types`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `customer_survey_response_ratings`
+--
+ALTER TABLE `customer_survey_response_ratings`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `survey_question_id` (`survey_question_id`),
+  ADD KEY `customer_survey_response_id` (`customer_survey_response_id`),
+  ADD KEY `customer_survey_response_ratings_ibfk_2` (`survey_question_rating_id`);
 
 --
 -- Indexes for table `groups`
@@ -478,7 +533,8 @@ ALTER TABLE `login_attempts`
 -- Indexes for table `survey_questions`
 --
 ALTER TABLE `survey_questions`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `survey_section_id` (`survey_section_id`);
 
 --
 -- Indexes for table `survey_question_answers`
@@ -492,6 +548,26 @@ ALTER TABLE `survey_question_answers`
 -- Indexes for table `survey_question_offered_answers`
 --
 ALTER TABLE `survey_question_offered_answers`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `survey_question_offered_ratings`
+--
+ALTER TABLE `survey_question_offered_ratings`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `survey_question_ratings`
+--
+ALTER TABLE `survey_question_ratings`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `survey_question_id` (`survey_question_id`),
+  ADD KEY `survey_offered_rating_id` (`survey_question_offered_rating_id`);
+
+--
+-- Indexes for table `survey_question_sections`
+--
+ALTER TABLE `survey_question_sections`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -569,6 +645,12 @@ ALTER TABLE `customer_survey_response_order_types`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT for table `customer_survey_response_ratings`
+--
+ALTER TABLE `customer_survey_response_ratings`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `groups`
 --
 ALTER TABLE `groups`
@@ -584,19 +666,37 @@ ALTER TABLE `login_attempts`
 -- AUTO_INCREMENT for table `survey_questions`
 --
 ALTER TABLE `survey_questions`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `survey_question_answers`
 --
 ALTER TABLE `survey_question_answers`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `survey_question_offered_answers`
 --
 ALTER TABLE `survey_question_offered_answers`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- AUTO_INCREMENT for table `survey_question_offered_ratings`
+--
+ALTER TABLE `survey_question_offered_ratings`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `survey_question_ratings`
+--
+ALTER TABLE `survey_question_ratings`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+
+--
+-- AUTO_INCREMENT for table `survey_question_sections`
+--
+ALTER TABLE `survey_question_sections`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -644,16 +744,46 @@ ALTER TABLE `user_stores`
 ALTER TABLE `customer_survey_responses`
   ADD CONSTRAINT `customer_survey_responses_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `staging_newteishop`.`transaction_tb` (`id`) ON UPDATE NO ACTION,
   ADD CONSTRAINT `customer_survey_responses_ibfk_2` FOREIGN KEY (`catering_transaction_id`) REFERENCES `staging_newteishop`.`catering_transaction_tb` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_3` FOREIGN KEY (`deals_redeem_id`) REFERENCES `staging_newteishop`.`deals_redeems_tb` (`id`) ON UPDATE NO ACTION,
   ADD CONSTRAINT `customer_survey_responses_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_5` FOREIGN KEY (`customer_survey_response_order_type_id`) REFERENCES `customer_survey_response_order_types` (`id`) ON UPDATE NO ACTION;
+  ADD CONSTRAINT `customer_survey_responses_ibfk_5` FOREIGN KEY (`customer_survey_response_order_type_id`) REFERENCES `customer_survey_response_order_types` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_6` FOREIGN KEY (`fb_user_id`) REFERENCES `staging_newteishop`.`fb_users` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_7` FOREIGN KEY (`mobile_user_id`) REFERENCES `staging_newteishop`.`mobile_users` (`id`) ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `customer_survey_response_answers`
 --
 ALTER TABLE `customer_survey_response_answers`
-  ADD CONSTRAINT `customer_survey_response_answers_ibfk_1` FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_response_answers_ibfk_2` FOREIGN KEY (`survey_question_offered_answer_id`) REFERENCES `survey_question_offered_answers` (`id`) ON UPDATE NO ACTION;
+  ADD CONSTRAINT `customer_survey_response_answers_ibfk_1` FOREIGN KEY (`customer_survey_response_id`) REFERENCES `customer_survey_responses` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_response_answers_ibfk_2` FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_response_answers_ibfk_3` FOREIGN KEY (`survey_question_answer_id`) REFERENCES `survey_question_answers` (`id`) ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `customer_survey_response_ratings`
+--
+ALTER TABLE `customer_survey_response_ratings`
+  ADD CONSTRAINT `customer_survey_response_ratings_ibfk_1` FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_response_ratings_ibfk_2` FOREIGN KEY (`survey_question_rating_id`) REFERENCES `survey_question_ratings` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_response_ratings_ibfk_3` FOREIGN KEY (`customer_survey_response_id`) REFERENCES `customer_survey_responses` (`id`) ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `survey_questions`
+--
+ALTER TABLE `survey_questions`
+  ADD CONSTRAINT `survey_questions_ibfk_1` FOREIGN KEY (`survey_section_id`) REFERENCES `survey_question_sections` (`id`) ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `survey_question_answers`
+--
+ALTER TABLE `survey_question_answers`
+  ADD CONSTRAINT `survey_question_answers_ibfk_1` FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `survey_question_answers_ibfk_2` FOREIGN KEY (`survey_question_offered_answer_id`) REFERENCES `survey_question_offered_answers` (`id`) ON UPDATE NO ACTION;
+
+--
+-- Constraints for table `survey_question_ratings`
+--
+ALTER TABLE `survey_question_ratings`
+  ADD CONSTRAINT `survey_question_ratings_ibfk_1` FOREIGN KEY (`survey_question_id`) REFERENCES `survey_questions` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `survey_question_ratings_ibfk_2` FOREIGN KEY (`survey_question_offered_rating_id`) REFERENCES `survey_question_offered_ratings` (`id`) ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

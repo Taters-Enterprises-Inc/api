@@ -3,6 +3,11 @@
 class Catering_model extends CI_Model 
 {
     
+    public function __construct(){
+		$this->db =  $this->load->database('default', TRUE, TRUE);
+        $this->bscDB = $this->load->database('bsc', TRUE, TRUE);
+    }
+    
     public function getUserCateringBookingHistoryCount($type, $id, $search){
         $this->db->select('count(*) as all_count');
             
@@ -45,10 +50,12 @@ class Catering_model extends CI_Model
             A.cod_fee,
             A.distance_price,
             A.hash_key,
+            E.hash as survey_hash,
         ');
 
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'A.client_id = B.id' ,'left');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses E', 'E.catering_transaction_id = A.id', 'left');
 
         if ($type == 'mobile') {
             $this->db->where('B.mobile_user_id', $id);
@@ -266,6 +273,17 @@ class Catering_model extends CI_Model
             $this->db->order_by('type','DESC');
             $query_orders = $this->db->get();
             $orders = $query_orders->result();
+            
+            $select_product_col = array("O.product_id","O.combination_id","O.type","O.quantity","O.status","O.remarks","O.promo_id","O.promo_price","O.sku","O.sku_id","O.price AS calc_price","O.product_price","P.product_image","P.name","P.description","P.delivery_details","P.uom","P.add_details","P.add_remarks","P.product_hash","P.status", "P.category","P.note","P.product_code","O.product_label");
+            $this->db->from('products_tb P');
+            $this->db->select($select_product_col);
+            $this->db->join('catering_order_items O', 'P.id = O.product_id' ,'left');
+            $this->db->join('catering_transaction_tb T', 'O.transaction_id = T.id' ,'left');
+            $this->db->where('T.hash_key', $hash_key);
+            $this->db->where('O.type', 'product');
+            $this->db->order_by('type','DESC');
+            $query_products = $this->db->get();
+            $products = $query_products->result();
 
             $select_addon_col = array(
                 "O.product_id",
@@ -303,6 +321,7 @@ class Catering_model extends CI_Model
             $this->db->order_by('type','DESC');
             $query_addons = $this->db->get();
             $addons = $query_addons->result();
+            
 
             $this->db->from('personnel_tb');
             $this->db->select('name,contact_number');
@@ -320,6 +339,7 @@ class Catering_model extends CI_Model
 
             $join_data['clients_info'] = $info[0];
             $join_data['order_details'] = $orders;
+            $join_data['products'] = $products;
             $join_data['addons'] = $addons;
             $join_data['personnel'] = $personnel[0];
             $join_data['bank'] = $bank[0];
@@ -407,6 +427,7 @@ class Catering_model extends CI_Model
             A.price, A.category, 
             A.num_flavor, 
             A.add_remarks,
+            A.product_hash,
             A.note, 
             B.category_name, 
             A.to_gc_value
@@ -524,6 +545,305 @@ class Catering_model extends CI_Model
           }
       }
   
+        // return re-arrange key values of array and convert to object
+        $reindex = array_values($return_data);
+        return $reindex;
+    }
+    
+    function getCateringProductsPerCategory($region,$category,$sort_id,$min,$max,$name)
+    {  
+        if($region!=0){
+            $region = $this->db
+                ->select('product_id')
+                ->get_where('catering_products', array('region_id' => $region,'status' => 1))
+                ->result();
+            foreach ($region as $row) {
+                $disable_region_items[] = $row->product_id;
+            }
+            $to_disable = empty($disable_region_items) ? 0 : $disable_region_items;
+        }
+
+        $store_menu_type = (isset($_SESSION['cache_data']['store_menu_type'])) ? $_SESSION['cache_data']
+        ['store_menu_type'] : '';
+
+        // use if store_type of some stores shown is popcorn
+        if(isset($store_menu_type)){
+            $category_by_menu_type = $this->db->select('category')
+                ->get_where('store_menu_type_tb ', array('menu_type' => $store_menu_type))
+                ->result();
+
+            foreach ($category_by_menu_type as $val) {
+                $product_categories[] = $val->category;
+            }
+            $shown_categories = empty($product_categories) ? 0 : $product_categories;
+        }
+		
+        //use if store_type of some stores shown is popcorn
+        $product_category_tb = ($store_menu_type == 2) ? 'C.product_id,C.category_id' : '';
+        // select all the category products
+        $this->db->select("
+            A.sequence,
+            A.id AS category_id,
+            A.category_name,
+            A.description AS category_details,
+            A.img AS category_image,
+            A.card_bgcolor AS category_background,
+            A.visibility AS visibility,
+            B.id AS product_id,
+            B.name AS product_name,
+            B.product_image,
+            B.description AS product_description,
+            B.price AS product_price,
+            B.product_hash,
+            ".$product_category_tb."
+        ");
+
+        $this->db->from('category_tb A');
+        if($store_menu_type != '2') {
+            $this->db->join('products_tb B', 'B.category = A.id','left');
+           //use if store_type of some stores shown is popcorn
+            $this->db->join('product_category_tb C', 'C.product_id = B.id');
+            $this->db->group_by('C.product_id'); //added to prevent showing duplicated products
+           //use if store_type of some stores shown is popcorn
+        }
+        else {
+            $this->db->join('product_category_tb C', 'C.category_id = A.id');
+            $this->db->join('products_tb B', 'B.id = C.product_id');
+        }
+
+        $this->db->where('A.status', 1);
+        $this->db->where('B.status', 1);
+
+        if($store_menu_type == '2') {
+            $this->db->where('C.category_id =', 14);
+        }
+
+        if($region != 0 && $to_disable != 0){
+            $this->db->where_not_in('B.id', $to_disable);
+            //use if store_type of some stores shown is popcorn
+            if(!empty($store_menu_type)){
+                $this->db->where_in('A.id', $shown_categories);
+            }
+            //use if store_type of some stores shown is popcorn
+        }
+        if ($name != null) {
+            $this->db->like('B.name', $name, 'both');
+        }
+        if ( ($min == 0 || $min != 0) && $max != 0) {
+            $this->db->where("price BETWEEN '$min' AND '$max'");
+        }
+        if($category != 0 && $category != 14) {
+            $this->db->where('A.id', $category);
+        }
+        if ($sort_id == 'low_high') {
+            $this->db->order_by('B.price', 'ASC');
+        }
+        if ($sort_id == 'high_low') {
+            $this->db->order_by('B.price', 'DESC');
+        }
+        if ($sort_id == 'a_z') {
+            $this->db->order_by('B.name', 'ASC');
+        }
+        if ($sort_id == 'z_a') {
+            $this->db->order_by('B.name', 'DESC');
+        }
+        $this->db->order_by("A.sequence", "asc");
+        $this->db->order_by("B.name", "asc"); //added to make products on category & products page in fixed position
+        $query = $this->db->get();
+        $query_data = $query->result();
+        // arrangement of return array data
+        $return_data = array();
+
+        if($store_menu_type != '2'){
+            if($category != 14 || $category == 'prod_category_page') {
+                foreach ($query_data as $key => $val) {
+                    
+                    $redeem_data = $this->session->redeem_data;
+                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $promo_discount_percentage = null;
+
+                    if($deal_products_promo_exclude){
+                        $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                        foreach($deal_products_promo_exclude as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = null;
+                                break;
+                            }
+                        }
+                    }
+
+                    $return_data[$val->sequence]['category_id']          = $val->category_id;
+                    $return_data[$val->sequence]['category_name']        = $val->category_name;
+                    $return_data[$val->sequence]['category_details']     = $val->category_details;
+                    $return_data[$val->sequence]['category_image']       = $val->category_image;
+                    $return_data[$val->sequence]['category_background']  = $val->category_background;
+                    $return_data[$val->sequence]['visibility']  = $val->visibility;
+                    $return_data[$val->sequence]['category_products'][] = array(
+                        'id' => $val->product_id,
+                        'name' => $val->product_name,
+                        'image' => $val->product_image,
+                        'description' => $val->product_description,
+                        'price' => $val->product_price,
+                        'promo_discount_percentage' => $promo_discount_percentage,
+                        'hash' => $val->product_hash,
+                    );
+                }
+            }
+
+            //use if store_type of some stores shown is popcorn
+            else if(!empty($store_menu_type)) {
+                foreach ($query_data as $key => $val) {
+                    
+                    $redeem_data = $this->session->redeem_data;
+                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $promo_discount_percentage = null;
+
+                    if($deal_products_promo_exclude){
+                        $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                        foreach($deal_products_promo_exclude as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = null;
+                                break;
+                            }
+                        }
+
+                    }
+
+                    $return_data[$val->sequence]['category_id']          = $val->category_id;
+                    $return_data[$val->sequence]['category_name']        = $val->category_name;
+                    $return_data[$val->sequence]['category_details']     = $val->category_details;
+                    $return_data[$val->sequence]['category_image']       = $val->category_image;
+                    $return_data[$val->sequence]['category_background']  = $val->category_background;
+                    $return_data[$val->sequence]['visibility']  = $val->visibility;
+                    $return_data[$val->sequence]['category_products'][] = array(
+                        'id' => $val->product_id,
+                        'name' => $val->product_name,
+                        'image' => $val->product_image,
+                        'description' => $val->product_description,
+                        'price' => $val->product_price,
+                        'promo_discount_percentage' => $promo_discount_percentage,
+                        'hash' => $val->product_hash,
+                    );
+                }
+            }
+
+            //for showing all products (shop grid)
+            else if ($category == 14){
+                foreach ($query_data as $key => $value) {
+
+                    $redeem_data = $this->session->redeem_data;
+                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $promo_discount_percentage = null;
+
+                    if($deal_products_promo_exclude){
+                        $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                        foreach($deal_products_promo_exclude as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = null;
+                                break;
+                            }
+                        }
+
+                    }
+
+
+                    $return_data[]['category_products'][] = array(
+                        'category_id'      => $value->category_id,
+                        'category_name'    => $value->category_name,
+                        'category_details' => $value->category_details,
+                        'category_image'   => $value->category_image,
+                        'id'     => $value->product_id,
+                        'name'   => $value->product_name,
+                        'image'  => $value->product_image,
+                        'description'  => $value->product_description,
+                        'price'  => $value->product_price,
+                        'promo_discount_percentage' => $promo_discount_percentage,
+                        'hash'  => $value->product_hash,
+                    );
+
+                }
+            }
+        }
+        else {
+
+            if($category != 14 || $category == 'prod_category_page') {
+                foreach ($query_data as $key => $val) {
+
+                    $redeem_data = $this->session->redeem_data;
+                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $promo_discount_percentage = null;
+
+                    if($deal_products_promo_exclude){
+                        $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                        foreach($deal_products_promo_exclude as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = null;
+                                break;
+                            }
+                        }
+
+
+                    }
+
+                    $return_data[0]['category_id'] = $val->category_id;
+                    $return_data[0]['category_name'] = $val->category_name;
+                    $return_data[0]['category_details'] = $val->category_details;
+                    $return_data[0]['category_image'] = $val->category_image;
+                    $return_data[0]['category_background'] = $val->category_background;
+                    $return_data[0]['visibility'] = $val->visibility;
+                    $return_data[0]['category_products'][] = array(
+                        'id' => $val->product_id,
+                        'name' => $val->product_name,
+                        'image' => $val->product_image,
+                        'description' => $val->product_description,
+                        'promo_discount_percentage' => $promo_discount_percentage,
+                        'price' => $val->product_price,
+                        'hash' => $val->product_hash,
+                    );
+                }
+            }
+            //for showing all products (shop grid)
+            else if ($category == 14){
+                foreach ($query_data as $key => $value) {
+                    
+                    $redeem_data = $this->session->redeem_data;
+                    $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $promo_discount_percentage = null;
+
+                    if($deal_products_promo_exclude){
+                        $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+
+                        foreach($deal_products_promo_exclude as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = null;
+                                break;
+                            }
+                        }
+
+                    }
+
+                    $return_data[]['category_products'][] = array(
+                        'category_id'      => $value->category_id,
+                        'category_name'    => $value->category_name,
+                        'category_details' => $value->category_details,
+                        'category_image'   => $value->category_image,
+                        'id'     => $value->product_id,
+                        'name'   => $value->product_name,
+                        'image'  => $value->product_image,
+                        'description'  => $value->product_description,
+                        'price'  => $value->product_price,
+                        'promo_discount_percentage' => $promo_discount_percentage,
+                        'hash'  => $value->product_hash,
+                    );
+
+                }
+            }
+        }
+
         // return re-arrange key values of array and convert to object
         $reindex = array_values($return_data);
         return $reindex;

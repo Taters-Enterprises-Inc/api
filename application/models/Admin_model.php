@@ -5,6 +5,7 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+    
     function insertRegion($data){
         $this->db->trans_start();
 		$this->db->insert('region_tb', $data);
@@ -34,6 +35,25 @@ class Admin_model extends CI_Model
         $query = $this->db->get();
         return $query->row();
     }
+
+
+    public function getCustomerSurveyResponse($survey_verification_id){
+        $this->bsc_db->select('
+            A.id,
+            A.transaction_id,
+            A.catering_transaction_id,
+            A.fb_user_id,
+            A.mobile_user_id,
+        ');
+
+        $this->bsc_db->from('customer_survey_responses A');
+        $this->bsc_db->where('A.id', $survey_verification_id);
+
+        $query_customer_survey_response = $this->bsc_db->get();
+
+        return $query_customer_survey_response->row();
+    }
+
     
     function getLocales(){
         $this->db->select('id, locale_name as name');
@@ -205,6 +225,16 @@ class Admin_model extends CI_Model
 
         $query_transaction = $this->db->get();
         return $query_transaction->result();
+    }
+
+    function getSnackshopProductFlavors($product_id){
+        $this->db->select("B.id,B.name,B.product_variant_id, A.name as parent_name");
+        $this->db->from('product_variants_tb A');
+        $this->db->join('product_variant_options_tb B', 'B.product_variant_id = A.id','left');
+        $this->db->where('A.product_id', $product_id);
+        $this->db->where('B.status', 1);
+        $query = $this->db->get();
+        return $query->result();
     }
 
     function getCateringPackageFlavors($package_id){
@@ -617,48 +647,87 @@ class Admin_model extends CI_Model
             A.dateadded,
             A.order_date,
             A.status,
+            A.fb_user_id,
+            A.mobile_user_id,
             B.name as store_name,
-            C.first_name,
-            C.last_name,
-            A.order_no,
-            D.tracking_no as snackshop_tracking_no,
-            E.tracking_no as catering_tracking_no,
-            F.redeem_code as popclub_redeem_code,
-            G.name as order_type
+            A.invoice_no,
+            C.tracking_no as snackshop_tracking_no,
+            D.tracking_no as catering_tracking_no,
+            E.name as order_type,
         ');
         $this->bsc_db->from('customer_survey_responses A');
         $this->bsc_db->join($this->db->database.'.store_tb B', 'B.store_id = A.store_id');
-        $this->bsc_db->join('user_profile C', 'C.user_id = A.user_id','left');
-        $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
-        $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
-        $this->bsc_db->join($this->db->database.'.deals_redeems_tb F', 'F.id = A.deals_redeem_id','left');
-        $this->bsc_db->join('customer_survey_response_order_types G', 'G.id = A.customer_survey_response_order_type_id');
+        $this->bsc_db->join($this->db->database.'.transaction_tb C', 'C.id = A.transaction_id','left');
+        $this->bsc_db->join($this->db->database.'.catering_transaction_tb D', 'D.id = A.catering_transaction_id','left');
+        $this->bsc_db->join('customer_survey_response_order_types E', 'E.id = A.customer_survey_response_order_type_id');
 
         $this->bsc_db->where('A.id', $survey_id);
 
         $query_customer_survey_response = $this->bsc_db->get();
         $customer_survey_response = $query_customer_survey_response->row();
+
+        $this->db->select('first_name, last_name');
+
+        if($customer_survey_response->fb_user_id){
+            $this->db->from('fb_users');
+            $this->db->where('id',$customer_survey_response->fb_user_id);
+        }else if($customer_survey_response->mobile_user_id){
+            $this->db->from('mobile_users');
+            $this->db->where('id',$customer_survey_response->mobile_user_id);
+        }
         
+		$query_user = $this->db->get();
+		$user = $query_user->row();
+
+        $customer_survey_response->user = $user;
+
 		$this->bsc_db->select('
             A.id, 
-            A.other_text,
+            A.text,
+            A.others,
             A.customer_survey_response_id,
             B.description as question,
-            C.text as answer,
+            D.text as answer,
         ');
 
         $this->bsc_db->from('customer_survey_response_answers A');
         $this->bsc_db->join('survey_questions B', 'B.id = A.survey_question_id', 'left');
-        $this->bsc_db->join('survey_question_offered_answers C', 'C.id = A.survey_question_offered_answer_id', 'left');
+        $this->bsc_db->join('survey_question_answers C', 'C.id = A.survey_question_answer_id', 'left');
+        $this->bsc_db->join('survey_question_offered_answers D', 'D.id = C.survey_question_offered_answer_id', 'left');
         
         $this->bsc_db->where('A.customer_survey_response_id', $customer_survey_response->id);
         
 		$query_customer_survey_response_answers = $this->bsc_db->get();
 		$customer_survey_response_answers = $query_customer_survey_response_answers->result();
+        
+		$this->bsc_db->select('
+            A.id, 
+            A.others,
+            A.customer_survey_response_id,
+            A.rate,
+            B.description as question,
+            C.survey_question_offered_rating_id,
+            D.name,
+            D.lowest_rate_text,
+            D.lowest_rate,
+            D.highest_rate_text,
+            D.highest_rate,
+        ');
+
+        $this->bsc_db->from('customer_survey_response_ratings A');
+        $this->bsc_db->join('survey_questions B', 'B.id = A.survey_question_id', 'left');
+        $this->bsc_db->join('survey_question_ratings C', 'C.id = A.survey_question_rating_id', 'left');
+        $this->bsc_db->join('survey_question_offered_ratings D', 'D.id = C.survey_question_offered_rating_id', 'left');
+        
+        $this->bsc_db->where('A.customer_survey_response_id', $customer_survey_response->id);
+        
+        $query_customer_survey_response_ratings = $this->bsc_db->get();
+        $customer_survey_response_ratings = $query_customer_survey_response_ratings->result();
 
         $data = $customer_survey_response;
         
         $data->answers = $customer_survey_response_answers;
+        $data->ratings = $customer_survey_response_ratings;
         
         return $data;
     }
@@ -671,7 +740,6 @@ class Admin_model extends CI_Model
         $this->bsc_db->join('user_profile C', 'C.user_id = A.user_id', 'left');
         $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
         $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
-        $this->bsc_db->join($this->db->database.'.deals_redeems_tb F', 'F.id = A.deals_redeem_id','left');
         $this->bsc_db->join('customer_survey_response_order_types G', 'G.id = A.customer_survey_response_order_type_id');
 
         if($status)
@@ -679,7 +747,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->bsc_db->group_start();
-            $this->bsc_db->or_like('A.order_no', $search);
+            $this->bsc_db->or_like('A.invoice_no', $search);
             $this->bsc_db->or_like('B.name', $search);
             $this->bsc_db->or_like('C.first_name', $search);
             $this->bsc_db->or_like('C.last_name', $search);
@@ -704,10 +772,9 @@ class Admin_model extends CI_Model
             B.name as store_name,
             C.first_name,
             C.last_name,
-            A.order_no,
+            A.invoice_no,
             D.tracking_no as snackshop_tracking_no,
             E.tracking_no as catering_tracking_no,
-            F.redeem_code as popclub_redeem_code,
             G.name as order_type
         ");
 
@@ -716,7 +783,6 @@ class Admin_model extends CI_Model
         $this->bsc_db->join('user_profile C', 'C.user_id = A.user_id','left');
         $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
         $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
-        $this->bsc_db->join($this->db->database.'.deals_redeems_tb F', 'F.id = A.deals_redeem_id','left');
         $this->bsc_db->join('customer_survey_response_order_types G', 'G.id = A.customer_survey_response_order_type_id');
  
         if($status)
@@ -724,13 +790,12 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->bsc_db->group_start();
-            $this->bsc_db->or_like('A.order_no', $search);
+            $this->bsc_db->or_like('A.invoice_no', $search);
             $this->bsc_db->or_like('B.name', $search);
             $this->bsc_db->or_like('C.first_name', $search);
             $this->bsc_db->or_like('C.last_name', $search);
             $this->bsc_db->or_like('D.tracking_no', $search);
             $this->bsc_db->or_like('E.tracking_no', $search);
-            $this->bsc_db->or_like('F.redeem_code', $search);
             $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
             $this->bsc_db->group_end();
         }
@@ -945,6 +1010,32 @@ class Admin_model extends CI_Model
         return $this->db->get()->result();
     }
 
+    function getStoreCateringProductCount($store_id, $category_id, $status, $search) {
+        $this->db->select('count(*) as all_count');
+
+        $this->db->from('catering_products A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->join('category_tb C', 'C.id = B.category');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->or_like('C.category_name', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
+        
+        if($status)
+            $this->db->where('A.status', $status);
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
     function getStoreProductCount($store_id, $category_id, $status, $search) {
         $this->db->select('count(*) as all_count');
 
@@ -1119,6 +1210,31 @@ class Admin_model extends CI_Model
         return $this->db->get()->result();
     }
 
+    function getStoreCateringProducts($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
+        $this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');
+        $this->db->from('catering_products A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->join('category_tb C', 'C.id = B.category');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->or_like('C.category_name', $search);
+            $this->db->group_end();
+        }
+            
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        return $this->db->get()->result();
+    }
+
     function getStoreProducts($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
         $this->db->select('A.id, B.name, B.product_image, A.store_id, B.add_details, C.category_name');
         $this->db->from('region_da_log A');
@@ -1149,8 +1265,6 @@ class Admin_model extends CI_Model
 
         $this->db->from('deals_region_da_log A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
-        $this->db->join('store_tb C', 'C.store_id = A.store_id');
-        $this->db->join('dotcom_deals_store_menu_tb D', 'D.store_menu_tb_id = C.store_menu_type_id AND D.deal_id = B.id');
 
         if($search){
             $this->db->group_start();
@@ -1199,13 +1313,16 @@ class Admin_model extends CI_Model
         $this->db->where("id", $id);
         $this->db->update("region_da_log");
     }
+    function updateStoreCateringProduct($id, $status){
+		$this->db->set('status', $status);
+        $this->db->where("id", $id);
+        $this->db->update("catering_products");
+    }
 
     function getStoreDeals($row_no, $row_per_page, $store_id, $category_id, $status, $order_by, $order, $search) {
         $this->db->select('A.id, B.alias, B.name, B.product_image, A.store_id');
         $this->db->from('deals_region_da_log A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
-        $this->db->join('store_tb C', 'C.store_id = A.store_id');
-        $this->db->join('dotcom_deals_store_menu_tb D', 'D.store_menu_tb_id = C.store_menu_type_id AND D.deal_id = B.id');
 
         if($search){
             $this->db->group_start();
@@ -1787,6 +1904,7 @@ class Admin_model extends CI_Model
 
     public function getSnackshopOrderItems($transaction_id){
         $this->db->select("
+            A.id as order_item_id,
             A.price,
             A.product_price,
             A.quantity,
@@ -1795,8 +1913,6 @@ class Admin_model extends CI_Model
             B.name,
             B.description,
             B.add_details,
-            C.name as deal_name,
-            C.description as deal_description,
             C.promo_discount_percentage,
         ");
         $this->db->from('order_items A');
@@ -1807,13 +1923,14 @@ class Admin_model extends CI_Model
         $products = $products_query->result();
 
         $this->db->select("
+            A.id as deal_order_item_id,
             A.price,
             A.product_price,
             A.quantity,
             A.remarks,
-            B.name,
+            B.name as deal_name,
             B.alias,
-            B.description,
+            B.description as deal_description,
         ");
         $this->db->from('deals_order_items A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
@@ -1832,6 +1949,7 @@ class Admin_model extends CI_Model
             A.tracking_no,
             A.purchase_amount,
             A.invoice_num,
+            A.hash_key,
 
             A.discount,
             A.discount_user_id,
@@ -1876,6 +1994,7 @@ class Admin_model extends CI_Model
             A.quantity,
             A.remarks,
             A.product_label,
+            A.type,
             B.id as product_id,
             B.name,
             B.description,
@@ -1894,7 +2013,25 @@ class Admin_model extends CI_Model
             B.quantity,
             B.remarks,
             B.product_label,
+            B.type,
             A.id as product_id,
+            A.name,
+            A.description,
+            A.add_details,
+        "); 
+        $this->db->from('products_tb A');
+        $this->db->join('catering_order_items B', 'B.product_id = A.id' ,'left');
+        $this->db->where('B.transaction_id', $transaction_id);
+        $this->db->where('B.type', 'product');
+        $query_catering_products= $this->db->get();
+        $catering_products = $query_catering_products->result();
+
+        $this->db->select("
+            B.product_price,
+            B.quantity,
+            B.remarks,
+            B.product_label,
+            B.type,
             A.name,
             A.description,
             A.add_details,
@@ -1906,7 +2043,7 @@ class Admin_model extends CI_Model
         $query_catering_add_ons = $this->db->get();
         $catering_add_ons = $query_catering_add_ons->result();
 
-        return array_merge($catering_packages, $catering_add_ons);
+        return array_merge($catering_packages, $catering_products, $catering_add_ons);
     }
 
     public function getCateringBooking($tracking_no){
@@ -1917,6 +2054,7 @@ class Admin_model extends CI_Model
             A.serving_time,
             A.tracking_no,
             A.invoice_num,
+            A.hash_key,
             A.logon_type,
             A.serving_time,
             A.start_datetime,
@@ -1925,7 +2063,6 @@ class Admin_model extends CI_Model
             A.event_class,
             A.company_name,
             A.remarks,
-            A.hash_key,
 
             A.purchase_amount,
             A.service_fee,

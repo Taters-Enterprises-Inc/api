@@ -3,7 +3,101 @@
 class Shop_model extends CI_Model 
 {
     
-    //jepoy get store id by hash key
+    public function __construct(){
+		$this->db =  $this->load->database('default', TRUE, TRUE);
+        $this->bscDB = $this->load->database('bsc', TRUE, TRUE);
+    }
+    
+    public function getUserInboxHistoryCount($type, $id, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('notifications A');
+        $this->db->join('notification_events B', 'B.id = A.notification_event_id');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses C', 'C.id = B.customer_survey_response_id', 'left');
+        $this->db->join('transaction_tb D', 'D.id = C.transaction_id', 'left');
+        $this->db->join('catering_transaction_tb E', 'E.id = C.catering_transaction_id', 'left');
+        $this->db->or_where('B.notification_event_type_id', 4);
+        $this->db->or_where('B.notification_event_type_id', 5);
+        $this->db->or_where('B.notification_event_type_id', 6);
+
+        
+        if ($type == 'mobile') {
+            $this->db->where('A.mobile_user_to_notify', $id);
+
+        } else if($type == 'facebook') {
+            $this->db->where('A.fb_user_to_notify', $id);
+        }
+
+            
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.text', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getUserInboxHistory($type, $id, $row_no, $row_per_page, $order_by,  $order, $search){
+
+        $this->db->select('
+            A.id,
+            A.dateadded,
+            B.notification_event_type_id,
+            B.text,
+            C.invoice_no,
+            C.hash as survey_hash,
+            D.hash_key as transaction_hash,
+            E.hash_key as catering_transaction_hash,
+
+            F.title,
+            F.body,
+            F.closing,
+            F.closing_salutation,
+            F.image_title,
+            F.image_url,
+            F.internal_link_title,
+            F.internal_link_url,
+            F.message_from,
+            F.email,
+            F.contact_number,
+        ');
+
+        $this->db->from('notifications A');
+        $this->db->join('notification_events B', 'B.id = A.notification_event_id');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses C', 'C.id = B.customer_survey_response_id', 'left');
+        $this->db->join('transaction_tb D', 'D.id = B.transaction_tb_id', 'left');
+        $this->db->join('catering_transaction_tb E', 'E.id = B.catering_transaction_tb_id', 'left');
+
+        $this->db->join('notification_messages F', 'F.id = B.notification_message_id', 'left');
+
+        $this->db->or_where('B.notification_event_type_id', 4);
+
+        if ($type == 'mobile') {
+            $this->db->where('A.mobile_user_to_notify', $id);
+
+        } else if($type == 'facebook') {
+            $this->db->where('A.fb_user_to_notify', $id);
+        }
+        
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.text', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+            
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
     public function get_store_id_by_hash_key($hash_key){
         $this->db->select('store');
         $this->db->where('hash_key', $hash_key);
@@ -28,6 +122,7 @@ class Shop_model extends CI_Model
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses E', 'E.transaction_id = A.id', 'left');
     
         
         if ($type == 'mobile') {
@@ -57,6 +152,7 @@ class Shop_model extends CI_Model
         $this->db->select('
             A.id,
             A.dateadded,
+            A.status,
             A.tracking_no,
             A.purchase_amount,
             A.distance_price,
@@ -64,13 +160,14 @@ class Shop_model extends CI_Model
             C.generated_raffle_code,
             C.application_status,
             A.hash_key,
+            E.hash as survey_hash,
         ');
 
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
-    
+        $this->db->join($this->bscDB->database.'.customer_survey_responses E', 'E.transaction_id = A.id', 'left');
 
 
         if ($type == 'mobile') {
@@ -226,7 +323,7 @@ class Shop_model extends CI_Model
             $query_orders = $this->db->get();
             $orders = $query_orders->result();
 
-            $select_col = array("D.name", 'D.product_image', 'O.quantity', 'O.remarks', "O.price",);
+            $select_col = array("D.id" ,"D.name","D.promo_discount_percentage", 'D.product_image', 'O.quantity', 'O.remarks', "O.price");
 			$this->db->from('dotcom_deals_tb D');
             $this->db->select($select_col);
             $this->db->join('deals_order_items O', 'D.id = O.deal_id' ,'left');
@@ -559,6 +656,7 @@ class Shop_model extends CI_Model
                     
                     $redeem_data = $this->session->redeem_data;
                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
                     $promo_discount_percentage = null;
 
                     if($deal_products_promo_exclude){
@@ -571,6 +669,16 @@ class Shop_model extends CI_Model
                             }
                         }
                     }
+                    
+                    if($deal_products_promo_include){
+                        foreach($deal_products_promo_include as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                                break;
+                            }
+                        }
+                    }
+
 
                     $return_data[$val->sequence]['category_id']          = $val->category_id;
                     $return_data[$val->sequence]['category_name']        = $val->category_name;
@@ -596,6 +704,7 @@ class Shop_model extends CI_Model
                     
                     $redeem_data = $this->session->redeem_data;
                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
                     $promo_discount_percentage = null;
 
                     if($deal_products_promo_exclude){
@@ -609,6 +718,16 @@ class Shop_model extends CI_Model
                         }
 
                     }
+                    
+                    if($deal_products_promo_include){
+                        foreach($deal_products_promo_include as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                                break;
+                            }
+                        }
+                    }
+
 
                     $return_data[$val->sequence]['category_id']          = $val->category_id;
                     $return_data[$val->sequence]['category_name']        = $val->category_name;
@@ -634,6 +753,7 @@ class Shop_model extends CI_Model
 
                     $redeem_data = $this->session->redeem_data;
                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
                     $promo_discount_percentage = null;
 
                     if($deal_products_promo_exclude){
@@ -646,6 +766,15 @@ class Shop_model extends CI_Model
                             }
                         }
 
+                    }
+
+                    if($deal_products_promo_include){
+                        foreach($deal_products_promo_include as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                                break;
+                            }
+                        }
                     }
 
 
@@ -673,6 +802,7 @@ class Shop_model extends CI_Model
 
                     $redeem_data = $this->session->redeem_data;
                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
                     $promo_discount_percentage = null;
 
                     if($deal_products_promo_exclude){
@@ -684,8 +814,15 @@ class Shop_model extends CI_Model
                                 break;
                             }
                         }
-
-
+                    }
+                    
+                    if($deal_products_promo_include){
+                        foreach($deal_products_promo_include as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                                break;
+                            }
+                        }
                     }
 
                     $return_data[0]['category_id'] = $val->category_id;
@@ -711,6 +848,7 @@ class Shop_model extends CI_Model
                     
                     $redeem_data = $this->session->redeem_data;
                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
                     $promo_discount_percentage = null;
 
                     if($deal_products_promo_exclude){
@@ -722,7 +860,15 @@ class Shop_model extends CI_Model
                                 break;
                             }
                         }
-
+                    }
+                    
+                    if($deal_products_promo_include){
+                        foreach($deal_products_promo_include as $value){
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                                break;
+                            }
+                        }
                     }
 
                     $return_data[]['category_products'][] = array(

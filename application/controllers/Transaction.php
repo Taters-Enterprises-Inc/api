@@ -123,14 +123,13 @@ class Transaction extends CI_Controller {
                             $comp_total = 0;
 
                             foreach ($this->session->orders as $k => $value) {
-                                $remarks = (empty($value['prod_multiflavors'])) ? null : $value['prod_multiflavors'];
 
                                 $order_data[] = array(
                                     'transaction_id'      => $trans_id,
                                     'combination_id'      => $k,
                                     'product_id'          => $value['prod_id'],
                                     'quantity'            => $value['prod_qty'],
-                                    'remarks'             => $remarks,
+                                    'remarks'             => $value['prod_multiflavors'],
                                     'type'                => $value['prod_type'],
                                     'status'              => 1,
                                     'promo_id'            => "",
@@ -209,7 +208,6 @@ class Transaction extends CI_Controller {
                         $this->notification_model->insertNotification($notifications_data);   
                     
 
-
                         $real_time_notification = array(
                             "store_id" => $store_id,
                             "message" => $message,
@@ -219,7 +217,6 @@ class Transaction extends CI_Controller {
                         
                 
                         $this->session->unset_userdata('orders');
-                        $this->session->unset_userdata('deals');
                         
                         $response = array(
                             "data" => array(
@@ -279,33 +276,31 @@ class Transaction extends CI_Controller {
                             }
                         }
                     }
-                    
-                    if(isset($_SESSION['deals'])){
-                        if(!empty($_SESSION['deals'])){
-                            foreach ($_SESSION['deals'] as $row => $val) {
-                                $comp_total += $val['deal_promo_price'];
-                            }
-                        }
-                    }
 
 
                     $distance_rate_id = (empty($this->session->distance_rate_id)) ? 0 : $this->session->distance_rate_id;
                     $distance_rate_price = (empty($this->session->distance_rate_price)) ? 0 : $this->session->distance_rate_price;
+                    $discount_value = "";
 
 					if(isset($_SESSION['redeem_data'])){
                         if(
                             isset($_SESSION['redeem_data']['minimum_purchase']) && 
-                            $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total
+                            $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total && 
+                            $_SESSION['redeem_data']['is_free_delivery'] === 1
                         ){
-                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
                             $distance_rate_price = 0;
                         }
-                        
+
                         if(
-                            isset($_SESSION['redeem_data']['promo_discount_percentage'])
+                            isset($_SESSION['redeem_data']['minimum_purchase']) && 
+                            isset($_SESSION['redeem_data']['promo_discount_percentage']) && 
+                            $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total && 
+                            $_SESSION['redeem_data']['is_free_delivery'] === 0
                         ){
-                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
+                            $discount_value = $comp_total *  (float) $_SESSION['redeem_data']['promo_discount_percentage'];
                         }
+                        
+                        $comp_total += $_SESSION['redeem_data']['deal_promo_price'];
 					}
 
                     $payops = $post['payops'];
@@ -366,7 +361,6 @@ class Transaction extends CI_Controller {
                     $payops_ref_no = '';
                     $discount_type = '';
                     $discount_ref_no = '';
-                    $discount_value = "";
                     $discount_user_id = null;
                     if(isset($discount)){
                         $discount_value = (int)$comp_total * (float)$discount->percentage;
@@ -393,7 +387,7 @@ class Transaction extends CI_Controller {
                         'reseller_discount' => "",
                         'payops'            => $payops,
                         'discount'          => $discount_value,
-                        'discount_user_id'       => $discount_user_id,
+                        'discount_user_id'  => $discount_user_id,
                         'giftcard_discount' => "",
                         'giftcard_number'   => "",
                         'voucher_id'        => $voucher_id,
@@ -412,10 +406,7 @@ class Transaction extends CI_Controller {
                     if($query_transaction_result['status'] == true){
                         $trans_id = $query_transaction_result['id'];
 
-                        $orders_session = isset($_SESSION['orders']) ? $_SESSION['orders']:  [];
-                        $deals_session = isset($_SESSION['deals']) ? $_SESSION['deals']:  [];
-
-                        $orders = array_merge($orders_session, $deals_session);
+                        $orders = isset($_SESSION['orders']) ? $_SESSION['orders']:  [];
                         
                         if(!empty($orders)){
                             $comp_total = 0;
@@ -446,6 +437,8 @@ class Transaction extends CI_Controller {
                                     
                                     $redeem_data = $this->session->redeem_data;
                                     $deal_products_promo_exclude = $redeem_data['deal_products_promo_exclude'];
+                                    $deal_products_promo_include = $redeem_data['deal_products_promo_include'];
+                                    $deal_id = null;
 
                                     if($deal_products_promo_exclude){
                                         $deal_id = $this->session->redeem_data['deal_id'];
@@ -453,6 +446,17 @@ class Transaction extends CI_Controller {
                                         foreach($deal_products_promo_exclude as $promo){
                                             if($promo->product_id === $value['prod_id']){
                                                 $deal_id = null;
+                                                break;
+                                            }
+                                        }
+
+                                        $order_product['deal_id'] = $deal_id;
+                                    }
+                                    
+                                    if($deal_products_promo_include){
+                                        foreach($deal_products_promo_include as $promo){
+                                            if($promo->product_id === $value['prod_id']){
+                                                $deal_id = $this->session->redeem_data['deal_id'];
                                                 break;
                                             }
                                         }
@@ -480,24 +484,12 @@ class Transaction extends CI_Controller {
 										);
 										$this->shop_model->insert_giftcard_user($data);
 									}
-								}else if($value['deal_id'] && $value['minimum_purchase'] === null && $value['promo_discount_percentage'] === null){
-									$order_data_deal[] = array(
-										'transaction_id'  => $query_transaction_result['id'],
-										'deal_id'         => $value['deal_id'],
-										'price'			  => $value['deal_promo_price'],
-										'product_price'   => $value['deal_promo_price'],
-										'remarks'		  => $value['deal_remarks'],
-										'quantity'	      => 1,
-										'status'	      => 0,
-									);
 								}
                             }
 							
 							if(!empty($order_data_product))
 								$this->transaction_model->insertSnackshopClientOrders($order_data_product);
 								
-							if(!empty($order_data_deal))
-								$this->transaction_model->insertPopClubClientOrders($order_data_deal);
                         }               
         
                         if(isset($_SESSION['orders'])){
@@ -505,12 +497,20 @@ class Transaction extends CI_Controller {
                         }
                         
 
-                        if(isset($_SESSION['deals'])){
-                            $this->session->unset_userdata('deals');
+                        if(isset($_SESSION['redeem_data'])){
 
-                            if(isset($_SESSION['redeem_data'])){
-                                $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
-                            }
+                            $order_data_deal = array(
+                                'transaction_id'  => $query_transaction_result['id'],
+                                'deal_id'         => $_SESSION['redeem_data']['deal_id'],
+                                'price'			  => $_SESSION['redeem_data']['deal_promo_price'],
+                                'product_price'   => $_SESSION['redeem_data']['deal_promo_price'],
+                                'remarks'		  => $_SESSION['redeem_data']['deal_remarks'],
+                                'quantity'	      => 1,
+                                'status'	      => 0,
+                            );
+                        
+                            $this->transaction_model->insertPopClubClientOrder($order_data_deal);
+                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
                         }
                         
                         if(isset($_SESSION['redeem_data'])){
@@ -578,7 +578,6 @@ class Transaction extends CI_Controller {
                             "dateadded" => date('Y-m-d H:i:s'),
                         );
                         $this->notification_model->insertNotification($notifications_data);   
-                        
 
                         $realtime_notification = array(
                             "store_id" => $store_id,

@@ -350,10 +350,22 @@ class Admin extends CI_Controller{
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
 
-        $flavors = $this->admin_model->getCateringPackageFlavors($package_id);
+        $type = $this->input->get('type');
+
+        switch($type){
+          case 'main':
+            $flavors = $this->admin_model->getCateringPackageFlavors($package_id);
+            break;
+          case 'product':
+            $flavors = $this->admin_model->getSnackshopProductFlavors($package_id);
+            break;
+        }
+
 				foreach($flavors as $key => $flavor){
-					$package_flavor[$flavor->product_variant_id]['parent_name'] = $flavor->parent_name;
-					$package_flavor[$flavor->product_variant_id]['flavors'][] =  $flavor;
+          if($flavor->parent_name !== 'size'){
+            $package_flavor[$flavor->product_variant_id]['parent_name'] = $flavor->parent_name;
+            $package_flavor[$flavor->product_variant_id]['flavors'][] =  $flavor;
+          }
 				}
 
         $response = array(
@@ -1040,10 +1052,57 @@ class Admin extends CI_Controller{
       case 'POST':
         $_POST =  json_decode(file_get_contents("php://input"), true);
         
-        $survey_verification_id = $this->input->post('surveyverificationId');
+        $survey_verification_id = $this->input->post('surveyVerificationId');
         $status = $this->input->post('status');
+        $invoice_no = $this->input->post('invoiceNo');
 
         $this->admin_model->changeStatusSurveyVerification($survey_verification_id, $status);
+        $surveyVerification = $this->admin_model->getCustomerSurveyResponse($survey_verification_id);
+
+        if((int)$status === 2){
+						$notification_event_data = array(
+							"notification_event_type_id" => 4,
+							"transaction_tb_id" => $surveyVerification->transaction_id,
+							"catering_transaction_tb_id" => $surveyVerification->catering_transaction_id,
+              'customer_survey_response_id' => $surveyVerification->id,
+							"text" => 'Claim your gift!'
+						);
+            
+						$notification_message_data = array(
+							"title" => "Claim your gift!",
+							"body" => "Here are the steps to claim your gift:
+							
+									1. Send an email to stacey@rafflepress.com within 7 days to claim your prize
+									2. Please confirm that it’s OK for us to publish your name on our social media channels and website
+									3. This is optional, but if you’re as excited as we are about your win, take a selfie and share it with us!
+
+									If you have any questions, just hit reply on this email and I’ll be happy to help!
+              ",
+							"message_from" => "Taters Enterprises Inc.",
+							"contact_number" => "(+64) 977-275-5595",
+							"email" => "tei.csr@tatersgroup.com",
+							"image_title" => $invoice_no,
+							"image_url" => "https://www.ilovetaters.com/api/assets/images/home/cards/taters_branches.jpg",
+						);
+                        
+            $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+
+            $notification_event_data['notification_message_id'] = $notification_message_id;
+
+            $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                            
+            //mobile or fb             
+            $notifications_data = array(
+                "fb_user_to_notify" => $surveyVerification->fb_user_id,
+                "mobile_user_to_notify" => $surveyVerification->mobile_user_id,
+                "fb_user_who_fired_event" => $surveyVerification->fb_user_id,
+                "mobile_user_who_fired_event" => $surveyVerification->mobile_user_id,
+                'notification_event_id' => $notification_event_id,
+                "dateadded" => date('Y-m-d H:i:s'),
+            );
+            
+            $this->notification_model->insertNotification($notifications_data); 
+        }
 
         $response = array(
           "message" => 'Successfully update survey verification status',
@@ -1216,6 +1275,11 @@ class Admin extends CI_Controller{
                 'notifications'=> $this->notification_model->getNotifications($user_id, 3, false, 'admin'),
                 "unseen_notifications" => $this->notification_model->getNotifications($user_id, 3, true, 'admin'),
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 3, 'admin'),
+              ),
+              "survey_verification" => array(
+                'notifications'=> $this->notification_model->getNotifications($user_id, 5, false, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 5, true, 'admin'),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 5, 'admin'),
               ),
             ),
             "message" => "Succesfully fetch notification"
@@ -1486,6 +1550,58 @@ class Admin extends CI_Controller{
 
   }
   
+  public function caters_product_availability(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $store_id = $this->input->get('store_id');
+        $category_id = $this->input->get('category_id');
+        $status = $this->input->get('status') ?? 0;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'id';
+        $search = $this->input->get('search');
+
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+
+        $products_count = $this->admin_model->getStoreCateringProductCount($store_id, $category_id, $status, $search);
+        $products = $this->admin_model->getStoreCateringProducts($page_no, $per_page, $store_id, $category_id, $status, $order_by, $order, $search);
+
+        $pagination = array(
+          "total_rows" => $products_count,
+          "per_page" => $per_page,
+        );
+
+        $response = array(
+          "message" => 'Successfully fetch products',
+          "data" => array(
+            "pagination" => $pagination,
+            "products" => $products
+          ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+        
+      case 'PUT': 
+        $put = json_decode(file_get_contents("php://input"), true);
+
+        $this->admin_model->updateStoreCateringProduct($put['id'], $put['status']);
+
+        $response = array(
+          "message" => 'Successfully update status',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+
+  }
+
   public function product_availability(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
@@ -1700,12 +1816,14 @@ class Admin extends CI_Controller{
       case 'POST': 
 				$_POST =  json_decode(file_get_contents("php://input"), true);
 
-        $fb_user_id = $this->input->post('fb_user_id');
-        $mobile_user_id = $this->input->post('mobile_user_id');
+        $fb_user_id = $this->input->post('fbUserId');
+        $mobile_user_id = $this->input->post('mobileUserId');
+
 
         $password = $this->input->post('password');
         
         $transaction_id = $this->input->post('transactionId');
+        $transaction_hash = $this->input->post('transactionHash');
 
         $from_store_id = $this->input->post('fromStoreId');
         $to_store_id = $this->input->post('toStoreId');
@@ -1728,6 +1846,7 @@ class Admin extends CI_Controller{
         elseif ($from_status_id == 6) $from_status = "Initial Payment Verified";
         elseif ($from_status_id == 7) $from_status = "Final Payment Uploaded";
         elseif ($from_status_id == 8) $from_status = "Final payment verified";
+        elseif ($from_status_id == 9) $from_status = "Catering booking completed";
         elseif ($from_status_id == 20) $from_status = "Booking denied";
         elseif ($from_status_id == 21) $from_status = "Contract denied";
         elseif ($from_status_id == 22) $from_status = "Initial Payment denied";
@@ -1741,6 +1860,7 @@ class Admin extends CI_Controller{
         elseif ($to_status_id == 6) $to_status = "Initial Payment Verified";
         elseif ($to_status_id == 7) $to_status = "Final Payment Uploaded";
         elseif ($to_status_id == 8) $to_status = "Final payment verified";
+        elseif ($to_status_id == 9) $to_status = "Catering booking completed";
         elseif ($to_status_id == 20) $to_status = "Booking denied";
         elseif ($to_status_id == 21) $to_status = "Contract denied";
         elseif ($to_status_id == 22) $to_status = "Initial Payment denied";
@@ -1772,6 +1892,42 @@ class Admin extends CI_Controller{
           elseif ($request == "change_status"){
             $this->logs_model->insertCateringTransactionLogs($user_id, 1, $transaction_id, 'Change booking status from ' . $from_status . ' to ' . $to_status);
             
+            
+            if($to_status_id === 9){
+              $notification_event_data = array(
+                "notification_event_type_id" => 4,
+                "catering_transaction_tb_id" => $transaction_id,
+                "text" => "Answer the feedback, and you'll have a free gift!",
+              );
+              
+              $notification_message_data = array(
+                "title" => "Answer the feedback, and you'll have a free gift!",
+                "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
+                "message_from" => "Taters Enterprises Inc.",
+                "contact_number" => "(+64) 977-275-5595",
+                "email" => "tei.csr@tatersgroup.com",
+                "internal_link_title" => "Feedback Questionnaire",
+                "internal_link_url" => "/feedback/catering/". $transaction_hash,
+              );
+                          
+              $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+              $notification_event_data['notification_message_id'] = $notification_message_id;
+
+              $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                              
+              //mobile or fb             
+              $notifications_data = array(
+                  "fb_user_to_notify" => $fb_user_id,
+                  "mobile_user_to_notify" => $mobile_user_id,
+                  "fb_user_who_fired_event" => $fb_user_id,
+                  "mobile_user_who_fired_event" => $mobile_user_id,
+                  'notification_event_id' => $notification_event_id,
+                  "dateadded" => date('Y-m-d H:i:s'),
+              );
+              
+              $this->notification_model->insertNotification($notifications_data); 
+            }
+
             $real_time_notification = array(
                 "fb_user_id" => $fb_user_id,
                 "mobile_user_id" => $mobile_user_id,
@@ -1802,12 +1958,13 @@ class Admin extends CI_Controller{
       case 'POST': 
 				$_POST =  json_decode(file_get_contents("php://input"), true);
 
-        $fb_user_id = $this->input->post('fb_user_id');
-        $mobile_user_id = $this->input->post('mobile_user_id');
+        $fb_user_id = $this->input->post('fbUserId');
+        $mobile_user_id = $this->input->post('mobileUserId');
 
         $password = $this->input->post('password');
         
         $transaction_id = $this->input->post('transactionId');
+        $transaction_hash = $this->input->post('transactionHash');
 
         $from_store_id = $this->input->post('fromStoreId');
         $to_store_id = $this->input->post('toStoreId');
@@ -1868,6 +2025,41 @@ class Admin extends CI_Controller{
           elseif ($request == "change_status"){
             $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Change order status from ' . $from_status . ' to ' . $to_status);
             
+            
+            if($to_status_id === 6){
+              $notification_event_data = array(
+                "notification_event_type_id" => 4,
+                "transaction_tb_id" => $transaction_id,
+                "text" => "Answer the feedback, and you'll have a free gift!"
+              );
+              
+              $notification_message_data = array(
+                "title" => "Answer the feedback, and you'll have a free gift!",
+                "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
+                "message_from" => "Taters Enterprises Inc.",
+                "contact_number" => "(+64) 977-275-5595",
+                "email" => "tei.csr@tatersgroup.com",
+                "internal_link_title" => "Feedback Questionnaires",
+                "internal_link_url" => "/feedback/snackshop/". $transaction_hash,
+              );
+                          
+              $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+              $notification_event_data['notification_message_id'] = $notification_message_id;
+              $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                              
+              //mobile or fb             
+              $notifications_data = array(
+                  "fb_user_to_notify" => $fb_user_id,
+                  "mobile_user_to_notify" => $mobile_user_id,
+                  "fb_user_who_fired_event" => $fb_user_id,
+                  "mobile_user_who_fired_event" => $mobile_user_id,
+                  'notification_event_id' => $notification_event_id,
+                  "dateadded" => date('Y-m-d H:i:s'),
+              );
+              
+              $this->notification_model->insertNotification($notifications_data); 
+            }
+
             $real_time_notification = array(
                 "fb_user_id" => $fb_user_id,
                 "mobile_user_id" => $mobile_user_id,
@@ -1898,6 +2090,7 @@ class Admin extends CI_Controller{
       case 'POST': 
         $_POST = json_decode(file_get_contents("php://input"), true);
         $trans_id = (int) $this->input->post('transactionId');
+        $transaction_hash = $this->input->post('transactionHash');
         $status = $this->input->post('status');
         $fetch_data = $this->admin_model->update_catering_status($trans_id, $status);
         $user_id = $this->session->admin['user_id'];
@@ -1920,6 +2113,42 @@ class Admin extends CI_Controller{
         if ($fetch_data == 1) {
           $this->logs_model->insertCateringTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Booking Success');
           
+          
+          if($status === 9){
+						$notification_event_data = array(
+							"notification_event_type_id" => 4,
+							"catering_transaction_tb_id" => $trans_id,
+							"text" => "Answer the feedback, and you'll have a free gift!"
+						);
+            
+						$notification_message_data = array(
+              "title" => "Answer the feedback, and you'll have a free gift!",
+              "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
+							"message_from" => "Taters Enterprises Inc.",
+							"contact_number" => "(+64) 977-275-5595",
+							"email" => "tei.csr@tatersgroup.com",
+							"internal_link_title" => "Feedback Questionnaires",
+							"internal_link_url" => "/feedback/catering/". $transaction_hash,
+						);
+                        
+            $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+            $notification_event_data['notification_message_id'] = $notification_message_id;
+
+            $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                            
+            //mobile or fb             
+            $notifications_data = array(
+                "fb_user_to_notify" => $fb_user_id,
+                "mobile_user_to_notify" => $mobile_user_id,
+                "fb_user_who_fired_event" => $fb_user_id,
+                "mobile_user_who_fired_event" => $mobile_user_id,
+                'notification_event_id' => $notification_event_id,
+                "dateadded" => date('Y-m-d H:i:s'),
+            );
+            
+            $this->notification_model->insertNotification($notifications_data); 
+          }
+
           $real_time_notification = array(
             "fb_user_id" => (int) $fb_user_id,
             "mobile_user_id" => (int) $mobile_user_id,
@@ -1945,6 +2174,7 @@ class Admin extends CI_Controller{
       case 'POST': 
         $_POST = json_decode(file_get_contents("php://input"), true);
         $trans_id = (int) $this->input->post('transactionId');
+        $transaction_hash = $this->input->post('transactionHash');
         $user_id = $this->session->admin['user_id'];
         $status = $this->input->post('status');
         $fetch_data = $this->admin_model->update_shop_status($trans_id, $status);
@@ -1964,10 +2194,44 @@ class Admin extends CI_Controller{
         if ($fetch_data == 1) {
           $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Order Success');
           $this->status_notification($trans_id, 9, $user_id);
+
+          if($status === 6){
+						$notification_event_data = array(
+							"notification_event_type_id" => 4,
+							"transaction_tb_id" => $trans_id,
+              "text" => "Answer the feedback, and you'll have a free gift!",
+						);
+
+						$notification_message_data = array(
+              "title" => "Answer the feedback, and you'll have a free gift!",
+              "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
+							"message_from" => "Taters Enterprises Inc.",
+							"contact_number" => "(+64) 977-275-5595",
+							"email" => "tei.csr@tatersgroup.com",
+							"internal_link_title" => "Feedback Questionnaires",
+							"internal_link_url" => "/feedback/snackshop/". $transaction_hash,
+						);
+                        
+            $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+            $notification_event_data['notification_message_id'] = $notification_message_id;
+            $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                            
+            //mobile or fb             
+            $notifications_data = array(
+                "fb_user_to_notify" => $fb_user_id,
+                "mobile_user_to_notify" => $mobile_user_id,
+                "fb_user_who_fired_event" => $fb_user_id,
+                "mobile_user_who_fired_event" => $mobile_user_id,
+                'notification_event_id' => $notification_event_id,
+                "dateadded" => date('Y-m-d H:i:s'),
+            );
+            
+            $this->notification_model->insertNotification($notifications_data); 
+          }
           
           $real_time_notification = array(
-              "fb_user_id" => (int) $fb_user_id,
-              "mobile_user_id" => (int) $mobile_user_id,
+              "fb_user_id" => $fb_user_id,
+              "mobile_user_id" => $mobile_user_id,
               "status" => $status,
           );
 
@@ -2215,7 +2479,6 @@ class Admin extends CI_Controller{
         $pagination = array(
           "total_rows" => $orders_count,
           "per_page" => $per_page,
-          "test" => $store_id_array,
         );
 
         $response = array(
