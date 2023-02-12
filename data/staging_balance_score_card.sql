@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 07, 2023 at 05:07 AM
+-- Generation Time: Feb 12, 2023 at 04:15 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -47,7 +47,7 @@ INSERT INTO `companies` (`id`, `name`) VALUES
 
 CREATE TABLE `customer_survey_responses` (
   `id` int(10) UNSIGNED NOT NULL,
-  `order_no` varchar(100) DEFAULT NULL,
+  `invoice_no` varchar(100) DEFAULT NULL,
   `fb_user_id` int(10) UNSIGNED DEFAULT NULL,
   `mobile_user_id` int(10) UNSIGNED DEFAULT NULL,
   `transaction_id` int(10) UNSIGNED DEFAULT NULL,
@@ -279,8 +279,34 @@ CREATE TABLE `survey_question_offered_ratings` (
 --
 
 INSERT INTO `survey_question_offered_ratings` (`id`, `name`, `description`, `lowest_rate_text`, `lowest_rate`, `highest_rate_text`, `highest_rate`) VALUES
-(1, 'Priority Rank', 'Please rate your priorities on a scale of 1 to 10. ', 'Lowest', 10, 'Highest', 1),
-(2, 'Satisfaction Rating', 'Please rate your overall satisfaction on a scale of 1 to 5', 'Dissatisfied', 1, 'Highly Satisfied', 5);
+(1, 'How much do you prioritize taste?\n', 'Please rate your priorities on a scale of 10 to 1.\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(2, 'Please rate your overall Satisfaction on taste.\n', 'Please rate your overall satisfaction on a scale of 1 to 5\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(3, 'How much do you prioritize freshness?\r\n', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(4, 'Please rate your overall Satisfaction on freshness.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(5, 'How much do you prioritize temperature?', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(6, 'Please rate your overall Satisfaction on temperature.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(7, 'How much do you prioritize presentation?', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(8, 'Please rate your overall Satisfaction on presentation.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(9, 'How much do you prioritize courtesy?', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(10, 'Please rate your overall Satisfaction on courtesy.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(11, 'How much do you prioritize cheerfulness?', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(12, 'Please rate your overall Satisfaction on cheerfulness.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(13, 'How much do you prioritize speed of service?', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(14, 'Please rate your overall Satisfaction on speed of service.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(15, 'How much do you prioritize knowledge of staff?', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(16, 'Please rate your overall Satisfaction on knowledge of staff.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(17, 'How much do you prioritize appearance of Staff?', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(18, 'Please rate your overall Satisfaction on appearance of Staff.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(19, 'How much do you prioritize cleanliness?', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(20, 'Please rate your overall Satisfaction on cleanliness.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(21, 'How much do you prioritize comfort?', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(22, 'Please rate your overall Satisfaction on comfort.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(23, 'How much do you prioritize décor?', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(24, 'Please rate your overall Satisfaction on décor.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(25, 'How much do you prioritize price?', 'Please rate your priorities on a scale of 10 to 1.\r\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(26, 'Please rate your overall Satisfaction on price.', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5),
+(27, 'How much do you prioritize variety?', 'Please rate your priorities on a scale of 10 to 1.\n1 = highest and 10 = lowest priority', 'Lowest', 10, 'Highest', 1),
+(28, 'Please rate your overall Satisfaction on variety.\r\n', 'Please rate your overall satisfaction on a scale of 1 to 5\r\n5 = Highly Satisfied and 1 = dissatisfied', 'Dissatisfied', 1, 'Highly Satisfied', 5);
 
 -- --------------------------------------------------------
 
@@ -301,32 +327,32 @@ CREATE TABLE `survey_question_ratings` (
 INSERT INTO `survey_question_ratings` (`id`, `survey_question_id`, `survey_question_offered_rating_id`) VALUES
 (1, 9, 1),
 (2, 9, 2),
-(3, 10, 1),
-(4, 10, 2),
-(5, 11, 1),
-(6, 11, 2),
-(7, 12, 1),
-(8, 12, 2),
-(9, 13, 1),
-(10, 13, 2),
-(11, 14, 1),
-(12, 14, 2),
-(13, 15, 1),
-(14, 15, 2),
-(15, 16, 1),
-(16, 16, 2),
-(17, 17, 1),
-(18, 17, 2),
-(19, 18, 1),
-(20, 18, 2),
-(21, 19, 1),
-(22, 19, 2),
-(23, 20, 1),
-(24, 20, 2),
-(25, 21, 1),
-(26, 21, 2),
-(27, 22, 1),
-(28, 22, 2);
+(3, 10, 3),
+(4, 10, 4),
+(5, 11, 5),
+(6, 11, 6),
+(7, 12, 7),
+(8, 12, 8),
+(9, 13, 9),
+(10, 13, 10),
+(11, 14, 11),
+(12, 14, 12),
+(13, 15, 13),
+(14, 15, 14),
+(15, 16, 15),
+(16, 16, 16),
+(17, 17, 17),
+(18, 17, 18),
+(19, 18, 19),
+(20, 18, 20),
+(21, 19, 21),
+(22, 19, 22),
+(23, 20, 23),
+(24, 20, 24),
+(25, 21, 25),
+(26, 21, 26),
+(27, 22, 27),
+(28, 22, 28);
 
 -- --------------------------------------------------------
 
@@ -684,7 +710,7 @@ ALTER TABLE `survey_question_offered_answers`
 -- AUTO_INCREMENT for table `survey_question_offered_ratings`
 --
 ALTER TABLE `survey_question_offered_ratings`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `survey_question_ratings`
@@ -742,12 +768,12 @@ ALTER TABLE `user_stores`
 -- Constraints for table `customer_survey_responses`
 --
 ALTER TABLE `customer_survey_responses`
-  ADD CONSTRAINT `customer_survey_responses_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `staging_newteishop`.`transaction_tb` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_2` FOREIGN KEY (`catering_transaction_id`) REFERENCES `staging_newteishop`.`catering_transaction_tb` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `staging_newteishop_feb_11_2023`.`transaction_tb` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_2` FOREIGN KEY (`catering_transaction_id`) REFERENCES `staging_newteishop_feb_11_2023`.`catering_transaction_tb` (`id`) ON UPDATE NO ACTION,
   ADD CONSTRAINT `customer_survey_responses_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`) ON UPDATE NO ACTION,
   ADD CONSTRAINT `customer_survey_responses_ibfk_5` FOREIGN KEY (`customer_survey_response_order_type_id`) REFERENCES `customer_survey_response_order_types` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_6` FOREIGN KEY (`fb_user_id`) REFERENCES `staging_newteishop`.`fb_users` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_7` FOREIGN KEY (`mobile_user_id`) REFERENCES `staging_newteishop`.`mobile_users` (`id`) ON UPDATE NO ACTION;
+  ADD CONSTRAINT `customer_survey_responses_ibfk_6` FOREIGN KEY (`fb_user_id`) REFERENCES `staging_newteishop_feb_11_2023`.`fb_users` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_7` FOREIGN KEY (`mobile_user_id`) REFERENCES `staging_newteishop_feb_11_2023`.`mobile_users` (`id`) ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `customer_survey_response_answers`
