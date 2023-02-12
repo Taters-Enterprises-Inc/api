@@ -23,6 +23,245 @@ class Admin extends CI_Controller{
 		$this->load->model('notification_model');
 		$this->load->model('report_model');
 	}
+
+  public function setting_store(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $store_id = $this->input->get('store-id');
+
+        $store = $this->admin_model->getSettingStore($store_id);
+
+        $store->products = $this->admin_model->getSettingStoreProductRegionDaLog($store_id);
+        $store->packages = $this->admin_model->getSettingStoreProductCateringRegionDaLog($store_id);
+
+        $services = array();
+
+        if($store->status){
+          $services[] = 'Snackshop';
+        }
+        if($store->catering_status){
+          $services[] = 'Catering';
+        }
+        if($store->popclub_walk_in_status){
+          $services[] = 'PopClub Store Visit';
+        }
+        if($store->popclub_online_delivery_status){
+          $services[] = 'PopClub Online Delivery';
+        }
+
+        $store->services = $services;
+
+
+        $response = array(
+          "message" =>  'Successfully fetch store',
+          "data" => $store,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+      case 'POST':
+        
+        if(is_uploaded_file($_FILES['image250x250']['tmp_name'])){
+          $store_image_name = str_replace(' ', '-', strtolower($this->input->post('name'))) . '-' . time() .'.jpg';
+          
+          $image250x250_error = upload('image250x250','./assets/images/shared/store_images/250',$store_image_name, 'jpg');
+
+          if($image250x250_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image250x250_error));
+            return;
+          }
+          
+
+          $last_store_create = $this->admin_model->getLatestStoreCreated();
+          $store_id = $last_store_create->store_id + 1;
+
+          $data = array(
+            "store_id" => $store_id,
+            "name" => $this->input->post('name'),
+            "address" => $this->input->post('address'),
+            "lat" => $this->input->post('lat'),
+            "lng" => $this->input->post('lng'),
+            "store_menu_type_id" => $this->input->post('storeMenu'),
+            "available_start_time" => $this->input->post('availableStartTime'),
+            "available_end_time" => $this->input->post('availableEndTime'),
+            "contact_number" => $this->input->post('phoneNumber'),
+            "contact_person" => $this->input->post('contactPerson'),
+            "email" => $this->input->post('email'),
+            "delivery_hours" => $this->input->post('deliveryHours'),
+            "operating_hours" => $this->input->post('operatingHours'),
+            "store_image" =>  $store_image_name,
+            'branch_status' => 1,
+            "region_id" => $this->input->post('region'),
+            "active_reseller_region_id" => $this->input->post('activeResellerRegionId'),
+            "region_store_combination_id" =>  $this->input->post('activeResellerRegionId'),
+            "menu_type" => 1,
+            "store_hash" => $this->input->post('storeHash'),
+            "locale" => $this->input->post('locale'),
+            "delivery_rate" => $this->input->post('deliveryRate'),
+            "minimum_rate" => $this->input->post('minimumRate'),
+            "catering_delivery_rate" => $this->input->post('cateringDeliveryRate'),
+            "catering_minimum_rate" => $this->input->post('cateringMinimumRate'),
+          );
+
+          $store_primary_key = $this->admin_model->insertStore($data);
+
+          $services = $this->input->post('services') ? json_decode($this->input->post('services'), true) : array();
+
+          foreach($services as $service){
+            $this->admin_model->updateSettingStore($store_primary_key, $service, 1);
+          }
+
+          $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
+          $region_da_logs = array();
+
+          foreach($products as $product){
+            $data = array(
+                'region_id' => $this->input->post('activeResellerRegionId'),
+                'store_id' => $store_id,
+                'product_id' => $product['id'],
+                'status' => 1,
+            );
+            $region_da_logs[] = $data;
+          }
+  
+          $this->admin_model->insertRegionDaLogs($region_da_logs); 
+          
+          $packages = $this->input->post('packages') ? json_decode($this->input->post('packages'), true) : array();
+          $catering_region_da_logs = array();
+
+          foreach($packages as $package){
+            $data = array(
+                'region_id' => $this->input->post('activeResellerRegionId'),
+                'store_id' => $store_id,
+                'product_id' => $package['id'],
+                'status' => 1,
+            );
+            $catering_region_da_logs[] = $data;
+          }
+  
+          $this->admin_model->insertCateringPackageRegionDaLogs($catering_region_da_logs); 
+        
+        }
+
+        $response = array(
+          "message" => 'Successfully created a new store',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+     
+    }
+  }
+
+  public function setting_edit_store(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST':
+        $store_image_name = str_replace(' ', '-', strtolower($this->input->post('name'))) . '-' . time() .'.jpg';
+
+        $store_id = $this->input->post('storeId');
+
+        $store = $this->admin_model->getSettingStore($store_id);
+        
+        if(isset($_FILES['image250x250']['tmp_name']) && is_uploaded_file($_FILES['image250x250']['tmp_name'])){
+          $image250x250_error = upload('image250x250','./assets/images/shared/store_images/250',$store_image_name, 'jpg');
+          if($image250x250_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image250x250_error));
+            return;
+          }
+        }else{
+          if($store->store_image !== $store_image_name){
+            rename('./assets/images/shared/store_images/250/' . $store->store_image,'./assets/images/shared/store_images/250/'. $store_image_name);
+          }
+        }
+        
+        $data = array(
+          "name" => $this->input->post('name'),
+          "store_image" => $store_image_name,
+          "address" => $this->input->post('address'),
+          "store_menu_type_id" => $this->input->post('storeMenu'),
+          "available_start_time" => $this->input->post('availableStartTime'),
+          "available_end_time" => $this->input->post('availableEndTime'),
+          "contact_number" => $this->input->post('phoneNumber'),
+          "contact_person" => $this->input->post('contactPerson'),
+          "email" => $this->input->post('email'),
+          "delivery_hours" => $this->input->post('deliveryHours'),
+          "operating_hours" => $this->input->post('operatingHours'),
+          "lat" => $this->input->post('lat'),
+          "lng" => $this->input->post('lng'),
+          "delivery_rate" => $this->input->post('deliveryRate'),
+          "minimum_rate" => $this->input->post('minimumRate'),
+          "catering_delivery_rate" => $this->input->post('cateringDeliveryRate'),
+          "catering_minimum_rate" => $this->input->post('cateringMinimumRate'),
+          "store_hash" => $this->input->post('storeHash'),
+          "locale" => $this->input->post('locale'),
+          "region_id" => $this->input->post('region'),
+          "active_reseller_region_id" => $this->input->post('activeResellerRegionId')
+        );
+
+        $this->admin_model->updateStore($store_id, $data);
+
+        
+        $services = $this->input->post('services') ? json_decode($this->input->post('services'), true) : array();
+
+        
+        $this->admin_model->updateSettingStore($store->id, 'Snackshop', 0);
+        $this->admin_model->updateSettingStore($store->id, 'Catering', 0);
+        $this->admin_model->updateSettingStore($store->id, 'PopClub Store Visit', 0);
+        $this->admin_model->updateSettingStore($store->id, 'PopClub Online Delivery', 0);
+
+        foreach($services as $service){
+          $this->admin_model->updateSettingStore($store->id, $service, 1);
+        }
+        
+        $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
+        $this->admin_model->removeRegionDaLogsByStoreId($store_id);
+
+        if(!empty($products)){
+          foreach($products as $product){
+            $region_da_log = array(
+              'region_id' => $store->region_store_id,
+              'store_id' => $store_id,
+              'product_id' => $product['id'],
+              'status' => 1,
+            );
+            $region_da_logs[] = $region_da_log;
+          }
+          
+          $this->admin_model->insertRegionDaLogs($region_da_logs);
+        }
+
+        
+        $packages = $this->input->post('packages') ?  json_decode($this->input->post('packages'), true) : array();
+        $this->admin_model->removeCateringRegionDaLogsByStoreId($store_id);
+
+        if(!empty($packages)){
+          foreach($packages as $package){
+            $catering_region_da_log = array(
+              'region_id' => $store->region_store_id,
+              'store_id' => $store_id,
+              'product_id' => $package['id'],
+              'status' => 1,
+            );
+            $catering_region_da_logs[] = $catering_region_da_log;
+          }
+          
+          $this->admin_model->insertCateringRegionDaLogs($catering_region_da_logs);
+        }
+
+
+        $response = array(
+          "message" =>  'Successfully edit store'
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
   
   public function deals(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -537,7 +776,7 @@ class Admin extends CI_Controller{
             }
             
             $this->admin_model->removeShopProductRegionDaLogs($product_id);
-            $this->admin_model->insertShopProductRegionDaLogs($region_da_logs);
+            $this->admin_model->insertRegionDaLogs($region_da_logs);
             
             $variants = $this->input->post('variants') ? json_decode($this->input->post('variants'), true) : array();
 
@@ -841,7 +1080,7 @@ class Admin extends CI_Controller{
                   $region_da_logs[] = $data;
                 }
   
-                $this->admin_model->insertShopProductRegionDaLogs($region_da_logs); 
+                $this->admin_model->insertRegionDaLogs($region_da_logs); 
                 
                 $variants = $this->input->post('variants') ? json_decode($this->input->post('variants'), true) : array();
                 
@@ -1386,114 +1625,7 @@ class Admin extends CI_Controller{
   
         header('content-type: application/json');
         echo json_encode($response);
-        return;
-      case 'POST':
-
-        if(is_uploaded_file($_FILES['image250x250']['tmp_name'])){
-          $store_image_name = str_replace(' ', '-', strtolower($this->input->post('name'))) . '-' . time() .'.jpg';
-          
-          $image250x250_error = upload('image250x250','./assets/images/shared/store_images/250',$store_image_name, 'jpg');
-
-          if($image250x250_error){
-            $this->output->set_status_header('401');
-            echo json_encode(array( "message" => $image250x250_error));
-            return;
-          }
-
-          $region = array(
-            "name" => $this->input->post('activeResellerRegion'),
-            "status" => 1,
-            "on_reseller_status" => 1,
-            "sequence" => 0,
-          );
-
-          $active_reseller_region_id = $this->admin_model->insertRegion($region);
-          
-          $region_store_combination_data = array(
-            "region_id" => $this->input->post('region'),
-            "region_store_id" => $active_reseller_region_id,
-          );
-
-           $this->admin_model->insertRegionStoreCombination($region_store_combination_data);
-
-          $last_store_create = $this->admin_model->getLatestStoreCreated();
-          $store_id = $last_store_create->store_id + 1;
-
-          $data = array(
-            "store_id" => $store_id,
-            "name" => $this->input->post('name'),
-            "address" => $this->input->post('address'),
-            "lat" => $this->input->post('lat'),
-            "lng" => $this->input->post('lng'),
-            "store_menu_type_id" => $this->input->post('storeMenu'),
-            "available_start_time" => $this->input->post('availableStartTime'),
-            "available_end_time" => $this->input->post('availableEndTime'),
-            "contact_number" => $this->input->post('phoneNumber'),
-            "contact_person" => $this->input->post('contactPerson'),
-            "email" => $this->input->post('email'),
-            "delivery_hours" => $this->input->post('deliveryHours'),
-            "operating_hours" => $this->input->post('operatingHours'),
-            "store_image" =>  $store_image_name,
-            'branch_status' => 1,
-            "region_id" => $this->input->post('region'),
-            "active_reseller_region_id" => $active_reseller_region_id,
-            "region_store_combination_id" => $active_reseller_region_id,
-            "menu_type" => 1,
-            "store_hash" => $this->input->post('storeHash'),
-            "locale" => $this->input->post('locale'),
-            "delivery_rate" => $this->input->post('deliveryRate'),
-            "minimum_rate" => $this->input->post('minimumRate'),
-            "catering_delivery_rate" => $this->input->post('cateringDeliveryRate'),
-            "catering_minimum_rate" => $this->input->post('cateringMinimumRate'),
-          );
-
-          $store_primary_key = $this->admin_model->insertStore($data);
-
-          $services = $this->input->post('services') ? json_decode($this->input->post('services'), true) : array();
-
-          foreach($services as $service){
-            $this->admin_model->updateSettingStore($store_primary_key, $service, 1);
-          }
-
-          $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
-          $region_da_logs = array();
-
-          foreach($products as $product){
-            $data = array(
-                'region_id' => $active_reseller_region_id,
-                'store_id' => $store_id,
-                'product_id' => $product['id'],
-                'status' => 1,
-            );
-            $region_da_logs[] = $data;
-          }
-  
-          $this->admin_model->insertShopProductRegionDaLogs($region_da_logs); 
-          
-          $packages = $this->input->post('packages') ? json_decode($this->input->post('packages'), true) : array();
-          $catering_region_da_logs = array();
-
-          foreach($packages as $package){
-            $data = array(
-                'region_id' => $active_reseller_region_id,
-                'store_id' => $store_id,
-                'product_id' => $package['id'],
-                'status' => 1,
-            );
-            $catering_region_da_logs[] = $data;
-          }
-  
-          $this->admin_model->insertCateringPackageRegionDaLogs($catering_region_da_logs); 
-        
-        }
-
-        $response = array(
-          "message" => 'Successfully created a new store',
-        );
-  
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
+        break;  
     }
 
   }

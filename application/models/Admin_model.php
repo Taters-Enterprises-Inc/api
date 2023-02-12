@@ -5,24 +5,102 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
-    
-    function insertRegion($data){
+
+    function insertCateringRegionDaLogs($data){
         $this->db->trans_start();
-		$this->db->insert('region_tb', $data);
-		$insert_id = $this->db->insert_id();
+		$this->db->insert_batch('catering_region_da_log', $data);
         $this->db->trans_complete();
-        
-        return $insert_id;
+    }
+
+    function removeCateringRegionDaLogsByStoreId($store_id){
+        $this->db->where('store_id', $store_id);
+		$this->db->delete('catering_region_da_log');
+    }
+
+    
+    function removeRegionDaLogsByStoreId($store_id){
+        $this->db->where('store_id', $store_id);
+		$this->db->delete('region_da_log');
+    }
+
+    function updateStore($store_id, $data){
+        $this->db->where('store_id', $store_id);
+        $this->db->update('store_tb', $data);
     }
 
 
-    function insertRegionStoreCombination($data){
-        $this->db->trans_start();
-		$this->db->insert('region_store_combination_tb', $data);
-		$insert_id = $this->db->insert_id();
-        $this->db->trans_complete();
-        
-        return $insert_id;
+    function getSettingStoreProductCateringRegionDaLog($store_id){
+        $this->db->select('
+            B.id,
+            B.name,
+        ');
+
+        $this->db->from('catering_region_da_log A');
+        $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
+
+        $this->db->where('A.store_id', $store_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+    function getSettingStoreProductRegionDaLog($store_id){
+        $this->db->select('
+            B.id,
+            B.name,
+        ');
+
+        $this->db->from('region_da_log A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+
+        $this->db->where('A.store_id', $store_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+    function getSettingStore($store_id){
+        $this->db->select('
+            A.id,
+            A.store_id,
+            A.name,
+            A.address,
+            A.contact_number,
+            A.contact_person,
+            A.email,
+            A.delivery_hours,
+            A.operating_hours,
+            A.delivery_rate,
+            A.minimum_rate,
+            A.catering_delivery_rate,
+            A.catering_minimum_rate,
+            A.store_hash,
+            A.active_reseller_region_id,
+            A.available_start_time,
+            A.available_end_time,
+            A.store_menu_type_id,
+            A.locale,
+            A.region_id,
+            A.lat,
+            A.lng,
+            A.status,
+            A.catering_status,
+            A.popclub_walk_in_status,
+            A.popclub_online_delivery_status,
+            A.branch_status,
+            A.store_image,
+            B.region_store_id,
+        ');
+        $this->db->from('store_tb A');
+		$this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
+
+        $this->db->where('A.store_id', $store_id);
+
+        $query = $this->db->get();
+
+        return $query->row();
     }
 
     function getLatestStoreCreated(){
@@ -566,7 +644,7 @@ class Admin_model extends CI_Model
         return $insert_id;
     }
 
-    function insertShopProductRegionDaLogs($data){
+    function insertRegionDaLogs($data){
         $this->db->trans_start();
 		$this->db->insert_batch('region_da_log', $data);
         $this->db->trans_complete();
@@ -841,7 +919,7 @@ class Admin_model extends CI_Model
         return $query->row();
     }
     
-    function updateSettingStore($store_id, $name_of_field_status, $status){
+    function updateSettingStore($store_primary_key, $name_of_field_status, $status){
         switch($name_of_field_status){
             case 'Snackshop':
                 $this->db->set('status', $status);
@@ -856,7 +934,7 @@ class Admin_model extends CI_Model
                 $this->db->set('popclub_online_delivery_status', $status);
                 break;
         }
-        $this->db->where("id", $store_id);
+        $this->db->where("id", $store_primary_key);
         $this->db->update("store_tb");
     }
     

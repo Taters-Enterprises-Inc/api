@@ -155,7 +155,6 @@ $route['admin/survey-verification/survey-verification-change-status'] = 'admin/s
 $route['admin/survey-verification/(:any)']= 'admin/survey_verification/$1';
 $route['admin/survey-verifications'] = 'admin/survey_verifications';
 
-$route['admin/setting/stores'] = 'admin/setting_stores';
 $route['admin/setting/users'] = 'admin/setting_users';
 $route['admin/setting/user/(:any)'] = 'admin/setting_user/$1';
 $route['admin/setting/groups'] = 'admin/setting_groups';
@@ -164,6 +163,9 @@ $route['admin/setting/shop-product'] = 'admin/setting_shop_product';
 $route['admin/setting/shop-product/type'] = 'admin/setting_shop_product_type';
 $route['admin/setting/edit-shop-product'] = 'admin/setting_edit_shop_product';
 $route['admin/setting/delete-shop-product'] = 'admin/setting_delete_shop_product';
+$route['admin/setting/stores'] = 'admin/setting_stores';
+$route['admin/setting/store'] = 'admin/setting_store';
+$route['admin/setting/edit-store'] = 'admin/setting_edit_store';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';
