@@ -78,6 +78,8 @@ class Admin extends CI_Controller{
           $last_store_create = $this->admin_model->getLatestStoreCreated();
           $store_id = $last_store_create->store_id + 1;
 
+          $region = $this->admin_model->getRegionStoreCombinationById($this->input->post('region'));
+
           $data = array(
             "store_id" => $store_id,
             "name" => $this->input->post('name'),
@@ -94,9 +96,9 @@ class Admin extends CI_Controller{
             "operating_hours" => $this->input->post('operatingHours'),
             "store_image" =>  $store_image_name,
             'branch_status' => 1,
-            "region_id" => $this->input->post('region'),
-            "active_reseller_region_id" => $this->input->post('activeResellerRegionId'),
-            "region_store_combination_id" =>  $this->input->post('activeResellerRegionId'),
+            "region_id" => $region->region_id,
+            "active_reseller_region_id" => $region->region_store_id,
+            "region_store_combination_id" =>  $region->region_store_id,
             "menu_type" => 1,
             "store_hash" => $this->input->post('storeHash'),
             "locale" => $this->input->post('locale'),
@@ -119,7 +121,7 @@ class Admin extends CI_Controller{
 
           foreach($products as $product){
             $data = array(
-                'region_id' => $this->input->post('activeResellerRegionId'),
+                'region_id' => $region->region_store_id,
                 'store_id' => $store_id,
                 'product_id' => $product['id'],
                 'status' => 1,
@@ -134,7 +136,7 @@ class Admin extends CI_Controller{
 
           foreach($packages as $package){
             $data = array(
-                'region_id' => $this->input->post('activeResellerRegionId'),
+                'region_id' => $region->region_store_id,
                 'store_id' => $store_id,
                 'product_id' => $package['id'],
                 'status' => 1,
@@ -179,6 +181,8 @@ class Admin extends CI_Controller{
           }
         }
         
+        $region = $this->admin_model->getRegionStoreCombinationById($this->input->post('region'));
+        
         $data = array(
           "name" => $this->input->post('name'),
           "store_image" => $store_image_name,
@@ -199,8 +203,9 @@ class Admin extends CI_Controller{
           "catering_minimum_rate" => $this->input->post('cateringMinimumRate'),
           "store_hash" => $this->input->post('storeHash'),
           "locale" => $this->input->post('locale'),
-          "region_id" => $this->input->post('region'),
-          "active_reseller_region_id" => $this->input->post('activeResellerRegionId')
+          "region_id" => $region->region_id,
+          "active_reseller_region_id" => $region->region_store_id,
+          "region_store_combination_id" =>  $region->region_store_id,
         );
 
         $this->admin_model->updateStore($store_id, $data);
@@ -214,12 +219,22 @@ class Admin extends CI_Controller{
         $this->admin_model->updateSettingStore($store->id, 'PopClub Store Visit', 0);
         $this->admin_model->updateSettingStore($store->id, 'PopClub Online Delivery', 0);
 
+        
         foreach($services as $service){
           $this->admin_model->updateSettingStore($store->id, $service, 1);
+
+          switch($service){
+            case 'Snackshop':
+              $this->admin_model->removeRegionDaLogsByStoreId($store_id);
+              break;
+            case 'Catering':
+              $this->admin_model->removeCateringRegionDaLogsByStoreId($store_id);
+              break;
+          }
         }
         
         $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
-        $this->admin_model->removeRegionDaLogsByStoreId($store_id);
+
 
         if(!empty($products)){
           foreach($products as $product){
@@ -237,7 +252,6 @@ class Admin extends CI_Controller{
 
         
         $packages = $this->input->post('packages') ?  json_decode($this->input->post('packages'), true) : array();
-        $this->admin_model->removeCateringRegionDaLogsByStoreId($store_id);
 
         if(!empty($packages)){
           foreach($packages as $package){
@@ -312,15 +326,15 @@ class Admin extends CI_Controller{
     }
   }
   
-  public function regions(){
+  public function region_store_combination(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
         
-        $regions = $this->admin_model->getRegions();
+        $region_store_combinations = $this->admin_model->getRegionStoreCombinations();
         
         $response = array(
-          "message" => "Succesfully get regions",
-          "data" => $regions,
+          "message" => "Succesfully get region store region combinations",
+          "data" => $region_store_combinations,
         );
         
         header('content-type: application/json');

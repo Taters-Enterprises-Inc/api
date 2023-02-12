@@ -6,6 +6,21 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    
+    function getRegionStoreCombinationById($region_store_combination_id){
+        $this->db->select('
+            id,
+            region_id,
+            region_store_id,
+        ');
+        $this->db->from('region_store_combination_tb');
+
+        $this->db->where('id', $region_store_combination_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
     function insertCateringRegionDaLogs($data){
         $this->db->trans_start();
 		$this->db->insert_batch('catering_region_da_log', $data);
@@ -92,9 +107,10 @@ class Admin_model extends CI_Model
             A.branch_status,
             A.store_image,
             B.region_store_id,
+            B.id as region_store_combination_tb_id,
         ');
         $this->db->from('store_tb A');
-		$this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id');
+		$this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id', 'left');
 
         $this->db->where('A.store_id', $store_id);
 
@@ -141,11 +157,15 @@ class Admin_model extends CI_Model
         return $query->result();
     }
     
-    function getRegions(){
-        $this->db->select('id, name');
-        $this->db->from('region_tb');
-        
-        $this->db->where('status', 1);
+    function getRegionStoreCombinations(){
+        $this->db->select('
+            A.id, 
+            B.name as region_name,
+            C.name as region_store_name,
+        ');
+        $this->db->from('region_store_combination_tb A');
+        $this->db->join('region_tb B', 'B.id = A.region_id');
+        $this->db->join('region_tb C', 'C.id = A.region_store_id');
 
         $query = $this->db->get();
         return $query->result();
