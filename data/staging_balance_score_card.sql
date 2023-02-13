@@ -768,12 +768,12 @@ ALTER TABLE `user_stores`
 -- Constraints for table `customer_survey_responses`
 --
 ALTER TABLE `customer_survey_responses`
-  ADD CONSTRAINT `customer_survey_responses_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `STAGING_NEW_TEISHOP`.`transaction_tb` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_2` FOREIGN KEY (`catering_transaction_id`) REFERENCES `STAGING_NEW_TEISHOP`.`catering_transaction_tb` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_1` FOREIGN KEY (`transaction_id`) REFERENCES `UAT_ILOVETATERS`.`transaction_tb` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_2` FOREIGN KEY (`catering_transaction_id`) REFERENCES `UAT_ILOVETATERS`.`catering_transaction_tb` (`id`) ON UPDATE NO ACTION,
   ADD CONSTRAINT `customer_survey_responses_ibfk_4` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`) ON UPDATE NO ACTION,
   ADD CONSTRAINT `customer_survey_responses_ibfk_5` FOREIGN KEY (`customer_survey_response_order_type_id`) REFERENCES `customer_survey_response_order_types` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_6` FOREIGN KEY (`fb_user_id`) REFERENCES `STAGING_NEW_TEISHOP`.`fb_users` (`id`) ON UPDATE NO ACTION,
-  ADD CONSTRAINT `customer_survey_responses_ibfk_7` FOREIGN KEY (`mobile_user_id`) REFERENCES `STAGING_NEW_TEISHOP`.`mobile_users` (`id`) ON UPDATE NO ACTION;
+  ADD CONSTRAINT `customer_survey_responses_ibfk_6` FOREIGN KEY (`fb_user_id`) REFERENCES `UAT_ILOVETATERS`.`fb_users` (`id`) ON UPDATE NO ACTION,
+  ADD CONSTRAINT `customer_survey_responses_ibfk_7` FOREIGN KEY (`mobile_user_id`) REFERENCES `UAT_ILOVETATERS`.`mobile_users` (`id`) ON UPDATE NO ACTION;
 
 --
 -- Constraints for table `customer_survey_response_answers`
