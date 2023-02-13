@@ -551,7 +551,7 @@ class Shop_model extends CI_Model
         if($region!=0){
             $region = $this->db
                 ->select('product_id')
-                ->get_where('region_da_log', array('region_id' => $region,'status' => 1))
+                ->get_where('region_da_log', array('region_id' => $region,'status' => 0))
                 ->result();
             foreach ($region as $row) {
                 $disable_region_items[] = $row->product_id;
@@ -574,9 +574,8 @@ class Shop_model extends CI_Model
             $shown_categories = empty($product_categories) ? 0 : $product_categories;
         }
 		
-        //use if store_type of some stores shown is popcorn
         $product_category_tb = ($store_menu_type == 2) ? 'C.product_id,C.category_id' : '';
-        // select all the category products
+
         $this->db->select("
             A.sequence,
             A.id AS category_id,
@@ -597,12 +596,9 @@ class Shop_model extends CI_Model
         $this->db->from('category_tb A');
         if($store_menu_type != '2') {
             $this->db->join('products_tb B', 'B.category = A.id','left');
-           //use if store_type of some stores shown is popcorn
             $this->db->join('product_category_tb C', 'C.product_id = B.id');
-            $this->db->group_by('C.product_id'); //added to prevent showing duplicated products
-           //use if store_type of some stores shown is popcorn
-        }
-        else {
+            $this->db->group_by('C.product_id'); 
+        } else {
             $this->db->join('product_category_tb C', 'C.category_id = A.id');
             $this->db->join('products_tb B', 'B.id = C.product_id');
         }
@@ -615,39 +611,20 @@ class Shop_model extends CI_Model
         }
 
         if($region != 0 && $to_disable != 0){
-            $this->db->where_not_in('B.id', $to_disable);
-            //use if store_type of some stores shown is popcorn
+            $this->db->where_in('B.id', $to_disable);
+
             if(!empty($store_menu_type)){
                 $this->db->where_in('A.id', $shown_categories);
             }
-            //use if store_type of some stores shown is popcorn
+
         }
-        if ($name != null) {
-            $this->db->like('B.name', $name, 'both');
-        }
-        if ( ($min == 0 || $min != 0) && $max != 0) {
-            $this->db->where("price BETWEEN '$min' AND '$max'");
-        }
-        if($category != 0 && $category != 14) {
-            $this->db->where('A.id', $category);
-        }
-        if ($sort_id == 'low_high') {
-            $this->db->order_by('B.price', 'ASC');
-        }
-        if ($sort_id == 'high_low') {
-            $this->db->order_by('B.price', 'DESC');
-        }
-        if ($sort_id == 'a_z') {
-            $this->db->order_by('B.name', 'ASC');
-        }
-        if ($sort_id == 'z_a') {
-            $this->db->order_by('B.name', 'DESC');
-        }
+        
         $this->db->order_by("A.sequence", "asc");
-        $this->db->order_by("B.name", "asc"); //added to make products on category & products page in fixed position
+        $this->db->order_by("B.name", "asc"); 
+
         $query = $this->db->get();
         $query_data = $query->result();
-        // arrangement of return array data
+
         $return_data = array();
 
         if($store_menu_type != '2'){

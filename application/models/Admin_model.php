@@ -5,6 +5,52 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+    function removeCateringRegionDaLog($catering_region_da_log_id){
+        $this->db->where('id', $catering_region_da_log_id);
+		$this->db->delete('catering_region_da_log');
+    }
+
+    function insertCateringRegionDaLog($data){
+        $this->db->trans_start();
+		$this->db->insert('catering_region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+    function getCateringRegionDaLog($store_id){
+        $this->db->select('id, product_id');
+
+        $this->db->from('catering_region_da_log');
+
+        $this->db->where('store_id', $store_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+    
+    function insertRegionDaLog($data){
+        $this->db->trans_start();
+		$this->db->insert('region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+    function removeSnackshopRegionDaLog($region_da_log_id){
+        $this->db->where('id', $region_da_log_id);
+		$this->db->delete('region_da_log');
+    }
+
+
+    function getSnackshopRegionDaLog($store_id){
+        $this->db->select('id, product_id');
+
+        $this->db->from('region_da_log');
+
+        $this->db->where('store_id', $store_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
 
     
     function getRegionStoreCombinationById($region_store_combination_id){
@@ -27,17 +73,7 @@ class Admin_model extends CI_Model
         $this->db->trans_complete();
     }
 
-    function removeCateringRegionDaLogsByStoreId($store_id){
-        $this->db->where('store_id', $store_id);
-		$this->db->delete('catering_region_da_log');
-    }
-
     
-    function removeRegionDaLogsByStoreId($store_id){
-        $this->db->where('store_id', $store_id);
-		$this->db->delete('region_da_log');
-    }
-
     function updateStore($store_id, $data){
         $this->db->where('store_id', $store_id);
         $this->db->update('store_tb', $data);

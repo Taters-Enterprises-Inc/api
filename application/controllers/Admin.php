@@ -219,52 +219,109 @@ class Admin extends CI_Controller{
         $this->admin_model->updateSettingStore($store->id, 'PopClub Store Visit', 0);
         $this->admin_model->updateSettingStore($store->id, 'PopClub Online Delivery', 0);
 
-        
+        $is_update_snackshop = false;
+        $is_update_catering = false;
+
         foreach($services as $service){
           $this->admin_model->updateSettingStore($store->id, $service, 1);
 
           switch($service){
             case 'Snackshop':
-              $this->admin_model->removeRegionDaLogsByStoreId($store_id);
+              $is_update_snackshop = true;
               break;
             case 'Catering':
-              $this->admin_model->removeCateringRegionDaLogsByStoreId($store_id);
+              $is_update_catering = true;
               break;
           }
         }
+
+        
+        $snackshop_region_da_log = $this->admin_model->getSnackshopRegionDaLog($store_id);
+        $catering_region_da_log = $this->admin_model->getCateringRegionDaLog($store_id);
         
         $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
 
+        if(!empty($products) && $is_update_snackshop){
 
-        if(!empty($products)){
-          foreach($products as $product){
-            $region_da_log = array(
-              'region_id' => $store->region_store_id,
-              'store_id' => $store_id,
-              'product_id' => $product['id'],
-              'status' => 1,
-            );
-            $region_da_logs[] = $region_da_log;
+          foreach($snackshop_region_da_log as $snackshop_region){
+            $is_not_exist = true;
+            foreach($products as $product){
+              if($product['id'] === $snackshop_region->product_id){
+                $is_not_exist = false;
+                break;
+              }
+            }
+
+            if($is_not_exist){
+              $this->admin_model->removeSnackshopRegionDaLog($snackshop_region->id);
+            }
           }
           
-          $this->admin_model->insertRegionDaLogs($region_da_logs);
+          foreach($products as $product){
+            $is_not_exist = true;
+
+            foreach($snackshop_region_da_log as $snackshop_region){
+              if($product['id'] === $snackshop_region->product_id){
+                $is_not_exist = false;
+                break;
+              }
+            }
+          
+            if($is_not_exist){
+              $region_da_log = array(
+                'region_id' => $store->region_store_id,
+                'store_id' => $store_id,
+                'product_id' => $product['id'],
+                'status' => 1,
+              );
+
+              $this->admin_model->insertRegionDaLog($region_da_log);
+            }
+          }
+          
         }
 
         
         $packages = $this->input->post('packages') ?  json_decode($this->input->post('packages'), true) : array();
 
-        if(!empty($packages)){
-          foreach($packages as $package){
-            $catering_region_da_log = array(
-              'region_id' => $store->region_store_id,
-              'store_id' => $store_id,
-              'product_id' => $package['id'],
-              'status' => 1,
-            );
-            $catering_region_da_logs[] = $catering_region_da_log;
+        if(!empty($packages) && $is_update_catering){
+         
+          foreach($catering_region_da_log as $catering_region){
+            $is_not_exist = true;
+            foreach($packages as $package){
+              if($package['id'] === $catering_region->product_id){
+                $is_not_exist = false;
+                break;
+              }
+            }
+
+            if($is_not_exist){
+              $this->admin_model->removeCateringRegionDaLog($catering_region->id);
+            }
           }
           
-          $this->admin_model->insertCateringRegionDaLogs($catering_region_da_logs);
+          foreach($packages as $package){
+            $is_not_exist = true;
+
+            foreach($catering_region_da_log as $catering_region){
+              if($package['id'] === $catering_region->product_id){
+                $is_not_exist = false;
+                break;
+              }
+            }
+          
+            if($is_not_exist){
+              $catering_region_da_log = array(
+                'region_id' => $store->region_store_id,
+                'store_id' => $store_id,
+                'product_id' => $package['id'],
+                'status' => 1,
+              );
+
+              $this->admin_model->insertCateringRegionDaLog($catering_region_da_log);
+            }
+          }
+          
         }
 
 
