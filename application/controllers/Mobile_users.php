@@ -394,7 +394,7 @@ class Mobile_users extends CI_Controller
 			case 'POST':
         $_POST = json_decode(file_get_contents("php://input"), true);
         $this->form_validation->set_rules('password', 'New Password', 'trim|required|min_length[6]|max_length[20]');
-        $this->form_validation->set_rules('confirmPassword', 'Confirm Password', 'trim|required|min_length[6]|max_length[20]|matches[newPassword]', array(
+        $this->form_validation->set_rules('confirmPassword', 'Confirm Password', 'trim|required|min_length[6]|max_length[20]|matches[password]', array(
           'matches'  => "{field} doesn't match"
         ));
     
