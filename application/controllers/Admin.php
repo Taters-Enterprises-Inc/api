@@ -1318,19 +1318,17 @@ class Admin extends CI_Controller{
 							"transaction_tb_id" => $surveyVerification->transaction_id,
 							"catering_transaction_tb_id" => $surveyVerification->catering_transaction_id,
               'customer_survey_response_id' => $surveyVerification->id,
-							"text" => 'Claim your gift!'
+							"text" => 'Congratulations and Thank you for completing the survey!'
 						);
             
 						$notification_message_data = array(
-							"title" => "Claim your gift!",
-							"body" => "Here are the steps to claim your gift:
+							"title" => "Congratulations and Thank you for completing the survey!",
+							"body" => "You may now claim your <b>FREE MINI PACK SUPERPOP</b> for a minimum purchase of 150.00 at your surveyed store.
 							
-									1. Send an email to stacey@rafflepress.com within 7 days to claim your prize
-									2. Please confirm that it’s OK for us to publish your name on our social media channels and website
-									3. This is optional, but if you’re as excited as we are about your win, take a selfie and share it with us!
-
-									If you have any questions, just hit reply on this email and I’ll be happy to help!
-              ",
+									Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
+									",
+							"closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+							"closing_salutation" => "Best wishes,",
 							"message_from" => "Taters Enterprises Inc.",
 							"contact_number" => "(+64) 977-275-5595",
 							"email" => "tei.csr@tatersgroup.com",
@@ -2048,7 +2046,7 @@ class Admin extends CI_Controller{
               
               $notification_message_data = array(
                 "title" => "Answer the feedback, and you'll have a free gift!",
-                "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
+                "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer experience, which is why we need your help. Our target customer includes",
                 "message_from" => "Taters Enterprises Inc.",
                 "contact_number" => "(+64) 977-275-5595",
                 "email" => "tei.csr@tatersgroup.com",

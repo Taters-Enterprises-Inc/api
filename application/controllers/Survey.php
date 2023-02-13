@@ -75,12 +75,13 @@ class Survey extends CI_Controller {
 							"mobile_user_id" => $mobile_user_id,
 							"status" => 2,
 							"hash" => $generated_hash,
+							'dateadded' => date('Y-m-d H:i:s'),
 						);
 								
 						$mobile_and_fb_survey_notification_event_data = array(
 							"notification_event_type_id" => 4,
 							"transaction_tb_id" => $order_details['clients_info']->id,
-							"text" => 'Claim Your Gift!'
+							"text" => 'Congratulations and Thank you for completing the survey!'
 						);
 						
 						$admin_and_csr_notification_event_data = array(
@@ -90,15 +91,13 @@ class Survey extends CI_Controller {
 						);
 						
 						$mobile_and_fb_survey_notification_message_data = array(
-							"title" => "Claim Your Gift!",
-							"body" => "Here are the steps to claim your prize:
+							"title" => "Congratulations and Thank you for completing the survey!",
+							"body" => "You may now claim your <b>FREE MINI PACK SUPERPOP</b> for a minimum purchase of 150.00 at your surveyed store.
 							
-									1. Send an email to stacey@rafflepress.com within 7 days to claim your prize
-									2. Please confirm that it’s OK for us to publish your name on our social media channels and website
-									3. This is optional, but if you’re as excited as we are about your win, take a selfie and share it with us!
-
-									If you have any questions, just hit reply on this email and I’ll be happy to help!
+									Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
 									",
+							"closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+							"closing_salutation" => "Best wishes,",
 							"message_from" => "Taters Enterprises Inc.",
 							"contact_number" => "(+64) 977-275-5595",
 							"email" => "tei.csr@tatersgroup.com",
@@ -122,12 +121,13 @@ class Survey extends CI_Controller {
 							"mobile_user_id" => $mobile_user_id,
 							"status" => 2,
 							"hash" => $generated_hash,
+							'dateadded' => date('Y-m-d H:i:s'),
 						);
 						
 						$mobile_and_fb_survey_notification_event_data = array(
 							"notification_event_type_id" => 4,
 							"catering_transaction_tb_id" => $order_details['clients_info']->id,
-							"text" => 'Claim Your Gift!'
+							"text" => 'Congratulations and Thank you for completing the survey!'
 						);
 
 						$admin_and_csr_notification_event_data = array(
@@ -138,15 +138,13 @@ class Survey extends CI_Controller {
 
 						
 						$mobile_and_fb_survey_notification_message_data = array(
-							"title" => "Claim your gift!",
-							"body" => "Here are the steps to claim your gift:
+							"title" => "Congratulations and Thank you for completing the survey!",
+							"body" => "You may now claim your <b>FREE MINI PACK SUPERPOP</b> for a minimum purchase of 150.00 at your surveyed store.
 							
-									1. Send an email to stacey@rafflepress.com within 7 days to claim your prize
-									2. Please confirm that it’s OK for us to publish your name on our social media channels and website
-									3. This is optional, but if you’re as excited as we are about your win, take a selfie and share it with us!
-
-									If you have any questions, just hit reply on this email and I’ll be happy to help!
+									Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
 									",
+							"closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+							"closing_salutation" => "Best wishes,",
 							"message_from" => "Taters Enterprises Inc.",
 							"contact_number" => "(+64) 977-275-5595",
 							"email" => "tei.csr@tatersgroup.com",
@@ -167,6 +165,7 @@ class Survey extends CI_Controller {
 							"mobile_user_id" => $mobile_user_id,
 							"status" => 1,
 							"hash" => $generated_hash,
+							'dateadded' => date('Y-m-d H:i:s'),
 						);
 						
 						$mobile_and_fb_survey_notification_event_data = array(
