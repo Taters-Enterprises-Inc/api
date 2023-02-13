@@ -171,7 +171,7 @@ class Survey extends CI_Controller {
 						
 						$mobile_and_fb_survey_notification_event_data = array(
 							"notification_event_type_id" => 4,
-							"text" => "Thank you for completing our survey",
+							"text" => "Congratulations and Thank you for completing the survey!",
 						);
 						
 						$admin_and_csr_notification_event_data = array(
@@ -180,8 +180,8 @@ class Survey extends CI_Controller {
 						);
 
 						$mobile_and_fb_survey_notification_message_data = array(
-							"title" => "Thank you for completing our survey",
-							"body" => "Your feedback is really important to us and we really appreciate the time you have taken. Feedback like this helps us constantly improve our customer experiences by knowing what we are doing right and what we can work on. We appreciate you taking the time to send us this helpful response.",
+							"title" => "Congratulations and Thank you for completing the survey!",
+							"body" => "Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.",
 							"closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
 							"closing_salutation" => "Best wishes,",
 							"message_from" => "Taters Enterprises Inc.",
