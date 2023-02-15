@@ -2107,6 +2107,8 @@ class Admin extends CI_Controller{
 
                            Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
                 ",
+                "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+                "closing_salutation" => "Best wishes,",
                 "message_from" => "Taters Enterprises Inc.",
                 "contact_number" => "(+64) 977-275-5595",
                 "email" => "tei.csr@tatersgroup.com",
@@ -2243,6 +2245,8 @@ class Admin extends CI_Controller{
 
                            Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
                 ",
+                "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+                "closing_salutation" => "Best wishes,",
                 "message_from" => "Taters Enterprises Inc.",
                 "contact_number" => "(+64) 977-275-5595",
                 "email" => "tei.csr@tatersgroup.com",
@@ -2334,6 +2338,8 @@ class Admin extends CI_Controller{
 
                          Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
               ",
+              "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+              "closing_salutation" => "Best wishes,",
               "message_from" => "Taters Enterprises Inc.",
 							"contact_number" => "(+64) 977-275-5595",
 							"email" => "tei.csr@tatersgroup.com",
@@ -2418,6 +2424,8 @@ class Admin extends CI_Controller{
 
                          Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
               ",
+              "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+              "closing_salutation" => "Best wishes,",
               "message_from" => "Taters Enterprises Inc.",
 							"contact_number" => "(+64) 977-275-5595",
 							"email" => "tei.csr@tatersgroup.com",
