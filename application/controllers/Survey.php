@@ -102,7 +102,7 @@ class Survey extends CI_Controller {
 							"contact_number" => "(+64) 977-275-5595",
 							"email" => "tei.csr@tatersgroup.com",
 							"image_title" => $invoice_no,
-							"image_url" => "https://www.ilovetaters.com/api/assets/images/home/cards/taters_branches.jpg",
+							"image_url" => base_url(). "assets/images/shared/survey/claim-now-to-get-your-free-superpop.jpg",
 						);
 						break;
 					case 'catering':
@@ -149,7 +149,7 @@ class Survey extends CI_Controller {
 							"contact_number" => "(+64) 977-275-5595",
 							"email" => "tei.csr@tatersgroup.com",
 							"image_title" => $invoice_no,
-							"image_url" => "https://www.ilovetaters.com/api/assets/images/home/cards/taters_branches.jpg",
+							"image_url" => base_url(). "assets/images/shared/survey/claim-now-to-get-your-free-superpop.jpg",
 						);
 
 						break;
@@ -170,7 +170,7 @@ class Survey extends CI_Controller {
 						
 						$mobile_and_fb_survey_notification_event_data = array(
 							"notification_event_type_id" => 4,
-							"text" => "Congratulations and Thank you for completing the survey!",
+							"text" => "Thank you for completing the survey!",
 						);
 						
 						$admin_and_csr_notification_event_data = array(
@@ -179,7 +179,7 @@ class Survey extends CI_Controller {
 						);
 
 						$mobile_and_fb_survey_notification_message_data = array(
-							"title" => "Congratulations and Thank you for completing the survey!",
+							"title" => "Thank you for completing the survey!",
 							"body" => "Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.",
 							"closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
 							"closing_salutation" => "Best wishes,",
