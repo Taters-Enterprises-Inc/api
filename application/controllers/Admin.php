@@ -1410,6 +1410,15 @@ class Admin extends CI_Controller{
             );
             
             $this->notification_model->insertNotification($notifications_data); 
+            
+            
+            $real_time_notification = array(
+              "fb_user_id" => $surveyVerification->fb_user_id,
+              "mobile_user_id" => $surveyVerification->mobile_user_id,
+              "message" => "Congratulations! To claim your gift kindly check your profile inbox.",
+            );
+
+            notify('user-inbox','inbox-feedback-complete', $real_time_notification);
         }
 
         $response = array(

@@ -104,6 +104,15 @@ class Survey extends CI_Controller {
 							"image_title" => $invoice_no,
 							"image_url" => base_url(). "assets/images/shared/survey/claim-now-to-get-your-free-superpop.jpg",
 						);
+						
+						$real_time_notification = array(
+							"fb_user_id" => $fb_user_id,
+							"mobile_user_id" => $mobile_user_id,
+							"message" => "Congratulations! To claim your gift kindly check your profile inbox.",
+						);
+			  
+						notify('user-inbox','inbox-feedback-complete', $real_time_notification);
+						
 						break;
 					case 'catering':
 						$order_details = $this->catering_model->view_order($order_hash);
@@ -151,6 +160,14 @@ class Survey extends CI_Controller {
 							"image_title" => $invoice_no,
 							"image_url" => base_url(). "assets/images/shared/survey/claim-now-to-get-your-free-superpop.jpg",
 						);
+
+						$real_time_notification = array(
+							"fb_user_id" => $fb_user_id,
+							"mobile_user_id" => $mobile_user_id,
+							"message" => "Congratulations! To claim your gift kindly check your profile inbox.",
+						);
+			  
+						notify('user-inbox','inbox-feedback-complete', $real_time_notification);
 
 						break;
 					default:  // WALK IN
