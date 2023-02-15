@@ -1345,7 +1345,7 @@ class Admin_model extends CI_Model
     }
 
     function getStoreCateringProducts($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');
+        $this->db->select('A.id, B.name, A.store_id, B.add_details, B.product_image, C.category_name');
         $this->db->from('catering_products A');
         $this->db->join('products_tb B', 'B.id = A.product_id');
         $this->db->join('category_tb C', 'C.id = B.category');
