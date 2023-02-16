@@ -1390,7 +1390,7 @@ class Admin extends CI_Controller{
 							"contact_number" => "(+64) 977-275-5595",
 							"email" => "tei.csr@tatersgroup.com",
 							"image_title" => $invoice_no,
-							"image_url" => "https://www.ilovetaters.com/api/assets/images/home/cards/taters_branches.jpg",
+							"image_url" => base_url(). "assets/images/shared/survey/claim-now-to-get-your-free-superpop.jpg",
 						);
                         
             $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
@@ -1410,6 +1410,15 @@ class Admin extends CI_Controller{
             );
             
             $this->notification_model->insertNotification($notifications_data); 
+            
+            
+            $real_time_notification = array(
+              "fb_user_id" => $surveyVerification->fb_user_id,
+              "mobile_user_id" => $surveyVerification->mobile_user_id,
+              "message" => "Congratulations! To claim your gift kindly check your profile inbox.",
+            );
+
+            notify('user-inbox','inbox-feedback-complete', $real_time_notification);
         }
 
         $response = array(
@@ -2098,12 +2107,17 @@ class Admin extends CI_Controller{
               $notification_event_data = array(
                 "notification_event_type_id" => 4,
                 "catering_transaction_tb_id" => $transaction_id,
-                "text" => "Answer the feedback, and you'll have a free gift!",
+                "text" => "Thank you for purchasing Taters!",
               );
               
               $notification_message_data = array(
-                "title" => "Answer the feedback, and you'll have a free gift!",
-                "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer experience, which is why we need your help. Our target customer includes",
+                "title" => "Thank you for purchasing Taters!",
+                "body" => "We would like to ask you to complete our survey form.
+
+                           Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
+                ",
+                "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+                "closing_salutation" => "Best wishes,",
                 "message_from" => "Taters Enterprises Inc.",
                 "contact_number" => "(+64) 977-275-5595",
                 "email" => "tei.csr@tatersgroup.com",
@@ -2231,12 +2245,17 @@ class Admin extends CI_Controller{
               $notification_event_data = array(
                 "notification_event_type_id" => 4,
                 "transaction_tb_id" => $transaction_id,
-                "text" => "Answer the feedback, and you'll have a free gift!"
+                "text" => "Thank you for purchasing Taters!"
               );
               
               $notification_message_data = array(
-                "title" => "Answer the feedback, and you'll have a free gift!",
-                "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
+                "title" => "Thank you for purchasing Taters!",
+                "body" => "We would like to ask you to complete our survey form.
+
+                           Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
+                ",
+                "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+                "closing_salutation" => "Best wishes,",
                 "message_from" => "Taters Enterprises Inc.",
                 "contact_number" => "(+64) 977-275-5595",
                 "email" => "tei.csr@tatersgroup.com",
@@ -2319,13 +2338,18 @@ class Admin extends CI_Controller{
 						$notification_event_data = array(
 							"notification_event_type_id" => 4,
 							"catering_transaction_tb_id" => $trans_id,
-							"text" => "Answer the feedback, and you'll have a free gift!"
+							"text" => "Thank you for purchasing Taters!"
 						);
             
 						$notification_message_data = array(
-              "title" => "Answer the feedback, and you'll have a free gift!",
-              "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
-							"message_from" => "Taters Enterprises Inc.",
+              "title" => "Thank you for purchasing Taters!",
+              "body" => "We would like to ask you to complete our survey form.
+
+                         Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
+              ",
+              "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+              "closing_salutation" => "Best wishes,",
+              "message_from" => "Taters Enterprises Inc.",
 							"contact_number" => "(+64) 977-275-5595",
 							"email" => "tei.csr@tatersgroup.com",
 							"internal_link_title" => "Feedback Questionnaires",
@@ -2400,13 +2424,18 @@ class Admin extends CI_Controller{
 						$notification_event_data = array(
 							"notification_event_type_id" => 4,
 							"transaction_tb_id" => $trans_id,
-              "text" => "Answer the feedback, and you'll have a free gift!",
+              "text" => "Thank you for purchasing Taters!",
 						);
 
 						$notification_message_data = array(
-              "title" => "Answer the feedback, and you'll have a free gift!",
-              "body" => "Thank you for agreeing to take part in our feedback. We at Taters are on a quest to find out the best customer expereince, which is why we need your help. Our target customer includes",
-							"message_from" => "Taters Enterprises Inc.",
+              "title" => "Thank you for purchasing Taters!",
+              "body" => "We would like to ask you to complete our survey form.
+
+                         Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
+              ",
+              "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+              "closing_salutation" => "Best wishes,",
+              "message_from" => "Taters Enterprises Inc.",
 							"contact_number" => "(+64) 977-275-5595",
 							"email" => "tei.csr@tatersgroup.com",
 							"internal_link_title" => "Feedback Questionnaires",
