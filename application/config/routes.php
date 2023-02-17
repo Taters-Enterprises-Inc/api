@@ -152,6 +152,7 @@ $route['admin/report-pmix/(:any)/(:any)'] = 'admin/report_pmix/$1/$2';
 $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/$2';
 $route['admin/report-popclub-store-visit/(:any)/(:any)'] = 'admin/report_popclub_store_visit/$1/$2';
 $route['admin/report-popclub-snacks-delivered/(:any)/(:any)'] = 'admin/report_popclub_snacks_delivered/$1/$2';
+$route['admin/report-customer-feedback/(:any)/(:any)'] = 'admin/report_customer_feedback/$1/$2';
 
 $route['admin/survey-verification/survey-verification-change-status'] = 'admin/survey_verification_change_status';
 $route['admin/survey-verification/(:any)']= 'admin/survey_verification/$1';

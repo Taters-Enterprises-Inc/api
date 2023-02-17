@@ -1522,7 +1522,6 @@ class Admin extends CI_Controller{
         $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
         $data = $this->report_model->getReportPmix($start, $end);
         header("Content-Type: application/vnd.ms-excel");
-
         header("Content-disposition: attachment; filename=PMIX_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
           
         $flag = false;
@@ -1662,6 +1661,61 @@ class Admin extends CI_Controller{
           echo $line . "\r\n";
         }
         
+        break;
+    }
+  }
+  
+  public function report_customer_feedback($startDate, $endDate){
+
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
+        $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
+        $customer_feedbacks = $this->report_model->getReportCustomerFeedback($start, $end);
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-disposition: attachment; filename=customer_feedback_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
+
+        $customer_feedbacks_processed = array();
+
+        foreach($customer_feedbacks as $customer_feedback){
+          $answers = $customer_feedback->answers;
+          $ratings = $customer_feedback->ratings;
+
+          $column_feedback = array();
+
+          foreach($answers as $val){
+            $key =  str_replace(" ", "_", $val->question);
+            $key =  str_replace("\n", "", $key);
+            $column_feedback[$key] = $val->text . $val->answer . $val->others;
+          }
+          
+          foreach($ratings as $val){
+            $key =  str_replace(" ", "_", $val->question);
+            $key =  str_replace("\n", "", $key);
+            $column_feedback[$key] = $val->rate . $val->others;
+          }
+
+          $customer_feedbacks_processed[] = $column_feedback;
+        }
+        
+        $flag = false;
+
+        foreach ($customer_feedbacks_processed as $row) {
+          if (!$flag) 
+          {
+            echo implode("\t", array_keys((array)$row)) . "\r\n";
+            $flag = true;
+          }
+
+          $line = "";
+          foreach ((array)$row as $key => $val) {
+              $line .= $val . "\t";
+          }
+
+          echo $line . "\r\n";
+        }
+
+
         break;
     }
   }

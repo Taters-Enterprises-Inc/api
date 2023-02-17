@@ -4,7 +4,8 @@ class Report_model extends CI_Model{
 
     public function __construct()
     {
-        $this->load->database();
+		$this->db =  $this->load->database('default', TRUE, TRUE);
+        $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
     
     public function getReportTransaction($startDate, $endDate){
@@ -159,6 +160,68 @@ class Report_model extends CI_Model{
         $this->db->order_by('A.dateadded', 'DESC');
         $query = $this->db->get();
         return $query->result();
+
+    }
+    
+    public function getReportCustomerFeedback($startDate, $endDate){
+        $this->bsc_db->select('
+            A.id,
+        ');
+
+        $this->bsc_db->from('customer_survey_responses A');
+        
+        $this->bsc_db->where('A.dateadded >=', $startDate);
+        $this->bsc_db->where('A.dateadded <=', $endDate);
+        $this->bsc_db->order_by('A.dateadded', 'DESC');
+        $query_customer_survey_responses = $this->bsc_db->get();
+        $customer_survey_responses = $query_customer_survey_responses->result();
+
+        foreach($customer_survey_responses as $customer_survey_response){
+
+            // Answers
+            $this->bsc_db->select('
+                A.text,
+                A.others,
+                B.description as question,
+                D.text as answer,
+            ');
+            
+            $this->bsc_db->from('customer_survey_response_answers A');
+            $this->bsc_db->join('survey_questions B', 'B.id = A.survey_question_id');
+            $this->bsc_db->join('survey_question_answers C', 'C.id = A.survey_question_answer_id', 'left');
+            $this->bsc_db->join('survey_question_offered_answers D', 'D.id = C.survey_question_offered_answer_id', 'left');
+
+            $this->bsc_db->where('A.customer_survey_response_id',$customer_survey_response->id);
+
+
+            $query_customer_survey_response_answers = $this->bsc_db->get();
+            $customer_survey_response_answers = $query_customer_survey_response_answers->result();
+
+            $customer_survey_response->answers = $customer_survey_response_answers;
+
+
+            // Ratings
+            $this->bsc_db->select('
+                D.name as question,
+                A.rate,
+                A.others,
+            ');
+
+            $this->bsc_db->from('customer_survey_response_ratings A');
+            $this->bsc_db->join('survey_questions B', 'B.id = A.survey_question_id');
+            $this->bsc_db->join('survey_question_ratings C', 'C.id = A.survey_question_rating_id', 'left');
+            $this->bsc_db->join('survey_question_offered_ratings D', 'D.id = C.survey_question_offered_rating_id', 'left');
+            
+            $this->bsc_db->where('A.customer_survey_response_id',$customer_survey_response->id);
+            
+            $query_customer_survey_response_ratings = $this->bsc_db->get();
+            $customer_survey_response_ratings = $query_customer_survey_response_ratings->result();
+
+            $customer_survey_response->ratings = $customer_survey_response_ratings;
+
+        }
+
+        return $customer_survey_responses;
 
     }
 }
