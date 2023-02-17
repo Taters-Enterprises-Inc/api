@@ -612,7 +612,7 @@ class Shop_model extends CI_Model
 
         if($region != 0 && $to_disable != 0){
             $this->db->where_in('B.id', $to_disable);
-
+            
             if(!empty($store_menu_type)){
                 $this->db->where_in('A.id', $shown_categories);
             }
