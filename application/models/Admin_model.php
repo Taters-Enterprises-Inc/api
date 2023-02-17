@@ -866,7 +866,7 @@ class Admin_model extends CI_Model
         return $data;
     }
 
-    public function getSurveysCount($status, $search){
+    public function getSurveysCount($status, $search, $store){
         $this->bsc_db->select('count(*) as all_count');
             
         $this->bsc_db->from('customer_survey_responses A');
@@ -878,6 +878,9 @@ class Admin_model extends CI_Model
 
         if($status)
             $this->bsc_db->where('A.status', $status);
+
+        if(!empty($store))
+            $this->bsc_db->where_in('A.store_id', $store);
 
         if($search){
             $this->bsc_db->group_start();
@@ -896,7 +899,7 @@ class Admin_model extends CI_Model
         return $query->row()->all_count;
     }
 
-    public function getSurveys($row_no, $row_per_page, $status, $order_by,  $order, $search){
+    public function getSurveys($row_no, $row_per_page, $status, $order_by,  $order, $search, $store){
         
         $this->bsc_db->select("
             A.id,
@@ -921,6 +924,9 @@ class Admin_model extends CI_Model
  
         if($status)
             $this->bsc_db->where('A.status', $status);
+
+        if(!empty($store))
+            $this->bsc_db->where_in('A.store_id', $store);
 
         if($search){
             $this->bsc_db->group_start();

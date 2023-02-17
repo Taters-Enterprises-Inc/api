@@ -1335,8 +1335,19 @@ class Admin extends CI_Controller{
         $page_no = ($page_no - 1) * $per_page;
       }
       
-      $surveys_count = $this->admin_model->getSurveysCount($status, $search);
-      $surveys = $this->admin_model->getSurveys($page_no, $per_page, $status, $order_by, $order, $search);
+
+      $store_id_array = array();
+      $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+      foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+      if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+        $surveys_count = 0;
+        $surveys = array();
+      }else{
+        $surveys_count = $this->admin_model->getSurveysCount($status, $search, $store_id_array);
+        $surveys = $this->admin_model->getSurveys($page_no, $per_page, $status, $order_by, $order, $search, $store_id_array);
+      }
+      
 
       $pagination = array(
         "total_rows" => $surveys_count,
@@ -1437,7 +1448,17 @@ class Admin extends CI_Controller{
       case 'GET':
         $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
         $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
-        $data = $this->report_model->getReportTransaction($start, $end);
+        
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $data = array();
+        }else{
+          $data = $this->report_model->getReportTransaction($start, $end, $store_id_array);
+        }
+        
         header("Content-Type: application/vnd.ms-excel");
         header("Content-disposition: attachment; filename=transaction_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
        
@@ -1520,7 +1541,17 @@ class Admin extends CI_Controller{
       case 'GET':
         $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
         $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
-        $data = $this->report_model->getReportPmix($start, $end);
+        
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $data = array();
+        }else{
+          $data = $this->report_model->getReportPmix($start, $end, $store_id_array);
+        }
+
         header("Content-Type: application/vnd.ms-excel");
         header("Content-disposition: attachment; filename=PMIX_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
           
@@ -1553,7 +1584,17 @@ class Admin extends CI_Controller{
       case 'GET':
         $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
         $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
-        $data = $this->report_model->getReportPopClubStoreVisit($start, $end);
+        
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $data = array();
+        }else{
+          $data = $this->report_model->getReportPopClubStoreVisit($start, $end, $store_id_array);
+        }
+        
         header("Content-Type: application/vnd.ms-excel");
         header("Content-disposition: attachment; filename=popclub_store_visit_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
 
@@ -1612,7 +1653,17 @@ class Admin extends CI_Controller{
       case 'GET':
         $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
         $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
-        $data = $this->report_model->getReportPopClubSnacksDelivered($start, $end);
+        
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $data = array();
+        }else{
+          $data = $this->report_model->getReportPopClubSnacksDelivered($start, $end, $store_id_array);
+        }
+
         header("Content-Type: application/vnd.ms-excel");
         header("Content-disposition: attachment; filename=popclub_snacks_delivered_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
 
@@ -1671,7 +1722,16 @@ class Admin extends CI_Controller{
       case 'GET':
         $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
         $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
-        $customer_feedbacks = $this->report_model->getReportCustomerFeedback($start, $end);
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $customer_feedbacks = array();
+        }else{
+          $customer_feedbacks = $this->report_model->getReportCustomerFeedback($start, $end, $store_id_array);
+        }
+        
         header("Content-Type: application/vnd.ms-excel");
         header("Content-disposition: attachment; filename=customer_feedback_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
 
