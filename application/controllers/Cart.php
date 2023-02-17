@@ -163,6 +163,8 @@ class Cart extends CI_Controller {
                     $product_sku_price = 0;
                     $prod_size = NULL;
                     
+                    $varx = array();
+                    
                     if($product['prod_size']){
                         
                         $varx[] = $product['prod_size'];
