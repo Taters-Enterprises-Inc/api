@@ -2098,8 +2098,7 @@ class Admin_model extends CI_Model
             A.reference_num,
             A.store,
 
-            concat(B.fname,' ',B.lname) as client_name,
-            B.add_name,
+            B.add_name as client_name,
             B.payops,
             B.contact_number,
             B.email,
@@ -2357,9 +2356,8 @@ class Admin_model extends CI_Model
             A.reference_num,
             A.store,
 
-            concat(B.fname,' ',B.lname) as client_name,
             B.payops,
-            B.add_name,
+            B.add_name as client_name,
             B.add_address,
             C.name as store_name
         ");
@@ -2377,7 +2375,7 @@ class Admin_model extends CI_Model
         if($search){
             $this->db->group_start();
             $this->db->like('A.tracking_no', $search);
-            $this->db->or_like('B.fname', $search);
+            $this->db->or_like("B.add_name", $search);
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
@@ -2408,7 +2406,7 @@ class Admin_model extends CI_Model
         if($search){
             $this->db->group_start();
             $this->db->like('A.tracking_no', $search);
-            $this->db->or_like('B.fname', $search);
+            $this->db->or_like("B.add_name", $search);
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
