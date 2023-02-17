@@ -417,7 +417,7 @@ class Shop_model extends CI_Model
         if($region!=0){
             $region = $this->db
                 ->select('product_id')
-                ->get_where('region_da_log', array('region_id' => $region,'status' => 1))
+                ->get_where('region_da_log', array('region_id' => $region,'status' => 0))
                 ->result();
             foreach ($region as $row) {
                 $disable_region_items[] = $row->product_id;
@@ -481,7 +481,7 @@ class Shop_model extends CI_Model
         }
 
         if($region != 0 && $to_disable != 0){
-            $this->db->where_not_in('B.id', $to_disable);
+            $this->db->where_in('B.id', $to_disable);
             //use if store_type of some stores shown is popcorn
             if(!empty($store_menu_type)){
                 $this->db->where_in('A.id', $shown_categories);
