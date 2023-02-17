@@ -1547,6 +1547,125 @@ class Admin extends CI_Controller{
         break;
     }
   }
+  
+  public function report_popclub_store_visit($startDate, $endDate){
+
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
+        $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
+        $data = $this->report_model->getReportPopClubStoreVisit($start, $end);
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-disposition: attachment; filename=popclub_store_visit_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
+
+        $redeem_status = array(
+          "",
+          "New",
+          "",
+          "",
+          "Declined",
+          "Cancelled",
+          "Completed",
+        );
+      
+
+        $flag = false;
+        foreach ($data as $row) {
+          if (!$flag) 
+          {
+            echo implode("\t", array_keys((array)$row)) . "\r\n";
+            $flag = true;
+          }
+
+          $line = "";
+          
+          foreach ((array)$row as $key => $val) {
+
+            switch($key){
+              case 'STATUS':
+                $today = date("Y-m-d H:i:s");
+                $status = $row->STATUS;
+                $expiration_date = date($row->EXPIRATION_DATE);
+
+                if( $status === 1 && $today >= $expiration_date){
+                  $line .= 'Expired'. "\t";
+                }else{
+                  $line .= $redeem_status[$val]. "\t";
+                }
+
+                break;
+              default:
+                $line .= $val . "\t";
+                break;
+            }
+          }
+
+          echo $line . "\r\n";
+        }
+        
+        break;
+    }
+  }
+  
+  public function report_popclub_snacks_delivered($startDate, $endDate){
+
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
+        $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
+        $data = $this->report_model->getReportPopClubSnacksDelivered($start, $end);
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-disposition: attachment; filename=popclub_snacks_delivered_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
+
+        $redeem_status = array(
+          "",
+          "New",
+          "",
+          "",
+          "Declined",
+          "Cancelled",
+          "Completed",
+        );
+      
+
+        $flag = false;
+        foreach ($data as $row) {
+          if (!$flag) 
+          {
+            echo implode("\t", array_keys((array)$row)) . "\r\n";
+            $flag = true;
+          }
+
+          $line = "";
+          
+          foreach ((array)$row as $key => $val) {
+
+            switch($key){
+              case 'STATUS':
+                $today = date("Y-m-d H:i:s");
+                $status = $row->STATUS;
+                $expiration_date = date($row->EXPIRATION_DATE);
+
+                if( $status === 1 && $today >= $expiration_date){
+                  $line .= 'Expired'. "\t";
+                }else{
+                  $line .= $redeem_status[$val]. "\t";
+                }
+
+                break;
+              default:
+                $line .= $val . "\t";
+                break;
+            }
+          }
+
+          echo $line . "\r\n";
+        }
+        
+        break;
+    }
+  }
+  
 
   public function notification_seen($notification_id){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -2238,6 +2357,7 @@ class Admin extends CI_Controller{
             notify('user-snackshop','snackshop-order-changed', $real_time_notification);
           }
           elseif ($request == "change_status"){
+
             $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Change order status from ' . $from_status . ' to ' . $to_status);
             
             
@@ -2807,7 +2927,8 @@ class Admin extends CI_Controller{
         $fb_user_id = $this->input->post('fbUserId');
         $mobile_user_id = $this->input->post('mobileUserId');
 
-        $this->admin_model->declineRedeem($redeem_id);
+        $today = date("Y-m-d H:i:s");
+        $this->admin_model->declineRedeem($redeem_id, $today);
         
         $real_time_notification = array(
           "fb_user_id" => (int) $fb_user_id,
@@ -2856,7 +2977,9 @@ class Admin extends CI_Controller{
         $fb_user_id = $this->input->post('fbUserId');
         $mobile_user_id = $this->input->post('mobileUserId');
 
-        $this->admin_model->completeRedeem($redeem_id);
+        $today = date("Y-m-d H:i:s");
+
+        $this->admin_model->completeRedeem($redeem_id, $today);
 
         $real_time_notification = array(
           "fb_user_id" => (int) $fb_user_id,

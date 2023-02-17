@@ -267,15 +267,17 @@ class Deals_model extends CI_Model
         return $query->result();
     }
 
-	public function forfeit_redeem_deal($id){
+	public function forfeit_redeem_deal($id, $today){
         $this->db->set('status',5);
+        $this->db->set('cancelled_date',$today);
         $this->db->where('id', $id);
         $this->db->update('deals_redeems_tb');
         $this->db->trans_complete();
 	}
 
-	public function complete_redeem_deal($id){
+	public function complete_redeem_deal($id, $today){
         $this->db->set('status',6);
+        $this->db->set('completed_date',$today);
         $this->db->where('id', $id);
         $this->db->update('deals_redeems_tb');
         $this->db->trans_complete();

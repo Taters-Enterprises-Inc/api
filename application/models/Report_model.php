@@ -103,4 +103,62 @@ class Report_model extends CI_Model{
 
         return $this->db->get()->result();
     }
+
+    public function getReportPopClubStoreVisit($startDate, $endDate){
+
+        $this->db->select('
+            A.redeem_code as REDEEM_CODE,
+            A.dateadded as ORDER_DATE,
+            A.expiration as EXPIRATION_DATE,
+            A.cancelled_date as CANCELLED_DATE,
+            A.completed_date as COMPLETED_DATE,
+            A.declined_date as DECLINED_DATE,
+            A.status as STATUS,
+            B.fname as FIRST_NAME,
+            B.lname as LAST_NAME,
+            C.name as STORE,
+        ');
+
+        $this->db->from('deals_redeems_tb A');
+        $this->db->join('deals_client_tb B','B.id = A.client_id');
+        $this->db->join('store_tb C','C.store_id = A.store');
+
+        
+        $this->db->where('A.dateadded >=', $startDate);
+        $this->db->where('A.dateadded <=', $endDate);
+        $this->db->where('A.platform_id', 1);
+        $this->db->order_by('A.dateadded', 'DESC');
+        $query = $this->db->get();
+        return $query->result();
+
+    }
+    
+    public function getReportPopClubSnacksDelivered($startDate, $endDate){
+
+
+        $this->db->select('
+            A.redeem_code as REDEEM_CODE,
+            A.dateadded as ORDER_DATE,
+            A.expiration as EXPIRATION_DATE,
+            A.cancelled_date as CANCELLED_DATE,
+            A.completed_date as COMPLETED_DATE,
+            A.status as STATUS,
+            B.fname as FIRST_NAME,
+            B.lname as LAST_NAME,
+            C.name as STORE,
+        ');
+
+        $this->db->from('deals_redeems_tb A');
+        $this->db->join('deals_client_tb B','B.id = A.client_id');
+        $this->db->join('store_tb C','C.store_id = A.store');
+
+        
+        $this->db->where('A.dateadded >=', $startDate);
+        $this->db->where('A.dateadded <=', $endDate);
+        $this->db->where('A.platform_id', 2);
+        $this->db->order_by('A.dateadded', 'DESC');
+        $query = $this->db->get();
+        return $query->result();
+
+    }
 }

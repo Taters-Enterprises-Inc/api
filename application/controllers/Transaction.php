@@ -510,7 +510,9 @@ class Transaction extends CI_Controller {
                             );
                         
                             $this->transaction_model->insertPopClubClientOrder($order_data_deal);
-                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
+
+                            $today = date("Y-m-d H:i:s");
+                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id'], $today);
                         }
                         
                         if(isset($_SESSION['redeem_data'])){

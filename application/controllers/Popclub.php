@@ -201,8 +201,9 @@ class Popclub extends CI_Controller {
 					}
 					
 					$redeem_id = $_SESSION['redeem_data']['id'];
+					$today = date("Y-m-d H:i:s");
 					
-					$this->deals_model->forfeit_redeem_deal($redeem_id);
+					$this->deals_model->forfeit_redeem_deal($redeem_id, $today);
 					unset($_SESSION['redeem_data']);
 					
 					
