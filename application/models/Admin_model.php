@@ -957,15 +957,17 @@ class Admin_model extends CI_Model
         return $query->result();
     }
 
-    public function completeRedeem($redeem_id){
+    public function completeRedeem($redeem_id, $today){
 		$this->db->set('status', 6);
+		$this->db->set('completed_date', $today);
         $this->db->where('id', $redeem_id);
         $this->db->update("deals_redeems_tb");
     }
 
     
-    public function declineRedeem($redeem_id){
+    public function declineRedeem($redeem_id, $today){
 		$this->db->set('status', 4);
+		$this->db->set('declined_date', $today);
         $this->db->where('id', $redeem_id);
         $this->db->update("deals_redeems_tb");
     }

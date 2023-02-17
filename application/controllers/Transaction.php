@@ -275,7 +275,6 @@ class Transaction extends CI_Controller {
                             $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total && 
                             $_SESSION['redeem_data']['is_free_delivery'] === 1
                         ){
-                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
                             $distance_rate_price = 0;
                         }
 
@@ -288,11 +287,6 @@ class Transaction extends CI_Controller {
                             $discount = $comp_total *  (float) $_SESSION['redeem_data']['promo_discount_percentage'];
                         }
                         
-                        if(
-                            isset($_SESSION['redeem_data']['promo_discount_percentage'])
-                        ){
-                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
-                        }
                         
                         $comp_total += $_SESSION['redeem_data']['deal_promo_price'];
 					}
@@ -493,7 +487,9 @@ class Transaction extends CI_Controller {
                             );
                         
                             $this->transaction_model->insertPopClubClientOrder($order_data_deal);
-                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id']);
+
+                            $today = date("Y-m-d H:i:s");
+                            $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id'], $today);
                         }
                         
                         if(isset($_SESSION['redeem_data'])){
