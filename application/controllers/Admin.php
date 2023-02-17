@@ -66,7 +66,7 @@ class Admin extends CI_Controller{
         if(is_uploaded_file($_FILES['image250x250']['tmp_name'])){
           $store_image_name = str_replace(' ', '-', strtolower($this->input->post('name'))) . '-' . time() .'.jpg';
           
-          $image250x250_error = upload('image250x250','./assets/images/shared/store_images/250',$store_image_name, 'jpg');
+          $image250x250_error = upload('image250x250','./assets/images/shared/image_not_found',$store_image_name, 'jpg');
 
           if($image250x250_error){
             $this->output->set_status_header('401');
@@ -169,7 +169,7 @@ class Admin extends CI_Controller{
         $store = $this->admin_model->getSettingStore($store_id);
         
         if(isset($_FILES['image250x250']['tmp_name']) && is_uploaded_file($_FILES['image250x250']['tmp_name'])){
-          $image250x250_error = upload('image250x250','./assets/images/shared/store_images/250',$store_image_name, 'jpg');
+          $image250x250_error = upload('image250x250','./assets/images/shared/image_not_found',$store_image_name, 'jpg');
           if($image250x250_error){
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $image250x250_error));
@@ -177,7 +177,7 @@ class Admin extends CI_Controller{
           }
         }else{
           if($store->store_image !== $store_image_name){
-            rename('./assets/images/shared/store_images/250/' . $store->store_image,'./assets/images/shared/store_images/250/'. $store_image_name);
+            rename('./assets/images/shared/image_not_found/' . $store->store_image,'./assets/images/shared/image_not_found/'. $store_image_name);
           }
         }
         

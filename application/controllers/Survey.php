@@ -58,6 +58,8 @@ class Survey extends CI_Controller {
                 $generated_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 				$admin_and_csr_notification_event_message = '';
 
+				$message = '';
+
 				switch($service){
 					case 'snackshop':
 						$order_details = $this->shop_model->view_order($order_hash);
@@ -104,14 +106,8 @@ class Survey extends CI_Controller {
 							"image_title" => $invoice_no,
 							"image_url" => base_url(). "assets/images/shared/survey/claim-now-to-get-your-free-superpop.jpg",
 						);
-						
-						$real_time_notification = array(
-							"fb_user_id" => $fb_user_id,
-							"mobile_user_id" => $mobile_user_id,
-							"message" => "Congratulations! To claim your gift kindly check your profile inbox.",
-						);
-			  
-						notify('user-inbox','inbox-feedback-complete', $real_time_notification);
+
+						$message = 'Congratulations! To claim your gift kindly check your profile inbox.';
 						
 						break;
 					case 'catering':
@@ -160,14 +156,8 @@ class Survey extends CI_Controller {
 							"image_title" => $invoice_no,
 							"image_url" => base_url(). "assets/images/shared/survey/claim-now-to-get-your-free-superpop.jpg",
 						);
-
-						$real_time_notification = array(
-							"fb_user_id" => $fb_user_id,
-							"mobile_user_id" => $mobile_user_id,
-							"message" => "Congratulations! To claim your gift kindly check your profile inbox.",
-						);
-			  
-						notify('user-inbox','inbox-feedback-complete', $real_time_notification);
+						
+						$message = 'Congratulations! To claim your gift kindly check your profile inbox.';
 
 						break;
 					default:  // WALK IN
@@ -206,6 +196,8 @@ class Survey extends CI_Controller {
 							"internal_link_title" => "Survey Answer",
 							"internal_link_url" => "/feedback/complete/".$generated_hash,
 						);
+
+						$message = 'Feedback submitted! Thank you';
 						
 						break;
 				}
@@ -312,7 +304,7 @@ class Survey extends CI_Controller {
 				
 
 				$response = array(
-					'message' => 'Survey submitted!',
+					'message' => $message,
 					"data" => array(
 						"hash" => $generated_hash,
 					),
