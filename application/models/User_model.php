@@ -29,7 +29,7 @@ class User_model extends CI_Model {
             $this->db->insert('users_store_groups', $data);
             $insert_id[] = $this->db->insert_id();
         }
-      }
+    }
      
     function get_all_store()
     {

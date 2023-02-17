@@ -3,7 +3,101 @@
 class Shop_model extends CI_Model 
 {
     
-    //jepoy get store id by hash key
+    public function __construct(){
+		$this->db =  $this->load->database('default', TRUE, TRUE);
+        $this->bscDB = $this->load->database('bsc', TRUE, TRUE);
+    }
+    
+    public function getUserInboxHistoryCount($type, $id, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('notifications A');
+        $this->db->join('notification_events B', 'B.id = A.notification_event_id');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses C', 'C.id = B.customer_survey_response_id', 'left');
+        $this->db->join('transaction_tb D', 'D.id = C.transaction_id', 'left');
+        $this->db->join('catering_transaction_tb E', 'E.id = C.catering_transaction_id', 'left');
+        $this->db->or_where('B.notification_event_type_id', 4);
+        $this->db->or_where('B.notification_event_type_id', 5);
+        $this->db->or_where('B.notification_event_type_id', 6);
+
+        
+        if ($type == 'mobile') {
+            $this->db->where('A.mobile_user_to_notify', $id);
+
+        } else if($type == 'facebook') {
+            $this->db->where('A.fb_user_to_notify', $id);
+        }
+
+            
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.text', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getUserInboxHistory($type, $id, $row_no, $row_per_page, $order_by,  $order, $search){
+
+        $this->db->select('
+            A.id,
+            A.dateadded,
+            B.notification_event_type_id,
+            B.text,
+            C.invoice_no,
+            C.hash as survey_hash,
+            D.hash_key as transaction_hash,
+            E.hash_key as catering_transaction_hash,
+
+            F.title,
+            F.body,
+            F.closing,
+            F.closing_salutation,
+            F.image_title,
+            F.image_url,
+            F.internal_link_title,
+            F.internal_link_url,
+            F.message_from,
+            F.email,
+            F.contact_number,
+        ');
+
+        $this->db->from('notifications A');
+        $this->db->join('notification_events B', 'B.id = A.notification_event_id');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses C', 'C.id = B.customer_survey_response_id', 'left');
+        $this->db->join('transaction_tb D', 'D.id = B.transaction_tb_id', 'left');
+        $this->db->join('catering_transaction_tb E', 'E.id = B.catering_transaction_tb_id', 'left');
+
+        $this->db->join('notification_messages F', 'F.id = B.notification_message_id', 'left');
+
+        $this->db->or_where('B.notification_event_type_id', 4);
+
+        if ($type == 'mobile') {
+            $this->db->where('A.mobile_user_to_notify', $id);
+
+        } else if($type == 'facebook') {
+            $this->db->where('A.fb_user_to_notify', $id);
+        }
+        
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('B.text', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+            
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
     public function get_store_id_by_hash_key($hash_key){
         $this->db->select('store');
         $this->db->where('hash_key', $hash_key);
@@ -28,6 +122,7 @@ class Shop_model extends CI_Model
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
+        $this->db->join($this->bscDB->database.'.customer_survey_responses E', 'E.transaction_id = A.id', 'left');
     
         
         if ($type == 'mobile') {
@@ -57,6 +152,7 @@ class Shop_model extends CI_Model
         $this->db->select('
             A.id,
             A.dateadded,
+            A.status,
             A.tracking_no,
             A.purchase_amount,
             A.distance_price,
@@ -64,13 +160,14 @@ class Shop_model extends CI_Model
             C.generated_raffle_code,
             C.application_status,
             A.hash_key,
+            E.hash as survey_hash,
         ');
 
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'A.client_id = B.id' ,'left');
         $this->db->join('raffle_ss_registration_tb C', 'A.id = C.trans_id','left');
         $this->db->join('raffle_coupon_tb D', 'C.raffle_coupon_id = D.id' ,'left');
-    
+        $this->db->join($this->bscDB->database.'.customer_survey_responses E', 'E.transaction_id = A.id', 'left');
 
 
         if ($type == 'mobile') {
@@ -143,28 +240,65 @@ class Shop_model extends CI_Model
         $this->db->select('hash_key');
         $this->db->from('transaction_tb');
         $this->db->where('hash_key', $hash_key);
-        // $this->db->where('status !=', 4);
-        // $this->db->where('status !=', 6);
         $check_hash = $this->db->get();
         $result = $check_hash->result();
 
         if(!empty($result)){
             $table = "client_tb A";
-            $select_column = array("A.fb_user_id", "A.mobile_user_id","A.fname", "A.lname", "A.email","A.address", "A.contact_number","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","B.voucher_id","B.table_number","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","A.add_name","A.add_contact","A.add_address","V.discount_value","V.voucher_code","B.giftcard_discount","B.giftcard_number");
+            $select_column = array(
+                "A.fb_user_id", 
+                "A.mobile_user_id",
+                "A.fname", 
+                "A.lname", 
+                "A.email","A.address",
+                "A.contact_number",
+                "B.id", 
+                "B.tracking_no",
+                "B.purchase_amount",
+                "B.distance_price",
+                "B.cod_fee",
+                "A.moh",
+                "A.payops",
+                "B.remarks", 
+                "B.status",
+                "B.dateadded",
+                "B.hash_key",
+                "B.store",
+                "B.invoice_num",
+                "B.reseller_id",
+                "B.reseller_discount",
+                "B.discount",
+                "B.voucher_id",
+                "B.table_number",
+                "Z.name AS store_name",
+                "Z.address AS store_address",
+                "Z.contact_number AS store_contact",
+                "Z.contact_person AS store_person",
+                "Z.email AS store_email",
+                "A.add_name",
+                "A.add_contact",
+                "A.add_address",
+                "V.discount_value",
+                "V.voucher_code",
+                "B.giftcard_discount",
+                "B.giftcard_number",
+                "E.name AS discount_name",
+                "E.percentage AS discount_percentage"
+            );
             $join_A = "A.id = B.client_id";
             $this->db->select($select_column);  
             $this->db->from($table);
             $this->db->join('transaction_tb B', $join_A ,'left');
             $this->db->join('store_tb Z', 'Z.store_id = B.store' ,'left');
             $this->db->join('voucher_logs_tb V', 'V.transaction_id = B.id' ,'left');
+            $this->db->join('discount_users D', 'D.id = B.discount_user_id' ,'left');
+            $this->db->join('discount E', 'E.id = D.discount_id' ,'left');
             $this->db->where('B.hash_key', $hash_key);
-            // $this->db->where('B.status !=', 4);
-            // $this->db->where('B.status !=', 6);
             $query_info = $this->db->get();
             $info = $query_info->result();
 
             // $fb_table = "fb_users F";
-            // $select_column_F = array("F.first_name", "F.last_name", "F.email","C.address", "C.contact_number","B.logon_type","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","C.moh","C.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","B.voucher_id","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","C.add_address","V.discount_value","V.voucher_code");
+            // $select_column_F = array("F.first_name","F.last_name","F.email","C.address", "C.contact_number","B.logon_type","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","C.moh","C.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","B.voucher_id","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","C.add_address","V.discount_value","V.voucher_code");
             // $join_F = "F.id = B.client_id";
             // $this->db->select($select_column_F);  
             // $this->db->from($fb_table);
@@ -440,9 +574,8 @@ class Shop_model extends CI_Model
             $shown_categories = empty($product_categories) ? 0 : $product_categories;
         }
 		
-        //use if store_type of some stores shown is popcorn
         $product_category_tb = ($store_menu_type == 2) ? 'C.product_id,C.category_id' : '';
-        // select all the category products
+
         $this->db->select("
             A.sequence,
             A.id AS category_id,
@@ -463,12 +596,9 @@ class Shop_model extends CI_Model
         $this->db->from('category_tb A');
         if($store_menu_type != '2') {
             $this->db->join('products_tb B', 'B.category = A.id','left');
-           //use if store_type of some stores shown is popcorn
             $this->db->join('product_category_tb C', 'C.product_id = B.id');
-            $this->db->group_by('C.product_id'); //added to prevent showing duplicated products
-           //use if store_type of some stores shown is popcorn
-        }
-        else {
+            $this->db->group_by('C.product_id'); 
+        } else {
             $this->db->join('product_category_tb C', 'C.category_id = A.id');
             $this->db->join('products_tb B', 'B.id = C.product_id');
         }
@@ -482,38 +612,19 @@ class Shop_model extends CI_Model
 
         if($region != 0 && $to_disable != 0){
             $this->db->where_in('B.id', $to_disable);
-            //use if store_type of some stores shown is popcorn
+            
             if(!empty($store_menu_type)){
                 $this->db->where_in('A.id', $shown_categories);
             }
-            //use if store_type of some stores shown is popcorn
+
         }
-        if ($name != null) {
-            $this->db->like('B.name', $name, 'both');
-        }
-        if ( ($min == 0 || $min != 0) && $max != 0) {
-            $this->db->where("price BETWEEN '$min' AND '$max'");
-        }
-        if($category != 0 && $category != 14) {
-            $this->db->where('A.id', $category);
-        }
-        if ($sort_id == 'low_high') {
-            $this->db->order_by('B.price', 'ASC');
-        }
-        if ($sort_id == 'high_low') {
-            $this->db->order_by('B.price', 'DESC');
-        }
-        if ($sort_id == 'a_z') {
-            $this->db->order_by('B.name', 'ASC');
-        }
-        if ($sort_id == 'z_a') {
-            $this->db->order_by('B.name', 'DESC');
-        }
+        
         $this->db->order_by("A.sequence", "asc");
-        $this->db->order_by("B.name", "asc"); //added to make products on category & products page in fixed position
+        $this->db->order_by("B.name", "asc"); 
+
         $query = $this->db->get();
         $query_data = $query->result();
-        // arrangement of return array data
+
         $return_data = array();
 
         if($store_menu_type != '2'){

@@ -49,7 +49,6 @@ class Cart extends CI_Controller {
                 $set_value['prod_qty']              = $this->input->post('prod_qty');
                 $set_value['prod_price']            = $product_price;
                 $set_value['prod_calc_amount']      = $prod_calc_amount;
-                $set_value['prod_flavor_id']        = $this->input->post('prod_flavor') !== ""  ? $this->input->post('prod_flavor'): '';
                 $set_value['prod_with_drinks']      = $this->input->post('prod_with_drinks') ? 1 : 0;
                 $set_value['prod_size']             = (empty($prod_size)) ? '' : $prod_size->name;
                 $set_value['prod_size_id']          = $this->input->post('prod_size') !== ""  ? $this->input->post('prod_size'): '';
@@ -113,14 +112,13 @@ class Cart extends CI_Controller {
 
                 $_SESSION['orders'][$put['product_id']]['prod_qty'] = $put['quantity'];
                 $_SESSION['orders'][$put['product_id']]['prod_size_id'] = $put['currentSize'];
-                $_SESSION['orders'][$put['product_id']]['prod_flavor_id'] = $put['currentFlavor'];
                 $_SESSION['orders'][$put['product_id']]['prod_flavor'] = $put['flavorName'];
                 $_SESSION['orders'][$put['product_id']]['prod_size'] = $put['sizeName'];
                 $_SESSION['orders'][$put['product_id']]['prod_calc_amount'] = $put['total_amount'];
                 $_SESSION['orders'][$put['product_id']]['prod_multiflavors'] =$put['prod_multiflavors'];
                 
                 
-                $response = array("message"=>"Edit Successfully" );
+                $response = array("message"=>"Edit Successfully");
                 header('content-type: application/json');
                 echo json_encode($response);
             
@@ -146,8 +144,82 @@ class Cart extends CI_Controller {
                 break;
 		}
 	}
+
+    public function catering_product(){
+        
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+                
+				$_POST = json_decode(file_get_contents("php://input"), true);
+
+                $products = $this->input->post('products');
+
+                $items = array();
+                foreach($products as $product){
+                    $prod_id = $product['prod_id'];
+                    $product_details = $this->shop_model->get_details($prod_id)[0];
+                    $prod_image_name = $product['prod_image_name'];
     
+                    $product_sku_price = 0;
+                    $prod_size = NULL;
+                    
+                    $varx = array();
+                    
+                    if($product['prod_size']){
+                        
+                        $varx[] = $product['prod_size'];
+                        $prod_size = $this->shop_model->fetch_variants_details($product['prod_size']);
+
+                        $varxz = array_values(array_filter($varx));
+                        $product_sku = $this->shop_model->fetch_product_sku($varxz);
+                        if(!empty($product_sku)){
+                            $product_sku_price = $product_sku->price;
+                        }else{
+                            $product_sku_price = $product_details->price;
+                        }
+                    }
+
+                    $product_price = (empty($varx)) ? $product_details->price : $product_sku_price;
+                    $prod_calc_amount   = $product['prod_calc_amount'];
     
+                    $set_value['prod_id']               = $prod_id;
+                    $set_value['prod_image_name']       = $prod_image_name;
+                    $set_value['prod_name']             = $product_details->name;
+                    $set_value['prod_qty']              = $product['prod_qty'];
+                    $set_value['prod_price']            = $product_price;
+                    $set_value['prod_calc_amount']      = $prod_calc_amount;
+                    $set_value['prod_with_drinks']      = isset($product['prod_with_drinks']) ? 1 : 0;
+                    $set_value['prod_size']             = (empty($prod_size)) ? '' : $prod_size->name;
+                    $set_value['prod_size_id']          = $product['prod_size'] ?? '';
+                    $set_value['prod_multiflavors']     = $product['flavors_details'] ?? '';
+                    $set_value['prod_sku_id']           = $product['prod_sku_id'] ?? '';
+                    $set_value['prod_sku']              = $product['prod_sku'] ?? '';
+                    $set_value['prod_discount']         = 0;
+                    $set_value['prod_category']         = $product_details->category;
+                    $set_value['prod_type']             = $product['prod_type'];
+                    $set_value['promo_discount_percentage'] = $product['promo_discount_percentage'] ?? '';
+    
+                    $items[] = $set_value;
+                }
+
+                if($this->session->orders){
+                    $_SESSION['orders'] = array_merge($this->session->orders,$items);
+                }else{
+                    $_SESSION['orders'] = $items;
+                }
+
+                
+				$response = array(
+					'message' => 'Successfully add to cart package'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+
+                break;
+        }
+    }
+
 	public function catering(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':

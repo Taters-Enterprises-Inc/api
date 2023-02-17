@@ -60,7 +60,7 @@ class Client_model extends CI_Model {
     public function insertClientDetailsCatering(
         $first_name,
         $last_name,
-        $address,
+        $eventAddress,
         $phone_number,
         $payops,
         $email
@@ -78,7 +78,7 @@ class Client_model extends CI_Model {
 
         $client_details_to_be_inserted = array(
             'email'             => $email,
-            'address'           => $address,
+            'address'           => $eventAddress,
             'contact_number'    => $phone_number,
             'fname'             => $first_name,
             'lname'             => $last_name,
@@ -86,7 +86,7 @@ class Client_model extends CI_Model {
             'payops'            => $payops,
             'add_name'          => $first_name.' '.$last_name,
             'add_contact'       => $phone_number,
-            'add_address'       => $address,
+            'add_address'       => $eventAddress,
         );
 
         switch($logon_type){
@@ -113,10 +113,10 @@ class Client_model extends CI_Model {
     public function insertClientDetailsShop(
         $first_name,
         $last_name,
-        $address,
+        $landMarkAddress,
         $phone_number,
         $payops,
-        $full_address,
+        $completeDeliveryAddress,
         $email
     ){
         $client_details = null;
@@ -132,7 +132,7 @@ class Client_model extends CI_Model {
 
         $client_details_to_be_inserted = array(
             'email'             => $email,
-            'address'           => $address,
+            'address'           => $landMarkAddress,
             'contact_number'    => $phone_number,
             'fname'             => $first_name,
             'lname'             => $last_name,
@@ -140,7 +140,7 @@ class Client_model extends CI_Model {
             'payops'            => $payops,
             'add_name'          => $first_name.' '.$last_name,
             'add_contact'       => $phone_number,
-            'add_address'       => $full_address,
+            'add_address'       => $completeDeliveryAddress,
         );
 
         switch($logon_type){
@@ -179,4 +179,16 @@ class Client_model extends CI_Model {
         $data = $query->row();
         return $data;
     }
+
+    public function addDiscountUser($data){
+        $insert = $this->db->insert('discount_users', $data);
+
+        if($insert){ 
+            return true;
+        }else {
+            return false;
+        }
+        
+    }
+
 }

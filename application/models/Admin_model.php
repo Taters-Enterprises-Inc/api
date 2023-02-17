@@ -2,6 +2,243 @@
 
 class Admin_model extends CI_Model 
 {
+    public function __construct(){
+        $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
+    }
+    function removeCateringRegionDaLog($catering_region_da_log_id){
+        $this->db->where('id', $catering_region_da_log_id);
+		$this->db->delete('catering_region_da_log');
+    }
+
+    function insertCateringRegionDaLog($data){
+        $this->db->trans_start();
+		$this->db->insert('catering_region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+    function getCateringRegionDaLog($store_id){
+        $this->db->select('id, product_id');
+
+        $this->db->from('catering_region_da_log');
+
+        $this->db->where('store_id', $store_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+    
+    function insertRegionDaLog($data){
+        $this->db->trans_start();
+		$this->db->insert('region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+    function removeSnackshopRegionDaLog($region_da_log_id){
+        $this->db->where('id', $region_da_log_id);
+		$this->db->delete('region_da_log');
+    }
+
+
+    function getSnackshopRegionDaLog($store_id){
+        $this->db->select('id, product_id');
+
+        $this->db->from('region_da_log');
+
+        $this->db->where('store_id', $store_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+    
+    function getRegionStoreCombinationById($region_store_combination_id){
+        $this->db->select('
+            id,
+            region_id,
+            region_store_id,
+        ');
+        $this->db->from('region_store_combination_tb');
+
+        $this->db->where('id', $region_store_combination_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    function insertCateringRegionDaLogs($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('catering_region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+    
+    function updateStore($store_id, $data){
+        $this->db->where('store_id', $store_id);
+        $this->db->update('store_tb', $data);
+    }
+
+
+    function getSettingStoreProductCateringRegionDaLog($store_id){
+        $this->db->select('
+            B.id,
+            B.name,
+        ');
+
+        $this->db->from('catering_region_da_log A');
+        $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
+
+        $this->db->where('A.store_id', $store_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+    function getSettingStoreProductRegionDaLog($store_id){
+        $this->db->select('
+            B.id,
+            B.name,
+        ');
+
+        $this->db->from('region_da_log A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+
+        $this->db->where('A.store_id', $store_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+    function getSettingStore($store_id){
+        $this->db->select('
+            A.id,
+            A.store_id,
+            A.name,
+            A.address,
+            A.contact_number,
+            A.contact_person,
+            A.email,
+            A.delivery_hours,
+            A.operating_hours,
+            A.delivery_rate,
+            A.minimum_rate,
+            A.catering_delivery_rate,
+            A.catering_minimum_rate,
+            A.store_hash,
+            A.active_reseller_region_id,
+            A.available_start_time,
+            A.available_end_time,
+            A.store_menu_type_id,
+            A.locale,
+            A.region_id,
+            A.lat,
+            A.lng,
+            A.status,
+            A.catering_status,
+            A.popclub_walk_in_status,
+            A.popclub_online_delivery_status,
+            A.branch_status,
+            A.store_image,
+            B.region_store_id,
+            B.id as region_store_combination_tb_id,
+        ');
+        $this->db->from('store_tb A');
+		$this->db->join('region_store_combination_tb B', 'B.region_store_id = A.region_store_combination_id', 'left');
+
+        $this->db->where('A.store_id', $store_id);
+
+        $query = $this->db->get();
+
+        return $query->row();
+    }
+
+    function getLatestStoreCreated(){
+        $this->db->select('store_id');
+        $this->db->from('store_tb');
+
+        $this->db->order_by('id', 'DESC');
+        $this->db->limit(1);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+
+    public function getCustomerSurveyResponse($survey_verification_id){
+        $this->bsc_db->select('
+            A.id,
+            A.transaction_id,
+            A.catering_transaction_id,
+            A.fb_user_id,
+            A.mobile_user_id,
+        ');
+
+        $this->bsc_db->from('customer_survey_responses A');
+        $this->bsc_db->where('A.id', $survey_verification_id);
+
+        $query_customer_survey_response = $this->bsc_db->get();
+
+        return $query_customer_survey_response->row();
+    }
+
+    
+    function getLocales(){
+        $this->db->select('id, locale_name as name');
+        $this->db->from('dotcom_locale_tb');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function getRegionStoreCombinations(){
+        $this->db->select('
+            A.id, 
+            B.name as region_name,
+            C.name as region_store_name,
+        ');
+        $this->db->from('region_store_combination_tb A');
+        $this->db->join('region_tb B', 'B.id = A.region_id');
+        $this->db->join('region_tb C', 'C.id = A.region_store_id');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function getActiveResellerRegions(){
+        $this->db->select('id, name');
+        $this->db->from('region_tb');
+        
+        $this->db->where('on_reseller_status', 1);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function removeShopStoreRegionDaLogs($store_id){
+        $this->db->where('store_id', $store_id);
+		$this->db->delete('region_da_log');
+    }
+
+    function insertStore($data){
+        $this->db->trans_start();
+		$this->db->insert('store_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    function getStoreMenus(){
+        $this->db->select('id, name');
+        $this->db->from('store_menu_tb');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     function getPopClubCompletedTransactionCount($store){
         $this->db->select('count(*) as all_count');
         $this->db->from('deals_redeems_tb');
@@ -124,6 +361,16 @@ class Admin_model extends CI_Model
         return $query_transaction->result();
     }
 
+    function getSnackshopProductFlavors($product_id){
+        $this->db->select("B.id,B.name,B.product_variant_id, A.name as parent_name");
+        $this->db->from('product_variants_tb A');
+        $this->db->join('product_variant_options_tb B', 'B.product_variant_id = A.id','left');
+        $this->db->where('A.product_id', $product_id);
+        $this->db->where('B.status', 1);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     function getCateringPackageFlavors($package_id){
         $this->db->select("B.id,B.name,B.product_variant_id, A.name as parent_name");
         $this->db->from('catering_package_variants_tb A');
@@ -138,6 +385,572 @@ class Admin_model extends CI_Model
         $this->db->set('remarks', $remarks);
         $this->db->where("id", $order_item_id);
         $this->db->update("catering_order_items");
+    }
+
+    function removeProductWithAddons($product_addon_id){
+        $this->db->where('addon_product_id', $product_addon_id);
+		$this->db->delete('product_with_addons');
+    }
+
+    function removeCateringProductAddons($product_addon_id){
+        $this->db->where('product_id', $product_addon_id);
+		$this->db->delete('catering_product_addons_tb');
+    }
+
+
+    function getProductWithAddons($addon_product_id){
+
+        $this->db->select('
+            B.id,
+            B.name,
+        ');
+
+        $this->db->from('product_with_addons A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+
+        $this->db->where('A.addon_product_id',$addon_product_id);
+        
+        $query_product_addon = $this->db->get();
+        return $query_product_addon->result();
+    }
+
+    function getCateringAddonProductStores($product_addon_id){
+
+        $this->db->select('
+            A.store_id,
+            B.name,
+			C.region_store_id,
+        ');
+
+        $this->db->from('catering_product_addons_tb A');
+        $this->db->join('store_tb B', 'B.store_id = A.store_id');
+		$this->db->join('region_store_combination_tb C', 'C.region_store_id = B.region_store_combination_id');
+
+        $this->db->where('A.product_id',$product_addon_id);
+        
+        $query_shop_product_stores = $this->db->get();
+        return $query_shop_product_stores->result();
+    }
+
+    function insertProductWithAddons($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('product_with_addons', $data);
+        $this->db->trans_complete();
+    }
+    
+    function insertCaterProductAddonsRegionDaLogs($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('catering_product_addons_tb', $data);
+        $this->db->trans_complete();
+    }
+
+    function getDeals(){
+        $this->db->select('
+            id,
+            name,
+        ');
+
+        $this->db->from('dotcom_deals_tb');
+        $this->db->where('status', 1);
+
+        $query_products = $this->db->get();
+        return $query_products->result();
+    }
+
+    function getPackages(){
+        $this->db->select('
+            id,
+            name,
+        ');
+
+        $this->db->from('catering_packages_tb');
+        $this->db->where('status', 1);
+
+        $query_products = $this->db->get();
+        return $query_products->result();
+    }
+
+    function getProducts(){
+        $this->db->select('
+            id,
+            name,
+        ');
+
+        $this->db->from('products_tb');
+        $this->db->where('status', 1);
+
+        $query_products = $this->db->get();
+        return $query_products->result();
+    }
+
+    function getProductTypes(){
+        $this->db->select('
+            id,
+            name,
+        ');
+
+        $this->db->from('product_types');
+        $query_product_types = $this->db->get();
+        return $query_product_types->result();
+    }
+    
+    function updateShopProductStatus($product_id, $status){
+        $this->db->set('status', $status);
+        $this->db->where("id", $product_id);
+        $this->db->update("products_tb");
+    }
+    
+    
+    function removeShopProductCategory($product_id){
+        $this->db->where('product_id', $product_id);
+        $this->db->delete('product_category_tb');
+    }
+
+    function removeShopProduct($product_id){
+        $this->db->where('id', $product_id);
+        $this->db->delete('products_tb');
+    }
+    
+    function removeProductVariantOptionCombination($product_variant_option_combination_id){
+        $this->db->where('id', $product_variant_option_combination_id);
+        $this->db->delete('product_variant_option_combinations_tb');
+    }
+
+    function removeProductSku($product_sku_id){
+        $this->db->where('id', $product_sku_id);
+        $this->db->delete('product_skus_tb');
+    }
+
+    function removeProductVariantOption($product_variant_option_id){
+        $this->db->where('id', $product_variant_option_id);
+        $this->db->delete('product_variant_options_tb');
+    }
+    
+
+    function removeProductVariant($product_variant_id){
+        $this->db->where('id', $product_variant_id);
+        $this->db->delete('product_variants_tb');
+    }
+    
+
+    function getProductVariants($product_id){
+        $this->db->select('id');
+
+        $this->db->from('product_variants_tb');
+        $this->db->where('product_id', $product_id);
+        
+        $query_product_variants = $this->db->get();
+
+        return $query_product_variants->result();
+    }
+    
+
+    function getProductVariantOptions($product_variant_id){
+        $this->db->select('id');
+
+        $this->db->from('product_variant_options_tb');
+        $this->db->where('product_variant_id', $product_variant_id);
+        
+        $query_product_variants = $this->db->get();
+
+        return $query_product_variants->result();
+    }
+
+    
+    function getProductVariantOptionCombinations($product_variant_option_id){
+        $this->db->select('id, sku_id');
+
+        $this->db->from('product_variant_option_combinations_tb');
+        $this->db->where('product_variant_option_id', $product_variant_option_id);
+        
+        $query_product_variants = $this->db->get();
+
+        return $query_product_variants->result();
+    }
+
+    function removeShopProductVariantOptionCombination($product_id){
+        $this->db->where('product_id', $product_id);
+		$this->db->delete('product_variant_option_combinations_tb');
+    }
+
+    
+    function removeShopProductRegionDaLogs($product_id){
+        $this->db->where('product_id', $product_id);
+		$this->db->delete('region_da_log');
+    }
+
+
+    function updateShopProductCategory($product_id, $data){
+        $this->db->where('product_id', (int)$product_id);
+        $this->db->update('product_category_tb', $data);
+    }
+    function updateShopProduct($product_id, $data){
+        $this->db->where('id', $product_id);
+        $this->db->update('products_tb', $data);
+    }
+
+    function getShopProductStores($product_id){
+
+        $this->db->select('
+            A.store_id,
+            B.name,
+			C.region_store_id,
+        ');
+
+        $this->db->from('region_da_log A');
+        $this->db->join('store_tb B', 'B.store_id = A.store_id');
+		$this->db->join('region_store_combination_tb C', 'C.region_store_id = B.region_store_combination_id');
+
+        $this->db->where('A.product_id',$product_id);
+        
+        $query_shop_product_stores = $this->db->get();
+        return $query_shop_product_stores->result();
+    }
+
+    function getShopProductVariantOptions($product_variant_id){
+        $this->db->select('
+            A.name,
+            C.sku,
+            C.price,
+        ');
+
+        $this->db->from('product_variant_options_tb A');
+        $this->db->join('product_variant_option_combinations_tb B', 'B.product_variant_option_id = A.id','left');
+        $this->db->join('product_skus_tb C', 'C.id = B.sku_id','left');
+        $this->db->where('A.product_variant_id',$product_variant_id);
+
+        $query_shop_product_variant_options = $this->db->get();
+        return $query_shop_product_variant_options->result();
+    }
+
+    function getShopProductVariants($product_id){
+        $this->db->select('
+            A.id,
+            A.product_id,
+            A.name, 
+            A.status
+        ');
+
+        $this->db->from('product_variants_tb A');
+        $this->db->where('A.product_id',$product_id);
+
+        $query_shop_product_variants = $this->db->get();
+        return $query_shop_product_variants->result();
+    }
+
+    function getShopProduct($product_id){
+        $this->db->select('
+            A.id,
+            A.name,
+            A.product_image,
+            A.description,
+            A.delivery_details,
+            A.price,
+            A.uom,
+            A.add_details,
+            A.status,
+            A.category,
+            A.num_flavor,
+            A.dateadded,
+            A.product_type_id,
+        ');
+
+        $this->db->from('products_tb A');
+        $this->db->where('A.id', $product_id);
+
+        $query_product = $this->db->get();
+        return $query_product->row();
+    }
+
+    function insertShopProductCategory($data){
+        $this->db->trans_start();
+		$this->db->insert('product_category_tb', $data);
+        $this->db->trans_complete();
+    }
+    function insertShopProductVariantOptionCombination($data){
+        $this->db->trans_start();
+		$this->db->insert('product_variant_option_combinations_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return $insert_id;
+    }
+
+    function insertShopProductSku($data){
+        $this->db->trans_start();
+		$this->db->insert('product_skus_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return $insert_id;
+    }
+
+    function insertShopProductVariantOption($data){
+        $this->db->trans_start();
+		$this->db->insert('product_variant_options_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return $insert_id;
+    }
+
+    function insertShopProductVariant($data){
+        $this->db->trans_start();
+		$this->db->insert('product_variants_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    function insertRegionDaLogs($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertCateringPackageRegionDaLogs($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('catering_region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertShopProduct($data){
+        $this->db->trans_start();
+		$this->db->insert('products_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    function getShopProducts($row_no, $row_per_page, $status, $order_by,  $order, $search){
+        $this->db->select('
+            id,
+            product_image,
+            name,
+            description,
+            price,
+            add_details,
+            product_type_id,
+            status,
+        ');
+
+        $this->db->from('products_tb');
+    
+        if($status)
+            $this->db->where('status', $status);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->or_like('name', $search);
+            $this->db->or_like('description', $search);
+            $this->db->or_like('price', $search);
+            $this->db->or_like('add_details', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    public function getShopProductsCount($status, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('products_tb');
+
+        if($status)
+            $this->db->where('status', $status);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->or_like('name', $search);
+            $this->db->or_like('description', $search);
+            $this->db->or_like('price', $search);
+            $this->db->or_like('add_details', $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    function getSurvey($survey_id){
+        $this->bsc_db->select('
+            A.id,
+            A.dateadded,
+            A.order_date,
+            A.status,
+            A.fb_user_id,
+            A.mobile_user_id,
+            B.name as store_name,
+            A.invoice_no,
+            C.tracking_no as snackshop_tracking_no,
+            D.tracking_no as catering_tracking_no,
+            E.name as order_type,
+        ');
+        $this->bsc_db->from('customer_survey_responses A');
+        $this->bsc_db->join($this->db->database.'.store_tb B', 'B.store_id = A.store_id');
+        $this->bsc_db->join($this->db->database.'.transaction_tb C', 'C.id = A.transaction_id','left');
+        $this->bsc_db->join($this->db->database.'.catering_transaction_tb D', 'D.id = A.catering_transaction_id','left');
+        $this->bsc_db->join('customer_survey_response_order_types E', 'E.id = A.customer_survey_response_order_type_id');
+
+        $this->bsc_db->where('A.id', $survey_id);
+
+        $query_customer_survey_response = $this->bsc_db->get();
+        $customer_survey_response = $query_customer_survey_response->row();
+
+        $this->db->select('first_name, last_name');
+
+        if($customer_survey_response->fb_user_id){
+            $this->db->from('fb_users');
+            $this->db->where('id',$customer_survey_response->fb_user_id);
+        }else if($customer_survey_response->mobile_user_id){
+            $this->db->from('mobile_users');
+            $this->db->where('id',$customer_survey_response->mobile_user_id);
+        }
+        
+		$query_user = $this->db->get();
+		$user = $query_user->row();
+
+        $customer_survey_response->user = $user;
+
+		$this->bsc_db->select('
+            A.id, 
+            A.text,
+            A.others,
+            A.customer_survey_response_id,
+            B.description as question,
+            D.text as answer,
+        ');
+
+        $this->bsc_db->from('customer_survey_response_answers A');
+        $this->bsc_db->join('survey_questions B', 'B.id = A.survey_question_id', 'left');
+        $this->bsc_db->join('survey_question_answers C', 'C.id = A.survey_question_answer_id', 'left');
+        $this->bsc_db->join('survey_question_offered_answers D', 'D.id = C.survey_question_offered_answer_id', 'left');
+        
+        $this->bsc_db->where('A.customer_survey_response_id', $customer_survey_response->id);
+        
+		$query_customer_survey_response_answers = $this->bsc_db->get();
+		$customer_survey_response_answers = $query_customer_survey_response_answers->result();
+        
+		$this->bsc_db->select('
+            A.id, 
+            A.others,
+            A.customer_survey_response_id,
+            A.rate,
+            B.description as question,
+            C.survey_question_offered_rating_id,
+            D.name,
+            D.lowest_rate_text,
+            D.lowest_rate,
+            D.highest_rate_text,
+            D.highest_rate,
+        ');
+
+        $this->bsc_db->from('customer_survey_response_ratings A');
+        $this->bsc_db->join('survey_questions B', 'B.id = A.survey_question_id', 'left');
+        $this->bsc_db->join('survey_question_ratings C', 'C.id = A.survey_question_rating_id', 'left');
+        $this->bsc_db->join('survey_question_offered_ratings D', 'D.id = C.survey_question_offered_rating_id', 'left');
+        
+        $this->bsc_db->where('A.customer_survey_response_id', $customer_survey_response->id);
+        
+        $query_customer_survey_response_ratings = $this->bsc_db->get();
+        $customer_survey_response_ratings = $query_customer_survey_response_ratings->result();
+
+        $data = $customer_survey_response;
+        
+        $data->answers = $customer_survey_response_answers;
+        $data->ratings = $customer_survey_response_ratings;
+        
+        return $data;
+    }
+
+    public function getSurveysCount($status, $search, $store){
+        $this->bsc_db->select('count(*) as all_count');
+            
+        $this->bsc_db->from('customer_survey_responses A');
+        $this->bsc_db->join($this->db->database.'.store_tb B', 'B.store_id = A.store_id');
+        $this->bsc_db->join('user_profile C', 'C.user_id = A.user_id', 'left');
+        $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
+        $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
+        $this->bsc_db->join('customer_survey_response_order_types G', 'G.id = A.customer_survey_response_order_type_id');
+
+        if($status)
+            $this->bsc_db->where('A.status', $status);
+
+        if(!empty($store))
+            $this->bsc_db->where_in('A.store_id', $store);
+
+        if($search){
+            $this->bsc_db->group_start();
+            $this->bsc_db->or_like('A.invoice_no', $search);
+            $this->bsc_db->or_like('B.name', $search);
+            $this->bsc_db->or_like('C.first_name', $search);
+            $this->bsc_db->or_like('C.last_name', $search);
+            $this->bsc_db->or_like('D.tracking_no', $search);
+            $this->bsc_db->or_like('E.tracking_no', $search);
+            $this->bsc_db->or_like('F.redeem_code', $search);
+            $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->bsc_db->group_end();
+        }
+
+        $query = $this->bsc_db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getSurveys($row_no, $row_per_page, $status, $order_by,  $order, $search, $store){
+        
+        $this->bsc_db->select("
+            A.id,
+            A.dateadded,
+            A.order_date,
+            A.status,
+            B.name as store_name,
+            C.first_name,
+            C.last_name,
+            A.invoice_no,
+            D.tracking_no as snackshop_tracking_no,
+            E.tracking_no as catering_tracking_no,
+            G.name as order_type
+        ");
+
+        $this->bsc_db->from('customer_survey_responses A');
+        $this->bsc_db->join($this->db->database.'.store_tb B', 'B.store_id = A.store_id');
+        $this->bsc_db->join('user_profile C', 'C.user_id = A.user_id','left');
+        $this->bsc_db->join($this->db->database.'.transaction_tb D', 'D.id = A.transaction_id','left');
+        $this->bsc_db->join($this->db->database.'.catering_transaction_tb E', 'E.id = A.catering_transaction_id','left');
+        $this->bsc_db->join('customer_survey_response_order_types G', 'G.id = A.customer_survey_response_order_type_id');
+ 
+        if($status)
+            $this->bsc_db->where('A.status', $status);
+
+        if(!empty($store))
+            $this->bsc_db->where_in('A.store_id', $store);
+
+        if($search){
+            $this->bsc_db->group_start();
+            $this->bsc_db->or_like('A.invoice_no', $search);
+            $this->bsc_db->or_like('B.name', $search);
+            $this->bsc_db->or_like('C.first_name', $search);
+            $this->bsc_db->or_like('C.last_name', $search);
+            $this->bsc_db->or_like('D.tracking_no', $search);
+            $this->bsc_db->or_like('E.tracking_no', $search);
+            $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->bsc_db->group_end();
+        }
+
+        $this->bsc_db->limit($row_per_page, $row_no);
+        $this->bsc_db->order_by($order_by, $order);
+
+        $query = $this->bsc_db->get();
+        return $query->result();
+    }
+
+    public function changeStatusSurveyVerification($survey_verification_id, $status){
+		$this->bsc_db->set('status', (int) $status);
+        $this->bsc_db->where('id', $survey_verification_id);
+        $this->bsc_db->update("customer_survey_responses");
     }
 
     function updateSettingStoreOperatingHours(
@@ -168,25 +981,22 @@ class Admin_model extends CI_Model
         return $query->row();
     }
     
-    function updateSettingStore($store_id, $name_of_field_status, $status){
+    function updateSettingStore($store_primary_key, $name_of_field_status, $status){
         switch($name_of_field_status){
-            case 'status':
+            case 'Snackshop':
                 $this->db->set('status', $status);
                 break;
-            case 'catering_status':
+            case 'Catering':
                 $this->db->set('catering_status', $status);
                 break;
-            case 'popclub_walk_in_status':
+            case 'PopClub Store Visit':
                 $this->db->set('popclub_walk_in_status', $status);
                 break;
-            case 'popclub_online_delivery_status':
+            case 'PopClub Online Delivery':
                 $this->db->set('popclub_online_delivery_status', $status);
                 break;
-            case 'branch_status':
-                $this->db->set('branch_status', $status);
-                break;
         }
-        $this->db->where("store_id", $store_id);
+        $this->db->where("id", $store_primary_key);
         $this->db->update("store_tb");
     }
     
@@ -216,6 +1026,7 @@ class Admin_model extends CI_Model
             A.store_id,
             A.name,
             A.status,
+            A.store_image,
             A.catering_status,
             A.popclub_walk_in_status,
             A.popclub_online_delivery_status,
@@ -327,19 +1138,44 @@ class Admin_model extends CI_Model
         return $this->db->get()->result();
     }
     
-    
     public function get_caters_package_categories() {
         $this->db->select("id, category_name as name");
         $this->db->from("catering_category_tb");
         return $this->db->get()->result();
     }
 
-    public function get_product_categories() {
+    public function getProductCategories() {
         $this->db->select("id, category_name as name");
         $this->db->from("category_tb");
         return $this->db->get()->result();
     }
 
+    function getStoreCateringProductCount($store_id, $category_id, $status, $search) {
+        $this->db->select('count(*) as all_count');
+
+        $this->db->from('catering_products A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->join('category_tb C', 'C.id = B.category');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->or_like('C.category_name', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
+        
+        if($status)
+            $this->db->where('A.status', $status);
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
     function getStoreProductCount($store_id, $category_id, $status, $search) {
         $this->db->select('count(*) as all_count');
 
@@ -447,7 +1283,7 @@ class Admin_model extends CI_Model
     }
 
     function getStoreCatersProductAddons($row_no, $row_per_page, $store_id,  $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.name, A.store_id, B.add_details');
+        $this->db->select('A.id, B.name, A.store_id, B.add_details, B.product_image');
 
         $this->db->from('catering_product_addons_tb	 A');
         $this->db->join('products_tb B', 'B.id = A.product_id');
@@ -469,8 +1305,8 @@ class Admin_model extends CI_Model
     }
     
     function getStoreCatersPackageAddons($row_no, $row_per_page, $store_id,  $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.name, A.store_id, B.add_details');
-        $this->db->from('catering_package_addons_tb	 A');
+        $this->db->select('A.id, B.name, A.store_id, B.add_details, B.product_image');
+        $this->db->from('catering_package_addons_tb A');
         $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
 
         if($search){
@@ -490,7 +1326,7 @@ class Admin_model extends CI_Model
     }
 
     function getStoreCatersPackages($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');
+        $this->db->select('A.id, B.name, A.store_id, B.product_image, B.add_details, C.category_name');
         $this->db->from('catering_region_da_log A');
         $this->db->join('catering_packages_tb B', 'B.id = A.product_id');
         $this->db->join('catering_category_tb C', 'C.id = B.category');
@@ -514,8 +1350,33 @@ class Admin_model extends CI_Model
         return $this->db->get()->result();
     }
 
+    function getStoreCateringProducts($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
+        $this->db->select('A.id, B.name, A.store_id, B.add_details, B.product_image, C.category_name');
+        $this->db->from('catering_products A');
+        $this->db->join('products_tb B', 'B.id = A.product_id');
+        $this->db->join('category_tb C', 'C.id = B.category');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('B.name', $search);
+            $this->db->or_like('C.category_name', $search);
+            $this->db->group_end();
+        }
+            
+        $this->db->where('B.status', 1);
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('A.status', $status);
+
+        if(isset($category_id)) $this->db->where('C.id', $category_id);
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        return $this->db->get()->result();
+    }
+
     function getStoreProducts($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.name, A.store_id, B.add_details, C.category_name');
+        $this->db->select('A.id, B.name, B.product_image, A.store_id, B.add_details, C.category_name');
         $this->db->from('region_da_log A');
         $this->db->join('products_tb B', 'B.id = A.product_id');
         $this->db->join('category_tb C', 'C.id = B.category');
@@ -592,9 +1453,14 @@ class Admin_model extends CI_Model
         $this->db->where("id", $id);
         $this->db->update("region_da_log");
     }
+    function updateStoreCateringProduct($id, $status){
+		$this->db->set('status', $status);
+        $this->db->where("id", $id);
+        $this->db->update("catering_products");
+    }
 
     function getStoreDeals($row_no, $row_per_page, $store_id, $category_id, $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.alias, B.name, A.store_id');
+        $this->db->select('A.id, B.alias, B.name, B.product_image, A.store_id');
         $this->db->from('deals_region_da_log A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
 
@@ -854,18 +1720,6 @@ class Admin_model extends CI_Model
         return ($this->db->affected_rows()) ? 1 : 0;
     }
 
-    function getStores(){
-        $this->db->select('
-            A.store_id,
-            A.name,
-            B.name as menu_name,
-        ');
-        $this->db->from('store_tb A');
-        $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
-        $query = $this->db->get();
-        return $query->result();
-    }
-
     public function getGroups(){
         $this->db->select("
             id,
@@ -957,6 +1811,12 @@ class Admin_model extends CI_Model
         return $query->result();
     }
 
+    public function changeStatusUserDiscount($discount_users_id, $status){
+		$this->db->set('status', (int) $status);
+        $this->db->where('id', $discount_users_id);
+        $this->db->update("discount_users");
+    }
+
     public function completeRedeem($redeem_id, $today){
 		$this->db->set('status', 6);
 		$this->db->set('completed_date', $today);
@@ -1015,6 +1875,62 @@ class Admin_model extends CI_Model
         $query = $this->db->get();
         return $query->row();
     }
+
+    public function getDiscount($discount_user_id){
+        $this->db->select("
+            A.id,
+            A.first_name,
+            A.middle_name,
+            A.last_name,
+            A.birthday,
+            A.id_number,
+            A.dateadded,
+            A.id_front,
+            A.id_back,
+            A.discount_id,
+            A.status,
+            B.name as discount_name,
+
+            C.first_name as fb_first_name,
+            C.last_name as fb_last_name,
+
+            D.first_name as mobile_first_name,
+            D.last_name as mobile_last_name,
+        ");
+        $this->db->from('discount_users A');
+        $this->db->join('discount B', 'B.id = A.discount_id');
+        $this->db->join('fb_users C', 'C.id = A.fb_user_id','left');
+        $this->db->join('mobile_users D', 'D.id = A.mobile_user_id','left');
+
+        $this->db->where('A.id', $discount_user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function getDiscountsCount($status, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('discount_users A');
+        $this->db->join('discount B', 'B.id = A.discount_id');
+
+        if($status)
+            $this->db->where('A.status', $status);
+
+            
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.id_number', $search);
+            $this->db->or_like('A.first_name', $search);
+            $this->db->or_like('A.middle_name', $search);
+            $this->db->or_like('A.last_name', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
     
     public function getPopclubRedeemsCount($status, $search, $store){
         $this->db->select('count(*) as all_count');
@@ -1043,6 +1959,46 @@ class Admin_model extends CI_Model
 
         $query = $this->db->get();
         return $query->row()->all_count;
+    }
+
+    public function getDiscounts($row_no, $row_per_page, $status, $order_by,  $order, $search){
+        
+        $this->db->select("
+            A.id,
+            A.first_name,
+            A.middle_name,
+            A.last_name,
+            A.birthday,
+            A.id_number,
+            A.dateadded,
+            A.discount_id,
+            A.status,
+            B.name as discount_name,
+            B.percentage,
+        ");
+        $this->db->from('discount_users A');
+        $this->db->join('discount B', 'B.id = A.discount_id');
+        
+            
+        if($status)
+            $this->db->where('A.status', $status);
+
+
+            if($search){
+                $this->db->group_start();
+                $this->db->like('A.id_number', $search);
+                $this->db->or_like('A.first_name', $search);
+                $this->db->or_like('A.middle_name', $search);
+                $this->db->or_like('A.last_name', $search);
+                $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+                $this->db->group_end();
+            }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
     }
     
     public function getPopclubRedeems($row_no, $row_per_page, $status, $order_by,  $order, $search, $store){
@@ -1135,8 +2091,10 @@ class Admin_model extends CI_Model
             A.tracking_no,
             A.purchase_amount,
             A.invoice_num,
+            A.hash_key,
 
             A.discount,
+            A.discount_user_id,
             A.reseller_discount,
             A.giftcard_discount,
             A.distance_price,
@@ -1146,8 +2104,7 @@ class Admin_model extends CI_Model
             A.reference_num,
             A.store,
 
-            concat(B.fname,' ',B.lname) as client_name,
-            B.add_name,
+            B.add_name as client_name,
             B.payops,
             B.contact_number,
             B.email,
@@ -1155,11 +2112,16 @@ class Admin_model extends CI_Model
             B.add_address,
             B.fb_user_id,
             B.mobile_user_id,
-            C.name as store_name
+            
+            C.name as store_name,
+            E.name AS discount_name,
+            E.percentage AS discount_percentage,
         ");
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
+        $this->db->join('discount_users D', 'D.id = A.discount_user_id','left');
+        $this->db->join('discount E', 'E.id = D.discount_id','left');
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();
@@ -1173,6 +2135,7 @@ class Admin_model extends CI_Model
             A.quantity,
             A.remarks,
             A.product_label,
+            A.type,
             B.id as product_id,
             B.name,
             B.description,
@@ -1191,7 +2154,25 @@ class Admin_model extends CI_Model
             B.quantity,
             B.remarks,
             B.product_label,
+            B.type,
             A.id as product_id,
+            A.name,
+            A.description,
+            A.add_details,
+        "); 
+        $this->db->from('products_tb A');
+        $this->db->join('catering_order_items B', 'B.product_id = A.id' ,'left');
+        $this->db->where('B.transaction_id', $transaction_id);
+        $this->db->where('B.type', 'product');
+        $query_catering_products= $this->db->get();
+        $catering_products = $query_catering_products->result();
+
+        $this->db->select("
+            B.product_price,
+            B.quantity,
+            B.remarks,
+            B.product_label,
+            B.type,
             A.name,
             A.description,
             A.add_details,
@@ -1203,7 +2184,7 @@ class Admin_model extends CI_Model
         $query_catering_add_ons = $this->db->get();
         $catering_add_ons = $query_catering_add_ons->result();
 
-        return array_merge($catering_packages, $catering_add_ons);
+        return array_merge($catering_packages, $catering_products, $catering_add_ons);
     }
 
     public function getCateringBooking($tracking_no){
@@ -1214,6 +2195,7 @@ class Admin_model extends CI_Model
             A.serving_time,
             A.tracking_no,
             A.invoice_num,
+            A.hash_key,
             A.logon_type,
             A.serving_time,
             A.start_datetime,
@@ -1222,7 +2204,6 @@ class Admin_model extends CI_Model
             A.event_class,
             A.company_name,
             A.remarks,
-            A.hash_key,
 
             A.purchase_amount,
             A.service_fee,
@@ -1243,7 +2224,8 @@ class Admin_model extends CI_Model
             
             A.reference_num,
             A.store,
-
+            A.discount,
+            A.discount_user_id,
             B.fb_user_id,
             B.mobile_user_id,
 
@@ -1260,17 +2242,19 @@ class Admin_model extends CI_Model
             C.address as store_address,
             C.contact_person as store_person,
             C.contact_number as store_contact,
-            C.email as store_email
+            C.email as store_email,
+
+            E.name AS discount_name,
+            E.percentage AS discount_percentage,
         ");
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
+        $this->db->join('discount_users D', 'D.id = A.discount_user_id','left');
+        $this->db->join('discount E', 'E.id = D.discount_id','left');
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();
-
-        // $queryData['info'] = $query->result();
-        
         return $query->row();
     }
 
@@ -1323,6 +2307,7 @@ class Admin_model extends CI_Model
             
             A.reference_num,
             A.store,
+            A.discount,
 
             B.add_name as client_name,
             B.payops,
@@ -1377,9 +2362,8 @@ class Admin_model extends CI_Model
             A.reference_num,
             A.store,
 
-            concat(B.fname,' ',B.lname) as client_name,
             B.payops,
-            B.add_name,
+            B.add_name as client_name,
             B.add_address,
             C.name as store_name
         ");
@@ -1397,7 +2381,7 @@ class Admin_model extends CI_Model
         if($search){
             $this->db->group_start();
             $this->db->like('A.tracking_no', $search);
-            $this->db->or_like('B.fname', $search);
+            $this->db->or_like("B.add_name", $search);
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);
@@ -1428,7 +2412,7 @@ class Admin_model extends CI_Model
         if($search){
             $this->db->group_start();
             $this->db->like('A.tracking_no', $search);
-            $this->db->or_like('B.fname', $search);
+            $this->db->or_like("B.add_name", $search);
             $this->db->or_like('C.name', $search);
             $this->db->or_like('A.purchase_amount', $search);
             $this->db->or_like('A.invoice_num', $search);

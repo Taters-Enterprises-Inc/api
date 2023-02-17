@@ -16,6 +16,81 @@ class Deals_model extends CI_Model
 		$this->load->model('client_model');
     }
 
+	public function getUserDeals($hash_key)
+    {   
+		$this->db->select('
+			A.client_id,
+			A.id, 
+			A.redeem_code,
+			A.purchase_amount,
+			A.dateadded,
+			A.expiration,
+			A.status,
+			D.name as type_of_service,
+		');
+
+		$this->db->from('deals_redeems_tb A');
+		$this->db->join('dotcom_deals_platform D','D.id = A.platform_id');
+
+
+		$this->db->where('A.hash_key',$hash_key);
+		$query_deal_order_details = $this->db->get();
+		$deal_order_details = $query_deal_order_details->row();
+
+		$this->db->select('
+			A.add_name,
+			A.add_contact,
+			A.add_address,
+			A.email,
+			A.payops,
+			B.id,
+			B.dateadded,
+			B.store,
+			B.hash_key,
+			C.store_id,
+			C.name as store_name,
+			C.address as store_address,
+			C.contact_number as store_contact_number,
+			C.email as store_email,
+		');
+
+		$this->db->from('deals_client_tb A');
+		$this->db->join('deals_redeems_tb B', 'B.client_id = A.id');
+		$this->db->join('store_tb C', 'C.store_id = B.store');
+		$this->db->where('A.id',$deal_order_details->client_id);
+	
+
+		$query_client_info = $this->db->get();
+		$client_info = $query_client_info->row();
+
+		$this->db->select('
+			A.id,
+			A.redeems_id,
+			A.deal_id,
+			A.price,
+			A.product_price,
+			A.remarks as deal_item_with_flavor,
+			A.quantity,
+			B.name,
+			B.product_image,
+		');
+
+		$this->db->from('deals_order_items A');
+		$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
+		$this->db->where('A.redeems_id',$deal_order_details->id);
+	
+
+		$query_deal_order_items = $this->db->get();
+		$deal_order_items = $query_deal_order_items->result();
+
+		$join_data['deals_redeems']=$deal_order_details;
+		$join_data['clients_info'] = $client_info;
+		$join_data['deal_order_items']=$deal_order_items;
+
+		return $join_data;
+
+    }
+	
 	public function getDealsPromoDiscountDeals($store_id, $date_now){
 		$this->db->select('
 			B.id,
@@ -241,6 +316,7 @@ class Deals_model extends CI_Model
 				A.status,
 				A.remarks,
 				A.platform_id,
+				A.hash_key as redeem_hash,
 				B.name,
 				B.hash AS deal_hash,
 				B.product_image,

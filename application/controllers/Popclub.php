@@ -21,6 +21,24 @@ class Popclub extends CI_Controller {
 		$this->load->model('store_model');
 	}
 
+	public function orders(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$hash = $this->input->get('hash');
+				$user_deals_details = $this->deals_model->getUserDeals($hash);
+			
+				
+				$response = array(
+					'data' => $user_deals_details,
+					'message' => 'Successfully fetch product'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+
 	private function unable_redeems(){
 		$redeems = $this->deals_model->getUserRedeems();
 		$today = date("Y-m-d H:i:s");

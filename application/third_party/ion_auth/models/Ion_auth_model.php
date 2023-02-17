@@ -990,7 +990,7 @@ class Ion_auth_model extends CI_Model
 	 */
 	public function recheck_session()
 	{
-		if (empty($this->session->userdata('identity')))
+		if (empty($this->session->admin['identity']))
 		{
 			return FALSE;
 		}
@@ -999,12 +999,12 @@ class Ion_auth_model extends CI_Model
 
 		if ($recheck !== 0)
 		{
-			$last_login = $this->session->userdata('last_check');
+			$last_login = $this->session->admin['last_check'];
 			if ($last_login + $recheck < time())
 			{
 				$query = $this->db->select('id')
 								  ->where([
-									  $this->identity_column => $this->session->userdata('identity'),
+									  $this->identity_column => $this->session->admin['identity'],
 									  'active' => '1'
 								  ])
 								  ->limit(1)
@@ -1012,22 +1012,20 @@ class Ion_auth_model extends CI_Model
 								  ->get($this->tables['users']);
 				if ($query->num_rows() === 1)
 				{
-					$this->session->set_userdata('last_check', time());
+					$this->session->admin['last_check'] = time();
 				}
 				else
 				{
 					$this->trigger_events('logout');
 
-					$identity = $this->config->item('identity', 'ion_auth');
-
-					$this->session->unset_userdata([$identity, 'id', 'user_id']);
+					$this->session->unset_userdata('admin');
 
 					return FALSE;
 				}
 			}
 		}
 
-		$session_hash = $this->session->userdata('ion_auth_session_hash');
+		$session_hash = $this->session->admin['ion_auth_session_hash'];
 
 		return (bool)$session_hash && $session_hash === $this->config->item('session_hash', 'ion_auth');
 	}
@@ -1507,7 +1505,7 @@ class Ion_auth_model extends CI_Model
 		$this->trigger_events('user');
 
 		// if no id was passed use the current users id
-		$id = isset($id) ? $id : $this->session->userdata('user_id');
+		$id = isset($id) ? $id : $this->session->admin['user_id'];
 
 		$this->limit(1);
 		$this->order_by($this->tables['users'].'.id', 'desc');
@@ -1531,7 +1529,7 @@ class Ion_auth_model extends CI_Model
 		$this->trigger_events('get_users_group');
 
 		// if no id was passed use the current users id
-		$id || $id = $this->session->userdata('user_id');
+		$id || $id = $this->session->admin['user_id'];
 
 		return $this->db->select($this->tables['users_groups'].'.'.$this->join['groups'].' as id, '.$this->tables['groups'].'.name, '.$this->tables['groups'].'.description')
 		                ->where($this->tables['users_groups'].'.'.$this->join['users'], $id)
@@ -1551,7 +1549,7 @@ class Ion_auth_model extends CI_Model
 	{
 		$this->trigger_events('in_group');
 
-		$id || $id = $this->session->userdata('user_id');
+		$id || $id = $this->session->admin['user_id'];
 
 		if (!is_array($check_group))
 		{
@@ -1611,7 +1609,7 @@ class Ion_auth_model extends CI_Model
 		$this->trigger_events('add_to_group');
 
 		// if no id was passed use the current users id
-		$user_id || $user_id = $this->session->userdata('user_id');
+		$user_id || $user_id = $this->session->admin['user_id'];
 
 		if(!is_array($group_ids))
 		{
@@ -1953,7 +1951,7 @@ class Ion_auth_model extends CI_Model
 		    'ion_auth_session_hash'    => $this->config->item('session_hash', 'ion_auth'),
 		];
 
-		$this->session->set_userdata($session_data);
+		$this->session->set_userdata('admin',$session_data);
 
 		$this->trigger_events('post_set_session');
 

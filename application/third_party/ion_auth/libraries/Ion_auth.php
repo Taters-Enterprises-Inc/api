@@ -331,7 +331,7 @@ class Ion_auth
 
 		$identity = $this->config->item('identity', 'ion_auth');
 
-		$this->session->unset_userdata([$identity, 'id', 'user_id']);
+		$this->session->unset_userdata('admin');
 
 		// delete the remember me cookies if they exist
 		delete_cookie($this->config->item('remember_cookie_name', 'ion_auth'));
@@ -373,7 +373,7 @@ class Ion_auth
 	 **/
 	public function get_user_id()
 	{
-		$user_id = $this->session->userdata('user_id');
+		$user_id = $this->session->admin['user_id'];
 		if (!empty($user_id))
 		{
 			return $user_id;

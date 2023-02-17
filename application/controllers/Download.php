@@ -81,7 +81,7 @@ class Download extends CI_Controller {
 			$no_of_pax = 0;
 			$package_price = 0;
 
-			$all_of_orders = array_merge($query_result['order_details'], $query_result['addons']);
+			$all_of_orders = array_merge($query_result['order_details'],$query_result['products'], $query_result['addons']);
 
 			foreach($all_of_orders  as $key => $order){
 				if($order->status == 0){
@@ -143,6 +143,9 @@ class Download extends CI_Controller {
 				'package_selection' => $package_selection,
 				'package_price' => $package_price,
 				'service_fee' => $service_fee,
+				'discount' => $query_result['clients_info']->discount,
+				'discount_name' => $query_result['clients_info']->discount_name,
+				'discount_percentage' => $query_result['clients_info']->discount_percentage,
 				'transportation_fee' => $transportation_fee,
 				'grand_total' => $grand_total,
 				'succeeding_hour_charge' => $succeeding_hour_charge,

@@ -168,6 +168,15 @@
 			<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= $package_price?></td>
 		</tr>
 		
+		<?php if($discount):?>
+			<tr>
+				<td></td>
+				<td></td>
+				<td> <?= (float)$discount_percentage * 100 . '% '. $discount_name ?>:</td>
+				<td style=" text-align: right;"><span style="font-family: DejaVu Sans; sans-serif;">&#8369;</span><?= number_format($discount,2,'.',',')?></td>
+			</tr>
+		<?php endif;?>
+		
 		<tr>
 			<td></td>
 			<td></td>

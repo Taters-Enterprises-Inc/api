@@ -59,6 +59,7 @@ class User_Authentication extends CI_Controller {
 			$data['logoutURL'] = $this->facebook->logout_url();
             $result = true;
 			redirect($login_point);	
+            return;
 		}else{
 			// Facebook authentication url
             $data['authURL'] =  $this->facebook->login_url();

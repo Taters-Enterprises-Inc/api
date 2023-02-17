@@ -20,6 +20,7 @@ class Transaction extends CI_Controller {
         $this->load->model('notification_model');
         $this->load->model('store_model');
         $this->load->model('user_model');
+        $this->load->model('discount_model');
 	}
     
     public function catering(){
@@ -35,7 +36,7 @@ class Transaction extends CI_Controller {
                 $insert_client_details = $this->client_model->insertClientDetailsCatering(
                     $post['firstName'],
                     $post['lastName'],
-                    $post['address'],
+                    $post['eventAddress'],
                     $post['phoneNumber'],
                     $post['payops'],
                     $post['eMail']
@@ -61,11 +62,24 @@ class Transaction extends CI_Controller {
                         $cod_fee = $this->session->cash_delivery;
                     }
 
-					$str_serving_time = strtotime($post['catering_serving_time']);
+					$str_serving_time = strtotime($post['servingTime']);
 					$serving_time = date($str_serving_time);
                     
                     $catering_start_date = $_SESSION['catering_start_date'];
                     $catering_end_date = $_SESSION['catering_end_date'];
+
+                    $discount = $this->discount_model->getAvailableUserDiscount(
+                        $this->session->userData['fb_user_id'] ?? null,
+                        $this->session->userData['mobile_user_id'] ?? null
+                    );
+
+                    $discount_value = "";
+                    $discount_user_id = null;
+                    
+                    if(isset($discount)){
+                        $discount_value = (int)$comp_total * (float)$discount->percentage;
+                        $discount_user_id = $discount->id;
+                    }
                     
                     $client_id = $insert_client_details['id'];
                     $transaction_data = array(
@@ -78,12 +92,12 @@ class Transaction extends CI_Controller {
                         'contract'          => 0,
                         'store'             => $this->session->cache_data['store_id'],
                         'dateadded'         => date('Y-m-d H:i:s'),
-						'company_name'		=> isset($post['catering_company_name']) ? $post['catering_company_name'] : '',
-						'message'			=> isset($post['other_details']) ? $post['other_details'] : '',
+						'company_name'		=> isset($post['companyName']) ? $post['companyName'] : '',
+						'message'			=> isset($post['otherDetails']) ? $post['otherDetails'] : '',
 						'serving_time'		=> $serving_time,
                         'start_datetime'    => $catering_start_date,
                         'end_datetime'      => $catering_end_date,
-                        'event_class'       => isset($post['event_class']) ? $post['event_class'] : '',
+                        'event_class'       => isset($post['eventClass']) ? $post['eventClass'] : '',
                         'service_fee'       => $comp_total * 0.1,
                         'night_diff_fee'    => (int)$this->get_night_diff($catering_start_date, $catering_end_date),
                         'additional_hour_charge' => (int)$this->get_succeeding_hour_charge($catering_start_date, $catering_end_date),
@@ -92,10 +106,11 @@ class Transaction extends CI_Controller {
                         'distance_price'    => $distance_rate_price,
                         'cod_fee'           => $cod_fee,
                         'payops'            => $payops,
-                        'payment_plan'      => $post['payment_plan'],
-                        'discount'          => 0,
+                        'payment_plan'      => $post['paymentPlan'],
                         'custom_message'    => '',
                         'logon_type'        => $insert_client_details['logon_type'],
+                        'discount'          => $discount_value,
+                        'discount_user_id'       => $discount_user_id,
                     );
 
                         
@@ -108,14 +123,13 @@ class Transaction extends CI_Controller {
                             $comp_total = 0;
 
                             foreach ($this->session->orders as $k => $value) {
-                                $remarks = (empty($value['prod_multiflavors'])) ? null : $value['prod_multiflavors'];
 
                                 $order_data[] = array(
                                     'transaction_id'      => $trans_id,
                                     'combination_id'      => $k,
                                     'product_id'          => $value['prod_id'],
                                     'quantity'            => $value['prod_qty'],
-                                    'remarks'             => $remarks,
+                                    'remarks'             => $value['prod_multiflavors'],
                                     'type'                => $value['prod_type'],
                                     'status'              => 1,
                                     'promo_id'            => "",
@@ -194,7 +208,6 @@ class Transaction extends CI_Controller {
                         $this->notification_model->insertNotification($notifications_data);   
                     
 
-
                         $real_time_notification = array(
                             "store_id" => $store_id,
                             "message" => $message,
@@ -244,10 +257,10 @@ class Transaction extends CI_Controller {
                 $insert_client_details = $this->client_model->insertClientDetailsShop(
                     $post['firstName'],
                     $post['lastName'],
-                    $post['address'],
+                    $post['landmarkAddress'],
                     $post['phoneNumber'],
                     $post['payops'],
-                    $post['full_address'],
+                    $post['completeDeliveryAddress'],
                     $post['eMail']
                 );
 
@@ -267,7 +280,7 @@ class Transaction extends CI_Controller {
 
                     $distance_rate_id = (empty($this->session->distance_rate_id)) ? 0 : $this->session->distance_rate_id;
                     $distance_rate_price = (empty($this->session->distance_rate_price)) ? 0 : $this->session->distance_rate_price;
-                    $discount = 0;
+                    $discount_value = "";
 
 					if(isset($_SESSION['redeem_data'])){
                         if(
@@ -284,9 +297,8 @@ class Transaction extends CI_Controller {
                             $_SESSION['redeem_data']['minimum_purchase'] <= $comp_total && 
                             $_SESSION['redeem_data']['is_free_delivery'] === 0
                         ){
-                            $discount = $comp_total *  (float) $_SESSION['redeem_data']['promo_discount_percentage'];
+                            $discount_value = $comp_total *  (float) $_SESSION['redeem_data']['promo_discount_percentage'];
                         }
-                        
                         
                         $comp_total += $_SESSION['redeem_data']['deal_promo_price'];
 					}
@@ -341,10 +353,20 @@ class Transaction extends CI_Controller {
                         $table_number = null;
                     }
 
+                    $discount = $this->discount_model->getAvailableUserDiscount(
+                        $this->session->userData['fb_user_id'] ?? null,
+                        $this->session->userData['mobile_user_id'] ?? null
+                    );
+
                     $payops_ref_no = '';
                     $discount_type = '';
                     $discount_ref_no = '';
-
+                    $discount_user_id = null;
+                    if(isset($discount)){
+                        $discount_value = (int)$comp_total * (float)$discount->percentage;
+                        $discount_user_id = $discount->id;
+                    }
+                    
                     $client_id = $insert_client_details['id'];
                 
 
@@ -364,7 +386,8 @@ class Transaction extends CI_Controller {
                         'reseller_id'       => 0,
                         'reseller_discount' => "",
                         'payops'            => $payops,
-                        'discount'          => $discount,
+                        'discount'          => $discount_value,
+                        'discount_user_id'  => $discount_user_id,
                         'giftcard_discount' => "",
                         'giftcard_number'   => "",
                         'voucher_id'        => $voucher_id,
@@ -557,7 +580,6 @@ class Transaction extends CI_Controller {
                             "dateadded" => date('Y-m-d H:i:s'),
                         );
                         $this->notification_model->insertNotification($notifications_data);   
-                        
 
                         $realtime_notification = array(
                             "store_id" => $store_id,

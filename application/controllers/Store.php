@@ -125,7 +125,6 @@ class Store extends CI_Controller {
         }
         return $night_diff * 500;
     }
-
 	
     public function get_succeeding_hour_charge($start_datetime, $end_datetime){
         $event_start = $start_datetime;

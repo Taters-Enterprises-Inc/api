@@ -7,15 +7,42 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
 class Shared extends CI_Controller {
 	
-	public function __construct()
-	{
+	public function __construct(){
 		parent::__construct();
 		$this->load->model('shop_model');
 		$this->load->model('contact_model');
 		$this->load->model('catering_model');
+		$this->load->model('client_model');
 		$this->load->model('user_model');
 		$this->load->model('logs_model');
+		$this->load->model('store_model');
+		$this->load->model('bsc_model');
+		$this->load->model('survey_model');
+		$this->load->model('discount_model');
 		$this->load->library('form_validation');
+	}
+	
+
+	public function survey($service, $hash){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				if(!isset($hash) || !isset($service)){
+					$this->output->set_status_header('401');
+					echo json_encode(array( "message" => 'Missing queries!'));
+					break;
+				}
+
+				$customer_survey = $this->survey_model->getCustomerSurveyResponseInOrderService($service,$hash);
+
+				$response = array(
+					'data' => $customer_survey,
+					'message' => 'Successfully fetch deals'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
 	}
 
     public function contacts(){
@@ -42,8 +69,8 @@ class Shared extends CI_Controller {
 				break;
 
 			case 'POST':
-				$post = json_decode(file_get_contents("php://input"), true);
-				$this->form_validation->set_data($post);
+				$_POST = json_decode(file_get_contents("php://input"), true);
+				$this->form_validation->set_data($this->input->post);
 
 				$this->form_validation->set_rules( 'contact' , 'Mobile Number', 'required|is_unique[mobile_user_contact.contact]|is_unique[fb_user_contact.contact]');
 
@@ -61,7 +88,7 @@ class Shared extends CI_Controller {
 							$isFbUser = true;
 							$data = array(
 								'fb_id' => $get_fb_user_details->id,
-								'contact' => $post['contact']
+								'contact' => $this->input->post('contact')
 							);
 		
 		
@@ -70,7 +97,7 @@ class Shared extends CI_Controller {
 							$isFbUser = false;
 							$data = array(
 								'mobile_id' => $get_mobile_user_details->id,
-								'contact' => $post['contact']
+								'contact' => $this->input->post('contact')
 							);
 
 							
@@ -92,9 +119,8 @@ class Shared extends CI_Controller {
 			break;
 		}
     }
-	
-    public function upload_payment()
-    {
+
+    public function upload_payment(){
         if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
             $config['upload_path'] = './assets/upload/proof_payment'; 
 
@@ -149,9 +175,7 @@ class Shared extends CI_Controller {
         }
     }
 
-	
-    public function catering_upload_payment()
-    {
+    public function catering_upload_payment(){
         if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
             $config['upload_path'] = './assets/upload/catering_proof_payment'; 
 
@@ -212,7 +236,6 @@ class Shared extends CI_Controller {
         }
     }
 
-
 	public function session(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
@@ -245,6 +268,7 @@ class Shared extends CI_Controller {
 					"cash_delivery"						=> $this->session->cash_delivery,
 				);
 		
+				
 				$response = array(
 					'message' => 'Successfully fetch session',
 					'data' => $data,
@@ -270,7 +294,6 @@ class Shared extends CI_Controller {
 		}
 	}
 	
-	
 	public function clear_all_session(){
 		$this->session->sess_destroy();
 		echo "<pre>";
@@ -281,5 +304,60 @@ class Shared extends CI_Controller {
 		unset($_SESSION['redeem_data']);
 		echo "<pre>";
 		print_r($_SESSION);
+	}
+
+	public function available_user_discount(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+
+				$available_user_discount = $this->discount_model->getAvailableUserDiscount(
+					$this->session->userData['fb_user_id'] ?? null,
+					$this->session->userData['mobile_user_id'] ?? null
+				);
+
+				$response = array(
+					"message" => 'Successfully fetch user available discount',
+					"data" => $available_user_discount,
+				);
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+
+	public function stores(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+
+				$stores = $this->store_model->getAllStores();
+		  
+				$response = array(
+					"message" => 'Successfully fetch stores',
+					"data" => $stores,
+				);
+		
+				header('content-type: application/json');
+				echo json_encode($response);
+
+				return;
+		}
+	}
+	
+	public function companies(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+
+				$companies = $this->bsc_model->getAllCompanies();
+		  
+				$response = array(
+					"message" => 'Successfully fetch companies',
+					"data" => $companies,
+				);
+		
+				header('content-type: application/json');
+				echo json_encode($response);
+
+				return;
+		}
 	}
 }

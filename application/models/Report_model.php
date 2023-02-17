@@ -4,10 +4,11 @@ class Report_model extends CI_Model{
 
     public function __construct()
     {
-        $this->load->database();
+		$this->db =  $this->load->database('default', TRUE, TRUE);
+        $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
     
-    public function getReportTransaction($startDate, $endDate){
+    public function getReportTransaction($startDate, $endDate, $store){
         $this->db->select('
             A.tracking_no as TRACKING NO,
             B.fname as FIRSTNAME,
@@ -42,6 +43,8 @@ class Report_model extends CI_Model{
         $this->db->join('dotcom_deals_platform_combination G', 'G.deal_id = F.id', 'left');
         $this->db->join('dotcom_deals_category H', 'H.id = G.platform_category_id', 'left');
 
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
         
         $this->db->where('A.dateadded >=', $startDate);
         $this->db->where('A.dateadded <=', $endDate);
@@ -51,7 +54,7 @@ class Report_model extends CI_Model{
         return $query->result();
     }
 
-    public function getReportPmix($startDate, $endDate){
+    public function getReportPmix($startDate, $endDate, $store){
         $this->db->select("
             f.transaction_id AS 'oi.transaction_id',
             f.combination_id AS 'oi.combination_id',
@@ -95,6 +98,9 @@ class Report_model extends CI_Model{
         $this->db->join('store_tb s', 's.store_id  = a.store');
         $this->db->join('client_tb c', 'c.id = a.client_id');
         $this->db->join('category_tb d', 'd.id = p.category');
+        
+        if(!empty($store))
+            $this->db->where_in('a.store', $store);
 
         $this->db->where("a.status = 6 AND b.details LIKE '%Complete Order Success%'");
         $this->db->where('a.dateadded >=', $startDate);
@@ -104,7 +110,7 @@ class Report_model extends CI_Model{
         return $this->db->get()->result();
     }
 
-    public function getReportPopClubStoreVisit($startDate, $endDate){
+    public function getReportPopClubStoreVisit($startDate, $endDate, $store){
 
         $this->db->select('
             A.redeem_code as REDEEM_CODE,
@@ -122,6 +128,9 @@ class Report_model extends CI_Model{
         $this->db->from('deals_redeems_tb A');
         $this->db->join('deals_client_tb B','B.id = A.client_id');
         $this->db->join('store_tb C','C.store_id = A.store');
+        
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
 
         
         $this->db->where('A.dateadded >=', $startDate);
@@ -133,7 +142,7 @@ class Report_model extends CI_Model{
 
     }
     
-    public function getReportPopClubSnacksDelivered($startDate, $endDate){
+    public function getReportPopClubSnacksDelivered($startDate, $endDate, $store){
 
 
         $this->db->select('
@@ -151,6 +160,9 @@ class Report_model extends CI_Model{
         $this->db->from('deals_redeems_tb A');
         $this->db->join('deals_client_tb B','B.id = A.client_id');
         $this->db->join('store_tb C','C.store_id = A.store');
+        
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
 
         
         $this->db->where('A.dateadded >=', $startDate);
@@ -159,6 +171,71 @@ class Report_model extends CI_Model{
         $this->db->order_by('A.dateadded', 'DESC');
         $query = $this->db->get();
         return $query->result();
+
+    }
+    
+    public function getReportCustomerFeedback($startDate, $endDate, $store){
+        $this->bsc_db->select('
+            A.id,
+        ');
+
+        $this->bsc_db->from('customer_survey_responses A');
+        
+        if(!empty($store))
+            $this->bsc_db->where_in('A.store_id', $store);
+        
+        $this->bsc_db->where('A.dateadded >=', $startDate);
+        $this->bsc_db->where('A.dateadded <=', $endDate);
+        $this->bsc_db->order_by('A.dateadded', 'DESC');
+        $query_customer_survey_responses = $this->bsc_db->get();
+        $customer_survey_responses = $query_customer_survey_responses->result();
+
+        foreach($customer_survey_responses as $customer_survey_response){
+
+            // Answers
+            $this->bsc_db->select('
+                A.text,
+                A.others,
+                B.description as question,
+                D.text as answer,
+            ');
+            
+            $this->bsc_db->from('customer_survey_response_answers A');
+            $this->bsc_db->join('survey_questions B', 'B.id = A.survey_question_id');
+            $this->bsc_db->join('survey_question_answers C', 'C.id = A.survey_question_answer_id', 'left');
+            $this->bsc_db->join('survey_question_offered_answers D', 'D.id = C.survey_question_offered_answer_id', 'left');
+
+            $this->bsc_db->where('A.customer_survey_response_id',$customer_survey_response->id);
+
+
+            $query_customer_survey_response_answers = $this->bsc_db->get();
+            $customer_survey_response_answers = $query_customer_survey_response_answers->result();
+
+            $customer_survey_response->answers = $customer_survey_response_answers;
+
+
+            // Ratings
+            $this->bsc_db->select('
+                D.name as question,
+                A.rate,
+                A.others,
+            ');
+
+            $this->bsc_db->from('customer_survey_response_ratings A');
+            $this->bsc_db->join('survey_questions B', 'B.id = A.survey_question_id');
+            $this->bsc_db->join('survey_question_ratings C', 'C.id = A.survey_question_rating_id', 'left');
+            $this->bsc_db->join('survey_question_offered_ratings D', 'D.id = C.survey_question_offered_rating_id', 'left');
+            
+            $this->bsc_db->where('A.customer_survey_response_id',$customer_survey_response->id);
+            
+            $query_customer_survey_response_ratings = $this->bsc_db->get();
+            $customer_survey_response_ratings = $query_customer_survey_response_ratings->result();
+
+            $customer_survey_response->ratings = $customer_survey_response_ratings;
+
+        }
+
+        return $customer_survey_responses;
 
     }
 }
