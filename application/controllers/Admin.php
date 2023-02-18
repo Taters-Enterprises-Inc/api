@@ -2313,6 +2313,7 @@ class Admin extends CI_Controller{
 
         $fetch_data = $this->admin_model->updateStoreOrStatusCateringTransaction(
           $request,
+          $user_id,
           $password,
           $transaction_id,
           $to_store_id,
@@ -2451,6 +2452,7 @@ class Admin extends CI_Controller{
 
         $fetch_data = $this->admin_model->updateStoreOrStatusSnackshopTransaction(
           $request,
+          $user_id,
           $password,
           $transaction_id,
           $to_store_id,

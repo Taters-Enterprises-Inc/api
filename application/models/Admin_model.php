@@ -1501,10 +1501,10 @@ class Admin_model extends CI_Model
         return $query->row(); 
     }
 
-    function updateStoreOrStatusCateringTransaction($request,$password,$transaction_id,$to_store_id,$to_status_id){
+    function updateStoreOrStatusCateringTransaction($request, $user_id, $password,$transaction_id,$to_store_id,$to_status_id){
         $this->db->select("password");
         $this->db->from('users');
-        $this->db->where('id', 1);
+        $this->db->where('id', $user_id);
         $query = $this->db->get();
 
         if ($query->num_rows() == 1) {
@@ -1551,10 +1551,10 @@ class Admin_model extends CI_Model
         }
     }
 
-    function updateStoreOrStatusSnackshopTransaction($request,$password,$transaction_id,$to_store_id,$to_status_id){
+    function updateStoreOrStatusSnackshopTransaction($request,$user_id,$password,$transaction_id,$to_store_id,$to_status_id){
         $this->db->select("password");
         $this->db->from('users');
-        $this->db->where('id', 1);
+        $this->db->where('id', $user_id);
         $query = $this->db->get();
 
         if ($query->num_rows() == 1) {
