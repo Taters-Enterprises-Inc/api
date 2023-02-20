@@ -585,6 +585,11 @@ class Admin extends CI_Controller{
                   foreach($filtered as $filtered_key => $filter){
                     if(date('Y-m-d', strtotime($filter->dateadded)) === date('Y-m-d', strtotime($sales->dateadded))){
                       $filtered[$filtered_key]->purchase_amount += (int) $sales->purchase_amount;
+                      if(isset($filtered[$filtered_key]->quantity)){
+                        $filtered[$filtered_key]->quantity += 1;
+                      }else{
+                        $filtered[$filtered_key]->quantity = 1;
+                      }
                       $is_exist = true;
                       unset($overall_sales[$overall_sales_key]);  
                     }
@@ -593,6 +598,11 @@ class Admin extends CI_Controller{
                   if(!$is_exist){
                     $sales->dateadded = date('Y-m-d', strtotime($sales->dateadded));
                     $sales->purchase_amount = (int)$sales->purchase_amount;
+                    if(isset($sales->quantity)){
+                      $sales->quantity += 1;
+                    }else{
+                      $sales->quantity = 1;
+                    }
                     $filtered[] = $sales;
                     unset($overall_sales[$overall_sales_key]);
                   }
@@ -605,7 +615,8 @@ class Admin extends CI_Controller{
                   while($start_date < date('Y-m-d', strtotime($sales->dateadded))){
                     $another_filter[] = array(
                       'dateadded' => $start_date,
-                      "purchase_amount" => 0,
+                      'purchase_amount' => 0,
+                      'quantity' => 0,
                     );
                     
                     $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
@@ -620,7 +631,8 @@ class Admin extends CI_Controller{
                 while($start_date < date('Y-m-d')){
                   $another_filter[] = array(
                     'dateadded' => $start_date,
-                    "purchase_amount" => 0,
+                    'purchase_amount' => 0,
+                    'quantity' => 0,
                   );
                   
                   $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
