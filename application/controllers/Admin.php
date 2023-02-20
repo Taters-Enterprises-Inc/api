@@ -3288,8 +3288,36 @@ class Admin extends CI_Controller{
 
         if($this->ion_auth->in_group(1) || $this->ion_auth->in_group(10)){
           $data["admin"]['user_details']->stores = $this->user_model->get_all_store();
+
+          $data["admin"]['is_snackshop_available'] = true;
+          $data["admin"]['is_catering_available'] = true;
+          $data["admin"]['is_popclub_store_visit_available'] = true;
+          $data["admin"]['is_popclub_snacks_delivered_available'] = true;
         }else{
-          $data["admin"]['user_details']->stores = $this->user_model->get_store_group_order($this->session->admin['user_id']);
+          $stores = $this->user_model->get_store_group_order($this->session->admin['user_id']);
+
+          $data["admin"]['user_details']->stores = $stores;
+
+          $data["admin"]['is_snackshop_available'] = false;
+          $data["admin"]['is_catering_available'] = false;
+          $data["admin"]['is_popclub_store_visit_available'] = false;
+          $data["admin"]['is_popclub_snacks_delivered_available'] = false;
+
+          foreach($stores as $store){
+            if($store->status){
+              $data["admin"]['is_snackshop_available'] = true;
+            }
+            if($store->catering_status){
+              $data["admin"]['is_catering_available'] = true;
+            }
+            if($store->popclub_walk_in_status){
+              $data["admin"]['is_popclub_store_visit_available'] = true;
+            }
+            if($store->popclub_online_delivery_status){
+              $data["admin"]['is_popclub_snacks_delivered_available'] = true;
+            }
+          }
+
         }
 
         $response = array(
