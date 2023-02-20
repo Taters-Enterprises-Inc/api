@@ -176,8 +176,10 @@ class Admin extends CI_Controller{
             return;
           }
         }else{
-          if($store->store_image !== $store_image_name){
-            rename('./assets/images/shared/store_images/250/' . $store->store_image,'./assets/images/shared/store_images/250/'. $store_image_name);
+          $current_image_name = './assets/images/shared/store_images/250/' .  $store->store_image;
+          
+          if($store->store_image !== $store_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/store_images/250/'. $store_image_name);
           }
         }
         
@@ -764,8 +766,10 @@ class Admin extends CI_Controller{
             return;
           }
         }else{
-          if($product->product_image !== $product_image_name){
-            rename('./assets/images/shared/products/500/' . $product->product_image,'./assets/images/shared/products/500/'. $product_image_name);
+          $current_image_name = './assets/images/shared/products/500/' . $product->product_image;
+          
+          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/products/500/'. $product_image_name);
           }
         }
         
@@ -777,8 +781,10 @@ class Admin extends CI_Controller{
             return;
           }
         }else{
-          if($product->product_image !== $product_image_name){
-            rename('./assets/images/shared/products/250/' . $product->product_image,'./assets/images/shared/products/250/'. $product_image_name);
+          $current_image_name = './assets/images/shared/products/250/' . $product->product_image;
+          
+          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/products/250/'. $product_image_name);
           }
         }
         
@@ -790,8 +796,10 @@ class Admin extends CI_Controller{
             return;
           }
         }else{
-          if($product->product_image !== $product_image_name){
-            rename('./assets/images/shared/products/150/' . $product->product_image,'./assets/images/shared/products/150/'. $product_image_name);
+          $current_image_name = './assets/images/shared/products/150/' . $product->product_image;
+
+          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/products/150/'. $product_image_name);
           }
         }
         
@@ -803,13 +811,15 @@ class Admin extends CI_Controller{
             return;
           }
         }else{
-          if($product->product_image !== $product_image_name){
-            rename('./assets/images/shared/products/75/' . $product->product_image,'./assets/images/shared/products/75/'. $product_image_name);
+          $current_image_name = './assets/images/shared/products/75/' . $product->product_image;
+          
+          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/products/75/'. $product_image_name);
           }
         }
 
 
-        switch($this->input->post('productType')){
+        switch($this->input->post('productTypeId')){
           case "1":
             $data = array(
               "name" => $this->input->post('name'),
@@ -817,11 +827,11 @@ class Admin extends CI_Controller{
               "description" => $this->input->post('description'),
               "delivery_details" => $this->input->post('deliveryDetails'),
               "price" => $this->input->post('price'),
-              "uom" => $this->input->post('uom'),
+              "uom" => $this->input ->post('uom'),
               "add_details" => $this->input->post('addDetails'),
               "category" => $this->input->post('category'),
               "num_flavor" => $this->input->post('numFlavor'),
-              "product_type_id" => $this->input->pose('productType'),
+              "product_type_id" => $this->input->post('productTypeId'),
             );
 
             $this->admin_model->updateShopProduct($product_id, $data);
@@ -834,20 +844,49 @@ class Admin extends CI_Controller{
             $this->admin_model->updateShopProductCategory($product_id,$product_category);
             
 
-            $stores = json_decode($this->input->post('stores'), true);
+            $stores =  $this->input->post('stores') ? json_decode($this->input->post('stores'), true) : array();
+            $snackshop_region_da_log = $this->admin_model->getSnackshopRegionDaLogByProductId($product_id);
 
-            foreach($stores as $store){
-              $data = array(
-                'region_id' => $store['region_store_id'],
-                'store_id' => $store['store_id'],
-                'product_id' => $product_id,
-                'status' => 1,
-              );
-              $region_da_logs[] = $data;
+            if(!empty($stores)){
+
+              foreach($snackshop_region_da_log as $snackshop_region){
+                $is_not_exist = true;
+                foreach($stores as $store){
+                  if($store['store_id'] === $snackshop_region->store_id){
+                    $is_not_exist = false;
+                    break;
+                  }
+                }
+    
+                if($is_not_exist){
+                  $this->admin_model->removeSnackshopRegionDaLog($snackshop_region->id);
+                }
+              }
+              
+              foreach($stores as $store){
+                $is_not_exist = true;
+    
+                foreach($snackshop_region_da_log as $snackshop_region){
+                  if($store['store_id'] === $snackshop_region->store_id){
+                    $is_not_exist = false;
+                    break;
+                  }
+                }
+              
+                if($is_not_exist){
+                  $region_da_log = array(
+                    'region_id' => $store['region_store_id'],
+                    'store_id' => $store['store_id'],
+                    'product_id' => $product_id,
+                    'status' => 1,
+                  );
+    
+                  $this->admin_model->insertRegionDaLog($region_da_log);
+                }
+              }
+              
+
             }
-            
-            $this->admin_model->removeShopProductRegionDaLogs($product_id);
-            $this->admin_model->insertRegionDaLogs($region_da_logs);
             
             $variants = $this->input->post('variants') ? json_decode($this->input->post('variants'), true) : array();
 
@@ -995,9 +1034,6 @@ class Admin extends CI_Controller{
 
             break;
         }
-
-
-
 
         $response = array(
           "message" =>  'Successfully edit product'

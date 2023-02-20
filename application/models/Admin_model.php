@@ -39,6 +39,18 @@ class Admin_model extends CI_Model
 		$this->db->delete('region_da_log');
     }
 
+    function getSnackshopRegionDaLogByProductId($product_id){
+        $this->db->select('id, store_id');
+
+        $this->db->from('region_da_log');
+
+        $this->db->where('product_id', $product_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
 
     function getSnackshopRegionDaLog($store_id){
         $this->db->select('id, product_id');
