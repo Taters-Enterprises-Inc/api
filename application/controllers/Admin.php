@@ -176,8 +176,10 @@ class Admin extends CI_Controller{
             return;
           }
         }else{
-          if($store->store_image !== $store_image_name){
-            rename('./assets/images/shared/store_images/250/' . $store->store_image,'./assets/images/shared/store_images/250/'. $store_image_name);
+          $current_image_name = './assets/images/shared/store_images/250/' .  $store->store_image;
+          
+          if($store->store_image !== $store_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/store_images/250/'. $store_image_name);
           }
         }
         
@@ -583,6 +585,11 @@ class Admin extends CI_Controller{
                   foreach($filtered as $filtered_key => $filter){
                     if(date('Y-m-d', strtotime($filter->dateadded)) === date('Y-m-d', strtotime($sales->dateadded))){
                       $filtered[$filtered_key]->purchase_amount += (int) $sales->purchase_amount;
+                      if(isset($filtered[$filtered_key]->quantity)){
+                        $filtered[$filtered_key]->quantity += 1;
+                      }else{
+                        $filtered[$filtered_key]->quantity = 1;
+                      }
                       $is_exist = true;
                       unset($overall_sales[$overall_sales_key]);  
                     }
@@ -591,6 +598,11 @@ class Admin extends CI_Controller{
                   if(!$is_exist){
                     $sales->dateadded = date('Y-m-d', strtotime($sales->dateadded));
                     $sales->purchase_amount = (int)$sales->purchase_amount;
+                    if(isset($sales->quantity)){
+                      $sales->quantity += 1;
+                    }else{
+                      $sales->quantity = 1;
+                    }
                     $filtered[] = $sales;
                     unset($overall_sales[$overall_sales_key]);
                   }
@@ -603,7 +615,8 @@ class Admin extends CI_Controller{
                   while($start_date < date('Y-m-d', strtotime($sales->dateadded))){
                     $another_filter[] = array(
                       'dateadded' => $start_date,
-                      "purchase_amount" => 0,
+                      'purchase_amount' => 0,
+                      'quantity' => 0,
                     );
                     
                     $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
@@ -618,7 +631,8 @@ class Admin extends CI_Controller{
                 while($start_date < date('Y-m-d')){
                   $another_filter[] = array(
                     'dateadded' => $start_date,
-                    "purchase_amount" => 0,
+                    'purchase_amount' => 0,
+                    'quantity' => 0,
                   );
                   
                   $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
@@ -764,8 +778,10 @@ class Admin extends CI_Controller{
             return;
           }
         }else{
-          if($product->product_image !== $product_image_name){
-            rename('./assets/images/shared/products/500/' . $product->product_image,'./assets/images/shared/products/500/'. $product_image_name);
+          $current_image_name = './assets/images/shared/products/500/' . $product->product_image;
+          
+          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/products/500/'. $product_image_name);
           }
         }
         
@@ -777,8 +793,10 @@ class Admin extends CI_Controller{
             return;
           }
         }else{
-          if($product->product_image !== $product_image_name){
-            rename('./assets/images/shared/products/250/' . $product->product_image,'./assets/images/shared/products/250/'. $product_image_name);
+          $current_image_name = './assets/images/shared/products/250/' . $product->product_image;
+          
+          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/products/250/'. $product_image_name);
           }
         }
         
@@ -790,8 +808,10 @@ class Admin extends CI_Controller{
             return;
           }
         }else{
-          if($product->product_image !== $product_image_name){
-            rename('./assets/images/shared/products/150/' . $product->product_image,'./assets/images/shared/products/150/'. $product_image_name);
+          $current_image_name = './assets/images/shared/products/150/' . $product->product_image;
+
+          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/products/150/'. $product_image_name);
           }
         }
         
@@ -803,13 +823,15 @@ class Admin extends CI_Controller{
             return;
           }
         }else{
-          if($product->product_image !== $product_image_name){
-            rename('./assets/images/shared/products/75/' . $product->product_image,'./assets/images/shared/products/75/'. $product_image_name);
+          $current_image_name = './assets/images/shared/products/75/' . $product->product_image;
+          
+          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/products/75/'. $product_image_name);
           }
         }
 
 
-        switch($this->input->post('productType')){
+        switch($this->input->post('productTypeId')){
           case "1":
             $data = array(
               "name" => $this->input->post('name'),
@@ -817,11 +839,11 @@ class Admin extends CI_Controller{
               "description" => $this->input->post('description'),
               "delivery_details" => $this->input->post('deliveryDetails'),
               "price" => $this->input->post('price'),
-              "uom" => $this->input->post('uom'),
+              "uom" => $this->input ->post('uom'),
               "add_details" => $this->input->post('addDetails'),
               "category" => $this->input->post('category'),
               "num_flavor" => $this->input->post('numFlavor'),
-              "product_type_id" => $this->input->pose('productType'),
+              "product_type_id" => $this->input->post('productTypeId'),
             );
 
             $this->admin_model->updateShopProduct($product_id, $data);
@@ -834,20 +856,49 @@ class Admin extends CI_Controller{
             $this->admin_model->updateShopProductCategory($product_id,$product_category);
             
 
-            $stores = json_decode($this->input->post('stores'), true);
+            $stores =  $this->input->post('stores') ? json_decode($this->input->post('stores'), true) : array();
+            $snackshop_region_da_log = $this->admin_model->getSnackshopRegionDaLogByProductId($product_id);
 
-            foreach($stores as $store){
-              $data = array(
-                'region_id' => $store['region_store_id'],
-                'store_id' => $store['store_id'],
-                'product_id' => $product_id,
-                'status' => 1,
-              );
-              $region_da_logs[] = $data;
+            if(!empty($stores)){
+
+              foreach($snackshop_region_da_log as $snackshop_region){
+                $is_not_exist = true;
+                foreach($stores as $store){
+                  if($store['store_id'] === $snackshop_region->store_id){
+                    $is_not_exist = false;
+                    break;
+                  }
+                }
+    
+                if($is_not_exist){
+                  $this->admin_model->removeSnackshopRegionDaLog($snackshop_region->id);
+                }
+              }
+              
+              foreach($stores as $store){
+                $is_not_exist = true;
+    
+                foreach($snackshop_region_da_log as $snackshop_region){
+                  if($store['store_id'] === $snackshop_region->store_id){
+                    $is_not_exist = false;
+                    break;
+                  }
+                }
+              
+                if($is_not_exist){
+                  $region_da_log = array(
+                    'region_id' => $store['region_store_id'],
+                    'store_id' => $store['store_id'],
+                    'product_id' => $product_id,
+                    'status' => 1,
+                  );
+    
+                  $this->admin_model->insertRegionDaLog($region_da_log);
+                }
+              }
+              
+
             }
-            
-            $this->admin_model->removeShopProductRegionDaLogs($product_id);
-            $this->admin_model->insertRegionDaLogs($region_da_logs);
             
             $variants = $this->input->post('variants') ? json_decode($this->input->post('variants'), true) : array();
 
@@ -995,9 +1046,6 @@ class Admin extends CI_Controller{
 
             break;
         }
-
-
-
 
         $response = array(
           "message" =>  'Successfully edit product'
@@ -1732,8 +1780,8 @@ class Admin extends CI_Controller{
           $customer_feedbacks = $this->report_model->getReportCustomerFeedback($start, $end, $store_id_array);
         }
         
-        header("Content-Type: application/vnd.ms-excel");
-        header("Content-disposition: attachment; filename=customer_feedback_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
+        // header("Content-Type: application/vnd.ms-excel");
+        // header("Content-disposition: attachment; filename=customer_feedback_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
 
         $customer_feedbacks_processed = array();
 
@@ -1758,23 +1806,30 @@ class Admin extends CI_Controller{
           $customer_feedbacks_processed[] = $column_feedback;
         }
         
-        $flag = false;
+        // $flag = false;
 
-        foreach ($customer_feedbacks_processed as $row) {
-          if (!$flag) 
-          {
-            echo implode("\t", array_keys((array)$row)) . "\r\n";
-            $flag = true;
-          }
+        // foreach ($customer_feedbacks_processed as $row) {
+        //   if (!$flag) 
+        //   {
+        //     echo implode("\t", array_keys((array)$row)) . "\r\n";
+        //     $flag = true;
+        //   }
 
-          $line = "";
-          foreach ((array)$row as $key => $val) {
-              $line .= $val . "\t";
-          }
+        //   $line = "";
+        //   foreach ((array)$row as $key => $val) {
+        //       $line .= $val . "\t";
+        //   }
 
-          echo $line . "\r\n";
-        }
-
+        //   echo $line . "\r\n";
+        // }
+        
+        $response = array(
+          "message" => 'Successfully fetch audit',
+          "data" => $customer_feedbacks_processed,
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
 
         break;
     }
@@ -3252,8 +3307,36 @@ class Admin extends CI_Controller{
 
         if($this->ion_auth->in_group(1) || $this->ion_auth->in_group(10)){
           $data["admin"]['user_details']->stores = $this->user_model->get_all_store();
+
+          $data["admin"]['is_snackshop_available'] = true;
+          $data["admin"]['is_catering_available'] = true;
+          $data["admin"]['is_popclub_store_visit_available'] = true;
+          $data["admin"]['is_popclub_snacks_delivered_available'] = true;
         }else{
-          $data["admin"]['user_details']->stores = $this->user_model->get_store_group_order($this->session->admin['user_id']);
+          $stores = $this->user_model->get_store_group_order($this->session->admin['user_id']);
+
+          $data["admin"]['user_details']->stores = $stores;
+
+          $data["admin"]['is_snackshop_available'] = false;
+          $data["admin"]['is_catering_available'] = false;
+          $data["admin"]['is_popclub_store_visit_available'] = false;
+          $data["admin"]['is_popclub_snacks_delivered_available'] = false;
+
+          foreach($stores as $store){
+            if($store->status){
+              $data["admin"]['is_snackshop_available'] = true;
+            }
+            if($store->catering_status){
+              $data["admin"]['is_catering_available'] = true;
+            }
+            if($store->popclub_walk_in_status){
+              $data["admin"]['is_popclub_store_visit_available'] = true;
+            }
+            if($store->popclub_online_delivery_status){
+              $data["admin"]['is_popclub_snacks_delivered_available'] = true;
+            }
+          }
+
         }
 
         $response = array(
