@@ -1823,14 +1823,6 @@ class Admin extends CI_Controller{
           echo $line . "\r\n";
         }
         
-        $response = array(
-          "message" => 'Successfully fetch audit',
-          "data" => $customer_feedbacks_processed,
-        );
-  
-        header('content-type: application/json');
-        echo json_encode($response);
-
         break;
     }
   }
