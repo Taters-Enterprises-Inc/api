@@ -42,7 +42,15 @@ class User_model extends CI_Model {
 
     function get_store_group_order($user_id)
     {
-        $this->db->select('a.store_id, b.name, c.name as menu_name');
+        $this->db->select('
+            a.store_id, 
+            b.name, 
+            b.status, 
+            b.catering_status,
+            b.popclub_walk_in_status, 
+            b.popclub_online_delivery_status, 
+            c.name as menu_name
+        ');
         $this->db->from('users_store_groups a');
         $this->db->join('store_tb b', 'b.store_id = a.store_id' ,'left');
         $this->db->join('store_menu_tb c', 'c.id = b.store_menu_type_id');
