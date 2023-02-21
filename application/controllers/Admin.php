@@ -1780,8 +1780,8 @@ class Admin extends CI_Controller{
           $customer_feedbacks = $this->report_model->getReportCustomerFeedback($start, $end, $store_id_array);
         }
         
-        // header("Content-Type: application/vnd.ms-excel");
-        // header("Content-disposition: attachment; filename=customer_feedback_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-disposition: attachment; filename=customer_feedback_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
 
         $customer_feedbacks_processed = array();
 
@@ -1806,22 +1806,22 @@ class Admin extends CI_Controller{
           $customer_feedbacks_processed[] = $column_feedback;
         }
         
-        // $flag = false;
+        $flag = false;
 
-        // foreach ($customer_feedbacks_processed as $row) {
-        //   if (!$flag) 
-        //   {
-        //     echo implode("\t", array_keys((array)$row)) . "\r\n";
-        //     $flag = true;
-        //   }
+        foreach ($customer_feedbacks_processed as $row) {
+          if (!$flag) 
+          {
+            echo implode("\t", array_keys((array)$row)) . "\r\n";
+            $flag = true;
+          }
 
-        //   $line = "";
-        //   foreach ((array)$row as $key => $val) {
-        //       $line .= $val . "\t";
-        //   }
+          $line = "";
+          foreach ((array)$row as $key => $val) {
+              $line .= $val . "\t";
+          }
 
-        //   echo $line . "\r\n";
-        // }
+          echo $line . "\r\n";
+        }
         
         $response = array(
           "message" => 'Successfully fetch audit',
