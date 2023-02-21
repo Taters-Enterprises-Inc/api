@@ -228,7 +228,7 @@ class Report_model extends CI_Model{
             
             $this->bsc_db->where('A.customer_survey_response_id',$customer_survey_response->id);
             
-            $this->bsc_db->order_by('B.id', 'ASC');
+            $this->bsc_db->order_by('B.id', 'DESC');
             
             $query_customer_survey_response_ratings = $this->bsc_db->get();
             $customer_survey_response_ratings = $query_customer_survey_response_ratings->result();
