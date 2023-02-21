@@ -85,8 +85,8 @@ if ( ! function_exists('set_store_sessions'))
 
         $CI->session->set_userdata('distance', round($routes));
         $CI->session->set_userdata('distance_rate_id', 0);
-        $CI->session->set_userdata('distance_rate_price', $delivery_charge);
-        $CI->session->set_userdata('distance_rate_price_before', $delivery_charge);
+        $CI->session->set_userdata('distance_rate_price', $delivery_charge * 2); // Back in fort thats why multiply by 2
+        $CI->session->set_userdata('distance_rate_price_before', $delivery_charge * 2); // Back in fort thats whiy multiply by 2
         $CI->session->set_userdata('distance_routes', $routes);
         $CI->session->set_userdata('distance_radius', $distance);
         
