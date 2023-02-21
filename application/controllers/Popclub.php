@@ -574,7 +574,7 @@ class Popclub extends CI_Controller {
 					}
 			
 					$response = array(
-						'message'=> 'Successfully add to cart deals',
+						'message'=> 'Successfully fetch popclub variants deals',
 						'data' => $deal_products,
 					);
 					
