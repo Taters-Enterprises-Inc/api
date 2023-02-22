@@ -115,6 +115,7 @@ class Survey_model extends CI_Model{
 			A.is_text_field,
 			A.is_text_area,
 			A.is_email,
+			A.is_required,
 			A.others,
 			A.survey_section_id,
 			B.name as section_name,

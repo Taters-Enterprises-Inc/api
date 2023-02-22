@@ -1794,6 +1794,10 @@ class Admin extends CI_Controller{
           $column_feedback['Invoice_Number'] =  $customer_feedback->invoice_no;
           $column_feedback['Store'] =  $customer_feedback->store_name;
 
+          $status = array('', 'Pending', 'Verified', 'Rejected');
+
+          $column_feedback['Status'] =  $status[$customer_feedback->status];
+
           foreach($answers as $val){
             $key =  str_replace(" ", "_", $val->question);
             $key =  str_replace("\n", "", $key);

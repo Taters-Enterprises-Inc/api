@@ -178,6 +178,7 @@ class Report_model extends CI_Model{
         $this->bsc_db->select('
             A.id,
             A.invoice_no,
+            A.status,
             B.name as store_name,
         ');
 
