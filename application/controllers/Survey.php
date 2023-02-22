@@ -16,7 +16,6 @@ class Survey extends CI_Controller {
 
 		$this->load->model('survey_model');
 		$this->load->model('shop_model');
-		$this->load->model('catering_model');
 		$this->load->model('deals_model');
 		$this->load->model('user_model');
 		$this->load->model('notification_model');
@@ -109,56 +108,6 @@ class Survey extends CI_Controller {
 
 						$message = 'Congratulations! To claim your gift kindly check your profile inbox.';
 						
-						break;
-					case 'catering':
-						$order_details = $this->catering_model->view_order($order_hash);
-						$store_id = $order_details['clients_info']->store;
-						$invoice_no = $order_details['clients_info']->invoice_num;
-						$admin_and_csr_notification_event_message = $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." feedbacks in catering!";
-
-						$customer_survey = array(
-							"catering_transaction_id" => $order_details['clients_info']->id,
-							"invoice_no" => $order_details['clients_info']->invoice_num,
-							"order_date" =>  $order_details['clients_info']->dateadded,
-							"store_id" =>  $order_details['clients_info']->store,
-							'customer_survey_response_order_type_id' => 3,
-							"fb_user_id" => $fb_user_id,
-							"mobile_user_id" => $mobile_user_id,
-							"status" => 2,
-							"hash" => $generated_hash,
-							'dateadded' => date('Y-m-d H:i:s'),
-						);
-						
-						$mobile_and_fb_survey_notification_event_data = array(
-							"notification_event_type_id" => 4,
-							"catering_transaction_tb_id" => $order_details['clients_info']->id,
-							"text" => 'Congratulations and Thank you for completing the survey!'
-						);
-
-						$admin_and_csr_notification_event_data = array(
-							"notification_event_type_id" => 5,
-							"catering_transaction_tb_id" => $order_details['clients_info']->id,
-							"text" => $admin_and_csr_notification_event_message,
-						);
-
-						
-						$mobile_and_fb_survey_notification_message_data = array(
-							"title" => "Congratulations and Thank you for completing the survey!",
-							"body" => "You may now claim your <b>FREE MINI PACK SUPERPOP</b> for a minimum purchase of 150.00 at your surveyed store.
-							
-									Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
-									",
-							"closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
-							"closing_salutation" => "Best wishes,",
-							"message_from" => "Taters Enterprises Inc.",
-							"contact_number" => "(+64) 977-275-5595",
-							"email" => "tei.csr@tatersgroup.com",
-							"image_title" => $invoice_no,
-							"image_url" => base_url(). "assets/images/shared/survey/claim-now-to-get-your-free-superpop.jpg",
-						);
-						
-						$message = 'Congratulations! To claim your gift kindly check your profile inbox.';
-
 						break;
 					default:  // WALK IN
 						$admin_and_csr_notification_event_message =  $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." feedbacks in walk-in!";

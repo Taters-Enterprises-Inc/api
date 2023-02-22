@@ -1791,6 +1791,9 @@ class Admin extends CI_Controller{
 
           $column_feedback = array();
 
+          $column_feedback['Invoice_Number'] =  $customer_feedback->invoice_no;
+          $column_feedback['Store'] =  $customer_feedback->store_name;
+
           foreach($answers as $val){
             $key =  str_replace(" ", "_", $val->question);
             $key =  str_replace("\n", "", $key);
@@ -2383,47 +2386,6 @@ class Admin extends CI_Controller{
           elseif ($request == "change_status"){
             $this->logs_model->insertCateringTransactionLogs($user_id, 1, $transaction_id, 'Change booking status from ' . $from_status . ' to ' . $to_status);
             
-            
-            if($to_status_id === 9){
-              $notification_event_data = array(
-                "notification_event_type_id" => 4,
-                "catering_transaction_tb_id" => $transaction_id,
-                "text" => "Thank you for purchasing Taters!",
-              );
-              
-              $notification_message_data = array(
-                "title" => "Thank you for purchasing Taters!",
-                "body" => "We would like to ask you to complete our survey form.
-
-                           Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
-                ",
-                "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
-                "closing_salutation" => "Best wishes,",
-                "message_from" => "Taters Enterprises Inc.",
-                "contact_number" => "(+64) 977-275-5595",
-                "email" => "tei.csr@tatersgroup.com",
-                "internal_link_title" => "Feedback Questionnaire",
-                "internal_link_url" => "/feedback/catering/". $transaction_hash,
-              );
-                          
-              $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
-              $notification_event_data['notification_message_id'] = $notification_message_id;
-
-              $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
-                              
-              //mobile or fb             
-              $notifications_data = array(
-                  "fb_user_to_notify" => $fb_user_id,
-                  "mobile_user_to_notify" => $mobile_user_id,
-                  "fb_user_who_fired_event" => $fb_user_id,
-                  "mobile_user_who_fired_event" => $mobile_user_id,
-                  'notification_event_id' => $notification_event_id,
-                  "dateadded" => date('Y-m-d H:i:s'),
-              );
-              
-              $this->notification_model->insertNotification($notifications_data); 
-            }
-
             $real_time_notification = array(
                 "fb_user_id" => $fb_user_id,
                 "mobile_user_id" => $mobile_user_id,
@@ -2616,47 +2578,6 @@ class Admin extends CI_Controller{
         if ($fetch_data == 1) {
           $this->logs_model->insertCateringTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Booking Success');
           
-          
-          if($status === 9){
-						$notification_event_data = array(
-							"notification_event_type_id" => 4,
-							"catering_transaction_tb_id" => $trans_id,
-							"text" => "Thank you for purchasing Taters!"
-						);
-            
-						$notification_message_data = array(
-              "title" => "Thank you for purchasing Taters!",
-              "body" => "We would like to ask you to complete our survey form.
-
-                         Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
-              ",
-              "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
-              "closing_salutation" => "Best wishes,",
-              "message_from" => "Taters Enterprises Inc.",
-							"contact_number" => "(+64) 977-275-5595",
-							"email" => "tei.csr@tatersgroup.com",
-							"internal_link_title" => "Feedback Questionnaires",
-							"internal_link_url" => "/feedback/catering/". $transaction_hash,
-						);
-                        
-            $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
-            $notification_event_data['notification_message_id'] = $notification_message_id;
-
-            $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
-                            
-            //mobile or fb             
-            $notifications_data = array(
-                "fb_user_to_notify" => $fb_user_id,
-                "mobile_user_to_notify" => $mobile_user_id,
-                "fb_user_who_fired_event" => $fb_user_id,
-                "mobile_user_who_fired_event" => $mobile_user_id,
-                'notification_event_id' => $notification_event_id,
-                "dateadded" => date('Y-m-d H:i:s'),
-            );
-            
-            $this->notification_model->insertNotification($notifications_data); 
-          }
-
           $real_time_notification = array(
             "fb_user_id" => (int) $fb_user_id,
             "mobile_user_id" => (int) $mobile_user_id,

@@ -17,10 +17,6 @@ class Survey_model extends CI_Model{
 				$this->db->join($this->newteishopDB->database.'.transaction_tb B', 'B.id = A.transaction_id');
 				$this->db->where('B.hash_key', $hash);
 				break;
-			case 'catering':
-				$this->db->join($this->newteishopDB->database.'.catering_transaction_tb B', 'B.id = A.catering_transaction_id');
-				$this->db->where('B.hash_key', $hash);
-				break;
 		}
 
 		$query = $this->db->get();
@@ -31,9 +27,12 @@ class Survey_model extends CI_Model{
 		$this->db->select('
 			A.id,
 			A.order_date,
+			A.invoice_no,
+			B.name as store_name,
 		');
 
 		$this->db->from('customer_survey_responses A');
+		$this->db->join($this->newteishopDB->database.'.store_tb B', 'B.store_id = A.store_id');
 
 		$this->db->where('A.hash', $hash);
 

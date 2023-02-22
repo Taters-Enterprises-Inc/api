@@ -177,9 +177,12 @@ class Report_model extends CI_Model{
     public function getReportCustomerFeedback($startDate, $endDate, $store){
         $this->bsc_db->select('
             A.id,
+            A.invoice_no,
+            B.name as store_name,
         ');
 
         $this->bsc_db->from('customer_survey_responses A');
+		$this->bsc_db->join($this->db->database.'.store_tb B', 'B.store_id = A.store_id');
         
         if(!empty($store))
             $this->bsc_db->where_in('A.store_id', $store);
