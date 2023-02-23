@@ -257,7 +257,7 @@ class Popclub extends CI_Controller {
 							'deal_id'						=> $deal->id,
 							'client_id' 	   				=> $client_id,
 							'purchase_amount'   			=> $deal->promo_price === NULL? 0 :  $deal->promo_price,
-							'remarks' 		    			=> $post['remarks'] === NULL? '' : $post['remarks'],
+							'remarks' 		    			=> $post['remarks'],
 							'platform_id'					=> $deal->platform_id,
 							'status' 		    			=> 1,
 							'dateadded'         			=> $date_redeemed,
@@ -277,7 +277,7 @@ class Popclub extends CI_Controller {
 								'price'			  => $deal->promo_price === NULL? 0 :  $deal->promo_price,
 								'quantity'	      => 1,
 								'status'	      => 0,
-								'remarks'		  => $post['remarks'] === NULL? '' : $post['remarks'],
+								'remarks'		  => $post['remarks'],
 							);
 	
 							$this->transaction_model->insertPopClubClientOrders($order_data);

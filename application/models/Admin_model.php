@@ -1431,7 +1431,11 @@ class Admin_model extends CI_Model
         if(isset($category_id)) $this->db->where('A.platform_category_id', $category_id);
         
         $this->db->where('A.status', $status);
-            
+        $this->db->where('B.available_start_datetime <=',date('Y-m-d H:i:s'));
+        $this->db->where('B.available_end_datetime >=',date('Y-m-d H:i:s'));
+        $this->db->or_where('B.available_start_datetime',null);
+        $this->db->or_where('B.available_end_datetime', null);
+        
         $query = $this->db->get();
         return $query->row()->all_count;
     }
@@ -1486,9 +1490,15 @@ class Admin_model extends CI_Model
         $this->db->where('B.status', 1);
         $this->db->where('A.store_id', $store_id);
         
+
         if(isset($category_id)) $this->db->where('A.platform_category_id', $category_id);
         
         $this->db->where('A.status', $status);
+
+        $this->db->where('B.available_start_datetime <=',date('Y-m-d H:i:s'));
+        $this->db->where('B.available_end_datetime >=',date('Y-m-d H:i:s'));
+        $this->db->or_where('B.available_start_datetime',null);
+        $this->db->or_where('B.available_end_datetime', null);
 
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
