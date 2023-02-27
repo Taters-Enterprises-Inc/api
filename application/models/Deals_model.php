@@ -145,7 +145,7 @@ class Deals_model extends CI_Model
 		');
 		$this->db->from('deals_product_promo_include A');
 		$this->db->join('products_tb B','B.id = A.product_id');
-		$this->db->where('deal_id',$deal_id);
+		$this->db->where('A.deal_id',$deal_id);
 
 		$query_deals_product_promo_includes = $this->db->get();
 		$deals_product_promo_includes = $query_deals_product_promo_includes->result();
@@ -160,7 +160,7 @@ class Deals_model extends CI_Model
 			$this->db->from('deals_product_promo_include_obtainable A');
 			$this->db->join('product_variant_option_combinations_tb C','C.product_variant_option_id = A.product_variant_option_tb_id');
 			$this->db->join('product_skus_tb D','D.id = C.sku_id');
-			$this->db->where('deals_product_promo_include_id',$deals_product_promo_include->id);
+			$this->db->where('A.deals_product_promo_include_id',$deals_product_promo_include->id);
 	
 			$query_deals_product_promo_includes_obtainable = $this->db->get();
 			$deals_product_promo_includes_obtainable = $query_deals_product_promo_includes_obtainable->result();
