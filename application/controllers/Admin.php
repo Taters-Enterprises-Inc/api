@@ -22,6 +22,7 @@ class Admin extends CI_Controller{
 		$this->load->model('logs_model');
 		$this->load->model('notification_model');
 		$this->load->model('report_model');
+		$this->load->model('deals_model');
 	}
 
   public function setting_store(){
@@ -2876,6 +2877,12 @@ class Admin extends CI_Controller{
       case 'GET': 
         $order = $this->admin_model->getSnackshopOrder($trackingNo);
         $order->items = $this->admin_model->getSnackshopOrderItems($order->id);
+        
+        foreach($order->items as $key => $item){
+          if(!isset($item->deal_order_item_id)){
+            $order->items[$key]->deal_products_promo_include = $this->deals_model->getDealProductsPromoInclude($item->deal_id);
+          }
+        }
 
         $response = array(
           "message" => 'Successfully fetch snackshop order',
@@ -3284,12 +3291,39 @@ class Admin extends CI_Controller{
       $query_result = $this->admin_model->get_order_summary($id);
       $data['info'] = $query_result['clients_info'];
       $data['orders'] = $query_result['order_details'];
+
+      foreach($data['orders'] as $key => $order){
+        if(isset($order->deal_order_id)){
+          $data['deal_products_promo_include'] = $this->deals_model->getDealProductsPromoInclude($order->deal_id);
+          break;
+        }
+      }
+      
+      foreach($data['orders'] as $key => $order){
+        if(!isset($order->deal_order_id)){
+          foreach($data['deal_products_promo_include'] as $deal_products_promo_include){
+            if($deal_products_promo_include->product_id === $order->product_id){
+              $data['orders'][$key]->deal_products_promo_include = $deal_products_promo_include;
+            }
+
+          }
+        }
+      }
   
       /** Downlaod as word-doc */
       $print = $this->load->view('/report/invoice_print', $data, TRUE);
 
 
     }
+    
+    // $response = array(
+    //   "message" => 'Successfully fetch admin session',
+    //   "data" => $data,
+    // );
+
+    // header('content-type: application/json');
+    // echo json_encode($response);
+    // return;
 
     header("Content-Type: application/vnd.ms-word");
     header("Expires: 0");

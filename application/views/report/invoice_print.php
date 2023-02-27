@@ -144,7 +144,6 @@
             <?php foreach ($orders as $key => $value): ?>
                     <?php $price = ( isset($value->promo_id ) && $value->promo_id == 0) ? $value->product_price : (isset($value->promo_id)  ?  $value->promo_price : $value->product_price);?>
                     <?php 
-
                       if(isset($value->promo_discount_percentage)){
                         $price = $price - ($price * $value->promo_discount_percentage );
                       }
@@ -215,7 +214,35 @@
                           <?php echo  number_format($price,2);?>
                         <?php endif;?>
                       </td>
-                      <td style="text-align: right;"><?php echo number_format($row_sum,2);?></td>
+                      <td style="text-align: right;"><?php 
+
+                            
+                            if(isset($value->deal_products_promo_include) && isset($value->product_id)){
+                              $added_obtainables = array();
+                              $obtainable_discount_price = 0;
+                              $obtainable_price= 0;
+                              foreach($value->deal_products_promo_include->obtainable as $obtainable ){
+                                $is_exist = false;
+                                foreach($added_obtainables as $added_obtainable){
+                                    if($added_obtainable->product_id === $obtainable->product_id){
+                                        $is_exist = true;
+                                        break;
+                                    }
+                                }
+                                if($obtainable->price && $obtainable->promo_discount_percentage && $is_exist === false){
+                                    $obtainable_discount_price = $obtainable->price - $obtainable->price * $obtainable->promo_discount_percentage;
+                                    $obtainable_price += $obtainable->price;
+                                    $added_obtainables[] = $obtainable;
+                                }
+                              }
+                              
+                              $row_sum = $obtainable_discount_price + $row_sum - $obtainable_price;
+                              echo number_format($row_sum,2);
+                            }else{
+                              echo number_format($row_sum,2);
+                            }
+                      
+                      ?></td>
                     </tr>
                     <?php $ctr++;?>
                     <?php $total_val +=$row_sum;?>

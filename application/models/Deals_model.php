@@ -136,13 +136,39 @@ class Deals_model extends CI_Model
 	}
 	
 	public function getDealProductsPromoInclude($deal_id){
-		$this->db->select('product_id');
-		$this->db->from('deals_product_promo_include');
+		$this->db->select('
+			A.id, 
+			A.product_id,
+			A.product_variant_option_tb_id,
+			A.quantity,
+			B.product_hash,
+		');
+		$this->db->from('deals_product_promo_include A');
+		$this->db->join('products_tb B','B.id = A.product_id');
 		$this->db->where('deal_id',$deal_id);
 
-		$query = $this->db->get();
+		$query_deals_product_promo_includes = $this->db->get();
+		$deals_product_promo_includes = $query_deals_product_promo_includes->result();
 
-		return $query->result();
+		foreach($deals_product_promo_includes as $deals_product_promo_include){
+			$this->db->select('
+				A.product_id, 
+				A.product_variant_option_tb_id, 
+				A.promo_discount_percentage,
+				CAST(D.price as int) as price,
+			');
+			$this->db->from('deals_product_promo_include_obtainable A');
+			$this->db->join('product_variant_option_combinations_tb C','C.product_variant_option_id = A.product_variant_option_tb_id');
+			$this->db->join('product_skus_tb D','D.id = C.sku_id');
+			$this->db->where('deals_product_promo_include_id',$deals_product_promo_include->id);
+	
+			$query_deals_product_promo_includes_obtainable = $this->db->get();
+			$deals_product_promo_includes_obtainable = $query_deals_product_promo_includes_obtainable->result();
+
+			$deals_product_promo_include->obtainable = $deals_product_promo_includes_obtainable; 
+		}
+		
+		return $deals_product_promo_includes;
 	}
 
 	public function getUserRedeems(){

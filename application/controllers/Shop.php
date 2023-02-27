@@ -157,6 +157,7 @@ class Shop extends CI_Controller {
 									$order_details['order_details'][$key]->promo_discount_percentage = null;
 								}
 							}
+							$order_details['deals_details'][0]->deal_products_promo_include = $deal_products_promo_include;
 						}
 					}
 				}

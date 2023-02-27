@@ -132,6 +132,9 @@ class Popclub extends CI_Controller {
 					if($today < $expire && $redeem->status == 1){	
 						$latest_not_expired_redeem = $redeem;
 
+						$redeem->deal_products_promo_exclude = $this->deals_model->getDealProductsPromoExclude($redeem->deal_id);
+						$redeem->deal_products_promo_include = $this->deals_model->getDealProductsPromoInclude($redeem->deal_id);
+
 						$products= array(	
 							'id' => $redeem->id,
 							'deal_id' => $redeem->deal_id,
@@ -146,8 +149,8 @@ class Popclub extends CI_Controller {
 							'is_free_delivery' => $redeem->is_free_delivery,
 							'deal_original_price' => $redeem->original_price,
 							'deal_promo_price' => $redeem->promo_price,
-							'deal_products_promo_exclude' => $this->deals_model->getDealProductsPromoExclude($redeem->deal_id),
-							'deal_products_promo_include' => $this->deals_model->getDealProductsPromoInclude($redeem->deal_id),
+							'deal_products_promo_exclude' => $redeem->deal_products_promo_exclude,
+							'deal_products_promo_include' => $redeem->deal_products_promo_include,
 						);
 
 						$_SESSION['popclub_data'] = [
@@ -496,6 +499,8 @@ class Popclub extends CI_Controller {
 
 	public function deal($hash){
 		$deal = $this->deals_model->getDeal($hash);
+		
+		$deal->deal_products_promo_include = $this->deals_model->getDealProductsPromoInclude($deal->id);
 		
 		$response = array(
 			'data' => $deal,
