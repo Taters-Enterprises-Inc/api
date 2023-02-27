@@ -5,6 +5,43 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+    
+
+    public function getSettingProductStoresSnackshop(){
+        $this->db->select('
+            A.store_id,
+            A.name,
+            B.name as menu_name,
+			C.region_store_id,
+        ');
+        $this->db->from('store_tb A');
+        $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
+		$this->db->join('region_store_combination_tb C', 'C.region_store_id = A.region_store_combination_id');
+
+        $this->db->where('A.status', 1);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getSettingProductStoresCatering(){
+        $this->db->select('
+            A.store_id,
+            A.name,
+            B.name as menu_name,
+			C.region_store_id,
+        ');
+        $this->db->from('store_tb A');
+        $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
+		$this->db->join('region_store_combination_tb C', 'C.region_store_id = A.region_store_combination_id');
+
+        $this->db->where('A.catering_status', 1);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+
     function removeCateringRegionDaLog($catering_region_da_log_id){
         $this->db->where('id', $catering_region_da_log_id);
 		$this->db->delete('catering_region_da_log');
@@ -1431,10 +1468,13 @@ class Admin_model extends CI_Model
         if(isset($category_id)) $this->db->where('A.platform_category_id', $category_id);
         
         $this->db->where('A.status', $status);
+
+        $this->db->group_start();
         $this->db->where('B.available_start_datetime <=',date('Y-m-d H:i:s'));
         $this->db->where('B.available_end_datetime >=',date('Y-m-d H:i:s'));
         $this->db->or_where('B.available_start_datetime',null);
         $this->db->or_where('B.available_end_datetime', null);
+        $this->db->group_end();
         
         $query = $this->db->get();
         return $query->row()->all_count;
@@ -1495,10 +1535,12 @@ class Admin_model extends CI_Model
         
         $this->db->where('A.status', $status);
 
+        $this->db->group_start();
         $this->db->where('B.available_start_datetime <=',date('Y-m-d H:i:s'));
         $this->db->where('B.available_end_datetime >=',date('Y-m-d H:i:s'));
         $this->db->or_where('B.available_start_datetime',null);
         $this->db->or_where('B.available_end_datetime', null);
+        $this->db->group_end();
 
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);

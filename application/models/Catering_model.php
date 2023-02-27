@@ -362,7 +362,7 @@ class Catering_model extends CI_Model
         $this->db->from('catering_product_addons_tb a');
         $this->db->join('products_tb b','b.id = a.product_id');
         $this->db->where('a.region_id',$region_id);
-        $this->db->where('a.status','0');
+        $this->db->where('a.status',1);
         $query = $this->db->get();
         return $query->result();
     }
@@ -372,7 +372,7 @@ class Catering_model extends CI_Model
         $this->db->from('catering_package_addons_tb a');
         $this->db->join('catering_packages_tb b','b.id = a.product_id');
         $this->db->where('a.region_id',$region_id);
-        $this->db->where('a.status','0');
+        $this->db->where('a.status',1);
         $query = $this->db->get();
         return $query->result();
     }
@@ -446,9 +446,9 @@ class Catering_model extends CI_Model
               ->get_where('catering_region_da_log', array('region_id' => $region,'status' => 1))
               ->result();
           foreach ($region as $row) {
-              $disable_region_items[] = $row->product_id;
+              $arr_region[] = $row->product_id;
           }
-          $to_disable = empty($disable_region_items) ? 0 : $disable_region_items;
+          $to_enable = empty($arr_region) ? 0 : $arr_region;
         }
   
         $this->db->select("
@@ -476,8 +476,8 @@ class Catering_model extends CI_Model
         $this->db->where('B.status', 1);
   
   
-        if($region != 0 && $to_disable != 0){
-            $this->db->where_not_in('B.id', $to_disable);
+        if($region != 0 && $to_enable != 0){
+            $this->db->where_in('B.id', $to_enable);
         }
         if ($name != null) {
             $this->db->like('B.name', $name, 'both');
@@ -556,9 +556,9 @@ class Catering_model extends CI_Model
                 ->get_where('catering_products', array('region_id' => $region,'status' => 1))
                 ->result();
             foreach ($region as $row) {
-                $disable_region_items[] = $row->product_id;
+                $enable_region_items[] = $row->product_id;
             }
-            $to_disable = empty($disable_region_items) ? 0 : $disable_region_items;
+            $to_enable = empty($enable_region_items) ? 0 : $enable_region_items;
         }
 
         $store_menu_type = (isset($_SESSION['cache_data']['store_menu_type'])) ? $_SESSION['cache_data']
@@ -616,8 +616,8 @@ class Catering_model extends CI_Model
             $this->db->where('C.category_id =', 14);
         }
 
-        if($region != 0 && $to_disable != 0){
-            $this->db->where_not_in('B.id', $to_disable);
+        if($region != 0 && $to_enable != 0){
+            $this->db->where_in('B.id', $to_enable);
             //use if store_type of some stores shown is popcorn
             if(!empty($store_menu_type)){
                 $this->db->where_in('A.id', $shown_categories);

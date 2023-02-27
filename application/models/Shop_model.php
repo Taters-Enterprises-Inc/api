@@ -554,9 +554,9 @@ class Shop_model extends CI_Model
                 ->get_where('region_da_log', array('region_id' => $region,'status' => 1))
                 ->result();
             foreach ($region as $row) {
-                $disable_region_items[] = $row->product_id;
+                $arr_region[] = $row->product_id;
             }
-            $to_disable = empty($disable_region_items) ? 0 : $disable_region_items;
+            $to_enable = empty($arr_region) ? 0 : $arr_region;
         }
 
         $store_menu_type = (isset($_SESSION['cache_data']['store_menu_type'])) ? $_SESSION['cache_data']
@@ -610,8 +610,8 @@ class Shop_model extends CI_Model
             $this->db->where('C.category_id =', 14);
         }
 
-        if($region != 0 && $to_disable != 0){
-            $this->db->where_in('B.id', $to_disable);
+        if($region != 0 && $to_enable != 0){
+            $this->db->where_in('B.id', $to_enable);
             
             if(!empty($store_menu_type)){
                 $this->db->where_in('A.id', $shown_categories);
