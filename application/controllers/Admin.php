@@ -124,7 +124,7 @@ class Admin extends CI_Controller{
                 'region_id' => $region->region_store_id,
                 'store_id' => $store_id,
                 'product_id' => $product['id'],
-                'status' => 1,
+                'status' => 0,
             );
             $region_da_logs[] = $data;
           }
@@ -139,7 +139,7 @@ class Admin extends CI_Controller{
                 'region_id' => $region->region_store_id,
                 'store_id' => $store_id,
                 'product_id' => $package['id'],
-                'status' => 1,
+                'status' => 0,
             );
             $catering_region_da_logs[] = $data;
           }
@@ -274,7 +274,7 @@ class Admin extends CI_Controller{
                 'region_id' => $store->region_store_id,
                 'store_id' => $store_id,
                 'product_id' => $product['id'],
-                'status' => 1,
+                'status' => 0,
               );
 
               $this->admin_model->insertRegionDaLog($region_da_log);
@@ -317,7 +317,7 @@ class Admin extends CI_Controller{
                 'region_id' => $store->region_store_id,
                 'store_id' => $store_id,
                 'product_id' => $package['id'],
-                'status' => 1,
+                'status' => 0,
               );
 
               $this->admin_model->insertCateringRegionDaLog($catering_region_da_log);
@@ -890,7 +890,7 @@ class Admin extends CI_Controller{
                     'region_id' => $store['region_store_id'],
                     'store_id' => $store['store_id'],
                     'product_id' => $product_id,
-                    'status' => 1,
+                    'status' => 0,
                   );
     
                   $this->admin_model->insertRegionDaLog($region_da_log);
@@ -1194,7 +1194,7 @@ class Admin extends CI_Controller{
                     'region_id' => $store['region_store_id'],
                     'store_id' => $store['store_id'],
                     'product_id' => $product_id,
-                    'status' => 1,
+                    'status' => 0,
                   );
                   $region_da_logs[] = $data;
                 }
@@ -2002,7 +2002,7 @@ class Admin extends CI_Controller{
         $page_no = $this->input->get('page_no') ?? 0;
         $store_id = $this->input->get('store_id');
         $category_id = $this->input->get('category_id');
-        $status = $this->input->get('status') ?? 0;
+        $status = $this->input->get('status') ?? 1;
         $order = $this->input->get('order') ?? 'desc';
         $order_by = $this->input->get('order_by') ?? 'id';
         $search = $this->input->get('search');
@@ -2106,7 +2106,7 @@ class Admin extends CI_Controller{
         $page_no = $this->input->get('page_no') ?? 0;
         $store_id = $this->input->get('store_id');
         $category_id = $this->input->get('category_id');
-        $status = $this->input->get('status') ?? 0;
+        $status = $this->input->get('status') ?? 1;
         $order = $this->input->get('order') ?? 'desc';
         $order_by = $this->input->get('order_by') ?? 'id';
         $search = $this->input->get('search');
@@ -2158,7 +2158,7 @@ class Admin extends CI_Controller{
         $page_no = $this->input->get('page_no') ?? 0;
         $store_id = $this->input->get('store_id');
         $category_id = $this->input->get('category_id');
-        $status = $this->input->get('status') ?? 0;
+        $status = $this->input->get('status') ?? 1;
         $order = $this->input->get('order') ?? 'desc';
         $order_by = $this->input->get('order_by') ?? 'id';
         $search = $this->input->get('search');

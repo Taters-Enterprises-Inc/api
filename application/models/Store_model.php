@@ -8,7 +8,7 @@ class Store_model extends CI_Model
 		$this->db->from('region_da_log A');
 		$this->db->join('products_tb B', 'B.id = A.product_id');
 		$this->db->where('B.product_hash', $hash);
-		$this->db->where('A.status', 0);
+		$this->db->where('A.status', 1);
 		$query = $this->db->get();
 		return $query->result();
 	}
@@ -18,7 +18,7 @@ class Store_model extends CI_Model
 		$this->db->from('catering_region_da_log A');
 		$this->db->join('catering_packages_tb B', 'B.id = A.product_id');
 		$this->db->where('B.product_hash', $hash);
-		$this->db->where('A.status', 0);
+		$this->db->where('A.status', 1);
 		$query = $this->db->get();
 		return $query->result();
 	}
@@ -28,7 +28,7 @@ class Store_model extends CI_Model
 		$this->db->from('deals_region_da_log A');
 		$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
 		$this->db->where('B.hash', $hash);
-		$this->db->where('A.status', 0);
+		$this->db->where('A.status', 1);
 		$query = $this->db->get();
 		return $query->result();
 	}

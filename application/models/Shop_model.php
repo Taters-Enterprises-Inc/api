@@ -383,7 +383,7 @@ class Shop_model extends CI_Model
             $region = $this->db
                     ->select('product_id')
                     ->get_where('region_da_log', array('region_id' => $_SESSION['cache_data']['region_id'],
-                        'status' => 1))
+                        'status' => 0))
                     ->result();
             foreach ($region as $row) {
                 $disable_region_items[] = $row->product_id;

@@ -547,7 +547,7 @@ class Deals_model extends CI_Model
 				if($store_id != null){
 					$this->db->join('deals_region_da_log D','D.deal_id = A.id');
 					$this->db->where('D.platform_category_id',$deal_category->id);
-					$this->db->where('D.status',0);
+					$this->db->where('D.status',1);
 					$this->db->where('D.store_id',$store_id);
 				}
 				$this->db->order_by('A.dateadded','ASC');
@@ -598,7 +598,7 @@ class Deals_model extends CI_Model
 		  if($store_id != null){
 			$this->db->join('deals_region_da_log D','D.deal_id = A.id');
 			$this->db->where('D.platform_category_id',$deals_category->id);
-			$this->db->where('D.status',0);
+			$this->db->where('D.status',1);
 			$this->db->where('D.store_id',$store_id);
 		  }
 
