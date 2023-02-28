@@ -25,6 +25,41 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
 
+  public function snackshop_stores(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $stores = $this->admin_model->getSettingProductStoresSnackshop();
+
+        $response = array(
+          "message" =>  'Successfully fetch store',
+          "data" => $stores,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
+
+  public function catering_stores(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $stores = $this->admin_model->getSettingProductStoresCatering();
+
+        $response = array(
+          "message" =>  'Successfully fetch store',
+          "data" => $stores,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
+
   public function setting_store(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -1188,9 +1223,9 @@ class Admin extends CI_Controller{
 
                 $this->admin_model->insertShopProductCategory($product_category);
                 
-                $stores = json_decode($this->input->post('stores'), true);
+                $snackshop_stores = json_decode($this->input->post('snackshopStores'), true);
     
-                foreach($stores as $store){
+                foreach($snackshop_stores as $store){
                   $data = array(
                     'region_id' => $store['region_store_id'],
                     'store_id' => $store['store_id'],
@@ -1277,9 +1312,9 @@ class Admin extends CI_Controller{
   
                 $this->admin_model->insertProductWithAddons($product_with_addons);
                 
-                $stores = json_decode($this->input->post('stores'), true);
+                $catering_stores = json_decode($this->input->post('cateringStores'), true);
     
-                foreach($stores as $store){
+                foreach($catering_stores as $store){
                   $data = array(
                     'region_id' => $store['region_store_id'],
                     'store_id' => $store['store_id'],
@@ -2055,7 +2090,7 @@ class Admin extends CI_Controller{
         $page_no = $this->input->get('page_no') ?? 0;
         $store_id = $this->input->get('store_id');
         $category_id = $this->input->get('category_id');
-        $status = $this->input->get('status') ?? 0;
+        $status = $this->input->get('status') ?? 1;
         $order = $this->input->get('order') ?? 'desc';
         $order_by = $this->input->get('order_by') ?? 'id';
         $search = $this->input->get('search');
@@ -2211,7 +2246,7 @@ class Admin extends CI_Controller{
         $per_page = $this->input->get('per_page') ?? 25;
         $page_no = $this->input->get('page_no') ?? 0;
         $store_id = $this->input->get('store_id');
-        $status = $this->input->get('status') ?? 0;
+        $status = $this->input->get('status') ?? 1;
         $order = $this->input->get('order') ?? 'desc';
         $order_by = $this->input->get('order_by') ?? 'id';
         $search = $this->input->get('search');
@@ -2263,7 +2298,7 @@ class Admin extends CI_Controller{
         $per_page = $this->input->get('per_page') ?? 25;
         $page_no = $this->input->get('page_no') ?? 0;
         $store_id = $this->input->get('store_id');
-        $status = $this->input->get('status') ?? 0;
+        $status = $this->input->get('status') ?? 1;
         $order = $this->input->get('order') ?? 'desc';
         $order_by = $this->input->get('order_by') ?? 'id';
         $search = $this->input->get('search');
@@ -2761,7 +2796,7 @@ class Admin extends CI_Controller{
     }
   }
 
-  public function stores(){
+  public function setting_user_stores(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
         $user_id = $this->input->get('user_id');
