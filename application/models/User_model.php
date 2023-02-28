@@ -36,7 +36,6 @@ class User_model extends CI_Model {
         $this->db->select('b.store_id, b.name, c.name as menu_name');
         $this->db->from('store_tb b');
         $this->db->join('store_menu_tb c', 'c.id = b.store_menu_type_id');
-        $this->db->where('b.status', 1);
         $query = $this->db->get();
         return $query->result();
     } 
@@ -56,7 +55,6 @@ class User_model extends CI_Model {
         $this->db->join('store_tb b', 'b.store_id = a.store_id' ,'left');
         $this->db->join('store_menu_tb c', 'c.id = b.store_menu_type_id');
         $this->db->where('a.user_id', $user_id);
-        $this->db->where('b.status', 1);
         $query = $this->db->get();
         return $query->result();
     }
