@@ -68,6 +68,7 @@ class Store_model extends CI_Model
     {
         $this->db->select('indicator AS id,moh_type AS type,bank_name AS name, bank_account_num AS acct, bank_account_name AS acct_name, qr_code');
         $this->db->where('store_id', $id);
+		$this->db->where('status', 1);
         $query = $this->db->get('bank_account_tb');
         return $query->result();
     }
