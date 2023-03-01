@@ -1463,58 +1463,70 @@ class Admin extends CI_Controller{
 
         $this->admin_model->changeStatusSurveyVerification($survey_verification_id, $status);
         $surveyVerification = $this->admin_model->getCustomerSurveyResponse($survey_verification_id);
+        $user_id = $this->session->admin['user_id'];
 
-        if((int)$status === 2){
-						$notification_event_data = array(
-							"notification_event_type_id" => 4,
-							"transaction_tb_id" => $surveyVerification->transaction_id,
-							"catering_transaction_tb_id" => $surveyVerification->catering_transaction_id,
-              'customer_survey_response_id' => $surveyVerification->id,
-							"text" => 'Congratulations and Thank you for completing the survey!'
-						);
-            
-						$notification_message_data = array(
-							"title" => "Congratulations and Thank you for completing the survey!",
-							"body" => "You may now claim your <b>FREE MINI PACK SUPERPOP</b> for a minimum purchase of 150.00 at your surveyed store.
-							
-									Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
-									",
-							"closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
-							"closing_salutation" => "Best wishes,",
-							"message_from" => "Taters Enterprises Inc.",
-							"contact_number" => "(+64) 977-275-5595",
-							"email" => "tei.csr@tatersgroup.com",
-							"image_title" => $invoice_no,
-							"image_url" => base_url(). "assets/images/shared/survey/claim-now-to-get-your-free-superpop.jpg",
-						);
-                        
-            $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+        switch((int)$status){
+          case 1:
+              $message = 'Rejected Survey success';
+              $this->logs_model->insertCustomerSurveyResponseLog($user_id, 1, $survey_verification_id, $message);
+              break;
+          case 2:
+              $message = 'Verified Survey success';
+              $this->logs_model->insertCustomerSurveyResponseLog($user_id, 1, $survey_verification_id, $message);
+              
+              $notification_event_data = array(
+                "notification_event_type_id" => 4,
+                "transaction_tb_id" => $surveyVerification->transaction_id,
+                "catering_transaction_tb_id" => $surveyVerification->catering_transaction_id,
+                'customer_survey_response_id' => $surveyVerification->id,
+                "text" => 'Congratulations and Thank you for completing the survey!'
+              );
+              
+              $notification_message_data = array(
+                "title" => "Congratulations and Thank you for completing the survey!",
+                "body" => "You may now claim your <b>FREE MINI PACK SUPERPOP</b> for a minimum purchase of 150.00 at your surveyed store.
+                
+                    Your feedback is really important as it will helps us to constantly improve our service to give a POPTASTIC customer experience.
+                    ",
+                "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+                "closing_salutation" => "Best wishes,",
+                "message_from" => "Taters Enterprises Inc.",
+                "contact_number" => "(+64) 977-275-5595",
+                "email" => "tei.csr@tatersgroup.com",
+                "image_title" => $invoice_no,
+                "image_url" => base_url(). "assets/images/shared/survey/claim-now-to-get-your-free-superpop.jpg",
+              );
+                          
+              $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
 
-            $notification_event_data['notification_message_id'] = $notification_message_id;
+              $notification_event_data['notification_message_id'] = $notification_message_id;
 
-            $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
-                            
-            //mobile or fb             
-            $notifications_data = array(
-                "fb_user_to_notify" => $surveyVerification->fb_user_id,
-                "mobile_user_to_notify" => $surveyVerification->mobile_user_id,
-                "fb_user_who_fired_event" => $surveyVerification->fb_user_id,
-                "mobile_user_who_fired_event" => $surveyVerification->mobile_user_id,
-                'notification_event_id' => $notification_event_id,
-                "dateadded" => date('Y-m-d H:i:s'),
-            );
-            
-            $this->notification_model->insertNotification($notifications_data); 
-            
-            
-            $real_time_notification = array(
-              "fb_user_id" => $surveyVerification->fb_user_id,
-              "mobile_user_id" => $surveyVerification->mobile_user_id,
-              "message" => "Congratulations! To claim your gift kindly check your profile inbox.",
-            );
+              $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                              
+              //mobile or fb             
+              $notifications_data = array(
+                  "fb_user_to_notify" => $surveyVerification->fb_user_id,
+                  "mobile_user_to_notify" => $surveyVerification->mobile_user_id,
+                  "fb_user_who_fired_event" => $surveyVerification->fb_user_id,
+                  "mobile_user_who_fired_event" => $surveyVerification->mobile_user_id,
+                  'notification_event_id' => $notification_event_id,
+                  "dateadded" => date('Y-m-d H:i:s'),
+              );
+              
+              $this->notification_model->insertNotification($notifications_data); 
+              
+              
+              $real_time_notification = array(
+                "fb_user_id" => $surveyVerification->fb_user_id,
+                "mobile_user_id" => $surveyVerification->mobile_user_id,
+                "message" => "Congratulations! To claim your gift kindly check your profile inbox.",
+              );
 
-            notify('user-inbox','inbox-feedback-complete', $real_time_notification);
+              notify('user-inbox','inbox-feedback-complete', $real_time_notification);
+
+              break;
         }
+
 
         $response = array(
           "message" => 'Successfully update survey verification status',
@@ -1966,6 +1978,25 @@ class Admin extends CI_Controller{
         break;
     }
   }
+
+  public function customer_survey_response_logs($customer_survey_response_id){
+    
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $customer_survey_response_logs = $this->logs_model->getCustomerSurveyResponseLogs($customer_survey_response_id);
+
+        $response = array(
+          "message" => 'Successfully fetch audit',
+          "data" => $customer_survey_response_logs,
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+  
   
   public function store(){
     switch($this->input->server('REQUEST_METHOD')){

@@ -148,6 +148,7 @@ $route['admin/caters-package-categories'] = 'admin/caters_package_categories';
 
 $route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
 $route['admin/catering-transaction-logs/(:num)'] = 'admin/catering_transaction_logs/$1';
+$route['admin/customer-survey-response-logs/(:num)'] = 'admin/customer_survey_response_logs/$1';
 
 $route['admin/notifications'] = 'admin/notifications';
 $route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
