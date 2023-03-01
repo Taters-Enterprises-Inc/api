@@ -1466,7 +1466,7 @@ class Admin extends CI_Controller{
         $user_id = $this->session->admin['user_id'];
 
         switch((int)$status){
-          case 1:
+          case 3:
               $message = 'Rejected Survey success';
               $this->logs_model->insertCustomerSurveyResponseLog($user_id, 1, $survey_verification_id, $message);
               break;
