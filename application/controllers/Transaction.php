@@ -277,6 +277,7 @@ class Transaction extends CI_Controller {
                                     $added_obtainables = array();
                                     $obtainable_discount_price = 0;
                                     $obtainable_price= 0;
+                                    $deal_products_promo_include_match = null;
                                     foreach($_SESSION['redeem_data']['deal_products_promo_include'] as $deal_products_promo_include){
                                         if($val['prod_id'] === $deal_products_promo_include->product_id){
                                             foreach($deal_products_promo_include->obtainable as $obtainable){
@@ -292,13 +293,19 @@ class Transaction extends CI_Controller {
                                                     $obtainable_price += $obtainable->price;
                                                     $added_obtainables[] = $obtainable;
                                                 }
+                                                $deal_products_promo_include_match =  $deal_products_promo_include;
                                             }
                                         }
                                     }
-                                    
-                                    $comp_total += $obtainable_discount_price + $val['prod_calc_amount'] - $obtainable_price;
+
+                                    if($deal_products_promo_include_match){
+                                        if(count($deal_products_promo_include_match->obtainable) > 0){
+                                            $comp_total += $obtainable_discount_price + $val['prod_calc_amount'] - $obtainable_price;
+                                        }else{
+                                            $comp_total += $val['prod_calc_amount'] - ( $val['prod_calc_amount']  * $deal_products_promo_include_match->promo_discount_percentage);
+                                        }
+                                    }
                                 }else{
-                        
                                     $promo_discount_percentage = $val['promo_discount_percentage'];
                                     $promo_discount = isset($promo_discount_percentage) ? $val['prod_calc_amount'] * $promo_discount_percentage : 0 ;
                                     $comp_total += $val['prod_calc_amount'] - $promo_discount;
