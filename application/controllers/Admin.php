@@ -1849,13 +1849,29 @@ class Admin extends CI_Controller{
           foreach($answers as $val){
             $key =  str_replace(" ", "_", $val->question);
             $key =  str_replace("\n", "", $key);
-            $column_feedback[$key] = $val->text || $val->answer || $val->others ? $val->text . $val->answer . $val->others : 'N/A';
+            $key =  str_replace("\t", "", $key);
+            $key =  str_replace("\r", "", $key);
+
+            $answer_value = $val->text || $val->answer || $val->others ? $val->text . $val->answer . $val->others : 'N/A';
+            $answer_value =  str_replace("\n", "", $answer_value);
+            $answer_value =  str_replace("\t", "", $answer_value);
+            $answer_value =  str_replace("\r", "", $answer_value);
+            
+            $column_feedback[$key] = $answer_value;
           }
           
           foreach($ratings as $val){
             $key =  str_replace(" ", "_", $val->question);
             $key =  str_replace("\n", "", $key);
-            $column_feedback[$key] = $val->rate . $val->others;
+            $key =  str_replace("\t", "", $key);
+            $key =  str_replace("\r", "", $key);
+
+            $rating_value = $val->rate . $val->others; 
+            $rating_value =  str_replace("\n", "", $rating_value);
+            $rating_value =  str_replace("\t", "", $rating_value);
+            $rating_value =  str_replace("\r", "", $rating_value);
+
+            $column_feedback[$key] = $rating_value;
           }
 
           $customer_feedbacks_processed[] = $column_feedback;
