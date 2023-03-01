@@ -1837,7 +1837,7 @@ class Admin extends CI_Controller{
           foreach($answers as $val){
             $key =  str_replace(" ", "_", $val->question);
             $key =  str_replace("\n", "", $key);
-            $column_feedback[$key] = $val->text . $val->answer . $val->others;
+            $column_feedback[$key] = $val->text || $val->answer || $val->others ? $val->text . $val->answer . $val->others : 'N/A';
           }
           
           foreach($ratings as $val){
