@@ -32,9 +32,10 @@ class Logs_model extends CI_Model {
     }
     
 
-    public function insertCustomerSurveyResponseLog($user_id, $action,  $customer_survey_response_id, $details){
+    public function insertCustomerSurveyResponseLog($user_id, $customer_survey_response_log_action_id,  $customer_survey_response_id, $details){
 		$values = array(
             'customer_survey_response_id' => $customer_survey_response_id,
+            'customer_survey_response_log_action_id' => $customer_survey_response_log_action_id,
             'user_id' => $user_id,
             'details' => $details,
         );
