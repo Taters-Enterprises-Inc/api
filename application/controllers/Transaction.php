@@ -293,8 +293,8 @@ class Transaction extends CI_Controller {
                                                     $obtainable_price += $obtainable->price;
                                                     $added_obtainables[] = $obtainable;
                                                 }
-                                                $deal_products_promo_include_match =  $deal_products_promo_include;
                                             }
+                                            $deal_products_promo_include_match =  $deal_products_promo_include;
                                         }
                                     }
 
@@ -302,7 +302,7 @@ class Transaction extends CI_Controller {
                                         if(count($deal_products_promo_include_match->obtainable) > 0){
                                             $comp_total += $obtainable_discount_price + $val['prod_calc_amount'] - $obtainable_price;
                                         }else{
-                                            $comp_total += $val['prod_calc_amount'] - ( $val['prod_calc_amount']  * $deal_products_promo_include_match->promo_discount_percentage);
+                                            $comp_total += $val['prod_calc_amount'] - ($val['prod_calc_amount']  * $deal_products_promo_include_match->promo_discount_percentage);
                                         }
                                     }
                                 }else{
