@@ -141,6 +141,7 @@ class Deals_model extends CI_Model
 			A.product_id,
 			A.product_variant_option_tb_id,
 			A.quantity,
+			A.promo_discount_percentage,
 			B.product_hash,
 		');
 		$this->db->from('deals_product_promo_include A');

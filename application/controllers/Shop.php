@@ -151,8 +151,8 @@ class Shop extends CI_Controller {
 							}
 						}else if($deal_products_promo_include){
 							foreach($deal_products_promo_include as $value){
-								if($value->product_id === $product->product_id){
-									$order_details['order_details'][$key]->promo_discount_percentage = (float)$deal->promo_discount_percentage;
+								if($value->product_id === $product->product_id && empty($value->obtainable)){
+									$order_details['order_details'][$key]->promo_discount_percentage = (float)$value->promo_discount_percentage;
 								}else{
 									$order_details['order_details'][$key]->promo_discount_percentage = null;
 								}
@@ -212,7 +212,7 @@ class Shop extends CI_Controller {
 				if($deal_products_promo_include){
 
                     foreach($deal_products_promo_include as $value){
-                        if($value->product_id === $product->id){
+                        if($value->product_id === $product->id && empty($value->obtainable)){
 							$promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
                             break;
                         }
