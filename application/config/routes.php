@@ -170,6 +170,7 @@ $route['admin/setting/shop-products'] = 'admin/setting_shop_products';
 $route['admin/setting/shop-product'] = 'admin/setting_shop_product';
 $route['admin/setting/shop-product/stores'] = 'admin/setting_product_stores';
 $route['admin/setting/edit-shop-product'] = 'admin/setting_edit_shop_product';
+$route['admin/setting/copy-shop-product'] = 'admin/setting_copy_shop_product';
 $route['admin/setting/delete-shop-product'] = 'admin/setting_delete_shop_product';
 $route['admin/setting/stores'] = 'admin/setting_stores';
 $route['admin/setting/store'] = 'admin/setting_store';
