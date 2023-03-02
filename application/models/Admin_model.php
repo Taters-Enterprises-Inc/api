@@ -96,7 +96,13 @@ class Admin_model extends CI_Model
         $this->db->trans_complete();
     }
 
-    function removeSnackshopRegionDaLog($region_da_log_id){
+    function removeSnackshopRegionDaLogByProductId($productId){
+        $this->db->where('product_id', $productId);
+		$this->db->delete('region_da_log');
+    }
+
+
+    function removeSnackshopRegionDaLogById($region_da_log_id){
         $this->db->where('id', $region_da_log_id);
 		$this->db->delete('region_da_log');
     }
