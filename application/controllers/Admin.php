@@ -310,7 +310,7 @@ class Admin extends CI_Controller{
             }
 
             if($is_not_exist){
-              $this->admin_model->removeSnackshopRegionDaLog($snackshop_region->id);
+              $this->admin_model->removeSnackshopRegionDaLogById($snackshop_region->id);
             }
           }
           
@@ -890,10 +890,32 @@ class Admin extends CI_Controller{
         $this->admin_model->updateShopProductCategory($product_id,$product_category);
         
 
-        $stores =  $this->input->post('stores') ? json_decode($this->input->post('stores'), true) : array();
+        $stores =  json_decode($this->input->post('stores'), true);
         $snackshop_region_da_log = $this->admin_model->getSnackshopRegionDaLogByProductId($product_id);
+        $product_availability = $this->input->post('productAvailability');
 
-        if(!empty($stores)){
+        if($product_availability){
+          $this->admin_model->removeSnackshopRegionDaLogByProductId($product_id);
+          $product_availability = json_decode($product_availability);
+          
+          $region_da_logs = array();
+          $stores = json_decode($this->input->post('stores'), true);
+
+          foreach($stores as $store){
+            $data = array(
+              'region_id' => $store['region_store_id'],
+              'store_id' => $store['store_id'],
+              'product_id' => $product_id,
+              'status' => $product_availability,
+            );
+            $region_da_logs[] = $data;
+          }
+
+          if(!empty($region_da_logs)){
+            $this->admin_model->insertRegionDaLogs($region_da_logs); 
+          }
+
+        }else if(!empty($stores)){
 
           foreach($snackshop_region_da_log as $snackshop_region){
             $is_not_exist = true;
@@ -905,7 +927,7 @@ class Admin extends CI_Controller{
             }
 
             if($is_not_exist){
-              $this->admin_model->removeSnackshopRegionDaLog($snackshop_region->id);
+              $this->admin_model->removeSnackshopRegionDaLogById($snackshop_region->id);
             }
           }
           
@@ -934,7 +956,7 @@ class Admin extends CI_Controller{
 
         }
         
-        $variants = $this->input->post('variants') ? json_decode($this->input->post('variants'), true) : array();
+        $variants = json_decode($this->input->post('variants'), true);
 
         $product_variants = $this->admin_model->getProductVariants($product_id);
 
@@ -998,7 +1020,7 @@ class Admin extends CI_Controller{
 
         }
 
-        $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
+        $products = json_decode($this->input->post('products'), true) ;
 
         if(!empty($products)){
           $this->admin_model->removeProductWithAddons($product_id);
@@ -1139,21 +1161,25 @@ class Admin extends CI_Controller{
 
             $this->admin_model->insertShopProductCategory($product_category);
             
-            $stores = $this->input->post('stores') ? json_decode($this->input->post('stores'), true) : array();
+            $region_da_logs = array();
+            $stores = json_decode($this->input->post('stores'), true);
+            $product_availability = json_decode($this->input->post('productAvailability'));
 
             foreach($stores as $store){
               $data = array(
                 'region_id' => $store['region_store_id'],
                 'store_id' => $store['store_id'],
                 'product_id' => $product_id,
-                'status' => 0,
+                'status' => $product_availability,
               );
               $region_da_logs[] = $data;
             }
 
-            $this->admin_model->insertRegionDaLogs($region_da_logs); 
+            if(!empty($region_da_logs)){
+              $this->admin_model->insertRegionDaLogs($region_da_logs); 
+            }
             
-            $variants = $this->input->post('variants') ? json_decode($this->input->post('variants'), true) : array();
+            $variants = json_decode($this->input->post('variants'), true);
             
             foreach($variants as $variant){
               $data = array(
@@ -1194,7 +1220,8 @@ class Admin extends CI_Controller{
             }
 
               
-            $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
+            $products = json_decode($this->input->post('products'), true);
+            $product_with_addon = array();
 
             foreach($products as $product){
               $data = array(
@@ -1203,9 +1230,11 @@ class Admin extends CI_Controller{
               );
               $product_with_addons[] = $data;
             }
-            
-            $this->admin_model->insertProductWithAddons($product_with_addons);
 
+            if(!empty($product_with_addons)){
+              $this->admin_model->insertProductWithAddons($product_with_addons);
+            }
+            
           }
 
           $response = array(
