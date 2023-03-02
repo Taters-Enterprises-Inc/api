@@ -1408,7 +1408,7 @@ class Admin extends CI_Controller{
         $page_no = $this->input->get('page_no') ?? 0;
         $status = $this->input->get('status') ?? null;
         $order = $this->input->get('order') ?? 'desc';
-        $order_by = $this->input->get('order_by') ?? 'dateadded';
+        $order_by = $this->input->get('order_by') ?? 'dateupdated';
         $search = $this->input->get('search');
     
         if($page_no != 0){
