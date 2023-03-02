@@ -169,12 +169,12 @@ $route['admin/setting/groups'] = 'admin/setting_groups';
 $route['admin/setting/shop-products'] = 'admin/setting_shop_products';
 $route['admin/setting/shop-product'] = 'admin/setting_shop_product';
 $route['admin/setting/shop-product/stores'] = 'admin/setting_product_stores';
-$route['admin/setting/shop-product/type'] = 'admin/setting_shop_product_type';
 $route['admin/setting/edit-shop-product'] = 'admin/setting_edit_shop_product';
 $route['admin/setting/delete-shop-product'] = 'admin/setting_delete_shop_product';
 $route['admin/setting/stores'] = 'admin/setting_stores';
 $route['admin/setting/store'] = 'admin/setting_store';
 $route['admin/setting/edit-store'] = 'admin/setting_edit_store';
+$route['admin/setting/product-addons'] = 'admin/setting_product_addons';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';

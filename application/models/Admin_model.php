@@ -6,6 +6,31 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
     
+    function getProductWithAddons($product_id){
+        $this->db->select('
+            B.id,
+            B.name,
+        ');
+
+        $this->db->from('product_with_addons A');
+        $this->db->join('products_tb B', 'B.id = A.addon_product_id');
+        $this->db->where('A.product_id', $product_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+    
+    function insertProductWithAddons($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('product_with_addons', $data);
+        $this->db->trans_complete();
+    }
+
+    function removeProductWithAddons($product_id){
+        $this->db->where('product_id', $product_id);
+		$this->db->delete('product_with_addons');
+    }
 
     public function getSettingProductStoresSnackshop(){
         $this->db->select('
@@ -436,61 +461,9 @@ class Admin_model extends CI_Model
         $this->db->update("catering_order_items");
     }
 
-    function removeProductWithAddons($product_addon_id){
-        $this->db->where('addon_product_id', $product_addon_id);
-		$this->db->delete('product_with_addons');
-    }
-
     function removeCateringProductAddons($product_addon_id){
         $this->db->where('product_id', $product_addon_id);
 		$this->db->delete('catering_product_addons_tb');
-    }
-
-
-    function getProductWithAddons($addon_product_id){
-
-        $this->db->select('
-            B.id,
-            B.name,
-        ');
-
-        $this->db->from('product_with_addons A');
-        $this->db->join('products_tb B', 'B.id = A.product_id');
-
-        $this->db->where('A.addon_product_id',$addon_product_id);
-        
-        $query_product_addon = $this->db->get();
-        return $query_product_addon->result();
-    }
-
-    function getCateringAddonProductStores($product_addon_id){
-
-        $this->db->select('
-            A.store_id,
-            B.name,
-			C.region_store_id,
-        ');
-
-        $this->db->from('catering_product_addons_tb A');
-        $this->db->join('store_tb B', 'B.store_id = A.store_id');
-		$this->db->join('region_store_combination_tb C', 'C.region_store_id = B.region_store_combination_id');
-
-        $this->db->where('A.product_id',$product_addon_id);
-        
-        $query_shop_product_stores = $this->db->get();
-        return $query_shop_product_stores->result();
-    }
-
-    function insertProductWithAddons($data){
-        $this->db->trans_start();
-		$this->db->insert_batch('product_with_addons', $data);
-        $this->db->trans_complete();
-    }
-    
-    function insertCaterProductAddonsRegionDaLogs($data){
-        $this->db->trans_start();
-		$this->db->insert_batch('catering_product_addons_tb', $data);
-        $this->db->trans_complete();
     }
 
     function getDeals(){
@@ -530,17 +503,6 @@ class Admin_model extends CI_Model
 
         $query_products = $this->db->get();
         return $query_products->result();
-    }
-
-    function getProductTypes(){
-        $this->db->select('
-            id,
-            name,
-        ');
-
-        $this->db->from('product_types');
-        $query_product_types = $this->db->get();
-        return $query_product_types->result();
     }
     
     function updateShopProductStatus($product_id, $status){
@@ -701,7 +663,6 @@ class Admin_model extends CI_Model
             A.category,
             A.num_flavor,
             A.dateadded,
-            A.product_type_id,
         ');
 
         $this->db->from('products_tb A');
@@ -778,7 +739,6 @@ class Admin_model extends CI_Model
             description,
             price,
             add_details,
-            product_type_id,
             status,
         ');
 
