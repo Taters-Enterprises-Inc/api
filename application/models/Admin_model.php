@@ -6,6 +6,31 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
     
+    function getProductWithAddons($product_id){
+        $this->db->select('
+            B.id,
+            B.name,
+        ');
+
+        $this->db->from('product_with_addons A');
+        $this->db->join('products_tb B', 'B.id = A.addon_product_id');
+        $this->db->where('A.product_id', $product_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+    
+    function insertProductWithAddons($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('product_with_addons', $data);
+        $this->db->trans_complete();
+    }
+
+    function removeProductWithAddons($product_id){
+        $this->db->where('product_id', $product_id);
+		$this->db->delete('product_with_addons');
+    }
 
     public function getSettingProductStoresSnackshop(){
         $this->db->select('
@@ -434,11 +459,6 @@ class Admin_model extends CI_Model
         $this->db->set('remarks', $remarks);
         $this->db->where("id", $order_item_id);
         $this->db->update("catering_order_items");
-    }
-
-    function removeProductWithAddons($product_addon_id){
-        $this->db->where('addon_product_id', $product_addon_id);
-		$this->db->delete('product_with_addons');
     }
 
     function removeCateringProductAddons($product_addon_id){

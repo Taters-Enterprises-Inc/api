@@ -25,6 +25,25 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
 
+  public function setting_product_addons(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $product_id = $this->input->get('productId');
+
+        $stores = $this->admin_model->getProductWithAddons($product_id);
+
+        $response = array(
+          "message" =>  'Successfully fetch store',
+          "data" => $stores,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
+
   public function snackshop_stores(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -979,9 +998,22 @@ class Admin extends CI_Controller{
 
         }
 
-        
-        $this->admin_model->removeProductWithAddons($product_id);
-        $this->admin_model->removeCateringProductAddons($product_id);
+        $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
+
+        if(!empty($products)){
+          $this->admin_model->removeProductWithAddons($product_id);
+
+          foreach($products as $product){
+            $data = array(
+              'product_id' => $product_id,
+              'addon_product_id' => $product['id'],
+            );
+            $product_with_addons[] = $data;
+          }
+          
+          $this->admin_model->insertProductWithAddons($product_with_addons);
+          
+        }
 
         $response = array(
           "message" =>  'Successfully edit product'
@@ -1107,7 +1139,7 @@ class Admin extends CI_Controller{
 
             $this->admin_model->insertShopProductCategory($product_category);
             
-            $stores = json_decode($this->input->post('stores'), true);
+            $stores = $this->input->post('stores') ? json_decode($this->input->post('stores'), true) : array();
 
             foreach($stores as $store){
               $data = array(
@@ -1159,8 +1191,20 @@ class Admin extends CI_Controller{
                   $this->admin_model->insertShopProductVariantOptionCombination($product_variant_option_combination);
                 }
               }
-
             }
+
+              
+            $products = $this->input->post('products') ? json_decode($this->input->post('products'), true) : array();
+
+            foreach($products as $product){
+              $data = array(
+                'product_id' => $product_id,
+                'addon_product_id' => $product['id'],
+              );
+              $product_with_addons[] = $data;
+            }
+            
+            $this->admin_model->insertProductWithAddons($product_with_addons);
 
           }
 
