@@ -1394,7 +1394,7 @@ class Admin_model extends CI_Model
     }
 
     function getStoreProducts($row_no, $row_per_page, $store_id, $category_id,  $status, $order_by, $order, $search) {
-        $this->db->select('A.id, B.name, B.product_image, A.store_id, B.add_details, C.category_name');
+        $this->db->select('A.id, B.name, B.product_image, B.price, A.store_id, B.add_details, C.category_name');
         $this->db->from('region_da_log A');
         $this->db->join('products_tb B', 'B.id = A.product_id');
         $this->db->join('category_tb C', 'C.id = B.category');
