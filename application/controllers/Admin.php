@@ -838,21 +838,6 @@ class Admin extends CI_Controller{
           }
         }
         
-        if(isset($_FILES['image150x150']['tmp_name']) && is_uploaded_file($_FILES['image150x150']['tmp_name'])){
-          $image150x150_error = upload('image150x150','./assets/images/shared/products/150',$product_image_name, 'jpg');
-          if($image150x150_error){
-            $this->output->set_status_header('401');
-            echo json_encode(array( "message" => $image150x150_error));
-            return;
-          }
-        }else{
-          $current_image_name = './assets/images/shared/products/150/' . $product->product_image;
-
-          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
-            rename($current_image_name,'./assets/images/shared/products/150/'. $product_image_name);
-          }
-        }
-        
         if(isset($_FILES['image75x75']['tmp_name']) && is_uploaded_file($_FILES['image75x75']['tmp_name'])){
           $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$product_image_name, 'jpg');
           if($image75x75_error){
@@ -1048,6 +1033,170 @@ class Admin extends CI_Controller{
 
   }
 
+  public function setting_copy_shop_product(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST':
+        $product_image_name = str_replace(' ', '-', strtolower($this->input->post('name'))) . '-' . time() .'.jpg';
+        $product_id = $this->input->post('id');
+
+        $product = $this->admin_model->getShopProduct($product_id);
+
+        if(isset($_FILES['image500x500']['tmp_name']) && is_uploaded_file($_FILES['image500x500']['tmp_name'])){
+          $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$product_image_name, 'jpg');
+          if($image500x500_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image500x500_error));
+            return;
+          }
+        }else{
+          $current_image_name = './assets/images/shared/products/500/' . $product->product_image;
+          
+          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
+            copy($current_image_name,'./assets/images/shared/products/500/'. $product_image_name);
+          }
+        }
+        
+        if(isset($_FILES['image250x250']['tmp_name']) && is_uploaded_file($_FILES['image250x250']['tmp_name'])){
+          $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$product_image_name, 'jpg');
+          if($image250x250_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image250x250_error));
+            return;
+          }
+        }else{
+          $current_image_name = './assets/images/shared/products/250/' . $product->product_image;
+          
+          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
+            copy($current_image_name,'./assets/images/shared/products/250/'. $product_image_name);
+          }
+        }
+        
+        
+        if(isset($_FILES['image75x75']['tmp_name']) && is_uploaded_file($_FILES['image75x75']['tmp_name'])){
+          $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$product_image_name, 'jpg');
+          if($image75x75_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image75x75_error));
+            return;
+          }
+        }else{
+          $current_image_name = './assets/images/shared/products/75/' . $product->product_image;
+          
+          if($product->product_image !== $product_image_name && file_exists($current_image_name)){
+            copy($current_image_name,'./assets/images/shared/products/75/'. $product_image_name);
+          }
+        }
+        $product_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+        
+        $data = array(
+          "name" => $this->input->post('name'),
+          "product_image" => $product_image_name,
+          "description" => $this->input->post('description'),
+          "delivery_details" => $this->input->post('deliveryDetails'),
+          "price" => $this->input->post('price'),
+          "category" => $this->input->post('category'),
+          "uom" => $this->input->post('uom'),
+          "add_details" => $this->input->post('addDetails'),
+          "status" => 1,
+          "num_flavor" => $this->input->post('numFlavor'),
+          'product_hash' => $product_hash,
+        );
+
+        $product_id = $this->admin_model->insertShopProduct($data);
+        
+        $product_category = array(
+          "product_id" => $product_id,
+          "category_id" => $this->input->post('category'),
+        );
+
+        $this->admin_model->insertShopProductCategory($product_category);
+        
+        $region_da_logs = array();
+        $stores = json_decode($this->input->post('stores'), true);
+        $product_availability = json_decode($this->input->post('productAvailability'));
+
+        foreach($stores as $store){
+          $data = array(
+            'region_id' => $store['region_store_id'],
+            'store_id' => $store['store_id'],
+            'product_id' => $product_id,
+            'status' => $product_availability,
+          );
+          $region_da_logs[] = $data;
+        }
+
+        if(!empty($region_da_logs)){
+          $this->admin_model->insertRegionDaLogs($region_da_logs); 
+        }
+        
+        $variants = json_decode($this->input->post('variants'), true);
+        
+        foreach($variants as $variant){
+          $data = array(
+            'product_id' => $product_id,
+            'name' => $variant['name'],
+            'status' => 1,
+          );
+
+          $variant_id = $this->admin_model->insertShopProductVariant($data);
+
+          $options = $variant['options'];
+          foreach($options as $option){
+            $product_variant_option = array(
+              "product_variant_id" => $variant_id,
+              "name" => $option['name'],
+              "status" => 1,
+            );
+
+            $product_variant_option_id = $this->admin_model->insertShopProductVariantOption($product_variant_option);
+
+            if(isset($option['price']) && isset($option['sku'])){
+              $product_sku = array(
+                "product_id" => $product_id,
+                "sku" => $option['sku'],
+                "price" => $option['price']
+              );
+
+              $sku_id = $this->admin_model->insertShopProductSku($product_sku);
+              
+              $product_variant_option_combination = array(
+                "product_variant_option_id" => $product_variant_option_id,
+                "sku_id" => $sku_id,
+              );
+
+              $this->admin_model->insertShopProductVariantOptionCombination($product_variant_option_combination);
+            }
+          }
+        }
+
+          
+        $products = json_decode($this->input->post('products'), true);
+        $product_with_addon = array();
+
+        foreach($products as $product){
+          $data = array(
+            'product_id' => $product_id,
+            'addon_product_id' => $product['id'],
+          );
+          $product_with_addons[] = $data;
+        }
+
+        if(!empty($product_with_addons)){
+          $this->admin_model->insertProductWithAddons($product_with_addons);
+        }
+
+
+        $response = array(
+          "message" =>  'Successfully copy product'
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+
+  }
+
   public function catering_update_order_item_remarks(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
@@ -1105,7 +1254,6 @@ class Admin extends CI_Controller{
           if(
             is_uploaded_file($_FILES['image500x500']['tmp_name']) &&
             is_uploaded_file($_FILES['image250x250']['tmp_name']) &&
-            is_uploaded_file($_FILES['image150x150']['tmp_name']) &&
             is_uploaded_file($_FILES['image75x75']['tmp_name']) 
           ){
             $product_image_name = str_replace(' ', '-', strtolower($this->input->post('name'))) . '-' . time() .'.jpg';
@@ -1124,19 +1272,13 @@ class Admin extends CI_Controller{
               return;
             }
 
-            $image150x150_error = upload('image150x150','./assets/images/shared/products/150',$product_image_name, 'jpg');
-            if($image150x150_error){
-              $this->output->set_status_header('401');
-              echo json_encode(array( "message" => $image150x150_error));
-              return;
-            }
-
             $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$product_image_name, 'jpg');
             if($image75x75_error){
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => $image75x75_error));
               return;
-            } $product_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+            } 
+            $product_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
 
             $data = array(
               "name" => $this->input->post('name'),
