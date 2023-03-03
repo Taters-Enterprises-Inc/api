@@ -960,7 +960,7 @@ class Admin extends CI_Controller{
   public function setting_edit_shop_product(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
-        $product_image_name = clean_str_for_img($this->input->post('name'). '-' . time() .'.jpg');
+        $product_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.jpg';
 
         $product_id = $this->input->post('id');
 
@@ -1194,7 +1194,7 @@ class Admin extends CI_Controller{
   public function setting_copy_shop_product(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
-        $product_image_name = clean_str_for_img($this->input->post('name'). '-' . time() .'.jpg');
+        $product_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.jpg';
 
         $product_id = $this->input->post('id');
 
@@ -1416,7 +1416,7 @@ class Admin extends CI_Controller{
             is_uploaded_file($_FILES['image75x75']['tmp_name']) 
           ){
             
-            $product_image_name = clean_str_for_img($this->input->post('name'). '-' . time() .'.jpg' );
+            $product_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.jpg';
     
             
             $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$product_image_name, 'jpg');
