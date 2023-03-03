@@ -6,6 +6,45 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    function insertPackageDynamicPrices($data){
+        $this->db->trans_start();
+		$this->db->insert('catering_package_prices_tb', $data);
+        $this->db->trans_complete();
+    }
+
+
+    function insertCateringPackageVariantOption($data){
+        $this->db->trans_start();
+		$this->db->insert('catering_package_variant_options_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return $insert_id;
+    }
+
+    function insertCateringPackageVariant($data){
+        $this->db->trans_start();
+		$this->db->insert('catering_package_variants_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    function insertCateringRegionDaLogs($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('catering_region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertCateringPackage($data){
+        $this->db->trans_start();
+		$this->db->insert('catering_packages_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
     public function getCateringPackagesCount($status, $search){
         $this->db->select('count(*) as all_count');
             
@@ -199,12 +238,6 @@ class Admin_model extends CI_Model
 
         $query = $this->db->get();
         return $query->row();
-    }
-
-    function insertCateringRegionDaLogs($data){
-        $this->db->trans_start();
-		$this->db->insert_batch('catering_region_da_log', $data);
-        $this->db->trans_complete();
     }
 
     
@@ -1221,6 +1254,13 @@ class Admin_model extends CI_Model
         $this->db->from("category_tb");
         return $this->db->get()->result();
     }
+
+    public function getPackageCategories() {
+        $this->db->select("id, category_name as name");
+        $this->db->from("catering_category_tb");
+        return $this->db->get()->result();
+    }
+
 
     function getStoreCateringProductCount($store_id, $category_id, $status, $search) {
         $this->db->select('count(*) as all_count');
