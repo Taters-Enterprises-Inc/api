@@ -24,6 +24,41 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 		$this->load->model('deals_model');
 	}
+  public function setting_catering_packages(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $status = $this->input->get('status') ?? null;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'dateadded';
+        $search = $this->input->get('search');
+    
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+        
+        $catering_packages_count = $this->admin_model->getCateringPackagesCount($status, $search);
+        $catering_packages = $this->admin_model->getCateringPackages($page_no, $per_page, $status, $order_by, $order, $search);
+    
+        $pagination = array(
+          "total_rows" => $catering_packages_count,
+          "per_page" => $per_page,
+        );
+    
+        $response = array(
+          "message" => 'Successfully fetch catering packages',
+          "data" => array(
+            "pagination" => $pagination,
+            "catering_packages" => $catering_packages
+          ),
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
 
   public function setting_product_addons(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -1424,7 +1459,7 @@ class Admin extends CI_Controller{
         );
     
         $response = array(
-          "message" => 'Successfully fetch survey verification',
+          "message" => 'Successfully fetch shop products',
           "data" => array(
             "pagination" => $pagination,
             "shop_products" => $shop_products
