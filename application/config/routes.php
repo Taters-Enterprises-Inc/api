@@ -171,6 +171,7 @@ $route['admin/setting/shop-products'] = 'admin/setting_shop_products';
 $route['admin/setting/shop-product'] = 'admin/setting_shop_product';
 $route['admin/setting/catering-packages'] = 'admin/setting_catering_packages';
 $route['admin/setting/catering-package'] = 'admin/setting_catering_package';
+$route['admin/setting/edit-catering-package'] = 'admin/setting_edit_catering_package';
 $route['admin/setting/shop-product/stores'] = 'admin/setting_product_stores';
 $route['admin/setting/edit-shop-product'] = 'admin/setting_edit_shop_product';
 $route['admin/setting/copy-shop-product'] = 'admin/setting_copy_shop_product';

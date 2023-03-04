@@ -6,19 +6,175 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
-    function insertPackageDynamicPrices($data){
+    function removePackageDynamicPrices($package_id){
+        $this->db->where('package_id', $package_id);
+		$this->db->delete('catering_package_prices_tb');
+    }
+
+    function removePackageVariantOption($package_variant_option_id){
+        $this->db->where('id', $package_variant_option_id);
+        $this->db->delete('catering_package_variant_options_tb');
+    }
+    
+    function removePackageVariant($package_variant_id){
+        $this->db->where('id', $package_variant_id);
+        $this->db->delete('catering_package_variants_tb');
+    }
+    
+    function getPackageVariants($package_id){
+        $this->db->select('id');
+
+        $this->db->from('catering_package_variants_tb');
+        $this->db->where('product_id', $package_id);
+        
+        $query_package_variants = $this->db->get();
+
+        return $query_package_variants->result();
+    }
+
+    function getPackageVariantOptions($package_variant_id){
+        $this->db->select('id');
+
+        $this->db->from('catering_package_variant_options_tb');
+        $this->db->where('product_variant_id', $package_variant_id);
+        
+        $query_package_variant_options = $this->db->get();
+
+        return $query_package_variant_options->result();
+    }
+
+    
+
+    function removeCateringRegionDaLogById($catering_region_da_log_id){
+        $this->db->where('id', $catering_region_da_log_id);
+		$this->db->delete('catering_region_da_log');
+    }
+
+    function removeCateringRegionDaLogByPackageId($package_id){
+        $this->db->where('product_id', $package_id);
+		$this->db->delete('catering_region_da_log');
+    }
+
+    function getCateringRegionDaLogByPackageId($package_id){
+        $this->db->select('id, store_id');
+
+        $this->db->from('catering_region_da_log');
+
+        $this->db->where('product_id', $package_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+
+    function updateCateringPackageCategory($package_id, $data){
+        $this->db->where('product_id', (int)$package_id);
+        $this->db->update('catering_package_category_tb', $data);
+    }
+
+    function updateCateringPackage($package_id, $data){
+        $this->db->where('id', $package_id);
+        $this->db->update('catering_packages_tb', $data);
+    }
+
+    function getCateringPackageDynamicPrices($package_id){
+        $this->db->select('id, price, min_qty');
+
+        $this->db->from('catering_package_prices_tb');
+
+        $this->db->where('package_id',$package_id);
+        
+        $query_catering_package_dynamic_prices = $this->db->get();
+        return $query_catering_package_dynamic_prices->result();
+
+    }
+
+    function getCateringPackageStores($package_id){
+
+        $this->db->select('
+            A.store_id,
+            B.name,
+			C.region_store_id,
+        ');
+
+        $this->db->from('catering_region_da_log A');
+        $this->db->join('store_tb B', 'B.store_id = A.store_id');
+		$this->db->join('region_store_combination_tb C', 'C.region_store_id = B.region_store_combination_id');
+
+        $this->db->where('A.product_id',$package_id);
+        
+        $query_catering_package_stores = $this->db->get();
+        return $query_catering_package_stores->result();
+    }
+
+    function getCateringPackageVariantOptions($product_variant_id){
+        $this->db->select('
+            A.name
+        ');
+
+        $this->db->from('catering_package_variant_options_tb A');
+        $this->db->where('A.product_variant_id',$product_variant_id);
+
+        $query_catering_package_variant_options = $this->db->get();
+        return $query_catering_package_variant_options->result();
+    }
+    
+    function getCateringPackageVariants($package_id){
+        $this->db->select('
+            A.id,
+            A.product_id,
+            A.name, 
+            A.status
+        ');
+
+        $this->db->from('catering_package_variants_tb A');
+        $this->db->where('A.product_id',$package_id);
+
+        $query_catering_package_variants = $this->db->get();
+        return $query_catering_package_variants->result();
+    }
+
+    function getCateringPackage($package_id){
+        $this->db->select('
+            A.id,
+            A.name,
+            A.product_image,
+            A.description,
+            A.delivery_details,
+            A.price,
+            A.uom,
+            A.add_details,
+            A.status,
+            A.category,
+            A.num_flavor,
+            A.dateadded,
+            A.free_threshold,
+        ');
+
+        $this->db->from('catering_packages_tb A');
+        $this->db->where('A.id', $package_id);
+
+        $query_package = $this->db->get();
+        return $query_package->row();
+    }
+
+    function insertCateringPackageCategory($data){
         $this->db->trans_start();
-		$this->db->insert('catering_package_prices_tb', $data);
+		$this->db->insert('catering_package_category_tb', $data);
         $this->db->trans_complete();
     }
 
+    function insertPackageDynamicPrices($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('catering_package_prices_tb', $data);
+        $this->db->trans_complete();
+    }
 
     function insertCateringPackageVariantOption($data){
         $this->db->trans_start();
 		$this->db->insert('catering_package_variant_options_tb', $data);
-		$insert_id = $this->db->insert_id();
         $this->db->trans_complete();
-        return $insert_id;
     }
 
     function insertCateringPackageVariant($data){
@@ -770,6 +926,7 @@ class Admin_model extends CI_Model
 		$this->db->insert('product_category_tb', $data);
         $this->db->trans_complete();
     }
+
     function insertShopProductVariantOptionCombination($data){
         $this->db->trans_start();
 		$this->db->insert('product_variant_option_combinations_tb', $data);
