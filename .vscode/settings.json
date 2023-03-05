@@ -3,6 +3,7 @@
 		"asdoc",
 		"BASEPATH",
 		"dateadded",
+		"dateupdated",
 		"firstname",
 		"geolocator",
 		"giftcard",
