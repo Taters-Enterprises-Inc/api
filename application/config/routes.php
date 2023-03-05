@@ -144,6 +144,7 @@ $route['admin/availability/caters-product-addon'] = 'admin/caters_product_addon_
 
 $route['admin/deal-categories'] = 'admin/deal_categories';
 $route['admin/product-categories'] = 'admin/product_categories';
+$route['admin/package-categories'] = 'admin/package_categories';
 $route['admin/caters-package-categories'] = 'admin/caters_package_categories';
 
 $route['admin/snackshop-transaction-logs/(:num)'] = 'admin/snackshop_transaction_logs/$1';
@@ -168,6 +169,10 @@ $route['admin/setting/user/(:any)'] = 'admin/setting_user/$1';
 $route['admin/setting/groups'] = 'admin/setting_groups';
 $route['admin/setting/shop-products'] = 'admin/setting_shop_products';
 $route['admin/setting/shop-product'] = 'admin/setting_shop_product';
+$route['admin/setting/catering-packages'] = 'admin/setting_catering_packages';
+$route['admin/setting/catering-package'] = 'admin/setting_catering_package';
+$route['admin/setting/edit-catering-package'] = 'admin/setting_edit_catering_package';
+$route['admin/setting/copy-catering-package'] = 'admin/setting_copy_catering_package';
 $route['admin/setting/shop-product/stores'] = 'admin/setting_product_stores';
 $route['admin/setting/edit-shop-product'] = 'admin/setting_edit_shop_product';
 $route['admin/setting/copy-shop-product'] = 'admin/setting_copy_shop_product';
