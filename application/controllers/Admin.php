@@ -25,6 +25,155 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
   
+
+  public function setting_copy_catering_package(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST':
+        $package_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.jpg';
+
+        $package_id = $this->input->post('id');
+
+        $package = $this->admin_model->getCateringPackage($package_id);
+
+        if(isset($_FILES['image500x500']['tmp_name']) && is_uploaded_file($_FILES['image500x500']['tmp_name'])){
+          $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$package_image_name, 'jpg');
+          if($image500x500_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image500x500_error));
+            return;
+          }
+        }else{
+          $current_image_name = './assets/images/shared/products/500/' . $package->product_image;
+          
+          if($package->product_image !== $package_image_name && file_exists($current_image_name)){
+            copy($current_image_name,'./assets/images/shared/products/500/'. $package_image_name);
+          }
+        }
+        
+        if(isset($_FILES['image250x250']['tmp_name']) && is_uploaded_file($_FILES['image250x250']['tmp_name'])){
+          $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$package_image_name, 'jpg');
+          if($image250x250_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image250x250_error));
+            return;
+          }
+        }else{
+          $current_image_name = './assets/images/shared/products/250/' . $package->product_image;
+          
+          if($package->product_image !== $package_image_name && file_exists($current_image_name)){
+            copy($current_image_name,'./assets/images/shared/products/250/'. $package_image_name);
+          }
+        }
+        
+        
+        if(isset($_FILES['image75x75']['tmp_name']) && is_uploaded_file($_FILES['image75x75']['tmp_name'])){
+          $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$package_image_name, 'jpg');
+          if($image75x75_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image75x75_error));
+            return;
+          }
+        }else{
+          $current_image_name = './assets/images/shared/products/75/' . $package->product_image;
+          
+          if($package->product_image !== $package_image_name && file_exists($current_image_name)){
+            copy($current_image_name,'./assets/images/shared/products/75/'. $package_image_name);
+          }
+        }
+        $package_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+        
+        $data = array(
+          "name" => $this->input->post('name'),
+          "product_image" => $package_image_name,
+          "description" => $this->input->post('description'),
+          "delivery_details" => $this->input->post('deliveryDetails'),
+          "price" => $this->input->post('price'),
+          "category" => $this->input->post('category'),
+          "uom" => $this->input->post('uom'),
+          "add_details" => $this->input->post('addDetails'),
+          "status" => 1,
+          "num_flavor" => $this->input->post('numFlavor'),
+          "free_threshold" => $this->input->post('freeThreshold'),
+          'product_hash' => $package_hash,
+        );
+
+        $package_id = $this->admin_model->insertCateringPackage($data);
+        
+        $package_category = array(
+          "product_id" => $package_id,
+          "category_id" => $this->input->post('category'),
+        );
+
+        $this->admin_model->insertCateringPackageCategory($package_category);
+            
+        $catering_region_da_logs = array();
+        $stores = json_decode($this->input->post('stores'), true);
+        $package_availability = json_decode($this->input->post('packageAvailability'));
+
+        foreach($stores as $store){
+          $data = array(
+            'region_id' => $store['region_store_id'],
+            'store_id' => $store['store_id'],
+            'product_id' => $package_id,
+            'status' => $package_availability,
+          );
+          $catering_region_da_logs[] = $data;
+        }
+
+        if(!empty($catering_region_da_logs)){
+          $this->admin_model->insertCateringRegionDaLogs($catering_region_da_logs); 
+        }
+        
+        $variants = json_decode($this->input->post('variants'), true);
+        
+        foreach($variants as $variant){
+          $data = array(
+            'product_id' => $package_id,
+            'name' => $variant['name'],
+            'status' => 1,
+          );
+
+          $variant_id = $this->admin_model->insertCateringPackageVariant($data);
+
+          $options = $variant['options'];
+          foreach($options as $option){
+            $package_variant_option = array(
+              "product_variant_id" => $variant_id,
+              "name" => $option['name'],
+              "status" => 1,
+            );
+
+            $this->admin_model->insertCateringPackageVariantOption($package_variant_option);
+          }
+        }
+
+        $dynamic_prices = json_decode($this->input->post('dynamicPrices'), true);
+        $dynamic_prices_array = array();
+
+        foreach($dynamic_prices as $dynamic_price){
+          $data = array(
+            'package_id' => $package_id,
+            'price' => $dynamic_price['price'],
+            'min_qty' => $dynamic_price['min_qty'],
+          );
+          $dynamic_prices_array[] = $data;
+        }
+
+        if(!empty($dynamic_prices)){
+          $this->admin_model->insertPackageDynamicPrices($dynamic_prices_array);
+        }
+
+        $response = array(
+          "message" =>  'Successfully copy package'
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+
+  }
+  
   public function setting_edit_catering_package(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
@@ -324,8 +473,6 @@ class Admin extends CI_Controller{
 
             $this->admin_model->insertCateringPackageCategory($package_category);
             
-            
-            
             $catering_region_da_logs = array();
             $stores = json_decode($this->input->post('stores'), true);
             $package_availability = json_decode($this->input->post('packageAvailability'));
@@ -388,6 +535,18 @@ class Admin extends CI_Controller{
           $response = array(
             "message" =>  'Successfully add package'
           );
+          header('content-type: application/json');
+          echo json_encode($response);
+          break;
+        case 'PUT':
+          $put = json_decode(file_get_contents("php://input"), true);
+
+          $this->admin_model->updateCateringPackageStatus($put['package_id'], $put['status']);
+
+          $response = array(
+            "message" => 'Successfully update status',
+          );
+    
           header('content-type: application/json');
           echo json_encode($response);
           break;

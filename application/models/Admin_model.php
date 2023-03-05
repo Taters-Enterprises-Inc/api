@@ -6,6 +6,13 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    
+    function updateCateringPackageStatus($package_id, $status){
+        $this->db->set('status', $status);
+        $this->db->where("id", $package_id);
+        $this->db->update("catering_packages_tb");
+    }
+
     function removePackageDynamicPrices($package_id){
         $this->db->where('package_id', $package_id);
 		$this->db->delete('catering_package_prices_tb');
