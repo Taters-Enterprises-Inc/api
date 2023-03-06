@@ -17,6 +17,7 @@ class Profile extends CI_Controller {
 		$this->load->model('user_model');
 		$this->load->model('contact_model');
 		$this->load->model('discount_model');
+		$this->load->model('notification_model');
 
 		$this->load->library('form_validation');
 		$this->form_validation->set_error_delimiters('', '');
@@ -552,7 +553,48 @@ class Profile extends CI_Controller {
 							'status' => 1
 						);
 
-						$this->discount_model->insertDiscountUser($user_discount_data);
+						$discount_user_id = $this->discount_model->insertDiscountUser($user_discount_data);
+
+                        $message = $_POST['firstName'] . " " . $_POST['lastName'] ." applied for discount!";
+                        
+                        $notification_event_data = array(
+                            "notification_event_type_id" => 6,
+                            "discount_user_id" => $discount_user_id,
+                            "text" => $message
+                        );
+                        
+                        $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                        //admin
+                        $admin_users = $this->user_model->getUsersByGroupId(1);
+                        foreach($admin_users as $user){
+                            $notifications_data = array(
+                                "user_to_notify" => $user->user_id,
+                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                                'notification_event_id' => $notification_event_id,
+                                "dateadded" => date('Y-m-d H:i:s'),
+                            );
+                            $this->notification_model->insertNotification($notifications_data);   
+                        }
+                        
+                        //csr admin
+                        $csr_admin_users = $this->user_model->getUsersByGroupId(10);
+                        foreach($csr_admin_users as $user){
+                            $notifications_data = array(
+                                "user_to_notify" => $user->user_id,
+                                "fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+                                "mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+                                'notification_event_id' => $notification_event_id,
+                                "dateadded" => date('Y-m-d H:i:s'),
+                            );
+                            $this->notification_model->insertNotification($notifications_data);   
+                        }
+
+                        $realtime_notification = array(
+                            "message" => $message,
+                        );
+
+                        notify('admin-discount-user','discount-application', $realtime_notification);
 
 						$response = array(
 							"message" => 'Application for user discount is successful!'
@@ -564,10 +606,6 @@ class Profile extends CI_Controller {
 					$this->output->set_status_header('401');
 					echo json_encode(array( "message" => 'Application for user discount failed.'));
 				}
-				break;
-
-			case 'PUT':
-
 				break;
 		}
 		

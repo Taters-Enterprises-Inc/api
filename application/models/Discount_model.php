@@ -12,7 +12,12 @@ class Discount_model extends CI_Model {
     }
 
     public function insertDiscountUser($data){
+        $this->db->trans_start();
         $this->db->insert('discount_users', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
     }
 
     public function getUserDiscountById($id){
