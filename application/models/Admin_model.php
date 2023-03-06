@@ -5,7 +5,60 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+    public function getPopclubDealsCount($status, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('dotcom_deals_tb');
 
+        if($status)
+            $this->db->where('status', $status);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->or_like('name', $search);
+            $this->db->or_like('original_price', $search);
+            $this->db->or_like('promo_price', $search);
+            $this->db->or_like('description', $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+
+    function getPopclubDeals($row_no, $row_per_page, $status, $order_by,  $order, $search){
+        $this->db->select('
+            id,
+            product_image,
+            name,
+            original_price,
+            promo_price,
+            description,
+            status,
+        ');
+
+        $this->db->from('dotcom_deals_tb');
+    
+        if($status)
+            $this->db->where('status', $status);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->or_like('name', $search);
+            $this->db->or_like('original_price', $search);
+            $this->db->or_like('promo_price', $search);
+            $this->db->or_like('description', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
     
     function updateCateringPackageStatus($package_id, $status){
         $this->db->set('status', $status);
