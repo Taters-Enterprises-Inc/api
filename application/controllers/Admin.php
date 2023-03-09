@@ -24,6 +24,66 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 		$this->load->model('deals_model');
 	}
+
+  public function setting_deal_shop_products(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $products = $this->admin_model->getAdminSettingDealShopProducts();
+
+        $stick_the_size = array();
+
+        foreach($products as $product){
+          $variant_size = $this->admin_model->getProductSizeId($product->id);
+          $product->variant_option_id = null;
+
+
+          if($variant_size){
+            $variant_options = $this->admin_model->getProductVariantOptions($variant_size->id);
+            
+            if(!empty($variant_options)){
+              foreach($variant_options as $option){
+                $product->name = $option->name . " " .$product->name;
+                $product->variant_option_id = $option->id;
+                $stick_the_size[] = $product;
+              }
+            }else{
+              $stick_the_size[] = $product;
+            }
+
+          }else{
+            $stick_the_size[] = $product;
+          }
+
+        }
+    
+        $response = array(
+          "message" => 'Successfully fetch shop products.',
+          "data" => $stick_the_size,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
+
+  public function popclub_categories(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $popclub_categories = $this->admin_model->getPopclubCategories();
+    
+        $response = array(
+          "message" => 'Successfully fetch popclub categories.',
+          "data" => $popclub_categories,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
   
 
   public function setting_popclub_deals(){
@@ -3633,7 +3693,8 @@ class Admin extends CI_Controller{
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
         $order = $this->admin_model->getSnackshopOrder($trackingNo);
-        $order->items = $this->admin_model->getSnackshopOrderItems($order->id);
+        $order->items = $this->admin_model->getSnackshopOrderItemsByTransactionId($order->id);
+        $order->deal_items = $this->admin_model->getDealOrderItemsByTransactionId($order->id);
         
         foreach($order->items as $key => $item){
           if(!isset($item->deal_order_item_id)){

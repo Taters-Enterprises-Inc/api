@@ -128,8 +128,10 @@ $route['admin/shop'] = 'admin/shop';
 
 $route['admin/popclub/complete-redeem'] = 'admin/popclub_complete_redeem';
 $route['admin/popclub/decline-redeem'] = 'admin/popclub_decline_redeem';
+$route['admin/popclub/categories'] = 'admin/popclub_categories';
 $route['admin/popclub/(:any)'] = 'admin/popclub_redeem/$1';
 $route['admin/popclub'] = 'admin/popclub';
+
 
 $route['admin/discount/user-discount-change-status'] = 'admin/user_discount_change_status';
 $route['admin/discount/(:any)'] = 'admin/discount/$1';
@@ -182,6 +184,7 @@ $route['admin/setting/store'] = 'admin/setting_store';
 $route['admin/setting/edit-store'] = 'admin/setting_edit_store';
 $route['admin/setting/product-addons'] = 'admin/setting_product_addons';
 $route['admin/setting/popclub-deals'] = 'admin/setting_popclub_deals';
+$route['admin/setting/deal-shop-products'] = 'admin/setting_deal_shop_products';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';

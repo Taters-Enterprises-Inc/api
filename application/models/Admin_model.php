@@ -4,7 +4,52 @@ class Admin_model extends CI_Model
 {
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
+
     }
+
+    public function getProductSizeId($product_id){
+        $this->db->select('
+            A.id,
+            A.name
+        ');
+
+        $this->db->from('product_variants_tb A');
+
+        $this->db->where('A.name', 'size');
+        $this->db->where('A.product_id', $product_id);
+
+        $query_shop_products = $this->db->get();
+        return $query_shop_products->row();
+    }
+
+    public function getAdminSettingDealShopProducts(){
+        $this->db->select('
+            A.id,
+            A.name,
+        ');
+
+        $this->db->from('products_tb A');
+
+        $this->db->where('A.status', 1);
+
+        $query_shop_products = $this->db->get();
+        return $query_shop_products->result();
+    }
+
+    public function getPopclubCategories(){
+        $this->db->select('
+            A.id,
+            A.name,
+            B.name as platform_name,
+        ');
+
+        $this->db->from('dotcom_deals_category A');
+        $this->db->join('dotcom_deals_platform B', 'B.id = A.dotcom_deals_platform_id');
+
+        $query_popclub_categories = $this->db->get();
+        return $query_popclub_categories->result();
+    }
+
     public function getPopclubDealsCount($status, $search){
         $this->db->select('count(*) as all_count');
             
@@ -866,7 +911,7 @@ class Admin_model extends CI_Model
     
 
     function getProductVariantOptions($product_variant_id){
-        $this->db->select('id');
+        $this->db->select('id, name');
 
         $this->db->from('product_variant_options_tb');
         $this->db->where('product_variant_id', $product_variant_id);
@@ -2388,7 +2433,7 @@ class Admin_model extends CI_Model
         return $query->result();
     }
 
-    public function getSnackshopOrderItems($transaction_id){
+    public function getSnackshopOrderItemsByTransactionId($transaction_id){
         $this->db->select("
             A.id as order_item_id,
             A.price,
@@ -2410,6 +2455,10 @@ class Admin_model extends CI_Model
         $products_query = $this->db->get();
         $products = $products_query->result();
 
+		return $products;
+    }
+
+    public function getDealOrderItemsByTransactionId($transaction_id){
         $this->db->select("
             A.id as deal_order_item_id,
             A.price,
@@ -2419,7 +2468,7 @@ class Admin_model extends CI_Model
             B.id as deal_id,
             B.name as deal_name,
             B.alias,
-            B.description as deal_description,
+            B.description,
         ");
         $this->db->from('deals_order_items A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
@@ -2427,7 +2476,7 @@ class Admin_model extends CI_Model
         $deals_query = $this->db->get();
         $deals = $deals_query->result();
         
-		return array_merge($products, $deals);
+		return $deals;
     }
 
     public function getSnackshopOrder($tracking_no){

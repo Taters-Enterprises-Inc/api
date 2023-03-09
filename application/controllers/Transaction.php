@@ -348,47 +348,6 @@ class Transaction extends CI_Controller {
                         $cod_fee = $this->session->cash_delivery;
                     }
                     
-                    $voucher_id = 0;
-                    $voucher_discount = 0;
-
-                    if(isset($this->session->voucher_data) && isset($this->session->voucher_status) && $this->session->voucher_status == 1){
-                        $voucher_id = $this->session->voucher_data[0]['id'];
-                        $offer_type = $this->session->voucher_data[0]['offer_type'];
-                        $voucher_max_discount = $this->session->voucher_data[0]['voucher_max_discount'];
-
-                        if ($offer_type == 1) {
-                            if ($voucher_max_discount != 0) {
-                                $comp = $this->session->voucher_data[0]['voucher_value'] * $comp_total / 100 ;
-                                if ($comp > $voucher_max_discount) {
-                                    $voucher_discount = $voucher_max_discount;
-                                } else {
-                                    $voucher_discount = $comp;
-                                }
-                            } else {
-                                $voucher_discount = $this->session->voucher_data[0]['voucher_value'] * $comp_total / 100;
-                            }
-                        } elseif($offer_type == 6 || $offer_type == 9 || $offer_type == 16){
-                            foreach ($this->session->orders as $key => $value) {
-                                $voucher_discount += $this->session->orders[$key]['prod_discount'];
-                            }
-                        } elseif($offer_type == 7){
-                            $compute_discount = $this->session->voucher_data[0]['voucher_value'] * $comp_total;
-                            if ($compute_discount >= 75) {
-                                $voucher_discount = 75;
-                            } else {
-                                $voucher_discount = $compute_discount;
-                            }
-                        } else {
-                            $voucher_discount = $this->session->voucher_data[0]['voucher_value'];
-                        }
-
-                    }
-
-                    if (isset($this->session->table_number)) {
-                        $table_number = $this->session->table_number;
-                    } else {
-                        $table_number = null;
-                    }
 
                     $discount = $this->discount_model->getAvailableUserDiscount(
                         $this->session->userData['fb_user_id'] ?? null,
@@ -427,8 +386,6 @@ class Transaction extends CI_Controller {
                         'discount_user_id'  => $discount_user_id,
                         'giftcard_discount' => "",
                         'giftcard_number'   => "",
-                        'voucher_id'        => $voucher_id,
-                        'table_number'      => $table_number,
                         'custom_message'    => '',
                         'logon_type'        => $insert_client_details['logon_type'],
                         'store_payops'      => 0,
