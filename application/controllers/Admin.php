@@ -24,6 +24,195 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 		$this->load->model('deals_model');
 	}
+  
+  public function setting_popclub_deal(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST':
+          if(
+            is_uploaded_file($_FILES['image500x500']['tmp_name']) &&
+            is_uploaded_file($_FILES['image250x250']['tmp_name']) &&
+            is_uploaded_file($_FILES['image75x75']['tmp_name']) 
+          ){
+            
+            $deal_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.jpg';
+    
+            $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$deal_image_name, 'jpg');
+            if($image500x500_error){
+              $this->output->set_status_header('401');
+              echo json_encode(array( "message" => $image500x500_error));
+              return;
+            }
+            
+            $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$deal_image_name, 'jpg');
+            if($image250x250_error){
+              $this->output->set_status_header('401');
+              echo json_encode(array( "message" => $image250x250_error));
+              return;
+            }
+
+            $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$deal_image_name, 'jpg');
+            if($image75x75_error){
+              $this->output->set_status_header('401');
+              echo json_encode(array( "message" => $image75x75_error));
+              return;
+            } 
+
+            $deal_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+
+            $data = array(
+              "alias" => $this->input->post('alias'),
+              "name" => $this->input->post('name'),
+              "product_image" => $deal_image_name,
+              "original_price" => $this->input->post('originalPrice'),
+              "promo_price" => $this->input->post('promoPrice'),
+              "promo_discount_percentage" => $this->input->post('promoDiscountPercentage'),
+              "minimum_purchase" => $this->input->post('minimumPurchase'),
+              "is_free_delivery" => $this->input->post('isFreeDelivery'),
+              "description" => $this->input->post('description'),
+              "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
+              "available_start_time" => $this->input->post('availableStartTime'),
+              "available_end_time" => $this->input->post('availableEndTime'),
+              "available_start_datetime" => $this->input->post('availableStartDateTime'),
+              "available_end_datetime" => $this->input->post('availableEndDateTime'),
+              "available_days" => $this->input->post('availableDays'),
+              "status" => 1,
+              'hash' => $deal_hash,
+            );
+
+            $deal_id = $this->admin_model->insertPopclubDeal($data);
+
+
+            
+            $categories = json_decode($this->input->post('categories'), true);
+            $platform_combinations = array();
+
+            foreach($categories as $category){
+              $data = array(
+                "deal_id" => $deal_id,
+                "platform_category_id" => $category['id'],
+              );
+              $platform_combinations[] = $data;
+            }
+
+            if(!empty($platform_combinations)){
+              $this->admin_model->insertDealsPlatformCombinations($platform_combinations); 
+            }
+
+            $excluded_products = json_decode($this->input->post('excludedProducts'), true);
+            $product_promo_excluded = array();
+
+            foreach($excluded_products as $excluded_product){
+              $data = array(
+                "deal_id" => $deal_id,
+                "product_id" => $excluded_product['id'],
+              );
+              $product_promo_excluded[] = $data;
+            }
+
+            if(!empty($product_promo_excluded)){
+              $this->admin_model->insertDealsProductPromoExclude($product_promo_excluded); 
+            }
+            
+
+            $products = json_decode($this->input->post('products'), true);
+            $products_with_variants = array();
+            
+            foreach($products as $val){
+              $data = array(
+                "deal_id" => $deal_id,
+                "product_id" => $val['product']['id'],
+                "product_variant_options_id" => $val['product']['variant_option_id'],
+                "quantity" => $val['quantity']
+              );
+              $products_with_variants[] = $data;
+            }
+
+            if(!empty($products_with_variants)){
+              $this->admin_model->insertDealsProductsWithVariants($products_with_variants); 
+            }
+            
+            $included_products = json_decode($this->input->post('includedProducts'), true);
+            foreach($included_products as $included_product){
+              $data = array(
+                "deal_id" => $deal_id,
+                "product_id" => $included_product['product']['id'],
+                "product_variant_option_tb_id" => $included_product['product']['variant_option_id'],
+                "promo_discount_percentage" => $included_product['promoDiscountPercentage'],
+                "quantity" => $included_product['quantity'],
+              );
+              $deals_product_promo_include_id = $this->admin_model->insertDealsProductsPromoInclude($data); 
+              
+              $obtainable =  $included_product['obtainableProducts'];
+              $products_include_obtainable = array();
+
+              foreach($obtainable as $val){
+                $data = array(
+                  "deals_product_promo_include_id" => $deals_product_promo_include_id,
+                  "product_id" => $val['product']['id'],
+                  "product_variant_option_tb_id" => $val['product']['variant_option_id'],
+                  "promo_discount_percentage" => $val['promoDiscountPercentage'],
+                  "quantity" => $val['quantity'],
+                );
+
+                $products_include_obtainable[] = $data;
+              }
+              
+              if(!empty($products_include_obtainable)){
+                $this->admin_model->insertDealsProductsIncludeObtainable($products_include_obtainable); 
+              }
+            }
+            
+            
+            $stores = json_decode($this->input->post('stores'), true);
+            $deals_region_da_logs = array();
+            $deal_availability = json_decode($this->input->post('dealAvailability'));
+
+            foreach($categories as $category){
+              foreach($stores as $store){
+                $data = array(
+                  'region_id' => $store['region_store_id'],
+                  'store_id' => $store['store_id'],
+                  'deal_id' => $deal_id,
+                  'status' => $deal_availability,
+                  "platform_category_id" => $category['id'],
+                );
+                $deals_region_da_logs[] = $data;
+              }
+            }
+            
+
+            if(!empty($deals_region_da_logs)){
+              $this->admin_model->insertDealRegionDaLogs($deals_region_da_logs); 
+            }
+          }
+
+          $response = array(
+            "POST" => $included_products,
+            "message" =>  'Successfully add product'
+          );
+          header('content-type: application/json');
+          echo json_encode($response);
+          break;
+    }
+  }
+
+  public function popclub_stores(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $stores = $this->admin_model->getSettingDealStoresPopclub();
+
+        $response = array(
+          "message" =>  'Successfully fetch stores',
+          "data" => $stores,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
 
   public function setting_deal_shop_products(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -2062,7 +2251,6 @@ class Admin extends CI_Controller{
           echo json_encode($response);
           break;
     }
-
   }
 
   public function setting_shop_products(){

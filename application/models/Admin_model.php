@@ -6,6 +6,72 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
 
     }
+    function insertDealRegionDaLogs($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('deals_region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+
+    function insertDealsProductsIncludeObtainable($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('deals_product_promo_include_obtainable', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertDealsProductsPromoInclude($data){
+        $this->db->trans_start();
+		$this->db->insert('deals_product_promo_include', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    function insertDealsProductsWithVariants($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('dotcom_deals_product_tb', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertDealsProductPromoExclude($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('deals_product_promo_exclude', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertDealsPlatformCombinations($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('dotcom_deals_platform_combination', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertPopclubDeal($data){
+        $this->db->trans_start();
+		$this->db->insert('dotcom_deals_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    public function getSettingDealStoresPopclub(){
+        $this->db->select('
+            A.store_id,
+            A.name,
+            B.name as menu_name,
+			C.region_store_id,
+        ');
+        $this->db->from('store_tb A');
+        $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
+		$this->db->join('region_store_combination_tb C', 'C.region_store_id = A.region_store_combination_id');
+
+        $this->db->where('A.popclub_walk_in_status', 1);
+        $this->db->or_where('A.popclub_online_delivery_status', 1);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
 
     public function getProductSizeId($product_id){
         $this->db->select('
