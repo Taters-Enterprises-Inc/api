@@ -3698,7 +3698,6 @@ class Admin extends CI_Controller{
 
         if ($fetch_data == 1) {
           $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Order Success');
-          $this->status_notification($trans_id, 9, $user_id);
 
           if($status === 6){
 						$notification_event_data = array(
@@ -4480,58 +4479,6 @@ class Admin extends CI_Controller{
     echo json_encode(array("status" => $status, 'message' => $msg));
 
     return $status;
-  }
-
-  // WILL BE DEPRECATED ( V2 Backend )
-  public function status_notification($transaction_id = '', $status = '', $user_id){
-    $query_result = $this->admin_model->get_order_summary($transaction_id);
-    $info = $query_result['clients_info'];
-
-    switch ($status) {
-      // PAID
-      case '2':
-        break;
-
-      // CONFIRMED
-      case '3':
-        break;
-
-      // DECLINE
-      case '4':
-        break;
-
-      // CANCELLED
-      case '5':
-        break;
-      
-      // COMPLETE
-      case '6':
-        break;
-
-      // REJECTED
-      case '7':
-        break;
-
-      // DISPATCH
-      case '9':
-          // SMS message
-          $sms_msg = 'Hey! Your product is now ready. Our team will get in touch with you shortly regarding the order logistics.';
-
-          $email_stat = TRUE;
-          $sms_stat = TRUE;
-          if ($info->table_number != null) {
-            if ($this->send_sms($info->contact_number, $sms_msg)) {
-              $sms_stat = TRUE;
-              $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Dispatched-sms-sent');
-            } else {
-              $sms_stat = FALSE;
-              $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Dispatched-sms-not-sent');
-            }
-          }
-          
-          return array('email_status' => $email_stat, 'sms_status' => $sms_stat);
-        break;
-    }
   }
 
   

@@ -810,7 +810,6 @@ class Transaction extends CI_Controller {
                     $query = $this->shop_model->update_transaction_status($_SESSION['transaction_id'], 5);
                     if ($query['status']) {
                         // $transaction_id = $_SESSION['transaction_id'];
-                        // $notification_status = $this->status_notification($transaction_id,5,0);
 
                         $this->session->unset_userdata('orders');
                         // $this->session->sess_destroy();

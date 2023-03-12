@@ -1631,7 +1631,7 @@ class Admin_model extends CI_Model
     public function get_order_summary($id)
     { 
         $table = "client_tb A";
-        $select_column = array("A.fname", "A.lname", "A.email","A.address", "A.contact_number","A.moh","A.payops","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","B.table_number","A.moh","A.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","Z.delivery_rate AS delivery_rate","Z.moh_notes AS moh_notes","Z.moh_setup AS moh_setup","B.payment_proof","A.add_name","A.add_contact","A.add_address","V.discount_value","V.voucher_code");
+        $select_column = array("A.fname", "A.lname", "A.email","A.address", "A.contact_number","A.moh","A.payops","B.id", "B.tracking_no","B.purchase_amount","B.distance_price","B.cod_fee","A.moh","A.payops","B.remarks", "B.status","B.dateadded","B.hash_key","B.store", "B.invoice_num","B.reseller_id","B.reseller_discount","B.discount","Z.name AS store_name","Z.address AS store_address","Z.contact_number AS store_contact","Z.contact_person AS store_person","Z.email AS store_email","Z.delivery_rate AS delivery_rate","Z.moh_notes AS moh_notes","Z.moh_setup AS moh_setup","B.payment_proof","A.add_name","A.add_contact","A.add_address","V.discount_value","V.voucher_code");
         $join_A = "A.id = B.client_id";
         $this->db->select($select_column);  
         $this->db->from($table);
