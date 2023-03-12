@@ -6,6 +6,313 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    function getPopclubDealStores($deal_id){
+
+        $this->db->select('
+            A.store_id,
+			C.region_store_id,
+            CONCAT(B.name , " (" , D.name ," - ", E.name , ")") as name,
+        ');
+
+        $this->db->from('deals_region_da_log A');
+        $this->db->join('store_tb B', 'B.store_id = A.store_id');
+		$this->db->join('region_store_combination_tb C', 'C.region_store_id = B.region_store_combination_id');
+        $this->db->join('dotcom_deals_category D', 'D.id = A.platform_category_id');
+        $this->db->join('dotcom_deals_platform E','E.id = D.dotcom_deals_platform_id');
+
+        $this->db->where('A.deal_id',$deal_id);
+        
+        $query_shop_product_stores = $this->db->get();
+        return $query_shop_product_stores->result();
+    }
+
+
+    function getPopclubDealCategories($deal_id){
+        $this->db->select('
+            B.id,
+            B.name,
+            C.name as platform_name,
+        ');
+
+        $this->db->from('dotcom_deals_platform_combination A');
+        $this->db->join('dotcom_deals_category B','B.id = A.platform_category_id');
+        $this->db->join('dotcom_deals_platform C','C.id = B.dotcom_deals_platform_id');
+        $this->db->where('A.deal_id',$deal_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+
+    function getPopclubDealIncludedProductObtainable($include_product_id){
+        $this->db->select('
+            A.id,
+            A.quantity,
+            A.product_id,
+            A.product_variant_option_tb_id,
+            A.promo_discount_percentage,
+            B.name as product_name,
+            C.name as variant_name,
+        ');
+
+        $this->db->from('deals_product_promo_include_obtainable A');
+        $this->db->join('products_tb B','B.id = A.product_id');
+        $this->db->join('product_variant_options_tb C','C.id = A.product_variant_option_tb_id', 'left');
+        $this->db->where('A.deals_product_promo_include_id',$include_product_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function getPopclubDealIncludedProducts($deal_id){
+        $this->db->select('
+            A.id,
+            A.deal_id,
+            A.product_id,
+            A.product_variant_option_tb_id, 
+            A.promo_discount_percentage,
+            A.quantity,
+            B.name as product_name,
+            C.name as variant_name,
+        ');
+
+        $this->db->from('deals_product_promo_include A');
+        $this->db->join('products_tb B','B.id = A.product_id');
+        $this->db->join('product_variant_options_tb C','C.id = A.product_variant_option_tb_id', 'left');
+        $this->db->where('A.deal_id',$deal_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+
+    function getPopclubDealExcludedProducts($deal_id){
+        $this->db->select('
+            B.id,
+            B.name, 
+        ');
+
+        $this->db->from('deals_product_promo_exclude A');
+        $this->db->join('products_tb B','B.id = A.product_id');
+        $this->db->where('A.deal_id',$deal_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    function getPopclubDealProducts($deal_id){
+        $this->db->select('
+            A.id,
+            A.deal_id,
+            A.product_id,
+            A.product_variant_options_id, 
+            A.quantity,
+            B.name as product_name,
+            C.name as variant_name,
+        ');
+
+        $this->db->from('dotcom_deals_product_tb A');
+        $this->db->join('products_tb B','B.id = A.product_id');
+        $this->db->join('product_variant_options_tb C','C.id = A.product_variant_options_id', 'left');
+        $this->db->where('A.deal_id',$deal_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    function getPopclubDeal($deal_id){
+        $this->db->select('
+            A.id,
+            A.alias,
+            A.name,
+            A.product_image,
+            A.original_price,
+            A.promo_price,
+            A.promo_discount_percentage,
+            A.minimum_purchase,
+            A.is_free_delivery,
+            A.description,
+            A.seconds_before_expiration,
+            A.available_start_time,
+            A.available_end_time,
+            A.available_start_datetime,
+            A.available_end_datetime,
+            A.available_days,
+            A.status,
+        ');
+
+        $this->db->from('dotcom_deals_tb A');
+        $this->db->where('A.id', $deal_id);
+
+        $query_product = $this->db->get();
+        return $query_product->row();
+    }
+
+
+    function insertDealRegionDaLogs($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('deals_region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+
+    function insertDealsProductsIncludeObtainable($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('deals_product_promo_include_obtainable', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertDealsProductsPromoInclude($data){
+        $this->db->trans_start();
+		$this->db->insert('deals_product_promo_include', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    function insertDealsProductsWithVariants($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('dotcom_deals_product_tb', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertDealsProductPromoExclude($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('deals_product_promo_exclude', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertDealsPlatformCombinations($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('dotcom_deals_platform_combination', $data);
+        $this->db->trans_complete();
+    }
+
+    function insertPopclubDeal($data){
+        $this->db->trans_start();
+		$this->db->insert('dotcom_deals_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        
+        return $insert_id;
+    }
+
+    public function getSettingDealStoresPopclub(){
+        $this->db->select('
+            A.store_id,
+            A.name,
+            B.name as menu_name,
+			C.region_store_id,
+        ');
+        $this->db->from('store_tb A');
+        $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
+		$this->db->join('region_store_combination_tb C', 'C.region_store_id = A.region_store_combination_id');
+
+        $this->db->where('A.popclub_walk_in_status', 1);
+        $this->db->or_where('A.popclub_online_delivery_status', 1);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getProductSizeId($product_id){
+        $this->db->select('
+            A.id,
+            A.name
+        ');
+
+        $this->db->from('product_variants_tb A');
+
+        $this->db->where('A.name', 'size');
+        $this->db->where('A.product_id', $product_id);
+
+        $query_shop_products = $this->db->get();
+        return $query_shop_products->row();
+    }
+
+    public function getAdminSettingDealShopProducts(){
+        $this->db->select('
+            A.id,
+            A.name,
+        ');
+
+        $this->db->from('products_tb A');
+
+        $this->db->where('A.status', 1);
+
+        $query_shop_products = $this->db->get();
+        return $query_shop_products->result();
+    }
+
+    public function getPopclubCategories(){
+        $this->db->select('
+            A.id,
+            A.name,
+            B.name as platform_name,
+        ');
+
+        $this->db->from('dotcom_deals_category A');
+        $this->db->join('dotcom_deals_platform B', 'B.id = A.dotcom_deals_platform_id');
+
+        $query_popclub_categories = $this->db->get();
+        return $query_popclub_categories->result();
+    }
+
+    public function getPopclubDealsCount($status, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('dotcom_deals_tb');
+
+        if($status)
+            $this->db->where('status', $status);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->or_like('name', $search);
+            $this->db->or_like('original_price', $search);
+            $this->db->or_like('promo_price', $search);
+            $this->db->or_like('description', $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+
+    function getPopclubDeals($row_no, $row_per_page, $status, $order_by,  $order, $search){
+        $this->db->select('
+            id,
+            product_image,
+            name,
+            original_price,
+            promo_price,
+            description,
+            status,
+        ');
+
+        $this->db->from('dotcom_deals_tb');
+    
+        if($status)
+            $this->db->where('status', $status);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->or_like('name', $search);
+            $this->db->or_like('original_price', $search);
+            $this->db->or_like('promo_price', $search);
+            $this->db->or_like('description', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
     
     function updateCateringPackageStatus($package_id, $status){
         $this->db->set('status', $status);
@@ -813,7 +1120,7 @@ class Admin_model extends CI_Model
     
 
     function getProductVariantOptions($product_variant_id){
-        $this->db->select('id');
+        $this->db->select('id, name');
 
         $this->db->from('product_variant_options_tb');
         $this->db->where('product_variant_id', $product_variant_id);
@@ -2335,7 +2642,7 @@ class Admin_model extends CI_Model
         return $query->result();
     }
 
-    public function getSnackshopOrderItems($transaction_id){
+    public function getSnackshopOrderItemsByTransactionId($transaction_id){
         $this->db->select("
             A.id as order_item_id,
             A.price,
@@ -2357,6 +2664,10 @@ class Admin_model extends CI_Model
         $products_query = $this->db->get();
         $products = $products_query->result();
 
+		return $products;
+    }
+
+    public function getDealOrderItemsByTransactionId($transaction_id){
         $this->db->select("
             A.id as deal_order_item_id,
             A.price,
@@ -2366,7 +2677,7 @@ class Admin_model extends CI_Model
             B.id as deal_id,
             B.name as deal_name,
             B.alias,
-            B.description as deal_description,
+            B.description,
         ");
         $this->db->from('deals_order_items A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
@@ -2374,7 +2685,7 @@ class Admin_model extends CI_Model
         $deals_query = $this->db->get();
         $deals = $deals_query->result();
         
-		return array_merge($products, $deals);
+		return $deals;
     }
 
     public function getSnackshopOrder($tracking_no){

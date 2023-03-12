@@ -25,7 +25,370 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
   
+  public function setting_popclub_deal(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $deal_id = $this->input->get('deal-id');
 
+        $deal = $this->admin_model->getPopclubDeal($deal_id);
+
+        $deal->categories = $this->admin_model->getPopclubDealCategories($deal_id);
+        
+        $products = $this->admin_model->getPopclubDealProducts($deal_id);
+        $deal_products = array();
+
+        foreach($products as $product){
+          $product_name =  $product->variant_name ? $product->variant_name . ' ' .$product->product_name : $product->product_name;
+          $product_data = array(
+            "product" => array(
+              "id" => $product->product_id,
+              "variant_option_id" => $product->product_variant_options_id,
+              "name" => $product_name,
+            ),
+            "quantity" => $product->quantity,
+          );
+
+          $deal_products[] = $product_data;
+        }
+        
+        $deal->products = $deal_products;
+        $deal->excluded_products = $this->admin_model->getPopclubDealExcludedProducts($deal_id);
+
+
+        $included_products = $this->admin_model->getPopclubDealIncludedProducts($deal_id);
+        $deal_included_products = array();
+        
+        foreach($included_products as $included_product){
+          $product_name =  $included_product->variant_name ? $included_product->variant_name . ' ' .$included_product->product_name : $included_product->product_name;
+          $include_product_data = array(
+            "product" => array(
+              "id" => $included_product->product_id,
+              "variant_option_id" => $included_product->product_variant_option_tb_id,
+              "name" => $product_name,
+            ),
+            "quantity" => $included_product->quantity,
+            "promo_discount_percentage" => $included_product->promo_discount_percentage,
+          );
+
+          $obtainable = $this->admin_model->getPopclubDealIncludedProductObtainable($included_product->id);
+          $deal_included_obtainable = array();
+
+          foreach($obtainable as $val){
+            $product_name =  $val->variant_name ? $val->variant_name . ' ' .$val->product_name : $val->product_name;
+            
+            $obtainable_data = array(
+              "product" => array(
+                "id" => $val->product_id,
+                "variant_option_id" => $val->product_variant_option_tb_id,
+                "name" => $product_name,
+              ),
+              "quantity" => $val->quantity,
+              "promo_discount_percentage" => $val->promo_discount_percentage,
+            );
+
+            $deal_included_obtainable[] = $obtainable_data;
+          }
+          
+          $include_product_data['obtainable'] = $deal_included_obtainable;
+
+          $deal_included_products[] = $include_product_data;
+        }
+        
+        $deal->included_products = $deal_included_products;
+        
+        $deal->stores = $this->admin_model->getPopclubDealStores($deal_id);
+
+        $response = array(
+          "message" =>  'Successfully fetch deal',
+          "data" => $deal,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+      case 'POST':
+          if(
+            is_uploaded_file($_FILES['image500x500']['tmp_name']) &&
+            is_uploaded_file($_FILES['image250x250']['tmp_name']) &&
+            is_uploaded_file($_FILES['image75x75']['tmp_name']) 
+          ){
+            
+            $deal_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.jpg';
+    
+            $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$deal_image_name, 'jpg');
+            if($image500x500_error){
+              $this->output->set_status_header('401');
+              echo json_encode(array( "message" => $image500x500_error));
+              return;
+            }
+            
+            $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$deal_image_name, 'jpg');
+            if($image250x250_error){
+              $this->output->set_status_header('401');
+              echo json_encode(array( "message" => $image250x250_error));
+              return;
+            }
+
+            $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$deal_image_name, 'jpg');
+            if($image75x75_error){
+              $this->output->set_status_header('401');
+              echo json_encode(array( "message" => $image75x75_error));
+              return;
+            } 
+
+            $deal_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+
+            $data = array(
+              "alias" => $this->input->post('alias'),
+              "name" => $this->input->post('name'),
+              "product_image" => $deal_image_name,
+              "original_price" => $this->input->post('originalPrice'),
+              "promo_price" => $this->input->post('promoPrice'),
+              "promo_discount_percentage" => $this->input->post('promoDiscountPercentage'),
+              "minimum_purchase" => $this->input->post('minimumPurchase'),
+              "is_free_delivery" => $this->input->post('isFreeDelivery'),
+              "description" => $this->input->post('description'),
+              "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
+              "available_start_time" => $this->input->post('availableStartTime'),
+              "available_end_time" => $this->input->post('availableEndTime'),
+              "available_start_datetime" => $this->input->post('availableStartDateTime'),
+              "available_end_datetime" => $this->input->post('availableEndDateTime'),
+              "available_days" => $this->input->post('availableDays'),
+              "status" => 1,
+              'hash' => $deal_hash,
+            );
+
+            $deal_id = $this->admin_model->insertPopclubDeal($data);
+
+
+            
+            $categories = json_decode($this->input->post('categories'), true);
+            $platform_combinations = array();
+
+            foreach($categories as $category){
+              $data = array(
+                "deal_id" => $deal_id,
+                "platform_category_id" => $category['id'],
+              );
+              $platform_combinations[] = $data;
+            }
+
+            if(!empty($platform_combinations)){
+              $this->admin_model->insertDealsPlatformCombinations($platform_combinations); 
+            }
+
+            $excluded_products = json_decode($this->input->post('excludedProducts'), true);
+            $product_promo_excluded = array();
+
+            foreach($excluded_products as $excluded_product){
+              $data = array(
+                "deal_id" => $deal_id,
+                "product_id" => $excluded_product['id'],
+              );
+              $product_promo_excluded[] = $data;
+            }
+
+            if(!empty($product_promo_excluded)){
+              $this->admin_model->insertDealsProductPromoExclude($product_promo_excluded); 
+            }
+            
+
+            $products = json_decode($this->input->post('products'), true);
+            $products_with_variants = array();
+            
+            foreach($products as $val){
+              $data = array(
+                "deal_id" => $deal_id,
+                "product_id" => $val['product']['id'],
+                "product_variant_options_id" => $val['product']['variant_option_id'],
+                "quantity" => $val['quantity']
+              );
+              $products_with_variants[] = $data;
+            }
+
+            if(!empty($products_with_variants)){
+              $this->admin_model->insertDealsProductsWithVariants($products_with_variants); 
+            }
+            
+            $included_products = json_decode($this->input->post('includedProducts'), true);
+            foreach($included_products as $included_product){
+              $data = array(
+                "deal_id" => $deal_id,
+                "product_id" => $included_product['product']['id'],
+                "product_variant_option_tb_id" => $included_product['product']['variant_option_id'],
+                "promo_discount_percentage" => $included_product['promoDiscountPercentage'],
+                "quantity" => $included_product['quantity'],
+              );
+              $deals_product_promo_include_id = $this->admin_model->insertDealsProductsPromoInclude($data); 
+              
+              $obtainable =  $included_product['obtainableProducts'];
+              $products_include_obtainable = array();
+
+              foreach($obtainable as $val){
+                $data = array(
+                  "deals_product_promo_include_id" => $deals_product_promo_include_id,
+                  "product_id" => $val['product']['id'],
+                  "product_variant_option_tb_id" => $val['product']['variant_option_id'],
+                  "promo_discount_percentage" => $val['promoDiscountPercentage'],
+                  "quantity" => $val['quantity'],
+                );
+
+                $products_include_obtainable[] = $data;
+              }
+              
+              if(!empty($products_include_obtainable)){
+                $this->admin_model->insertDealsProductsIncludeObtainable($products_include_obtainable); 
+              }
+            }
+            
+            
+            $stores = json_decode($this->input->post('stores'), true);
+            $deals_region_da_logs = array();
+            $deal_availability = json_decode($this->input->post('dealAvailability'));
+
+            foreach($categories as $category){
+              foreach($stores as $store){
+                $data = array(
+                  'region_id' => $store['region_store_id'],
+                  'store_id' => $store['store_id'],
+                  'deal_id' => $deal_id,
+                  'status' => $deal_availability,
+                  "platform_category_id" => $category['id'],
+                );
+                $deals_region_da_logs[] = $data;
+              }
+            }
+            
+
+            if(!empty($deals_region_da_logs)){
+              $this->admin_model->insertDealRegionDaLogs($deals_region_da_logs); 
+            }
+          }
+
+          $response = array(
+            "POST" => $included_products,
+            "message" =>  'Successfully add product'
+          );
+          header('content-type: application/json');
+          echo json_encode($response);
+          break;
+    }
+  }
+
+  public function popclub_stores(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $stores = $this->admin_model->getSettingDealStoresPopclub();
+
+        $response = array(
+          "message" =>  'Successfully fetch stores',
+          "data" => $stores,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
+
+  public function setting_deal_shop_products(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $products = $this->admin_model->getAdminSettingDealShopProducts();
+
+        $stick_the_size = array();
+
+        foreach($products as $product){
+          $variant_size = $this->admin_model->getProductSizeId($product->id);
+          $product->variant_option_id = null;
+
+
+          if($variant_size){
+            $variant_options = $this->admin_model->getProductVariantOptions($variant_size->id);
+            
+            if(!empty($variant_options)){
+              foreach($variant_options as $option){
+                $product->name = $option->name . " " .$product->name;
+                $product->variant_option_id = $option->id;
+                $stick_the_size[] = $product;
+              }
+            }else{
+              $stick_the_size[] = $product;
+            }
+
+          }else{
+            $stick_the_size[] = $product;
+          }
+
+        }
+    
+        $response = array(
+          "message" => 'Successfully fetch shop products.',
+          "data" => $stick_the_size,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
+
+  public function popclub_categories(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $popclub_categories = $this->admin_model->getPopclubCategories();
+    
+        $response = array(
+          "message" => 'Successfully fetch popclub categories.',
+          "data" => $popclub_categories,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
+  
+
+  public function setting_popclub_deals(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $status = $this->input->get('status') ?? null;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'dateadded';
+        $search = $this->input->get('search');
+    
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+        
+        $popclub_deals_count = $this->admin_model->getPopclubDealsCount($status, $search);
+        $popclub_deals = $this->admin_model->getPopclubDeals($page_no, $per_page, $status, $order_by, $order, $search);
+    
+        $pagination = array(
+          "total_rows" => $popclub_deals_count,
+          "per_page" => $per_page,
+        );
+    
+        $response = array(
+          "message" => 'Successfully fetch catering packages',
+          "data" => array(
+            "pagination" => $pagination,
+            "popclub_deals" => $popclub_deals
+          ),
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
   public function setting_copy_catering_package(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
@@ -1967,7 +2330,6 @@ class Admin extends CI_Controller{
           echo json_encode($response);
           break;
     }
-
   }
 
   public function setting_shop_products(){
@@ -3603,7 +3965,8 @@ class Admin extends CI_Controller{
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
         $order = $this->admin_model->getSnackshopOrder($trackingNo);
-        $order->items = $this->admin_model->getSnackshopOrderItems($order->id);
+        $order->items = $this->admin_model->getSnackshopOrderItemsByTransactionId($order->id);
+        $order->deal_items = $this->admin_model->getDealOrderItemsByTransactionId($order->id);
         
         foreach($order->items as $key => $item){
           if(!isset($item->deal_order_item_id)){
