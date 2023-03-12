@@ -27,6 +27,85 @@ class Admin extends CI_Controller{
   
   public function setting_popclub_deal(){
     switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $deal_id = $this->input->get('deal-id');
+
+        $deal = $this->admin_model->getPopclubDeal($deal_id);
+
+        $deal->categories = $this->admin_model->getPopclubDealCategories($deal_id);
+        
+        $products = $this->admin_model->getPopclubDealProducts($deal_id);
+        $deal_products = array();
+
+        foreach($products as $product){
+          $product_name =  $product->variant_name ? $product->variant_name . ' ' .$product->product_name : $product->product_name;
+          $product_data = array(
+            "product" => array(
+              "id" => $product->product_id,
+              "variant_option_id" => $product->product_variant_options_id,
+              "name" => $product_name,
+            ),
+            "quantity" => $product->quantity,
+          );
+
+          $deal_products[] = $product_data;
+        }
+        
+        $deal->products = $deal_products;
+        $deal->excluded_products = $this->admin_model->getPopclubDealExcludedProducts($deal_id);
+
+
+        $included_products = $this->admin_model->getPopclubDealIncludedProducts($deal_id);
+        $deal_included_products = array();
+        
+        foreach($included_products as $included_product){
+          $product_name =  $included_product->variant_name ? $included_product->variant_name . ' ' .$included_product->product_name : $included_product->product_name;
+          $include_product_data = array(
+            "product" => array(
+              "id" => $included_product->product_id,
+              "variant_option_id" => $included_product->product_variant_option_tb_id,
+              "name" => $product_name,
+            ),
+            "quantity" => $included_product->quantity,
+            "promo_discount_percentage" => $included_product->promo_discount_percentage,
+          );
+
+          $obtainable = $this->admin_model->getPopclubDealIncludedProductObtainable($included_product->id);
+          $deal_included_obtainable = array();
+
+          foreach($obtainable as $val){
+            $product_name =  $val->variant_name ? $val->variant_name . ' ' .$val->product_name : $val->product_name;
+            
+            $obtainable_data = array(
+              "product" => array(
+                "id" => $val->product_id,
+                "variant_option_id" => $val->product_variant_option_tb_id,
+                "name" => $product_name,
+              ),
+              "quantity" => $val->quantity,
+              "promo_discount_percentage" => $val->promo_discount_percentage,
+            );
+
+            $deal_included_obtainable[] = $obtainable_data;
+          }
+          
+          $include_product_data['obtainable'] = $deal_included_obtainable;
+
+          $deal_included_products[] = $include_product_data;
+        }
+        
+        $deal->included_products = $deal_included_products;
+        
+        $deal->stores = $this->admin_model->getPopclubDealStores($deal_id);
+
+        $response = array(
+          "message" =>  'Successfully fetch deal',
+          "data" => $deal,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
       case 'POST':
           if(
             is_uploaded_file($_FILES['image500x500']['tmp_name']) &&
