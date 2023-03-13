@@ -63,6 +63,9 @@ $route['profile/user-discount'] = 'profile/user_discount';
 $route['profile/update-user-discount'] = 'profile/update_user_discount';
 $route['profile/contact/(:num)'] = 'profile/contact/$1';
 $route['profile/inbox'] = 'profile/inbox';
+$route['profile/influencer'] = 'profile/influencer';
+$route['profile/update-influencer'] = 'profile/update_influencer';
+
 
 // Store
 $route['store'] = 'store';
@@ -90,6 +93,7 @@ $route['load-image-catering/(:any)'] = 'image/load_catering_image/$1';
 $route['load-image-catering-contract/(:any)'] = 'image/load_catering_image_contract/$1';
 $route['load-image-user-discount/(:any)'] = 'image/load_image_user_discount/$1';
 $route['load-image-product/(:any)'] = 'image/load_image_product/$1';
+$route['load-image-influencer/(:any)'] = 'image/load_image_influencer/$1';
 
 
 //Admin
@@ -135,8 +139,13 @@ $route['admin/popclub'] = 'admin/popclub';
 
 
 $route['admin/discount/user-discount-change-status'] = 'admin/user_discount_change_status';
-$route['admin/discount/(:any)'] = 'admin/discount/$1';
+$route['admin/discount/(:num)'] = 'admin/discount/$1';
 $route['admin/discounts'] = 'admin/discounts';
+
+
+$route['admin/discount/influencer-change-status'] = 'admin/influencer_change_status';
+$route['admin/influencers'] = 'admin/influencers';
+$route['admin/influencer/(:num)'] = 'admin/influencer/$1';
 
 $route['admin/availability/deal'] = 'admin/deal_availability';
 $route['admin/availability/product'] = 'admin/product_availability';

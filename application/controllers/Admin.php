@@ -25,6 +25,78 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
   
+  public function influencer_change_status(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
+        
+        $influencer_users_id = $this->input->post('influencerUserId');
+        $status = $this->input->post('status');
+
+        $this->admin_model->changeStatusInfluencer($influencer_users_id, $status);
+
+        $response = array(
+          "message" => 'Successfully update influencer status',
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
+  public function influencer($influencer_user_id){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $influencer = $this->admin_model->getInfluencer($influencer_user_id);
+
+        $response = array(
+          "message" => 'Successfully fetch influencer request',
+          "data" => $influencer,
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
+  public function influencers(){
+		switch($this->input->server('REQUEST_METHOD')){
+		  case 'GET':
+			$per_page = $this->input->get('per_page') ?? 25;
+			$page_no = $this->input->get('page_no') ?? 0;
+			$status = $this->input->get('status') ?? null;
+			$order = $this->input->get('order') ?? 'desc';
+			$order_by = $this->input->get('order_by') ?? 'dateadded';
+			$search = $this->input->get('search');
+	
+			if($page_no != 0){
+			  $page_no = ($page_no - 1) * $per_page;
+			}
+			
+			$influencers_count = $this->admin_model->getInfluencersCount($status, $search);
+      $influencers = $this->admin_model->getInfluencers($page_no, $per_page, $status, $order_by, $order, $search);
+	
+			$pagination = array(
+			  "total_rows" => $influencers_count,
+			  "per_page" => $per_page,
+			);
+	
+			$response = array(
+			  "message" => 'Successfully fetch user influencers',
+			  "data" => array(
+          "pagination" => $pagination,
+          "influencers" => $influencers
+			  ),
+			);
+	  
+			header('content-type: application/json');
+			echo json_encode($response);
+			return;
+		}
+  }
+
   public function setting_popclub_deal(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':

@@ -6,6 +6,101 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    public function changeStatusInfluencer($influencer_user_id, $status){
+		$this->db->set('status', (int) $status);
+        $this->db->where('id', $influencer_user_id);
+        $this->db->update("influencers");
+    }
+
+    public function getInfluencer($influencer_user_id){
+        $this->db->select("
+            A.id,
+            A.first_name,
+            A.middle_name,
+            A.last_name,
+            A.birthday,
+            A.id_number,
+            A.dateadded,
+            A.id_front,
+            A.id_back,
+            A.status,
+
+            B.first_name as fb_first_name,
+            B.last_name as fb_last_name,
+
+            C.first_name as mobile_first_name,
+            C.last_name as mobile_last_name,
+        ");
+        $this->db->from('influencers A');
+        $this->db->join('fb_users B', 'B.id = A.fb_user_id','left');
+        $this->db->join('mobile_users C', 'C.id = A.mobile_user_id','left');
+
+        $this->db->where('A.id', $influencer_user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+
+    public function getInfluencers($row_no, $row_per_page, $status, $order_by,  $order, $search){
+        
+        $this->db->select("
+            A.id,
+            A.first_name,
+            A.middle_name,
+            A.last_name,
+            A.birthday,
+            A.id_number,
+            A.dateadded,
+            A.status,
+        ");
+        $this->db->from('influencers A');
+        
+            
+        if($status)
+            $this->db->where('A.status', $status);
+
+
+            if($search){
+                $this->db->group_start();
+                $this->db->like('A.id_number', $search);
+                $this->db->or_like('A.first_name', $search);
+                $this->db->or_like('A.middle_name', $search);
+                $this->db->or_like('A.last_name', $search);
+                $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+                $this->db->group_end();
+            }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    public function getInfluencersCount($status, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('influencers A');
+
+        if($status)
+            $this->db->where('A.status', $status);
+
+            
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.id_number', $search);
+            $this->db->or_like('A.first_name', $search);
+            $this->db->or_like('A.middle_name', $search);
+            $this->db->or_like('A.last_name', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
     function getPopclubDealStores($deal_id){
 
         $this->db->select('

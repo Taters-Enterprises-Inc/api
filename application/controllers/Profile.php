@@ -17,11 +17,144 @@ class Profile extends CI_Controller {
 		$this->load->model('user_model');
 		$this->load->model('contact_model');
 		$this->load->model('discount_model');
+		$this->load->model('influencer_model');
 
 		$this->load->library('form_validation');
 		$this->form_validation->set_error_delimiters('', '');
 		$this->ion_auth->set_message_delimiters('', '');
 		$this->ion_auth->set_error_delimiters('', '');
+	}
+	
+	
+	public function update_influencer(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+				$config['upload_path'] = './assets/upload/influencer'; 
+				
+				if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
+				
+				$config['allowed_types']    = 'gif|png|jpg|jpeg'; 
+				$config['max_size']         = 2000;
+				$config['max_width']        = 0;
+				$config['max_height']       = 0;
+				$config['encrypt_name']     = TRUE;
+
+				$this->load->library('upload', $config);
+
+				
+				$user_discount_data = array(
+					'first_name' => $_POST['firstName'],
+					'middle_name' => $_POST['middleName'],	
+					'last_name' => $_POST['lastName'],
+					'birthday' => $_POST['birthday'],
+					'id_number' => $_POST['idNumber'],
+					'dateadded' => date('Y-m-d H:i:s'),
+					'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
+					'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
+					'status' => 1
+				);
+
+				$old_influencer = $this->influencer_model->getInfluencerById($_POST['id']);
+
+
+				if($this->upload->do_upload('idFront')){
+					$id_front_data = $this->upload->data();
+					unlink(  FCPATH . "assets/upload/influencer/" . $old_influencer->id_front);
+					$influencer_data['id_front'] = $id_front_data['file_name'];
+				}
+				
+				if($this->upload->do_upload('idBack')){
+					$id_back_data = $this->upload->data();
+					unlink(  FCPATH . "assets/upload/influencer/" . $old_influencer->id_back);
+					$influencer_data['id_back'] = $id_back_data['file_name'];
+				}
+					
+				$this->discount_model->updateDiscountUser($_POST['id'], $influencer_data);
+
+				$response = array(
+					"message" => 'Edit application successful'
+				);
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+
+	public function influencer(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$influencer = $this->influencer_model->getInfluencer(
+					$this->session->userData['fb_user_id'] ?? null,
+					$this->session->userData['mobile_user_id'] ?? null
+				);
+
+				$response = array(
+					"message" => 'Successfully fetch influencer',
+					"data" => $influencer,
+				);
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+			case 'POST':
+				$birthday = new DateTime($_POST['birthday']);
+				$currentYear = new DateTime();
+				
+				if(
+					is_uploaded_file($_FILES['idFront']['tmp_name']) &&
+					is_uploaded_file($_FILES['idBack']['tmp_name'])
+				){
+					$config['upload_path'] = './assets/upload/influencer'; 
+					
+					if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
+					
+					$config['allowed_types']    = 'gif|png|jpg|jpeg'; 
+					$config['max_size']         = 2000;
+					$config['max_width']        = 0;
+					$config['max_height']       = 0;
+					$config['encrypt_name']     = TRUE;
+
+					$this->load->library('upload', $config);
+
+					$id_front_data = null;
+					$id_back_data = null;
+
+					if($this->upload->do_upload('idFront')){
+						$id_front_data = $this->upload->data();
+					}
+					
+					if($this->upload->do_upload('idBack')){
+						$id_back_data = $this->upload->data();
+					}
+
+						
+					$user_discount_data = array(
+						'first_name' => $_POST['firstName'],
+						'middle_name' => $_POST['middleName'],	
+						'last_name' => $_POST['lastName'],
+						'birthday' => $_POST['birthday'],
+						'id_number' => $_POST['idNumber'],
+						'id_front' => $id_front_data['file_name'],
+						'id_back' => $id_back_data['file_name'],
+						'dateadded' => date('Y-m-d H:i:s'),
+						'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
+						'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
+						'status' => 1
+					);
+
+					$this->influencer_model->insertInfluencer($user_discount_data);
+
+					$response = array(
+						"message" => 'Application for influencer is successful!'
+					);
+					header('content-type: application/json');
+					echo json_encode($response);
+				}else{
+					$this->output->set_status_header('401');
+					echo json_encode(array( "message" => 'Application for influencer failed.'));
+				}
+				break;
+		}
+		
 	}
 	
 	public function inbox(){
@@ -565,11 +698,8 @@ class Profile extends CI_Controller {
 					echo json_encode(array( "message" => 'Application for user discount failed.'));
 				}
 				break;
-
-			case 'PUT':
-
-				break;
 		}
 		
 	}
+	
 }
