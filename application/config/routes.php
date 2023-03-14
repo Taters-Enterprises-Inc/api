@@ -196,6 +196,7 @@ $route['admin/setting/product-addons'] = 'admin/setting_product_addons';
 $route['admin/setting/popclub-deals'] = 'admin/setting_popclub_deals';
 $route['admin/setting/deal-shop-products'] = 'admin/setting_deal_shop_products';
 $route['admin/setting/popclub-deal'] = 'admin/setting_popclub_deal';
+$route['admin/setting/edit-popclub-deal'] = 'admin/setting_edit_popclub_deal';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';

@@ -24,6 +24,257 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 		$this->load->model('deals_model');
 	}
+
+  public function setting_edit_popclub_deal(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST':
+        $deal_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.jpg';
+
+        $deal_id = $this->input->post('id');
+
+        $deal = $this->admin_model->getPopclubDeal($deal_id);
+
+        if(isset($_FILES['image500x500']['tmp_name']) && is_uploaded_file($_FILES['image500x500']['tmp_name'])){
+          $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$deal_image_name, 'jpg');
+          if($image500x500_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image500x500_error));
+            return;
+          }
+        }else{
+          $current_image_name = './assets/images/shared/products/500/' . $deal->product_image;
+          
+          if($deal->product_image !== $deal_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/products/500/'. $deal_image_name);
+          }
+        }
+        
+        if(isset($_FILES['image250x250']['tmp_name']) && is_uploaded_file($_FILES['image250x250']['tmp_name'])){
+          $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$deal_image_name, 'jpg');
+          if($image250x250_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image250x250_error));
+            return;
+          }
+        }else{
+          $current_image_name = './assets/images/shared/products/250/' . $deal->product_image;
+          
+          if($deal->product_image !== $deal_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/products/250/'. $deal_image_name);
+          }
+        }
+        
+        if(isset($_FILES['image75x75']['tmp_name']) && is_uploaded_file($_FILES['image75x75']['tmp_name'])){
+          $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$deal_image_name, 'jpg');
+          if($image75x75_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $image75x75_error));
+            return;
+          }
+        }else{
+          $current_image_name = './assets/images/shared/products/75/' . $deal->product_image;
+          
+          if($deal->product_image !== $deal_image_name && file_exists($current_image_name)){
+            rename($current_image_name,'./assets/images/shared/products/75/'. $deal_image_name);
+          }
+        }
+
+        $data = array(
+          "alias" => $this->input->post('alias'),
+          "name" => $this->input->post('name'),
+          "product_image" => $deal_image_name,
+          "original_price" => $this->input->post('originalPrice'),
+          "promo_price" => $this->input->post('promoPrice'),
+          "promo_discount_percentage" => $this->input->post('promoDiscountPercentage'),
+          "minimum_purchase" => $this->input->post('minimumPurchase'),
+          "is_free_delivery" => $this->input->post('isFreeDelivery'),
+          "description" => $this->input->post('description'),
+          "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
+          "available_start_time" => $this->input->post('availableStartTime'),
+          "available_end_time" => $this->input->post('availableEndTime'),
+          "available_start_datetime" => $this->input->post('availableStartDateTime'),
+          "available_end_datetime" => $this->input->post('availableEndDateTime'),
+          "available_days" => $this->input->post('availableDays'),
+        );
+
+        $this->admin_model->updatePopclubDeal($deal_id, $data);
+        
+
+        $categories = json_decode($this->input->post('categories'), true);
+        $platform_combinations = array();
+
+        $this->admin_model->removePlatformCombinations($deal_id);
+
+        foreach($categories as $category){
+          $data = array(
+            "deal_id" => $deal_id,
+            "platform_category_id" => $category['id'],
+          );
+          $platform_combinations[] = $data;
+        }
+
+        if(!empty($platform_combinations)){
+          $this->admin_model->insertDealsPlatformCombinations($platform_combinations); 
+        }
+        
+        $excluded_products = json_decode($this->input->post('excludedProducts'), true);
+        $product_promo_excluded = array();
+
+        $this->admin_model->removePopclubProductExclude($deal_id);
+
+        foreach($excluded_products as $excluded_product){
+          $data = array(
+            "deal_id" => $deal_id,
+            "product_id" => $excluded_product['id'],
+          );
+          $product_promo_excluded[] = $data;
+        }
+
+        if(!empty($product_promo_excluded)){
+          $this->admin_model->insertDealsProductPromoExclude($product_promo_excluded); 
+        }
+
+        $products = json_decode($this->input->post('products'), true);
+        $products_with_variants = array();
+
+        $this->admin_model->removeDealsProductWithVariants($deal_id);
+        
+        foreach($products as $val){
+          $data = array(
+            "deal_id" => $deal_id,
+            "product_id" => $val['product']['id'],
+            "product_variant_options_id" => $val['product']['variant_option_id'],
+            "quantity" => $val['quantity']
+          );
+          $products_with_variants[] = $data;
+        }
+
+        if(!empty($products_with_variants)){
+          $this->admin_model->insertDealsProductsWithVariants($products_with_variants); 
+        }
+
+        
+        $included_products = $this->admin_model->getPopclubDealIncludedProducts($deal_id);
+
+        foreach($included_products as $included_product){
+          $obtainable = $this->admin_model->getPopclubDealIncludedProductObtainable($included_product->id);
+          $this->admin_model->removePopclubProductInclude($included_product->id);
+
+          foreach($obtainable as $val){
+            $this->admin_model->removePopclubProductIncludeObtainable($val->id);
+          }
+        }
+
+        
+        $included_products = json_decode($this->input->post('includedProducts'), true);
+
+        foreach($included_products as $included_product){
+          $data = array(
+            "deal_id" => $deal_id,
+            "product_id" => $included_product['product']['id'],
+            "product_variant_option_tb_id" => $included_product['product']['variant_option_id'],
+            "promo_discount_percentage" => $included_product['promo_discount_percentage'],
+            "quantity" => $included_product['quantity'],
+          );
+          $deals_product_promo_include_id = $this->admin_model->insertDealsProductsPromoInclude($data); 
+          
+          $obtainable =  $included_product['obtainable'];
+          $products_include_obtainable = array();
+
+          foreach($obtainable as $val){
+            $data = array(
+              "deals_product_promo_include_id" => $deals_product_promo_include_id,
+              "product_id" => $val['product']['id'],
+              "product_variant_option_tb_id" => $val['product']['variant_option_id'],
+              "promo_discount_percentage" => $val['promo_discount_percentage'],
+              "quantity" => $val['quantity'],
+            );
+
+            $products_include_obtainable[] = $data;
+          }
+          
+          if(!empty($products_include_obtainable)){
+            $this->admin_model->insertDealsProductsIncludeObtainable($products_include_obtainable); 
+          }
+        }
+        
+        
+
+        $stores =  json_decode($this->input->post('stores'), true);
+        $popclub_region_da_log = $this->admin_model->getDealsRegionDaLogByDealId($deal_id);
+        $deal_availability = $this->input->post('dealAvailability');
+
+        if($deal_availability){
+          $this->admin_model->removeDealsRegionDaLogByProductId($deal_id);
+          $deal_availability = json_decode($deal_availability);
+          
+          $deals_region_da_logs = array();
+          $stores = json_decode($this->input->post('stores'), true);
+
+          foreach($stores as $store){
+            $data = array(
+              'region_id' => $store['region_store_id'],
+              'store_id' => $store['store_id'],
+              'deal_id' => $deal_id,
+              'status' => $deal_availability,
+            );
+            $deals_region_da_logs[] = $data;
+          }
+
+          if(!empty($deals_region_da_logs)){
+            $this->admin_model->insertDealRegionDaLogs($deals_region_da_logs); 
+          }
+
+        }else if(!empty($stores)){
+
+          foreach($popclub_region_da_log as $popclub_region){
+            $is_not_exist = true;
+            foreach($stores as $store){
+              if($store['store_id'] === $popclub_region->store_id){
+                $is_not_exist = false;
+                break;
+              }
+            }
+
+            if($is_not_exist){
+              $this->admin_model->removeDealsRegionDaLogByProductId($popclub_region->id);
+            }
+          }
+          
+          foreach($stores as $store){
+            $is_not_exist = true;
+
+            foreach($popclub_region_da_log as $popclub_region){
+              if($store['store_id'] === $popclub_region->store_id){
+                $is_not_exist = false;
+                break;
+              }
+            }
+          
+            if($is_not_exist){
+              $deals_region_da_log = array(
+                'region_id' => $store['region_store_id'],
+                'store_id' => $store['store_id'],
+                'deal_id' => $deal_id,
+                'status' => 0,
+              );
+
+              $this->admin_model->insertDealRegionDaLog($deals_region_da_log);
+            }
+          }
+          
+        }
+        
+
+        $response = array(
+          "message" =>  'Successfully edit deal'
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
   
   public function influencer_change_status(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -232,8 +483,6 @@ class Admin extends CI_Controller{
 
             $deal_id = $this->admin_model->insertPopclubDeal($data);
 
-
-            
             $categories = json_decode($this->input->post('categories'), true);
             $platform_combinations = array();
 
@@ -288,12 +537,12 @@ class Admin extends CI_Controller{
                 "deal_id" => $deal_id,
                 "product_id" => $included_product['product']['id'],
                 "product_variant_option_tb_id" => $included_product['product']['variant_option_id'],
-                "promo_discount_percentage" => $included_product['promoDiscountPercentage'],
+                "promo_discount_percentage" => $included_product['promo_discount_percentage'],
                 "quantity" => $included_product['quantity'],
               );
               $deals_product_promo_include_id = $this->admin_model->insertDealsProductsPromoInclude($data); 
               
-              $obtainable =  $included_product['obtainableProducts'];
+              $obtainable =  $included_product['obtainable'];
               $products_include_obtainable = array();
 
               foreach($obtainable as $val){
@@ -301,7 +550,7 @@ class Admin extends CI_Controller{
                   "deals_product_promo_include_id" => $deals_product_promo_include_id,
                   "product_id" => $val['product']['id'],
                   "product_variant_option_tb_id" => $val['product']['variant_option_id'],
-                  "promo_discount_percentage" => $val['promoDiscountPercentage'],
+                  "promo_discount_percentage" => $val['promo_discount_percentage'],
                   "quantity" => $val['quantity'],
                 );
 
@@ -2030,8 +2279,6 @@ class Admin extends CI_Controller{
         echo json_encode($response);
         break;
     }
-
-
   }
 
   public function setting_copy_shop_product(){
@@ -3005,6 +3252,11 @@ class Admin extends CI_Controller{
                 "unseen_notifications" => $this->notification_model->getNotifications($user_id, 5, true, 'admin'),
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 5, 'admin'),
               ),
+              "user_discount" => array(
+                'notifications'=> $this->notification_model->getNotifications($user_id, 6, false, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 6, true, 'admin'),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 6, 'admin'),
+              ),
             ),
             "message" => "Succesfully fetch notification"
         );
@@ -3765,7 +4017,6 @@ class Admin extends CI_Controller{
 
         if ($fetch_data == 1) {
           $this->logs_model->insertTransactionLogs($user_id, 1, $trans_id, '' . $tagname . ' ' . 'Order Success');
-          $this->status_notification($trans_id, 9, $user_id);
 
           if($status === 6){
 						$notification_event_data = array(
@@ -4547,58 +4798,6 @@ class Admin extends CI_Controller{
     echo json_encode(array("status" => $status, 'message' => $msg));
 
     return $status;
-  }
-
-  // WILL BE DEPRECATED ( V2 Backend )
-  public function status_notification($transaction_id = '', $status = '', $user_id){
-    $query_result = $this->admin_model->get_order_summary($transaction_id);
-    $info = $query_result['clients_info'];
-
-    switch ($status) {
-      // PAID
-      case '2':
-        break;
-
-      // CONFIRMED
-      case '3':
-        break;
-
-      // DECLINE
-      case '4':
-        break;
-
-      // CANCELLED
-      case '5':
-        break;
-      
-      // COMPLETE
-      case '6':
-        break;
-
-      // REJECTED
-      case '7':
-        break;
-
-      // DISPATCH
-      case '9':
-          // SMS message
-          $sms_msg = 'Hey! Your product is now ready. Our team will get in touch with you shortly regarding the order logistics.';
-
-          $email_stat = TRUE;
-          $sms_stat = TRUE;
-          if ($info->table_number != null) {
-            if ($this->send_sms($info->contact_number, $sms_msg)) {
-              $sms_stat = TRUE;
-              $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Dispatched-sms-sent');
-            } else {
-              $sms_stat = FALSE;
-              $this->logs_model->insertTransactionLogs($user_id, 1, $transaction_id, 'Dispatched-sms-not-sent');
-            }
-          }
-          
-          return array('email_status' => $email_stat, 'sms_status' => $sms_stat);
-        break;
-    }
   }
 
   
