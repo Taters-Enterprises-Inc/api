@@ -5,6 +5,54 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+    
+
+    function removeDealsRegionDaLogByProductId($deal_id){
+        $this->db->where('deal_id', $deal_id);
+		$this->db->delete('deals_region_da_log');
+    }
+
+    function getDealsRegionDaLogByDealId($deal_id){
+        $this->db->select('id, store_id');
+
+        $this->db->from('deals_region_da_log');
+
+        $this->db->where('deal_id', $deal_id);
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+    function removePopclubProductIncludeObtainable($product_include_obtainable_id){
+        $this->db->where('id', $product_include_obtainable_id);
+        $this->db->delete('deals_product_promo_include_obtainable');
+    }
+
+    function removePopclubProductInclude($product_include_id){
+        $this->db->where('id', $product_include_id);
+        $this->db->delete('deals_product_promo_include');
+    }
+    
+    function removeDealsProductWithVariants($deal_id){
+        $this->db->where('deal_id', $deal_id);
+		$this->db->delete('dotcom_deals_product_tb');
+    }
+
+    function removePopclubProductExclude($deal_id){
+        $this->db->where('deal_id', $deal_id);
+		$this->db->delete('deals_product_promo_exclude');
+    }
+
+    function removePlatformCombinations($deal_id){
+        $this->db->where('deal_id', $deal_id);
+		$this->db->delete('dotcom_deals_platform_combination');
+    }
+
+    function updatePopclubDeal($deal_id, $data){
+        $this->db->where('id', $deal_id);
+        $this->db->update('dotcom_deals_tb', $data);
+    }
 
     function getPopclubDealStores($deal_id){
 
