@@ -183,7 +183,6 @@ $route['admin/setting/delete-shop-product'] = 'admin/setting_delete_shop_product
 $route['admin/setting/stores'] = 'admin/setting_stores';
 $route['admin/setting/store'] = 'admin/setting_store';
 $route['admin/setting/edit-store'] = 'admin/setting_edit_store';
-$route['admin/setting/product-addons'] = 'admin/setting_product_addons';
 $route['admin/setting/popclub-deals'] = 'admin/setting_popclub_deals';
 $route['admin/setting/deal-shop-products'] = 'admin/setting_deal_shop_products';
 $route['admin/setting/popclub-deal'] = 'admin/setting_popclub_deal';

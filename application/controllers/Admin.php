@@ -2413,6 +2413,7 @@ class Admin extends CI_Controller{
         $product = $this->admin_model->getShopProduct($product_id);
 
         $product_variants = $this->admin_model->getShopProductVariants($product_id);
+        $product->products = $this->admin_model->getProductWithAddons($product_id);
 
         foreach($product_variants as $product_variant){
           $variants = array(
