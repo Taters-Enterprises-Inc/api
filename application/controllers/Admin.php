@@ -387,11 +387,10 @@ class Admin extends CI_Controller{
               return;
             } 
 
-            $deal_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
-
             $data = array(
               "alias" => $this->input->post('alias'),
               "name" => $this->input->post('name'),
+              'hash' => $this->input->post('urlId'),
               "product_image" => $deal_image_name,
               "original_price" => $this->input->post('originalPrice'),
               "promo_price" => $this->input->post('promoPrice'),
@@ -406,7 +405,6 @@ class Admin extends CI_Controller{
               "available_end_datetime" => $this->input->post('availableEndDateTime') ? $this->input->post('availableEndDateTime') : null,
               "available_days" => $this->input->post('availableDays'),
               "status" => 1,
-              'hash' => $deal_hash,
             );
 
             $deal_id = $this->admin_model->insertPopclubDeal($data);
