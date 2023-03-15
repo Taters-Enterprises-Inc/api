@@ -282,6 +282,7 @@ class Admin_model extends CI_Model
             A.available_end_datetime,
             A.available_days,
             A.status,
+            A.hash,
         ');
 
         $this->db->from('dotcom_deals_tb A');
