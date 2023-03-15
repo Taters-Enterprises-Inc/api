@@ -110,7 +110,7 @@ class Shop extends CI_Controller {
                     }
 
                     $cod_fee = $order_details['clients_info']->cod_fee;
-                    $grand_total = (int)$subtotal + (int)$delivery_fee + (int)$cod_fee - (double)$voucher_amount - (double)$giftcard_amount;
+                    $grand_total = $subtotal + $delivery_fee + $cod_fee - $voucher_amount - $giftcard_amount;
                 }
 				
 				$query_logon  = $this->shop_model->get_logon_type($hash);
