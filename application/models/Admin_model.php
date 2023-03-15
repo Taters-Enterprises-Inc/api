@@ -6,6 +6,12 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
     
+    function insertDealRegionDaLog($data){
+        $this->db->trans_start();
+		$this->db->insert('deals_region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
 
     function removeDealsRegionDaLogByProductId($deal_id){
         $this->db->where('deal_id', $deal_id);

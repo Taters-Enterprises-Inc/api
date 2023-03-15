@@ -208,23 +208,25 @@ class Admin extends CI_Controller{
         if($deal_availability){
           $this->admin_model->removeDealsRegionDaLogByProductId($deal_id);
           $deal_availability = json_decode($deal_availability);
-          
           $deals_region_da_logs = array();
-          $stores = json_decode($this->input->post('stores'), true);
-
-          foreach($stores as $store){
-            $data = array(
-              'region_id' => $store['region_store_id'],
-              'store_id' => $store['store_id'],
-              'deal_id' => $deal_id,
-              'status' => $deal_availability,
-            );
-            $deals_region_da_logs[] = $data;
+          
+          foreach($categories as $category){
+            foreach($stores as $store){
+              $data = array(
+                'region_id' => $store['region_store_id'],
+                'store_id' => $store['store_id'],
+                'deal_id' => $deal_id,
+                'status' => 1,
+                "platform_category_id" => $category['id'],
+              );
+              $deals_region_da_logs[] = $data;
+            }
+  
+            if(!empty($deals_region_da_logs)){
+              $this->admin_model->insertDealRegionDaLogs($deals_region_da_logs); 
+            }
           }
-
-          if(!empty($deals_region_da_logs)){
-            $this->admin_model->insertDealRegionDaLogs($deals_region_da_logs); 
-          }
+          
 
         }else if(!empty($stores)){
 
@@ -242,28 +244,32 @@ class Admin extends CI_Controller{
             }
           }
           
-          foreach($stores as $store){
-            $is_not_exist = true;
-
-            foreach($popclub_region_da_log as $popclub_region){
-              if($store['store_id'] === $popclub_region->store_id){
-                $is_not_exist = false;
-                break;
+          foreach($categories as $category){
+            foreach($stores as $store){
+              $is_not_exist = true;
+  
+              foreach($popclub_region_da_log as $popclub_region){
+                if($store['store_id'] === $popclub_region->store_id){
+                  $is_not_exist = false;
+                  break;
+                }
+              }
+            
+              if($is_not_exist){
+                $deals_region_da_log = array(
+                  'region_id' => $store['region_store_id'],
+                  'store_id' => $store['store_id'],
+                  'deal_id' => $deal_id,
+                  'status' => 0,
+                  "platform_category_id" => $category['id'],
+                );
+  
+                $this->admin_model->insertDealRegionDaLog($deals_region_da_log);
               }
             }
-          
-            if($is_not_exist){
-              $deals_region_da_log = array(
-                'region_id' => $store['region_store_id'],
-                'store_id' => $store['store_id'],
-                'deal_id' => $deal_id,
-                'status' => 0,
-              );
-
-              $this->admin_model->insertDealRegionDaLog($deals_region_da_log);
-            }
           }
-          
+        }else if(empty($stores)){
+          $this->admin_model->removeDealsRegionDaLogByProductId($deal_id);
         }
         
 
@@ -558,9 +564,12 @@ class Admin extends CI_Controller{
             
             if(!empty($variant_options)){
               foreach($variant_options as $option){
-                $product->name = $option->name . " " .$product->name;
-                $product->variant_option_id = $option->id;
-                $stick_the_size[] = $product;
+                $variant_product = array(
+                  "id" => $product->id,
+                  "name" => $option->name . " " .$product->name,
+                  "variant_option_id" => $option->id,
+                );
+                $stick_the_size[] = $variant_product;
               }
             }else{
               $stick_the_size[] = $product;
@@ -2059,9 +2068,7 @@ class Admin extends CI_Controller{
         if($product_availability){
           $this->admin_model->removeSnackshopRegionDaLogByProductId($product_id);
           $product_availability = json_decode($product_availability);
-          
           $region_da_logs = array();
-          $stores = json_decode($this->input->post('stores'), true);
 
           foreach($stores as $store){
             $data = array(
@@ -2116,6 +2123,8 @@ class Admin extends CI_Controller{
           }
           
 
+        }else if(empty($stores)){
+          $this->admin_model->removeSnackshopRegionDaLogByProductId($product_id);
         }
         
         $variants = json_decode($this->input->post('variants'), true);
