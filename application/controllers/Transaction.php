@@ -272,7 +272,8 @@ class Transaction extends CI_Controller {
                             foreach ($_SESSION['orders'] as $row => $val) {
                                 
                                 if(
-                                    isset($_SESSION['redeem_data']['deal_products_promo_include'])
+                                    isset($_SESSION['redeem_data']['deal_products_promo_include']) &&
+                                    !empty($_SESSION['redeem_data']['deal_products_promo_include'])
                                 ){
                                     $added_obtainables = array();
                                     $obtainable_discount_price = 0;
@@ -307,8 +308,13 @@ class Transaction extends CI_Controller {
                                     }
                                 }else{
                                     $promo_discount_percentage = $val['promo_discount_percentage'];
-                                    $promo_discount = isset($promo_discount_percentage) ? $val['prod_calc_amount'] * $promo_discount_percentage : 0 ;
-                                    $comp_total += $val['prod_calc_amount'] - $promo_discount;
+
+                                    if(isset($promo_discount_percentage )){
+                                        $promo_discount = isset($promo_discount_percentage) ? $val['prod_calc_amount'] * $promo_discount_percentage : 0 ;
+                                        $comp_total += $val['prod_calc_amount'] - $promo_discount;
+                                    }else{
+                                        $comp_total += $val['prod_calc_amount'];
+                                    }
                                 }
                             }
                         }
@@ -337,7 +343,15 @@ class Transaction extends CI_Controller {
                             $discount_value = $comp_total *  (float) $_SESSION['redeem_data']['promo_discount_percentage'];
                         }
                         
-                        $comp_total += $_SESSION['redeem_data']['deal_promo_price'];
+                        if(
+                            isset($_SESSION['redeem_data']['subtotal_promo_discount'])
+                        ){
+                            $discount_value = $comp_total *  (float) $_SESSION['redeem_data']['subtotal_promo_discount'];
+                        }
+                        
+                        if(  isset($_SESSION['redeem_data']['deal_promo_price'])){
+                            $comp_total += $_SESSION['redeem_data']['deal_promo_price'];
+                        }
 					}
 
                     $payops = $post['payops'];

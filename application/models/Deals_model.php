@@ -350,6 +350,7 @@ class Deals_model extends CI_Model
 				B.description,
 				B.original_price,
 				B.promo_discount_percentage,
+				B.subtotal_promo_discount,
 				B.minimum_purchase,
 				B.is_free_delivery,
 				B.promo_price,
@@ -414,6 +415,7 @@ class Deals_model extends CI_Model
 			A.available_days,
 			A.status,
 			A.hash,
+			A.subtotal_promo_discount,
 			C.name as category_name,
 			C.dotcom_deals_platform_id AS platform_id,
 		  ');
