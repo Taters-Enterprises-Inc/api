@@ -301,8 +301,7 @@ class Admin_model extends CI_Model
         ');
 
         $this->db->from('products_tb A');
-
-        $this->db->where('A.status', 1);
+        $this->db->where('A.popclub_status',1);
 
         $query_shop_products = $this->db->get();
         return $query_shop_products->result();
@@ -1131,8 +1130,15 @@ class Admin_model extends CI_Model
         return $query_products->result();
     }
     
-    function updateShopProductStatus($product_id, $status){
-        $this->db->set('status', $status);
+    function updateShopProductStatus($product_id, $status, $type){
+        switch($type){
+            case 'snackshop':
+                $this->db->set('status', $status);
+                break;
+            case 'popclub':
+                $this->db->set('popclub_status', $status);
+                break;
+        }
         $this->db->where("id", $product_id);
         $this->db->update("products_tb");
     }
@@ -1367,6 +1373,7 @@ class Admin_model extends CI_Model
             price,
             add_details,
             status,
+            popclub_status,
         ');
 
         $this->db->from('products_tb');

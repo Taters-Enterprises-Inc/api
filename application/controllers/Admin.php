@@ -2589,7 +2589,7 @@ class Admin extends CI_Controller{
       case 'PUT':
           $put = json_decode(file_get_contents("php://input"), true);
 
-          $this->admin_model->updateShopProductStatus($put['product_id'], $put['status']);
+          $this->admin_model->updateShopProductStatus($put['product_id'], $put['status'], $put['type']);
 
           $response = array(
             "message" => 'Successfully update status',
