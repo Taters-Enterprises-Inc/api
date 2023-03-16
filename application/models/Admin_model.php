@@ -5,6 +5,13 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
+
+    function updatePopclubDealStatus($deal_id, $status){
+        $this->db->set('status', $status);
+        $this->db->where("id", $deal_id);
+        $this->db->update("dotcom_deals_tb");
+    }
+
     
     function insertDealRegionDaLog($data){
         $this->db->trans_start();

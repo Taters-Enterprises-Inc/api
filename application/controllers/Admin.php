@@ -526,6 +526,19 @@ class Admin extends CI_Controller{
           header('content-type: application/json');
           echo json_encode($response);
           break;
+          
+        case 'PUT':
+          $put = json_decode(file_get_contents("php://input"), true);
+
+          $this->admin_model->updatePopclubDealStatus($put['deal_id'], $put['status']);
+
+          $response = array(
+            "message" => 'Successfully update status',
+          );
+    
+          header('content-type: application/json');
+          echo json_encode($response);
+          break;
     }
   }
 
