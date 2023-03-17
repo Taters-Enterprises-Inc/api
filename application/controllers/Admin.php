@@ -206,7 +206,7 @@ class Admin extends CI_Controller{
         $deal_availability = $this->input->post('dealAvailability');
 
         if($deal_availability){
-          $this->admin_model->removeDealsRegionDaLogByProductId($deal_id);
+          $this->admin_model->removeDealsRegionDaLogByDealId($deal_id);
           $deal_availability = json_decode($deal_availability);
           $deals_region_da_logs = array();
           
@@ -240,7 +240,7 @@ class Admin extends CI_Controller{
             }
 
             if($is_not_exist){
-              $this->admin_model->removeDealsRegionDaLogByProductId($popclub_region->id);
+              $this->admin_model->removeDealsRegionDaLogById($popclub_region->id);
             }
           }
           
@@ -269,7 +269,7 @@ class Admin extends CI_Controller{
             }
           }
         }else if(empty($stores)){
-          $this->admin_model->removeDealsRegionDaLogByProductId($deal_id);
+          $this->admin_model->removeDealsRegionDaLogByDealId($deal_id);
         }
         
 
