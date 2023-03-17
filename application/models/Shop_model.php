@@ -157,6 +157,7 @@ class Shop_model extends CI_Model
             A.purchase_amount,
             A.distance_price,
             A.cod_fee,
+            A.discount,
             C.generated_raffle_code,
             C.application_status,
             A.hash_key,
