@@ -355,8 +355,6 @@ class Admin extends CI_Controller{
         $deal->included_products = $deal_included_products;
         
         $deal->stores = $this->admin_model->getPopclubDealStores($deal_id);
-        
-        // $deal->stores  = $this->admin_model->getSettingDealStoresPopclub();
 
         $response = array(
           "message" =>  'Successfully fetch deal',

@@ -277,8 +277,6 @@ class Admin_model extends CI_Model
         $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
 		$this->db->join('region_store_combination_tb C', 'C.region_store_id = A.region_store_combination_id');
 
-        $this->db->where('A.store_menu_type_id !=', 2);
-        
         $this->db->group_start();
         $this->db->where('A.popclub_walk_in_status', 1);
         $this->db->or_where('A.popclub_online_delivery_status', 1);
