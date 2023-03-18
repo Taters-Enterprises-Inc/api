@@ -82,19 +82,20 @@ class Admin extends CI_Controller{
         $data = array(
           "alias" => $this->input->post('alias'),
           "name" => $this->input->post('name'),
+          "hash" => $this->input->post('urlId'),
           "product_image" => $deal_image_name,
-          "original_price" => $this->input->post('originalPrice'),
-          "promo_price" => $this->input->post('promoPrice'),
-          "promo_discount_percentage" => $this->input->post('promoDiscountPercentage'),
-          "minimum_purchase" => $this->input->post('minimumPurchase'),
+          "original_price" => $this->input->post('originalPrice') ?  $this->input->post('originalPrice') : null,
+          "promo_price" => $this->input->post('promoPrice') ?  $this->input->post('promoPrice') : null,
+          "promo_discount_percentage" => $this->input->post('promoDiscountPercentage') ?  $this->input->post('promoDiscountPercentage') : null,
+          "minimum_purchase" => $this->input->post('minimumPurchase') ?  $this->input->post('minimumPurchase') : null,
           "is_free_delivery" => $this->input->post('isFreeDelivery'),
           "description" => $this->input->post('description'),
           "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
-          "available_start_time" => $this->input->post('availableStartTime'),
-          "available_end_time" => $this->input->post('availableEndTime'),
-          "available_start_datetime" => $this->input->post('availableStartDateTime'),
-          "available_end_datetime" => $this->input->post('availableEndDateTime'),
-          "available_days" => $this->input->post('availableDays'),
+          "available_start_time" => $this->input->post('availableStartTime') ?  $this->input->post('availableStartTime') : null,
+          "available_end_time" => $this->input->post('availableEndTime') ?  $this->input->post('availableEndTime') : null,
+          "available_start_datetime" => $this->input->post('availableStartDateTime') ?  $this->input->post('availableStartDateTime') : null,
+          "available_end_datetime" => $this->input->post('availableEndDateTime') ?  $this->input->post('availableEndDateTime') : null,
+          "available_days" => $this->input->post('availableDays') ?  $this->input->post('availableDays') : null,
         );
 
         $this->admin_model->updatePopclubDeal($deal_id, $data);
@@ -205,25 +206,27 @@ class Admin extends CI_Controller{
         $deal_availability = $this->input->post('dealAvailability');
 
         if($deal_availability){
-          $this->admin_model->removeDealsRegionDaLogByProductId($deal_id);
+          $this->admin_model->removeDealsRegionDaLogByDealId($deal_id);
           $deal_availability = json_decode($deal_availability);
-          
           $deals_region_da_logs = array();
-          $stores = json_decode($this->input->post('stores'), true);
-
-          foreach($stores as $store){
-            $data = array(
-              'region_id' => $store['region_store_id'],
-              'store_id' => $store['store_id'],
-              'deal_id' => $deal_id,
-              'status' => $deal_availability,
-            );
-            $deals_region_da_logs[] = $data;
+          
+          foreach($categories as $category){
+            foreach($stores as $store){
+              $data = array(
+                'region_id' => $store['region_store_id'],
+                'store_id' => $store['store_id'],
+                'deal_id' => $deal_id,
+                'status' => 1,
+                "platform_category_id" => $category['id'],
+              );
+              $deals_region_da_logs[] = $data;
+            }
+  
+            if(!empty($deals_region_da_logs)){
+              $this->admin_model->insertDealRegionDaLogs($deals_region_da_logs); 
+            }
           }
-
-          if(!empty($deals_region_da_logs)){
-            $this->admin_model->insertDealRegionDaLogs($deals_region_da_logs); 
-          }
+          
 
         }else if(!empty($stores)){
 
@@ -237,32 +240,36 @@ class Admin extends CI_Controller{
             }
 
             if($is_not_exist){
-              $this->admin_model->removeDealsRegionDaLogByProductId($popclub_region->id);
+              $this->admin_model->removeDealsRegionDaLogById($popclub_region->id);
             }
           }
           
-          foreach($stores as $store){
-            $is_not_exist = true;
-
-            foreach($popclub_region_da_log as $popclub_region){
-              if($store['store_id'] === $popclub_region->store_id){
-                $is_not_exist = false;
-                break;
+          foreach($categories as $category){
+            foreach($stores as $store){
+              $is_not_exist = true;
+  
+              foreach($popclub_region_da_log as $popclub_region){
+                if($store['store_id'] === $popclub_region->store_id){
+                  $is_not_exist = false;
+                  break;
+                }
+              }
+            
+              if($is_not_exist){
+                $deals_region_da_log = array(
+                  'region_id' => $store['region_store_id'],
+                  'store_id' => $store['store_id'],
+                  'deal_id' => $deal_id,
+                  'status' => 0,
+                  "platform_category_id" => $category['id'],
+                );
+  
+                $this->admin_model->insertDealRegionDaLog($deals_region_da_log);
               }
             }
-          
-            if($is_not_exist){
-              $deals_region_da_log = array(
-                'region_id' => $store['region_store_id'],
-                'store_id' => $store['store_id'],
-                'deal_id' => $deal_id,
-                'status' => 0,
-              );
-
-              $this->admin_model->insertDealRegionDaLog($deals_region_da_log);
-            }
           }
-          
+        }else if(empty($stores)){
+          $this->admin_model->removeDealsRegionDaLogByDealId($deal_id);
         }
         
 
@@ -462,21 +469,21 @@ class Admin extends CI_Controller{
             $data = array(
               "alias" => $this->input->post('alias'),
               "name" => $this->input->post('name'),
+              'hash' => $this->input->post('urlId'),
               "product_image" => $deal_image_name,
-              "original_price" => $this->input->post('originalPrice'),
-              "promo_price" => $this->input->post('promoPrice'),
-              "promo_discount_percentage" => $this->input->post('promoDiscountPercentage'),
-              "minimum_purchase" => $this->input->post('minimumPurchase'),
+              "original_price" => $this->input->post('originalPrice') ? $this->input->post('originalPrice') : null,
+              "promo_price" => $this->input->post('promoPrice') ? $this->input->post('promoPrice') : null,
+              "promo_discount_percentage" => $this->input->post('promoDiscountPercentage') ? $this->input->post('promoDiscountPercentage') : null,
+              "minimum_purchase" => $this->input->post('minimumPurchase') ? $this->input->post('minimumPurchase') : null,
               "is_free_delivery" => $this->input->post('isFreeDelivery'),
               "description" => $this->input->post('description'),
               "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
-              "available_start_time" => $this->input->post('availableStartTime'),
-              "available_end_time" => $this->input->post('availableEndTime'),
-              "available_start_datetime" => $this->input->post('availableStartDateTime'),
-              "available_end_datetime" => $this->input->post('availableEndDateTime'),
-              "available_days" => $this->input->post('availableDays'),
+              "available_start_time" => $this->input->post('availableStartTime') ? $this->input->post('availableStartTime') : null,
+              "available_end_time" => $this->input->post('availableEndTime') ? $this->input->post('availableEndTime') : null,
+              "available_start_datetime" => $this->input->post('availableStartDateTime') ? $this->input->post('availableStartDateTime') : null,
+              "available_end_datetime" => $this->input->post('availableEndDateTime') ? $this->input->post('availableEndDateTime') : null,
+              "available_days" => $this->input->post('availableDays') ? $this->input->post('availableDays') : null,
               "status" => 1,
-              'hash' => $this->input->post('urlId'),
             );
 
             $deal_id = $this->admin_model->insertPopclubDeal($data);
@@ -591,6 +598,19 @@ class Admin extends CI_Controller{
           header('content-type: application/json');
           echo json_encode($response);
           break;
+          
+        case 'PUT':
+          $put = json_decode(file_get_contents("php://input"), true);
+
+          $this->admin_model->updatePopclubDealStatus($put['deal_id'], $put['status']);
+
+          $response = array(
+            "message" => 'Successfully update status',
+          );
+    
+          header('content-type: application/json');
+          echo json_encode($response);
+          break;
     }
   }
 
@@ -629,9 +649,12 @@ class Admin extends CI_Controller{
             
             if(!empty($variant_options)){
               foreach($variant_options as $option){
-                $product->name = $option->name . " " .$product->name;
-                $product->variant_option_id = $option->id;
-                $stick_the_size[] = $product;
+                $variant_product = array(
+                  "id" => $product->id,
+                  "name" => $option->name . " " .$product->name,
+                  "variant_option_id" => $option->id,
+                );
+                $stick_the_size[] = $variant_product;
               }
             }else{
               $stick_the_size[] = $product;
@@ -2130,9 +2153,7 @@ class Admin extends CI_Controller{
         if($product_availability){
           $this->admin_model->removeSnackshopRegionDaLogByProductId($product_id);
           $product_availability = json_decode($product_availability);
-          
           $region_da_logs = array();
-          $stores = json_decode($this->input->post('stores'), true);
 
           foreach($stores as $store){
             $data = array(
@@ -2187,6 +2208,8 @@ class Admin extends CI_Controller{
           }
           
 
+        }else if(empty($stores)){
+          $this->admin_model->removeSnackshopRegionDaLogByProductId($product_id);
         }
         
         $variants = json_decode($this->input->post('variants'), true);
@@ -2475,6 +2498,7 @@ class Admin extends CI_Controller{
         $product = $this->admin_model->getShopProduct($product_id);
 
         $product_variants = $this->admin_model->getShopProductVariants($product_id);
+        $product->products = $this->admin_model->getProductWithAddons($product_id);
 
         foreach($product_variants as $product_variant){
           $variants = array(
@@ -2637,7 +2661,7 @@ class Admin extends CI_Controller{
       case 'PUT':
           $put = json_decode(file_get_contents("php://input"), true);
 
-          $this->admin_model->updateShopProductStatus($put['product_id'], $put['status']);
+          $this->admin_model->updateShopProductStatus($put['product_id'], $put['status'], $put['type']);
 
           $response = array(
             "message" => 'Successfully update status',

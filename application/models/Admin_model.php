@@ -5,9 +5,28 @@ class Admin_model extends CI_Model
     public function __construct(){
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
-    
 
-    function removeDealsRegionDaLogByProductId($deal_id){
+    function updatePopclubDealStatus($deal_id, $status){
+        $this->db->set('status', $status);
+        $this->db->where("id", $deal_id);
+        $this->db->update("dotcom_deals_tb");
+    }
+
+    
+    function insertDealRegionDaLog($data){
+        $this->db->trans_start();
+		$this->db->insert('deals_region_da_log', $data);
+        $this->db->trans_complete();
+    }
+
+
+    function removeDealsRegionDaLogById($da_log_id){
+        $this->db->where('id', $da_log_id);
+		$this->db->delete('deals_region_da_log');
+    }
+
+
+    function removeDealsRegionDaLogByDealId($deal_id){
         $this->db->where('deal_id', $deal_id);
 		$this->db->delete('deals_region_da_log');
     }
@@ -353,8 +372,10 @@ class Admin_model extends CI_Model
         $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
 		$this->db->join('region_store_combination_tb C', 'C.region_store_id = A.region_store_combination_id');
 
+        $this->db->group_start();
         $this->db->where('A.popclub_walk_in_status', 1);
         $this->db->or_where('A.popclub_online_delivery_status', 1);
+        $this->db->group_end();
 
         $query = $this->db->get();
         return $query->result();
@@ -382,8 +403,7 @@ class Admin_model extends CI_Model
         ');
 
         $this->db->from('products_tb A');
-
-        $this->db->where('A.status', 1);
+        $this->db->where('A.popclub_status',1);
 
         $query_shop_products = $this->db->get();
         return $query_shop_products->result();
@@ -1212,8 +1232,15 @@ class Admin_model extends CI_Model
         return $query_products->result();
     }
     
-    function updateShopProductStatus($product_id, $status){
-        $this->db->set('status', $status);
+    function updateShopProductStatus($product_id, $status, $type){
+        switch($type){
+            case 'snackshop':
+                $this->db->set('status', $status);
+                break;
+            case 'popclub':
+                $this->db->set('popclub_status', $status);
+                break;
+        }
         $this->db->where("id", $product_id);
         $this->db->update("products_tb");
     }
@@ -1448,6 +1475,7 @@ class Admin_model extends CI_Model
             price,
             add_details,
             status,
+            popclub_status,
         ');
 
         $this->db->from('products_tb');
