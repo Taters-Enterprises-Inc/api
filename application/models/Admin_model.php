@@ -1540,9 +1540,9 @@ class Admin_model extends CI_Model
             $this->bsc_db->or_like('C.last_name', $search);
             $this->bsc_db->or_like('D.tracking_no', $search);
             $this->bsc_db->or_like('E.tracking_no', $search);
-            $this->bsc_db->or_like('F.redeem_code', $search);
             $this->bsc_db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
             $this->bsc_db->group_end();
+            
         }
 
         $query = $this->bsc_db->get();
