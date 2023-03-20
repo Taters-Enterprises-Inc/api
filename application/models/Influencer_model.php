@@ -6,8 +6,82 @@ class Influencer_model extends CI_Model {
         $this->load->database();
     }
 
+    public function getInfluencerDealRedeemsCount( $influencer_id, $search){
+        $this->db->select('count(*) as all_count');
+            
+
+        $this->db->from('deals_redeems_tb A');
+        $this->db->join('influencer_deals B', 'B.id = A.influencer_deal_id', 'left');
+        $this->db->join('influencers C', 'C.id = B.influencer_id','left');
+        $this->db->where('C.id',$influencer_id);
+
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.redeem_code', $search);
+            $this->db->or_like('A.name', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getInfluencerDealRedeems($influencer_id,$row_no, $row_per_page, $order_by,  $order, $search){
+
+        $this->db->select('
+            A.redeem_code,
+            A.dateadded as redeem_dateadded,
+            D.add_name as referee_name,
+            E.influencer_discount,
+        ');
+
+        $this->db->from('deals_redeems_tb A');
+        $this->db->join('influencer_deals B', 'B.id = A.influencer_deal_id', 'left');
+        $this->db->join('influencers C', 'C.id = B.influencer_id','left');
+        $this->db->join('deals_client_tb D', 'D.id = A.client_id');
+        $this->db->join('dotcom_deals_tb E', 'E.id = A.deal_id');
+        $this->db->where('C.id',$influencer_id);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.redeem_code', $search);
+            $this->db->or_like('A.name', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+            
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getInfluencerDealByReferralCode($referral_code){
+        $this->db->select('id');
+
+        $this->db->from('influencer_deals');
+        $this->db->where('referral_code', $referral_code);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function insertInfluencerProfile($data){
+        $this->db->trans_start();
+        $this->db->insert('influencer_profiles', $data);
+        $this->db->trans_complete();
+    }
+
     public function insertInfluencer($data){
+        $this->db->trans_start();
         $this->db->insert('influencers', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+
+        return $insert_id;
     }
     
     public function getInfluencer($fb_user_id, $mobile_user_id){
@@ -21,9 +95,11 @@ class Influencer_model extends CI_Model {
             A.id_front,
             A.id_back,
             A.status,
+            B.discount_points,
         ');
 
         $this->db->from('influencers A');
+        $this->db->join('influencer_profiles B', 'B.influencer_id = A.id');
         
         if(isset($fb_user_id)){
             $this->db->where('A.fb_user_id', $fb_user_id);

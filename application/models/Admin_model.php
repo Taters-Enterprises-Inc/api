@@ -6,6 +6,96 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    function resetInfluencerDiscountPoints($influencer_id){
+        $this->db->set('discount_points', 0);
+        $this->db->where("influencer_id", $influencer_id);
+        $this->db->update("influencer_profiles");
+    }
+
+    public function getInfluencerByFbOrMobileUser($fb_user_id, $mobile_user_id){
+        $this->db->select('
+            A.id,
+            A.first_name,
+            A.middle_name,
+            A.last_name,
+            A.birthday,
+            A.id_number,
+            A.id_front,
+            A.id_back,
+            A.status,
+            B.discount_points,
+        ');
+
+        $this->db->from('influencers A');
+        $this->db->join('influencer_profiles B', 'B.influencer_id = A.id');
+        
+        if(isset($fb_user_id)){
+            $this->db->where('A.fb_user_id', $fb_user_id);
+        }elseif(isset($mobile_user_id)){
+            $this->db->where('A.mobile_user_id', $mobile_user_id);
+        }
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    function getInfluencerProfile($influencer_id){
+
+        $this->db->select('discount_points');
+
+        $this->db->from('influencer_profiles A');
+        $this->db->where('influencer_id', $influencer_id);
+
+        $query = $this->db->get();
+
+        return $query->row();
+    }
+
+    function updateInfluencerDiscountPoints($influencer_id, $discount_point){
+        $this->db->set('discount_points',$discount_point);
+        $this->db->where("influencer_id", $influencer_id);
+        $this->db->update("influencer_profiles");
+    }
+
+    function getTransactionById($transaction_id){
+        $this->db->select('
+            A.hash_key,
+            B.fb_user_id,
+            B.mobile_user_id,
+            D.influencer_id,
+            E.influencer_discount,
+        ');
+
+        $this->db->from('transaction_tb A');
+        $this->db->join('client_tb B', 'B.id = A.client_id');
+        $this->db->join('deals_redeems_tb C', 'C.id = A.deals_redeems_id', 'left');
+        $this->db->join('influencer_deals D', 'D.id = C.influencer_deal_id', 'left');
+        $this->db->join('dotcom_deals_tb E', 'E.id = C.deal_id', 'left');
+
+        $this->db->where('A.id', $transaction_id);
+
+        $query = $this->db->get();
+
+        return $query->row();
+    }
+
+    function insertInfluencerDeal($data){
+        $this->db->trans_start();
+		$this->db->insert('influencer_deals', $data);
+        $this->db->trans_complete();
+    }
+
+    function getInfluencersId(){
+        $this->db->select('id, fb_user_id, mobile_user_id ');
+
+        $this->db->from('influencers');
+
+        $query = $this->db->get();
+
+        return $query->result();
+    }
+
+
     function updatePopclubDealStatus($deal_id, $status){
         $this->db->set('status', $status);
         $this->db->where("id", $deal_id);

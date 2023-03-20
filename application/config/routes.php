@@ -65,6 +65,7 @@ $route['profile/contact/(:num)'] = 'profile/contact/$1';
 $route['profile/inbox'] = 'profile/inbox';
 $route['profile/influencer'] = 'profile/influencer';
 $route['profile/update-influencer'] = 'profile/update_influencer';
+$route['profile/influencer-deal-redeems'] = 'profile/influencer_deal_redeems';
 
 
 // Store

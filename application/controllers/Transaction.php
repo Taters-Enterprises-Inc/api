@@ -21,6 +21,7 @@ class Transaction extends CI_Controller {
         $this->load->model('store_model');
         $this->load->model('user_model');
         $this->load->model('discount_model');
+        $this->load->model('influencer_model');
 	}
     
     public function catering(){
@@ -353,6 +354,15 @@ class Transaction extends CI_Controller {
                             $comp_total += $_SESSION['redeem_data']['deal_promo_price'];
                         }
 					}
+                    
+                    $influencer = $this->influencer_model->getInfluencer(
+                        $this->session->userData['fb_user_id'] ?? null,
+                        $this->session->userData['mobile_user_id'] ?? null
+                    );
+
+                    if($influencer){
+                        $discount_value = $comp_total *  (float) $influencer->discount_points;
+                    }
 
                     $payops = $post['payops'];
 
@@ -506,10 +516,11 @@ class Transaction extends CI_Controller {
                         
 
                         if(isset($_SESSION['redeem_data'])){
+                            $deal_id = $_SESSION['redeem_data']['deal_id'];
 
                             $order_data_deal = array(
                                 'transaction_id'  => $query_transaction_result['id'],
-                                'deal_id'         => $_SESSION['redeem_data']['deal_id'],
+                                'deal_id'         => $deal_id,
                                 'price'			  => $_SESSION['redeem_data']['deal_promo_price'],
                                 'product_price'   => $_SESSION['redeem_data']['deal_promo_price'],
                                 'remarks'		  => $_SESSION['redeem_data']['deal_remarks'],
@@ -521,12 +532,9 @@ class Transaction extends CI_Controller {
 
                             $today = date("Y-m-d H:i:s");
                             $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id'], $today);
-                        }
-                        
-                        if(isset($_SESSION['redeem_data'])){
                             $this->session->unset_userdata('redeem_data');
                         }
-
+                        
                         $message = $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!";
                         
                         $notification_event_data = array(

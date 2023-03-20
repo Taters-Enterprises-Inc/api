@@ -474,8 +474,10 @@ class Admin extends CI_Controller{
               "original_price" => $this->input->post('originalPrice') ? $this->input->post('originalPrice') : null,
               "promo_price" => $this->input->post('promoPrice') ? $this->input->post('promoPrice') : null,
               "promo_discount_percentage" => $this->input->post('promoDiscountPercentage') ? $this->input->post('promoDiscountPercentage') : null,
+              "subtotal_promo_discount" => $this->input->post('subTotalPromoDiscount') ? $this->input->post('subTotalPromoDiscount') : null,
               "minimum_purchase" => $this->input->post('minimumPurchase') ? $this->input->post('minimumPurchase') : null,
               "is_free_delivery" => $this->input->post('isFreeDelivery'),
+              "influencer_discount" => $this->input->post('influencerDiscount'),
               "description" => $this->input->post('description'),
               "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
               "available_start_time" => $this->input->post('availableStartTime') ? $this->input->post('availableStartTime') : null,
@@ -589,10 +591,76 @@ class Admin extends CI_Controller{
             if(!empty($deals_region_da_logs)){
               $this->admin_model->insertDealRegionDaLogs($deals_region_da_logs); 
             }
+
+            $influencer_discount = $this->input->post('influencerDiscount');
+
+            if($influencer_discount){
+              $influencers = $this->admin_model->getInfluencersId();
+
+              foreach($influencers as $influencer){
+                $referral_code = substr(md5(uniqid(mt_rand(), true)), 0, 6);
+
+                $influencer_deal = array(
+                  "deal_id" => $deal_id,
+                  "influencer_id" => $influencer->id,
+                  "referral_code" => $referral_code
+                );
+
+                $this->admin_model->insertInfluencerDeal($influencer_deal);
+                
+                $notification_event_data = array(
+                  "notification_event_type_id" => 4,
+                  "text" => 'A new deal has arrive to endorse now to get discount!'
+                );
+
+              
+                $notification_message_data = array(
+                  "title" => "A new deal to endorse!",
+                  "body" => "You can now endorse this deal to your followers. Just click the <b>Popclub Deal Link</b> below and copy the url link.",
+                  "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+                  "closing_salutation" => "Best wishes,",
+                  "message_from" => "Taters Enterprises Inc.",
+                  "contact_number" => "(+64) 977-275-5595",
+                  "email" => "tei.csr@tatersgroup.com",
+                  "internal_link_title" => "Popclub Deal Link",
+                  "internal_link_url" => "/popclub/deal/".$this->input->post('urlId') . '?referral-code=' . $referral_code,
+                );
+                            
+                $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+
+                $notification_event_data['notification_message_id'] = $notification_message_id;
+
+                $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                                
+                //mobile or fb             
+                $notifications_data = array(
+                    "fb_user_to_notify" => $influencer->fb_user_id,
+                    "mobile_user_to_notify" => $influencer->mobile_user_id,
+                    "fb_user_who_fired_event" => $influencer->fb_user_id,
+                    "mobile_user_who_fired_event" => $influencer->mobile_user_id,
+                    'notification_event_id' => $notification_event_id,
+                    "dateadded" => date('Y-m-d H:i:s'),
+                );
+                
+                $this->notification_model->insertNotification($notifications_data); 
+                
+                
+                $real_time_notification = array(
+                  "fb_user_id" => $influencer->fb_user_id,
+                  "mobile_user_id" => $influencer->mobile_user_id,
+                  "message" => "A new deal has arrive to endorse now to get discount!",
+                );
+
+                notify('user-inbox','inbox-influencer-discount', $real_time_notification);
+
+              }
+
+              
+
+            }
           }
 
           $response = array(
-            "POST" => $included_products,
             "message" =>  'Successfully add product'
           );
           header('content-type: application/json');
@@ -4020,12 +4088,17 @@ class Admin extends CI_Controller{
       case 'POST': 
         $_POST = json_decode(file_get_contents("php://input"), true);
         $trans_id = (int) $this->input->post('transactionId');
-        $transaction_hash = $this->input->post('transactionHash');
+
+
+        $transaction = $this->admin_model->getTransactionById($trans_id);
+
+
+        $transaction_hash = $transaction->hash_key;
         $user_id = $this->session->admin['user_id'];
         $status = $this->input->post('status');
         $fetch_data = $this->admin_model->update_shop_status($trans_id, $status);
-        $fb_user_id = $this->input->post('fbUserId');
-        $mobile_user_id = $this->input->post('mobileUserId');
+        $fb_user_id = $transaction->fb_user_id;
+        $mobile_user_id = $transaction->mobile_user_id;
 
         $update_on_click = $this->admin_model->update_shop_on_click($trans_id, $_POST['status']);
         if ($status == 3) $generate_invoice = $this->admin_model->generate_shop_invoice_num($trans_id);
@@ -4077,6 +4150,22 @@ class Admin extends CI_Controller{
             );
             
             $this->notification_model->insertNotification($notifications_data); 
+            
+            if($transaction->influencer_id && $transaction->influencer_discount){
+              $added_discount = $transaction->influencer_discount;
+              $influencer_profile = $this->admin_model->getInfluencerProfile($transaction->influencer_id);
+              $this->admin_model->updateInfluencerDiscountPoints($transaction->influencer_id, $influencer_profile->discount_points + $added_discount);
+            }
+
+            $influencer = $this->admin_model->getInfluencerByFbOrMobileUser(
+              $fb_user_id ?? null,
+              $mobile_user_id?? null
+            );
+
+            if($influencer){
+              $this->admin_model->resetInfluencerDiscountPoints($influencer->id);
+            }
+
           }
           
           $real_time_notification = array(
@@ -4086,7 +4175,6 @@ class Admin extends CI_Controller{
           );
 
           notify('user-snackshop','snackshop-order-update', $real_time_notification);
-
 
           header('content-type: application/json');
           echo json_encode(array( "message" => 'Successfully update status!'));

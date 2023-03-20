@@ -19,6 +19,7 @@ class Profile extends CI_Controller {
 		$this->load->model('discount_model');
 		$this->load->model('influencer_model');
 		$this->load->model('notification_model');
+		$this->load->model('inbox_model');
 
 		$this->load->library('form_validation');
 		$this->form_validation->set_error_delimiters('', '');
@@ -26,6 +27,86 @@ class Profile extends CI_Controller {
 		$this->ion_auth->set_error_delimiters('', '');
 	}
 	
+	public function influencer_deal_redeems(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$per_page = $this->input->get('per_page') ?? 25;
+				$page_no = $this->input->get('page_no') ?? 0;
+				$order = $this->input->get('order') ?? 'desc';
+				$order_by = $this->input->get('order_by') ?? 'redeem_dateadded';
+				$search = $this->input->get('search');
+				
+				if($page_no != 0){
+					$page_no = ($page_no - 1) * $per_page;
+				}
+		
+				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
+					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
+
+				if(!isset($logon_type)){
+
+					$response = array(
+						'message' => 'Error user not found',
+					);
+
+					header('content-type: application/json');
+					echo json_encode($response);
+					break;
+				}
+
+				switch($logon_type){
+					case 'facebook':
+						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+						$influencer = $this->influencer_model->getInfluencer($get_fb_user_details->id, null);
+
+						$deal_redeems_count = $this->influencer_model->getInfluencerDealRedeemsCount($influencer->id, $search);
+						$deal_redeems = $this->influencer_model->getInfluencerDealRedeems($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
+
+
+						$pagination = array(
+							"total_rows" => $deal_redeems_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Succesfully fetch history of inbox',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "deal_redeems" => $deal_redeems,
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						break;
+					case 'mobile':
+						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+						$influencer = $this->influencer_model->getInfluencer(null, $get_mobile_user_details->id);
+
+						$deal_redeems_count = $this->influencer_model->getInfluencerDealRedeemsCount($influencer->id, $search);
+						$deal_redeems = $this->influencer_model->getInfluencerDealRedeems($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
+						
+						$pagination = array(
+							"total_rows" => $deal_redeems_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Succesfully fetch history of inbox',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "deal_redeems" => $deal_redeems,
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						break;
+				}
+				break;
+		}
+	}
+
 	
 	public function update_influencer(){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -142,7 +223,13 @@ class Profile extends CI_Controller {
 						'status' => 1
 					);
 
-					$this->influencer_model->insertInfluencer($user_discount_data);
+					$influencer_id = $this->influencer_model->insertInfluencer($user_discount_data);
+
+					$influencer_profile = array(
+						"influencer_id" => $influencer_id,
+					);
+
+					$this->influencer_model->insertInfluencerProfile($influencer_profile);
 
 					$response = array(
 						"message" => 'Application for influencer is successful!'
@@ -188,8 +275,8 @@ class Profile extends CI_Controller {
 				switch($logon_type){
 					case 'facebook':
 						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-						$inbox_count = $this->shop_model->getUserInboxHistoryCount('facebook',$get_fb_user_details->id, $search);
-						$inbox = $this->shop_model->getUserInboxHistory('facebook',$get_fb_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						$inbox_count = $this->inbox_model->getUserInboxHistoryCount('facebook',$get_fb_user_details->id, $search);
+						$inbox = $this->inbox_model->getUserInboxHistory('facebook',$get_fb_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
 						
 
 						$pagination = array(
@@ -210,8 +297,8 @@ class Profile extends CI_Controller {
 						break;
 					case 'mobile':
 						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
-						$inbox_count = $this->shop_model->getUserInboxHistoryCount('mobile',$get_mobile_user_details->id, $search);
-						$inbox = $this->shop_model->getUserInboxHistory('mobile',$get_mobile_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						$inbox_count = $this->inbox_model->getUserInboxHistoryCount('mobile',$get_mobile_user_details->id, $search);
+						$inbox = $this->inbox_model->getUserInboxHistory('mobile',$get_mobile_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
 						
 						$pagination = array(
 							"total_rows" => $inbox_count,
