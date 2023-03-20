@@ -13,8 +13,11 @@ class Influencer_model extends CI_Model {
         $this->db->from('deals_redeems_tb A');
         $this->db->join('influencer_deals B', 'B.id = A.influencer_deal_id', 'left');
         $this->db->join('influencers C', 'C.id = B.influencer_id','left');
+        $this->db->join('deals_client_tb D', 'D.id = A.client_id');
+        $this->db->join('dotcom_deals_tb E', 'E.id = A.deal_id');
+        $this->db->join('transaction_tb F', 'F.deals_redeems_id = A.id', 'left');
         $this->db->where('C.id',$influencer_id);
-        $this->db->where('A.status', 6);
+        $this->db->where('F.status', 6);
 
 
         if($search){
@@ -43,8 +46,9 @@ class Influencer_model extends CI_Model {
         $this->db->join('influencers C', 'C.id = B.influencer_id','left');
         $this->db->join('deals_client_tb D', 'D.id = A.client_id');
         $this->db->join('dotcom_deals_tb E', 'E.id = A.deal_id');
+        $this->db->join('transaction_tb F', 'F.deals_redeems_id = A.id', 'left');
         $this->db->where('C.id',$influencer_id);
-        $this->db->where('A.status', 6);
+        $this->db->where('F.status', 6);
 
         if($search){
             $this->db->group_start();
