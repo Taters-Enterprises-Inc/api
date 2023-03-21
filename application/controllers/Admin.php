@@ -288,15 +288,25 @@ class Admin extends CI_Controller{
       case 'POST':
 				$_POST =  json_decode(file_get_contents("php://input"), true);
         
-        $influencer_users_id = $this->input->post('influencerUserId');
+        $influencer_id = $this->input->post('influencerUserId');
         $status = $this->input->post('status');
 
-        $this->admin_model->changeStatusInfluencer($influencer_users_id, $status);
+        $influencer = $this->admin_model->getInfluencerById($influencer_id);
+
+        $this->admin_model->changeStatusInfluencer($influencer_id, $status);
+
+        $real_time_notification = array(
+            "fb_user_id" => $influencer->fb_user_id,
+            "mobile_user_id" => $influencer->mobile_user_id,
+            "status" => $status,
+        );
+
+        notify('user-influencer','influencer-update', $real_time_notification);
+
 
         $response = array(
           "message" => 'Successfully update influencer status',
         );
-  
         header('content-type: application/json');
         echo json_encode($response);
         return;
@@ -3347,6 +3357,11 @@ class Admin extends CI_Controller{
                 "unseen_notifications" => $this->notification_model->getNotifications($user_id, 6, true, 'admin'),
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 6, 'admin'),
               ),
+              "influencer" => array(
+                'notifications'=> $this->notification_model->getNotifications($user_id, 7, false, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 7, true, 'admin'),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 7, 'admin'),
+              ),
             ),
             "message" => "Succesfully fetch notification"
         );
@@ -4569,7 +4584,17 @@ class Admin extends CI_Controller{
         $discount_users_id = $this->input->post('discountUserId');
         $status = $this->input->post('status');
 
+        $discount = $this->admin_model->getDiscountUserById($discount_users_id);
+
         $this->admin_model->changeStatusUserDiscount($discount_users_id, $status);
+
+        $real_time_notification = array(
+            "fb_user_id" => $discount->fb_user_id,
+            "mobile_user_id" => $discount->mobile_user_id,
+            "status" => $status,
+        );
+
+        notify('user-discount','discount-update', $real_time_notification);
 
         $response = array(
           "message" => 'Successfully update user discount status',

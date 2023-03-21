@@ -18,6 +18,34 @@ class Shop extends CI_Controller {
 		$this->load->library('images');
 	}
 
+	public function influencer_product(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+				$post = json_decode(file_get_contents("php://input"), true);
+
+				$referral_code = $post['referralCode'];
+				$product_id = $post['productId'];
+
+				$influencer_product = $this->shop_model->getInfluencerProductByReferralCode($referral_code, $product_id);
+
+				if($influencer_product){
+					$response = array(
+						'data' => $influencer_product,
+						'message' => 'Successfully applied referral'
+					);
+	
+					header('content-type: application/json');
+					echo json_encode($response);
+				}else{
+					
+					$this->output->set_status_header('401');
+					echo json_encode(array( "message" => 'Cannot find the referral code'));
+					return;
+				}
+				break;
+		}
+	}
+
 	public function deals(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':

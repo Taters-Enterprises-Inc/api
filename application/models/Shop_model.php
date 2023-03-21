@@ -8,6 +8,23 @@ class Shop_model extends CI_Model
         $this->bscDB = $this->load->database('bsc', TRUE, TRUE);
     }
     
+    public function getInfluencerProductByReferralCode($referral_code, $product_id){
+        $this->db->select('
+            id, 
+            product_id, 
+            product_variant_option_id,
+            influencer_id,
+            referral_code, 
+            discount, 
+            dateadded
+        ');
+        $this->db->where('referral_code', $referral_code);
+        $this->db->where('product_id', $product_id);
+        $query = $this->db->get('influencer_products');
+        $data = $query->row();
+        return $data;
+    }
+
     public function get_store_id_by_hash_key($hash_key){
         $this->db->select('store');
         $this->db->where('hash_key', $hash_key);

@@ -6,6 +6,36 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    function getInfluencerById($influencer_id){
+        $this->db->select('
+            id,
+            fb_user_id,
+            mobile_user_id,
+        ');
+
+        $this->db->from('influencers');
+
+        $this->db->where('id', $influencer_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    function getDiscountUserById($discount_user_id){
+        $this->db->select('
+            id,
+            fb_user_id,
+            mobile_user_id,
+        ');
+
+        $this->db->from('discount_users');
+
+        $this->db->where('id', $discount_user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
     function resetInfluencerDiscountPoints($influencer_id){
         $this->db->set('discount_points', 0);
         $this->db->where("influencer_id", $influencer_id);

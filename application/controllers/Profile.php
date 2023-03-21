@@ -231,6 +231,49 @@ class Profile extends CI_Controller {
 
 					$this->influencer_model->insertInfluencerProfile($influencer_profile);
 
+					
+					$message = $_POST['firstName'] . " " . $_POST['lastName'] ." applied for influencer!";
+                        
+					$notification_event_data = array(
+						"notification_event_type_id" => 7,
+						"influencer_id" => $influencer_id,
+						"text" => $message
+					);
+					
+					$notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+
+					//admin
+					$admin_users = $this->user_model->getUsersByGroupId(1);
+					foreach($admin_users as $user){
+						$notifications_data = array(
+							"user_to_notify" => $user->user_id,
+							"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+							"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+							'notification_event_id' => $notification_event_id,
+							"dateadded" => date('Y-m-d H:i:s'),
+						);
+						$this->notification_model->insertNotification($notifications_data);   
+					}
+					
+					//csr admin
+					$csr_admin_users = $this->user_model->getUsersByGroupId(10);
+					foreach($csr_admin_users as $user){
+						$notifications_data = array(
+							"user_to_notify" => $user->user_id,
+							"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+							"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+							'notification_event_id' => $notification_event_id,
+							"dateadded" => date('Y-m-d H:i:s'),
+						);
+						$this->notification_model->insertNotification($notifications_data);   
+					}
+
+					$realtime_notification = array(
+						"message" => $message,
+					);
+
+					notify('admin-influencer','influencer-application', $realtime_notification);
+
 					$response = array(
 						"message" => 'Application for influencer is successful!'
 					);
