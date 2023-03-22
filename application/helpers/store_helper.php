@@ -9,7 +9,7 @@ if ( ! function_exists('set_store_sessions'))
         $service,
         $platform_id,
         $catering_start_date=null,
-        $catering_end_date=null
+        $catering_end_date=null,
     ){
         $CI = get_instance();
 
@@ -83,10 +83,14 @@ if ( ! function_exists('set_store_sessions'))
         $routes   = $get_routes;
         $distance = $get_routes;
 
+        if($service === 'CATERING'){
+            $delivery_charge = $delivery_charge * 2;
+        }
+
         $CI->session->set_userdata('distance', round($routes));
         $CI->session->set_userdata('distance_rate_id', 0);
-        $CI->session->set_userdata('distance_rate_price', $delivery_charge * 2); // Back in fort thats why multiply by 2
-        $CI->session->set_userdata('distance_rate_price_before', $delivery_charge * 2); // Back in fort thats whiy multiply by 2
+        $CI->session->set_userdata('distance_rate_price', $delivery_charge); // Back in fort thats why multiply by 2
+        $CI->session->set_userdata('distance_rate_price_before', $delivery_charge); // Back in fort thats whiy multiply by 2
         $CI->session->set_userdata('distance_routes', $routes);
         $CI->session->set_userdata('distance_radius', $distance);
         
