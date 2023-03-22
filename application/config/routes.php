@@ -6,7 +6,7 @@ $route['shop/products'] = 'shop/products';
 $route['shop/orders'] = 'shop/orders';
 $route['shop/deals'] = 'shop/deals';
 $route['shop/get_product_sku'] = 'shop/get_product_sku';
-$route['shop/influencer-product'] = 'shop/influencer_product';
+$route['shop/influencer-promo'] = 'shop/influencer_promo';
 
 //Catering
 $route['catering/packages'] = 'catering/packages';

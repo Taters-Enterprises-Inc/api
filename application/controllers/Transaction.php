@@ -326,6 +326,8 @@ class Transaction extends CI_Controller {
                     $distance_rate_price = (empty($this->session->distance_rate_price)) ? 0 : $this->session->distance_rate_price;
                     $discount_value = "";
 
+                    $influencer_discount_value = null;
+
 					if(isset($_SESSION['redeem_data'])){
                         if(
                             isset($_SESSION['redeem_data']['minimum_purchase']) && 
@@ -354,18 +356,18 @@ class Transaction extends CI_Controller {
                             $comp_total += $_SESSION['redeem_data']['deal_promo_price'];
                         }
 					}
-                    
-                    $influencer = $this->influencer_model->getInfluencer(
-                        $this->session->userData['fb_user_id'] ?? null,
-                        $this->session->userData['mobile_user_id'] ?? null
-                    );
-
-                    if($influencer){
-                        $discount_value = $comp_total *  (float) $influencer->discount_points;
-                    }
 
                     $payops = $post['payops'];
 
+                    $referral_code = $post['referralCode'];
+
+                    $influencer_promo = $this->shop_model->getInfluencerPromoByReferralCode($referral_code);
+
+
+                    if($influencer_promo){
+                        $discount_value = $comp_total *  (float) $influencer_promo->customer_discount;
+                        $influencer_discount_value =  $comp_total *  (float) $influencer_promo->influencer_discount;
+                    }
                     
                     $cod_fee = "0";
                     if( $payops == '3'){
@@ -408,6 +410,8 @@ class Transaction extends CI_Controller {
                         'payops'            => $payops,
                         'discount'          => $discount_value,
                         'discount_user_id'  => $discount_user_id,
+                        'influencer_discount' => $influencer_discount_value,
+                        'influencer_promo_id' => $influencer_promo->id,
                         'giftcard_discount' => "",
                         'giftcard_number'   => "",
                         'custom_message'    => '',

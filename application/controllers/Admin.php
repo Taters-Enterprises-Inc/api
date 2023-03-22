@@ -4166,19 +4166,10 @@ class Admin extends CI_Controller{
             
             $this->notification_model->insertNotification($notifications_data); 
             
-            if($transaction->influencer_id && $transaction->influencer_discount){
-              $added_discount = $transaction->influencer_discount;
+            if($transaction->influencer_id){
+              $payable = $transaction->payable;
               $influencer_profile = $this->admin_model->getInfluencerProfile($transaction->influencer_id);
-              $this->admin_model->updateInfluencerDiscountPoints($transaction->influencer_id, $influencer_profile->discount_points + $added_discount);
-            }
-
-            $influencer = $this->admin_model->getInfluencerByFbOrMobileUser(
-              $fb_user_id ?? null,
-              $mobile_user_id?? null
-            );
-
-            if($influencer){
-              $this->admin_model->resetInfluencerDiscountPoints($influencer->id);
+              $this->admin_model->updateInfluencerProfilePayable($transaction->influencer_id, $influencer_profile->payable + $payable);
             }
 
           }

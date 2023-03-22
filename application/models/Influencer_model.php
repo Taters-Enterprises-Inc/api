@@ -101,7 +101,7 @@ class Influencer_model extends CI_Model {
             A.id_front,
             A.id_back,
             A.status,
-            B.discount_points,
+            B.payable,
         ');
 
         $this->db->from('influencers A');

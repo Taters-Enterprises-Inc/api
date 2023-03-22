@@ -7,22 +7,33 @@ class Shop_model extends CI_Model
 		$this->db =  $this->load->database('default', TRUE, TRUE);
         $this->bscDB = $this->load->database('bsc', TRUE, TRUE);
     }
+
+    public function getInfluencerPromo($referral_code){
+        $this->db->select('A.id');
+
+        $this->db->from('transaction_tb A');
+        $this->db->join('influencer_promos B', 'B.id = A.influencer_promo_id', 'left');
+
+        $this->db->where('B.referral_code', $referral_code);
+
+        $query = $this->db->get();
+
+        return $query->row();
+    }
     
-    public function getInfluencerProductByReferralCode($referral_code, $product_id){
+    public function getInfluencerPromoByReferralCode($referral_code){
         $this->db->select('
             id, 
-            product_id, 
-            product_variant_option_id,
             influencer_id,
             referral_code, 
-            discount, 
+            customer_discount, 
+            influencer_discount,
             dateadded
         ');
+        $this->db->from('influencer_promos');
         $this->db->where('referral_code', $referral_code);
-        $this->db->where('product_id', $product_id);
-        $query = $this->db->get('influencer_products');
-        $data = $query->row();
-        return $data;
+        $query = $this->db->get();
+        return $query->row();
     }
 
     public function get_store_id_by_hash_key($hash_key){

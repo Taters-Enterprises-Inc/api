@@ -18,19 +18,26 @@ class Shop extends CI_Controller {
 		$this->load->library('images');
 	}
 
-	public function influencer_product(){
+	public function influencer_promo(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);
 
 				$referral_code = $post['referralCode'];
-				$product_id = $post['productId'];
 
-				$influencer_product = $this->shop_model->getInfluencerProductByReferralCode($referral_code, $product_id);
+				$check_if_exist = $this->shop_model->getInfluencerPromo($referral_code);
 
-				if($influencer_product){
+				if($check_if_exist){
+					$this->output->set_status_header('401');
+					echo json_encode(array( "message" => 'You already redeem this promo'));
+					return;
+				}
+
+				$influencer_promo = $this->shop_model->getInfluencerPromoByReferralCode($referral_code);
+
+				if($influencer_promo){
 					$response = array(
-						'data' => $influencer_product,
+						'data' => $influencer_promo,
 						'message' => 'Successfully applied referral'
 					);
 	

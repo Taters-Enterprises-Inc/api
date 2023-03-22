@@ -36,12 +36,6 @@ class Admin_model extends CI_Model
         return $query->row();
     }
 
-    function resetInfluencerDiscountPoints($influencer_id){
-        $this->db->set('discount_points', 0);
-        $this->db->where("influencer_id", $influencer_id);
-        $this->db->update("influencer_profiles");
-    }
-
     public function getInfluencerByFbOrMobileUser($fb_user_id, $mobile_user_id){
         $this->db->select('
             A.id,
@@ -53,7 +47,6 @@ class Admin_model extends CI_Model
             A.id_front,
             A.id_back,
             A.status,
-            B.discount_points,
         ');
 
         $this->db->from('influencers A');
@@ -71,9 +64,9 @@ class Admin_model extends CI_Model
 
     function getInfluencerProfile($influencer_id){
 
-        $this->db->select('discount_points');
+        $this->db->select('payable');
 
-        $this->db->from('influencer_profiles A');
+        $this->db->from('influencer_profiles');
         $this->db->where('influencer_id', $influencer_id);
 
         $query = $this->db->get();
@@ -81,8 +74,8 @@ class Admin_model extends CI_Model
         return $query->row();
     }
 
-    function updateInfluencerDiscountPoints($influencer_id, $discount_point){
-        $this->db->set('discount_points',$discount_point);
+    function updateInfluencerProfilePayable($influencer_id, $payable){
+        $this->db->set('payable',$payable);
         $this->db->where("influencer_id", $influencer_id);
         $this->db->update("influencer_profiles");
     }
@@ -90,6 +83,7 @@ class Admin_model extends CI_Model
     function getTransactionById($transaction_id){
         $this->db->select('
             A.hash_key,
+            A.influencer_discount as payable,
             B.fb_user_id,
             B.mobile_user_id,
             D.influencer_id,
