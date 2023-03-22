@@ -83,6 +83,9 @@ if ( ! function_exists('set_store_sessions'))
         $routes   = $get_routes;
         $distance = $get_routes;
         
+        if($service == 'CATERING'){
+            $delivery_charge = $delivery_charge * 2;
+        }
 
         $CI->session->set_userdata('distance', round($routes));
         $CI->session->set_userdata('distance_rate_id', 0);
