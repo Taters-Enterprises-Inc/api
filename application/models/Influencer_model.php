@@ -6,24 +6,20 @@ class Influencer_model extends CI_Model {
         $this->load->database();
     }
 
-    public function getInfluencerTransactionsCount( $influencer_id, $search){
-        $this->db->select('count(*) as all_count');
-            
+    public function getInfluencerRefereesCount( $influencer_id, $search){
+        $this->db->select('count(*) as all_count');   
 
-        $this->db->from('deals_redeems_tb A');
-        $this->db->join('influencer_deals B', 'B.id = A.influencer_deal_id', 'left');
-        $this->db->join('influencers C', 'C.id = B.influencer_id','left');
-        $this->db->join('deals_client_tb D', 'D.id = A.client_id');
-        $this->db->join('dotcom_deals_tb E', 'E.id = A.deal_id');
-        $this->db->join('transaction_tb F', 'F.deals_redeems_id = A.id', 'left');
-        $this->db->where('C.id',$influencer_id);
-        $this->db->where('F.status', 6);
+        $this->db->from('transaction_tb A');
+        $this->db->join('influencer_promos B','B.id = A.influencer_promo_id', 'left');
+        $this->db->join('client_tb C', 'C.id = A.client_id', 'left');
+        $this->db->where('B.influencer_id', $influencer_id);
+        $this->db->where('A.status', 6);
 
 
         if($search){
             $this->db->group_start();
-            $this->db->like('A.redeem_code', $search);
-            $this->db->or_like('A.name', $search);
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('C.client_name', $search);
             $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
             $this->db->group_end();
         }
@@ -32,28 +28,28 @@ class Influencer_model extends CI_Model {
         return $query->row()->all_count;
     }
 
-    public function getInfluencerTransactions($influencer_id,$row_no, $row_per_page, $order_by,  $order, $search){
+    public function getInfluencerReferees($influencer_id,$row_no, $row_per_page, $order_by,  $order, $search){
 
         $this->db->select('
-            A.redeem_code,
-            A.dateadded as redeem_dateadded,
-            D.add_name as referee_name,
-            E.influencer_discount,
+            A.id,
+            A.tracking_no,
+            A.discount,
+            A.influencer_discount,
+            A.dateadded,
+            C.add_name as client_name,
         ');
 
-        $this->db->from('deals_redeems_tb A');
-        $this->db->join('influencer_deals B', 'B.id = A.influencer_deal_id', 'left');
-        $this->db->join('influencers C', 'C.id = B.influencer_id','left');
-        $this->db->join('deals_client_tb D', 'D.id = A.client_id');
-        $this->db->join('dotcom_deals_tb E', 'E.id = A.deal_id');
-        $this->db->join('transaction_tb F', 'F.deals_redeems_id = A.id', 'left');
-        $this->db->where('C.id',$influencer_id);
-        $this->db->where('F.status', 6);
+        $this->db->from('transaction_tb A');
+        $this->db->join('influencer_promos B', 'B.id = A.influencer_promo_id');
+        $this->db->join('client_tb C', 'C.id = A.client_id');
+        $this->db->where('B.influencer_id', $influencer_id);
+        $this->db->where('A.status', 6);
+
 
         if($search){
             $this->db->group_start();
-            $this->db->like('A.redeem_code', $search);
-            $this->db->or_like('A.name', $search);
+            $this->db->like('A.tracking_no', $search);
+            $this->db->or_like('C.client_name', $search);
             $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
             $this->db->group_end();
         }

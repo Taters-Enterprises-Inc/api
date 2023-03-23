@@ -27,13 +27,13 @@ class Profile extends CI_Controller {
 		$this->ion_auth->set_error_delimiters('', '');
 	}
 	
-	public function influencer_deal_redeems(){
+	public function influencer_referee(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
 				$per_page = $this->input->get('per_page') ?? 25;
 				$page_no = $this->input->get('page_no') ?? 0;
 				$order = $this->input->get('order') ?? 'desc';
-				$order_by = $this->input->get('order_by') ?? 'redeem_dateadded';
+				$order_by = $this->input->get('order_by') ?? 'dateadded';
 				$search = $this->input->get('search');
 				
 				if($page_no != 0){
@@ -59,12 +59,12 @@ class Profile extends CI_Controller {
 						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
 						$influencer = $this->influencer_model->getInfluencer($get_fb_user_details->id, null);
 
-						$deal_redeems_count = $this->influencer_model->getInfluencerTransactionsCount($influencer->id, $search);
-						$deal_redeems = $this->influencer_model->getInfluencerTransactions($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
+						$referees_count = $this->influencer_model->getInfluencerRefereesCount($influencer->id, $search);
+						$referees = $this->influencer_model->getInfluencerReferees($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
 
 
 						$pagination = array(
-							"total_rows" => $deal_redeems_count,
+							"total_rows" => $referees_count,
 							"per_page" => $per_page,
 						);		
 		
@@ -72,7 +72,7 @@ class Profile extends CI_Controller {
 							'message' => 'Succesfully fetch history of inbox',
 							"data" => array(
 							  "pagination" => $pagination,
-							  "deal_redeems" => $deal_redeems,
+							  "referees" => $referees,
 							),
 						);
 		
@@ -83,11 +83,11 @@ class Profile extends CI_Controller {
 						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
 						$influencer = $this->influencer_model->getInfluencer(null, $get_mobile_user_details->id);
 
-						$deal_redeems_count = $this->influencer_model->getInfluencerTransactionsCount($influencer->id, $search);
-						$deal_redeems = $this->influencer_model->getInfluencerTransactions($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
+						$referees_count = $this->influencer_model->getInfluencerRefereesCount($influencer->id, $search);
+						$referees = $this->influencer_model->getInfluencerReferees($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
 						
 						$pagination = array(
-							"total_rows" => $deal_redeems_count,
+							"total_rows" => $referees_count,
 							"per_page" => $per_page,
 						);		
 		
@@ -95,7 +95,7 @@ class Profile extends CI_Controller {
 							'message' => 'Succesfully fetch history of inbox',
 							"data" => array(
 							  "pagination" => $pagination,
-							  "deal_redeems" => $deal_redeems,
+							  "referees" => $referees,
 							),
 						);
 		
