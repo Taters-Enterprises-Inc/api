@@ -209,7 +209,7 @@ class Profile extends CI_Controller {
 					}
 
 						
-					$user_discount_data = array(
+					$influencer_data = array(
 						'first_name' => $_POST['firstName'],
 						'middle_name' => $_POST['middleName'],	
 						'last_name' => $_POST['lastName'],
@@ -223,7 +223,7 @@ class Profile extends CI_Controller {
 						'status' => 1
 					);
 
-					$influencer_id = $this->influencer_model->insertInfluencer($user_discount_data);
+					$influencer_id = $this->influencer_model->insertInfluencer($influencer_data);
 
 					$influencer_profile = array(
 						"influencer_id" => $influencer_id,
