@@ -23,15 +23,19 @@ class Shop_model extends CI_Model
     
     public function getInfluencerPromoByReferralCode($referral_code){
         $this->db->select('
-            id, 
-            influencer_id,
-            referral_code, 
-            customer_discount, 
-            influencer_discount,
-            dateadded
+            A.id, 
+            A.influencer_id,
+            A.referral_code, 
+            A.customer_discount, 
+            A.influencer_discount,
+            A.dateadded,
+            B.fb_user_id,
+            B.mobile_user_id,
         ');
-        $this->db->from('influencer_promos');
-        $this->db->where('referral_code', $referral_code);
+        $this->db->from('influencer_promos A');
+        $this->db->join('influencers B', 'B.id = A.influencer_id');
+        $this->db->where('A.referral_code', $referral_code);
+
         $query = $this->db->get();
         return $query->row();
     }

@@ -83,18 +83,15 @@ class Admin_model extends CI_Model
     function getTransactionById($transaction_id){
         $this->db->select('
             A.hash_key,
-            A.influencer_discount as payable,
+            A.influencer_discount,
             B.fb_user_id,
             B.mobile_user_id,
             D.influencer_id,
-            E.influencer_discount,
         ');
 
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'B.id = A.client_id');
-        $this->db->join('deals_redeems_tb C', 'C.id = A.deals_redeems_id', 'left');
-        $this->db->join('influencer_deals D', 'D.id = C.influencer_deal_id', 'left');
-        $this->db->join('dotcom_deals_tb E', 'E.id = C.deal_id', 'left');
+        $this->db->join('influencer_promos D', 'D.id = A.influencer_promo_id', 'left');
 
         $this->db->where('A.id', $transaction_id);
 

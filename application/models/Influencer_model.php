@@ -6,7 +6,7 @@ class Influencer_model extends CI_Model {
         $this->load->database();
     }
 
-    public function getInfluencerDealRedeemsCount( $influencer_id, $search){
+    public function getInfluencerTransactionsCount( $influencer_id, $search){
         $this->db->select('count(*) as all_count');
             
 
@@ -32,7 +32,7 @@ class Influencer_model extends CI_Model {
         return $query->row()->all_count;
     }
 
-    public function getInfluencerDealRedeems($influencer_id,$row_no, $row_per_page, $order_by,  $order, $search){
+    public function getInfluencerTransactions($influencer_id,$row_no, $row_per_page, $order_by,  $order, $search){
 
         $this->db->select('
             A.redeem_code,

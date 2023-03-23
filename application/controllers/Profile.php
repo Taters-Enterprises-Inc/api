@@ -59,8 +59,8 @@ class Profile extends CI_Controller {
 						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
 						$influencer = $this->influencer_model->getInfluencer($get_fb_user_details->id, null);
 
-						$deal_redeems_count = $this->influencer_model->getInfluencerDealRedeemsCount($influencer->id, $search);
-						$deal_redeems = $this->influencer_model->getInfluencerDealRedeems($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
+						$deal_redeems_count = $this->influencer_model->getInfluencerTransactionsCount($influencer->id, $search);
+						$deal_redeems = $this->influencer_model->getInfluencerTransactions($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
 
 
 						$pagination = array(
@@ -83,8 +83,8 @@ class Profile extends CI_Controller {
 						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
 						$influencer = $this->influencer_model->getInfluencer(null, $get_mobile_user_details->id);
 
-						$deal_redeems_count = $this->influencer_model->getInfluencerDealRedeemsCount($influencer->id, $search);
-						$deal_redeems = $this->influencer_model->getInfluencerDealRedeems($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
+						$deal_redeems_count = $this->influencer_model->getInfluencerTransactionsCount($influencer->id, $search);
+						$deal_redeems = $this->influencer_model->getInfluencerTransactions($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
 						
 						$pagination = array(
 							"total_rows" => $deal_redeems_count,

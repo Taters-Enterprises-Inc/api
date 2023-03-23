@@ -363,7 +363,6 @@ class Transaction extends CI_Controller {
 
                     $influencer_promo = $this->shop_model->getInfluencerPromoByReferralCode($referral_code);
 
-
                     if($influencer_promo){
                         $discount_value = $comp_total *  (float) $influencer_promo->customer_discount;
                         $influencer_discount_value =  $comp_total *  (float) $influencer_promo->influencer_discount;

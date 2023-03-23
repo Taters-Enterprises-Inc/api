@@ -22,12 +22,14 @@ class Shop extends CI_Controller {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);
+				$fb_user_id = $this->session->userData['fb_user_id'] ?? null;
+				$mobile_user_id = $this->session->userData['mobile_user_id'] ?? null;
 
 				$referral_code = $post['referralCode'];
 
-				$check_if_exist = $this->shop_model->getInfluencerPromo($referral_code);
+				$validation = $this->shop_model->getInfluencerPromo($referral_code);
 
-				if($check_if_exist){
+				if($validation){
 					$this->output->set_status_header('401');
 					echo json_encode(array( "message" => 'You already redeem this promo'));
 					return;
@@ -35,7 +37,11 @@ class Shop extends CI_Controller {
 
 				$influencer_promo = $this->shop_model->getInfluencerPromoByReferralCode($referral_code);
 
-				if($influencer_promo){
+				if(	
+					$influencer_promo && 
+					$influencer_promo->fb_user_id !== $fb_user_id && 
+					$influencer_promo->mobile_user_id !== $mobile_user_id
+					){
 					$response = array(
 						'data' => $influencer_promo,
 						'message' => 'Successfully applied referral'
@@ -46,7 +52,7 @@ class Shop extends CI_Controller {
 				}else{
 					
 					$this->output->set_status_header('401');
-					echo json_encode(array( "message" => 'Cannot find the referral code'));
+					echo json_encode(array( "message" => "You can't redeem this promo"));
 					return;
 				}
 				break;

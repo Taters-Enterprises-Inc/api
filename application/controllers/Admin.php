@@ -4167,9 +4167,9 @@ class Admin extends CI_Controller{
             $this->notification_model->insertNotification($notifications_data); 
             
             if($transaction->influencer_id){
-              $payable = $transaction->payable;
+              $influencer_discount = $transaction->influencer_discount;
               $influencer_profile = $this->admin_model->getInfluencerProfile($transaction->influencer_id);
-              $this->admin_model->updateInfluencerProfilePayable($transaction->influencer_id, $influencer_profile->payable + $payable);
+              $this->admin_model->updateInfluencerProfilePayable($transaction->influencer_id, $influencer_profile->payable + $influencer_discount);
             }
 
           }
