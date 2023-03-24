@@ -13,6 +13,7 @@ class Download extends CI_Controller {
 		$this->load->model('store_model');
 		$this->load->model('catering_model');
 		$this->load->model('client_model');
+		$this->load->model('influencer_model');
 		$this->load->library('images');
 	}
 
@@ -164,6 +165,30 @@ class Download extends CI_Controller {
 			$this->pdf->render();
 			$this->pdf->stream($file_name);
 		}
+
+    }
+	
+
+    public function influencer_contract(){
+
+		$influencer = $this->influencer_model->getInfluencer(
+			$this->session->userData['fb_user_id'] ?? null,
+			$this->session->userData['mobile_user_id'] ?? null
+		);
+
+		$full_name = $influencer->first_name . ' ' . $influencer->middle_name . ' ' . $influencer->last_name;
+		
+		$contract_data = array(
+			"full_name" => $full_name,
+		);
+
+		$file_name = 'influencer-contract';
+
+
+		$this->load->library('pdf');
+		$this->pdf->legalPotrait('influencer_contract_download',$contract_data);
+		$this->pdf->render();
+		$this->pdf->stream($file_name);
 
     }
     

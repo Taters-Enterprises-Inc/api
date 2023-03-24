@@ -223,7 +223,7 @@ class Transaction extends CI_Controller {
                             "data" => array(
                                 "hash" => $hash_key,
                             ),
-                            "message" => "Succesfully checkout order"
+                            "message" => "Successfully checkout order"
                         );
                         
                         header('content-type: application/json');
@@ -611,7 +611,7 @@ class Transaction extends CI_Controller {
                             "data" => array(
                                 "hash" => $hash_key,
                             ),
-                            "message" => "Succesfully checkout order"
+                            "message" => "Successfully checkout order"
                         );
                         
                         header('content-type: application/json');

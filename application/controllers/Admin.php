@@ -1778,7 +1778,7 @@ class Admin extends CI_Controller{
         $locales = $this->admin_model->getLocales();
         
         $response = array(
-          "message" => "Succesfully get locales",
+          "message" => "Successfully get locales",
           "data" => $locales,
         );
         
@@ -1795,7 +1795,7 @@ class Admin extends CI_Controller{
         $region_store_combinations = $this->admin_model->getRegionStoreCombinations();
         
         $response = array(
-          "message" => "Succesfully get region store region combinations",
+          "message" => "Successfully get region store region combinations",
           "data" => $region_store_combinations,
         );
         
@@ -1812,7 +1812,7 @@ class Admin extends CI_Controller{
         $store_menus = $this->admin_model->getStoreMenus();
         
         $response = array(
-          "message" => "Succesfully get store menus",
+          "message" => "Successfully get store menus",
           "data" => $store_menus,
         );
         
@@ -1840,7 +1840,7 @@ class Admin extends CI_Controller{
               }
               
               $response = array(
-                "message" => "Succesfully get snackshop total sales",
+                "message" => "Successfully get snackshop total sales",
                 "data" => array(
                   "total_completed_transaction" => $snackshop_total_completed_transaction,
                   "total_purchase_amount" => (int) $snackshop_total_purchase_amount[0]->purchase_amount,
@@ -1866,7 +1866,7 @@ class Admin extends CI_Controller{
               }
               
               $response = array(
-                "message" => "Succesfully get catering total sales",
+                "message" => "Successfully get catering total sales",
                 "data" => array(
                   "total_completed_transaction" => $catering_total_completed_transaction,
                   "total_purchase_amount" => (int) $catering_total_purchase_amount[0]->purchase_amount,
@@ -1893,7 +1893,7 @@ class Admin extends CI_Controller{
 
               
               $response = array(
-                "message" => "Succesfully get popclub total sales",
+                "message" => "Successfully get popclub total sales",
                 "data" => array(
                   "total_completed_transaction" => $popclub_total_completed_transaction,
                   "total_purchase_amount" => (int) $popclub_total_purchase_amount[0]->purchase_amount,
@@ -1937,7 +1937,7 @@ class Admin extends CI_Controller{
               }
               
               $response = array(
-                "message" => "Succesfully get overall total sales",
+                "message" => "Successfully get overall total sales",
                 "data" => array(
                   "total_completed_transaction" => $overall_total_completed_transaction,
                   "total_purchase_amount" => (int) $overall_total_purchase_amount,
@@ -2045,7 +2045,7 @@ class Admin extends CI_Controller{
 
               
               $response = array(
-                "message" => "Succesfully get snackshop sales",
+                "message" => "Successfully get snackshop sales",
                 "data" => $another_filter,
               );
               
@@ -2096,7 +2096,7 @@ class Admin extends CI_Controller{
 				}
 
         $response = array(
-          "message" => "Succesfully get package flavor!",
+          "message" => "Successfully get package flavor!",
           "data" => array_values($package_flavor),
         );
         
@@ -2557,7 +2557,7 @@ class Admin extends CI_Controller{
 
         
         $response = array(
-          "message" => "Succesfully update remarks!"
+          "message" => "Successfully update remarks!"
         );
         
         header('content-type: application/json');
@@ -2793,7 +2793,7 @@ class Admin extends CI_Controller{
           $survey = $this->admin_model->getSurvey($survey_id);
           $response = array(
             "data" => $survey,
-            "message" => "Succesfully fetch survey verification"
+            "message" => "Successfully fetch survey verification"
           );
 
           header('content-type: application/json');
@@ -3309,7 +3309,7 @@ class Admin extends CI_Controller{
         $this->notification_model->seenNotification($notification_id, $date_now);
         
         $response = array(
-          "message" => "Succesfully seen notification"
+          "message" => "Successfully seen notification"
         );
         
         header('content-type: application/json');
@@ -3363,7 +3363,7 @@ class Admin extends CI_Controller{
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 7, 'admin'),
               ),
             ),
-            "message" => "Succesfully fetch notification"
+            "message" => "Successfully fetch notification"
         );
         
         header('content-type: application/json');
@@ -4956,7 +4956,7 @@ class Admin extends CI_Controller{
             $this->admin_model->uploadPayment($trans_id, $data, $file_name);
 
             header('content-type: application/json');
-            echo json_encode(array( "message" => 'Succesfully upload payment'));
+            echo json_encode(array( "message" => 'Successfully upload payment'));
           }
 
         break;

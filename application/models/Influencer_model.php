@@ -5,6 +5,21 @@ class Influencer_model extends CI_Model {
     public function __construct(){
         $this->load->database();
     }
+    
+
+    function uploadContract($data,$influencer_id)
+    { 
+        $file_name = $data['file_name'];
+		$this->db->set('contract', $file_name);
+		$this->db->set('status', 6);
+
+        $this->db->where("id", $influencer_id);
+        $this->db->update("influencers");
+		
+        $return_data['upload_status'] = ($this->db->affected_rows() != 1) ? false : true;
+
+        return $return_data;
+    }
 
     public function getInfluencerRefereesCount( $influencer_id, $search){
         $this->db->select('count(*) as all_count');   

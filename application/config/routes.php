@@ -67,7 +67,7 @@ $route['profile/inbox'] = 'profile/inbox';
 $route['profile/influencer'] = 'profile/influencer';
 $route['profile/update-influencer'] = 'profile/update_influencer';
 $route['profile/influencer-referee'] = 'profile/influencer_referee';
-
+$route['profile/influencer-upload-contract'] = 'profile/influencer_upload_contract';
 
 // Store
 $route['store'] = 'store';
@@ -88,6 +88,7 @@ $route['transaction/catering'] = 'transaction/catering';
 
 //Download
 $route['download/contract/(:any)'] = 'download/contract/$1';
+$route['download/influencer-contract'] = 'download/influencer_contract/';
 
 //Image
 $route['load-image/(:any)'] = 'image/load_image/$1';	

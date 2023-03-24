@@ -26,6 +26,55 @@ class Profile extends CI_Controller {
 		$this->ion_auth->set_message_delimiters('', '');
 		$this->ion_auth->set_error_delimiters('', '');
 	}
+
+	public function influencer_upload_contract(){
+		
+        if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
+
+            $config['upload_path'] = './assets/upload/influencer_upload_contract'; 
+
+			if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
+
+            $config['allowed_types']    = 'pdf|doc|gif|jpg|jpeg|png';   
+            $config['max_size']         = 2000; 
+            $config['max_width']        = 0;
+            $config['max_height']       = 0;
+            $config['encrypt_name']     = TRUE; 
+
+            $this->load->library('upload', $config);
+
+            if (!$this->upload->do_upload('uploaded_file')) { 
+                $error = $this->upload->display_errors();
+				$this->output->set_status_header('401');
+                echo json_encode(array( "message" => $error));
+            } else {
+                $data = $this->upload->data(); 
+
+				$influencer = $this->influencer_model->getInfluencer(
+					$this->session->userData['fb_user_id'] ?? null,
+					$this->session->userData['mobile_user_id'] ?? null
+				);
+
+                $this->influencer_model->uploadContract(
+					$data,
+					$influencer->id,
+				);	
+
+				
+				$real_time_notification = array(
+					"message" => $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." Upload Influencer Contract!"
+				);
+
+				notify('admin-influencer','influencer-application-with-id', $real_time_notification);
+
+                header('content-type: application/json');
+                echo json_encode(array( "message" => 'Successfully upload contract'));
+            }
+        } else {
+			$this->output->set_status_header('401');
+			echo json_encode(array( "message" => 'Failed upload contract check your file'));
+        }
+	}
 	
 	public function influencer_referee(){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -69,7 +118,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Succesfully fetch history of inbox',
+							'message' => 'Successfully fetch history of inbox',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "referees" => $referees,
@@ -92,7 +141,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Succesfully fetch history of inbox',
+							'message' => 'Successfully fetch history of inbox',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "referees" => $referees,
@@ -328,7 +377,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Succesfully fetch history of inbox',
+							'message' => 'Successfully fetch history of inbox',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "inbox" => $inbox
@@ -349,7 +398,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Succesfully fetch history of inbox',
+							'message' => 'Successfully fetch history of inbox',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "inbox" => $inbox,
@@ -495,7 +544,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Succesfully fetch history of orders',
+							'message' => 'Successfully fetch history of orders',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "orders" => $snackshop_orders
@@ -516,7 +565,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Succesfully fetch history of orders',
+							'message' => 'Successfully fetch history of orders',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "orders" => $snackshop_orders,
@@ -573,7 +622,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Succesfully fetch history of bookings',
+							'message' => 'Successfully fetch history of bookings',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "bookings" => $catering_bookings
@@ -594,7 +643,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Succesfully fetch history of bookings',
+							'message' => 'Successfully fetch history of bookings',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "bookings" => $catering_bookings
@@ -651,7 +700,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Succesfully fetch history of orders',
+							'message' => 'Successfully fetch history of orders',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "redeems" => $popclub_redeems
@@ -673,7 +722,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Succesfully fetch history of orders',
+							'message' => 'Successfully fetch history of orders',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "redeems" => $popclub_redeems
