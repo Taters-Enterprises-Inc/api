@@ -25,6 +25,133 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
 
+  public function setting_influencer(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST':
+
+        $influencerPost = json_decode($this->input->post('influencer'), true);
+        $referral_code = substr(md5(uniqid(mt_rand(), true)), 0, 6);
+
+        $influencer = $this->admin_model->getInfluencerById($influencerPost['id']);
+
+        $data = array(
+          "influencer_id" => $influencer->id,
+          'referral_code' => $referral_code,
+          "customer_discount" => $this->input->post('customerDiscountPercentage'),
+          'influencer_discount' => $this->input->post('influencerDiscountPercentage'),
+        );
+        
+
+        $this->admin_model->insertInfluencerPromo($data);
+
+                
+        $notification_event_data = array(
+          "notification_event_type_id" => 4,
+          "text" => 'A new promo has arrive, endorse now!'
+        );
+
+      
+        $notification_message_data = array(
+          "title" => "A new promo has arrive, endorse now!",
+          "body" => "You can now endorse this promo to your followers. Just input the referral code ( <b>" . $referral_code . "</b> ) in checkout!.",
+          "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
+          "closing_salutation" => "Best wishes,",
+          "message_from" => "Taters Enterprises Inc.",
+          "contact_number" => "(+64) 977-275-5595",
+          "email" => "tei.csr@tatersgroup.com",
+        );
+                    
+        $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
+
+        $notification_event_data['notification_message_id'] = $notification_message_id;
+
+        $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+                        
+        //mobile or fb             
+        $notifications_data = array(
+            "fb_user_to_notify" => $influencer->fb_user_id,
+            "mobile_user_to_notify" => $influencer->mobile_user_id,
+            "fb_user_who_fired_event" => $influencer->fb_user_id,
+            "mobile_user_who_fired_event" => $influencer->mobile_user_id,
+            'notification_event_id' => $notification_event_id,
+            "dateadded" => date('Y-m-d H:i:s'),
+        );
+        
+        $this->notification_model->insertNotification($notifications_data); 
+
+        $real_time_notification = array(
+          "fb_user_id" => $influencer->fb_user_id,
+          "mobile_user_id" => $influencer->mobile_user_id,
+          "message" => "A new promo has arrive, endorse now!",
+        );
+
+        notify('user-inbox','inbox-influencer-promo', $real_time_notification);
+
+
+        $response = array(
+          "message" => 'Successfully create influencer promo',
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+
+    }
+  }
+  
+
+  public function setting_influencers(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $influencers = $this->admin_model->getSettingInfluencers();
+
+        $response = array(
+          "message" => 'Successfully fetch influencers',
+          "data" => $influencers,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+
+    }
+  }
+  
+  public function setting_influencer_promos(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'dateadded';
+        $search = $this->input->get('search');
+    
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+        
+        $influencer_promos_count = $this->admin_model->getInfluencerPromosCount($search);
+        $influencer_promos = $this->admin_model->getInfluencerPromos($page_no, $per_page, $order_by, $order, $search);
+    
+        $pagination = array(
+          "total_rows" => $influencer_promos_count,
+          "per_page" => $per_page,
+        );
+    
+        $response = array(
+          "message" => 'Successfully fetch catering packages',
+          "data" => array(
+            "pagination" => $pagination,
+            "influencer_promos" => $influencer_promos
+          ),
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
   public function setting_edit_popclub_deal(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
@@ -661,7 +788,7 @@ class Admin extends CI_Controller{
                   "message" => "A new deal has arrive to endorse now to get discount!",
                 );
 
-                notify('user-inbox','inbox-influencer-discount', $real_time_notification);
+                notify('user-inbox','inbox-influencer-promo', $real_time_notification);
 
               }
 

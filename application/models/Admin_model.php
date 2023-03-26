@@ -6,6 +6,89 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    function insertInfluencerPromo($data){
+        $this->db->trans_start();
+		$this->db->insert('influencer_promos', $data);
+        $this->db->trans_complete();
+    }
+
+    
+    function getSettingInfluencers(){
+
+        $this->db->select('
+            A.id,
+            CONCAT(B.first_name," ",B.last_name) as fb_user_name,
+            CONCAT(C.first_name," ",C.last_name) as mobile_user_name,
+        ');
+
+        $this->db->from('influencers A');
+        $this->db->join('fb_users B', 'B.id = A.fb_user_id', 'left');
+        $this->db->join('mobile_users C', 'C.id = A.mobile_user_id', 'left');
+
+        $this->db->where('A.status', 9);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getInfluencerPromosCount($search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('influencer_promos A');
+        $this->db->join('influencers B', 'B.id = A.influencer_id');
+        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
+        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->or_like('A.referral_code', $search);
+            $this->db->or_like('fb_user_name', $search);
+            $this->db->or_like('mobile_user_name', $search);
+            $this->db->or_like('A.customer_discount', $search);
+            $this->db->or_like('A.influencer_discount', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+    
+    function getInfluencerPromos($row_no, $row_per_page, $order_by,  $order, $search){
+        $this->db->select('
+            A.id,
+            A.referral_code,
+            A.customer_discount,
+            A.influencer_discount,
+            A.dateadded,
+            CONCAT(C.first_name," ",C.last_name) as fb_user_name,
+            CONCAT(D.first_name," ",D.last_name) as mobile_user_name,
+        ');
+
+        $this->db->from('influencer_promos A');
+        $this->db->join('influencers B', 'B.id = A.influencer_id');
+        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
+        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->or_like('A.referral_code', $search);
+            $this->db->or_like('fb_user_name', $search);
+            $this->db->or_like('mobile_user_name', $search);
+            $this->db->or_like('A.customer_discount', $search);
+            $this->db->or_like('A.influencer_discount', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+
     function getInfluencerById($influencer_id){
         $this->db->select('
             id,
