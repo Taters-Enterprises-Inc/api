@@ -440,13 +440,13 @@ class Admin extends CI_Controller{
     }
   }
 
-  public function influencer($influencer_user_id){
+  public function influencer_application($influencer_user_id){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
-        $influencer = $this->admin_model->getInfluencer($influencer_user_id);
+        $influencer = $this->admin_model->getInfluencerApplication($influencer_user_id);
 
         $response = array(
-          "message" => 'Successfully fetch influencer request',
+          "message" => 'Successfully fetch influencer application',
           "data" => $influencer,
         );
   
@@ -456,7 +456,7 @@ class Admin extends CI_Controller{
     }
   }
 
-  public function influencers(){
+  public function influencer_applications(){
 		switch($this->input->server('REQUEST_METHOD')){
 		  case 'GET':
 			$per_page = $this->input->get('per_page') ?? 25;
@@ -470,19 +470,19 @@ class Admin extends CI_Controller{
 			  $page_no = ($page_no - 1) * $per_page;
 			}
 			
-			$influencers_count = $this->admin_model->getInfluencersCount($status, $search);
-      $influencers = $this->admin_model->getInfluencers($page_no, $per_page, $status, $order_by, $order, $search);
+			$influencer_applications_count = $this->admin_model->getInfluencerApplicationsCount($status, $search);
+      $influencer_applications = $this->admin_model->getInfluencerApplications($page_no, $per_page, $status, $order_by, $order, $search);
 	
 			$pagination = array(
-			  "total_rows" => $influencers_count,
+			  "total_rows" => $influencer_applications_count,
 			  "per_page" => $per_page,
 			);
 	
 			$response = array(
-			  "message" => 'Successfully fetch user influencers',
+			  "message" => 'Successfully fetch user influencers Applications',
 			  "data" => array(
           "pagination" => $pagination,
-          "influencers" => $influencers
+          "influencer_applications" => $influencer_applications
 			  ),
 			);
 	  

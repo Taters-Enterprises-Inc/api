@@ -273,7 +273,7 @@ class Admin_model extends CI_Model
         $this->db->update("influencers");
     }
 
-    public function getInfluencer($influencer_user_id){
+    public function getInfluencerApplication($influencer_user_id){
         $this->db->select("
             A.id,
             A.first_name,
@@ -303,7 +303,7 @@ class Admin_model extends CI_Model
     }
 
 
-    public function getInfluencers($row_no, $row_per_page, $status, $order_by,  $order, $search){
+    public function getInfluencerApplications($row_no, $row_per_page, $status, $order_by,  $order, $search){
         
         $this->db->select("
             A.id,
@@ -339,7 +339,7 @@ class Admin_model extends CI_Model
         return $query->result();
     }
     
-    public function getInfluencersCount($status, $search){
+    public function getInfluencerApplicationsCount($status, $search){
         $this->db->select('count(*) as all_count');
             
         $this->db->from('influencers A');

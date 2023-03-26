@@ -146,10 +146,6 @@ $route['admin/discount/(:num)'] = 'admin/discount/$1';
 $route['admin/discounts'] = 'admin/discounts';
 
 
-$route['admin/discount/influencer-change-status'] = 'admin/influencer_change_status';
-$route['admin/influencers'] = 'admin/influencers';
-$route['admin/influencer/(:num)'] = 'admin/influencer/$1';
-
 $route['admin/availability/deal'] = 'admin/deal_availability';
 $route['admin/availability/product'] = 'admin/product_availability';
 $route['admin/availability/caters-product'] = 'admin/caters_product_availability';
@@ -202,6 +198,11 @@ $route['admin/setting/edit-popclub-deal'] = 'admin/setting_edit_popclub_deal';
 $route['admin/setting/influencer-promos'] = 'admin/setting_influencer_promos';
 $route['admin/setting/influencers'] = 'admin/setting_influencers';
 $route['admin/setting/influencer'] = 'admin/setting_influencer';
+
+
+$route['admin/influencer/applications'] = 'admin/influencer_applications';
+$route['admin/influencer/application/change-status'] = 'admin/influencer_change_status';
+$route['admin/influencer/application/(:num)'] = 'admin/influencer_application/$1';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';
