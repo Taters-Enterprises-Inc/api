@@ -675,8 +675,6 @@ class Admin_model extends CI_Model
         $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
 		$this->db->join('region_store_combination_tb C', 'C.region_store_id = A.region_store_combination_id');
 
-        $this->db->where('A.status', 1);
-
         $query = $this->db->get();
         return $query->result();
     }
