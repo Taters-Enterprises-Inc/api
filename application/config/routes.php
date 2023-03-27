@@ -65,6 +65,7 @@ $route['profile/update-user-discount'] = 'profile/update_user_discount';
 $route['profile/contact/(:num)'] = 'profile/contact/$1';
 $route['profile/inbox'] = 'profile/inbox';
 $route['profile/influencer'] = 'profile/influencer';
+$route['profile/influencer/cashout'] = 'profile/influencer_cashout';
 $route['profile/update-influencer'] = 'profile/update_influencer';
 $route['profile/influencer-referee'] = 'profile/influencer_referee';
 $route['profile/influencer-upload-contract'] = 'profile/influencer_upload_contract';
@@ -195,14 +196,15 @@ $route['admin/setting/popclub-deals'] = 'admin/setting_popclub_deals';
 $route['admin/setting/deal-shop-products'] = 'admin/setting_deal_shop_products';
 $route['admin/setting/popclub-deal'] = 'admin/setting_popclub_deal';
 $route['admin/setting/edit-popclub-deal'] = 'admin/setting_edit_popclub_deal';
-$route['admin/setting/influencer-promos'] = 'admin/setting_influencer_promos';
-$route['admin/setting/influencers'] = 'admin/setting_influencers';
-$route['admin/setting/influencer'] = 'admin/setting_influencer';
 
 
 $route['admin/influencer/applications'] = 'admin/influencer_applications';
 $route['admin/influencer/application/change-status'] = 'admin/influencer_change_status';
 $route['admin/influencer/application/(:num)'] = 'admin/influencer_application/$1';
+$route['admin/influencer/promos'] = 'admin/influencer_promos';
+$route['admin/influencers'] = 'admin/influencers';
+$route['admin/influencer'] = 'admin/influencer';
+$route['admin/influencer/cashouts'] = 'admin/influencer_cashouts';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';

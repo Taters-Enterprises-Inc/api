@@ -24,8 +24,44 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 		$this->load->model('deals_model');
 	}
+  
+  public function influencer_cashouts(){
+		switch($this->input->server('REQUEST_METHOD')){
+		  case 'GET':
+			$per_page = $this->input->get('per_page') ?? 25;
+			$page_no = $this->input->get('page_no') ?? 0;
+			$status = $this->input->get('status') ?? null;
+			$order = $this->input->get('order') ?? 'desc';
+			$order_by = $this->input->get('order_by') ?? 'dateadded';
+			$search = $this->input->get('search');
+	
+			if($page_no != 0){
+			  $page_no = ($page_no - 1) * $per_page;
+			}
+			
+			$influencer_cashouts_count = $this->admin_model->getInfluencerCashoutsCount($status, $search);
+      $influencer_cashouts = $this->admin_model->getInfluencerCashouts($page_no, $per_page, $status, $order_by, $order, $search);
+	
+			$pagination = array(
+			  "total_rows" => $influencer_cashouts_count,
+			  "per_page" => $per_page,
+			);
+	
+			$response = array(
+			  "message" => 'Successfully fetch user influencers cashouts',
+			  "data" => array(
+          "pagination" => $pagination,
+          "influencer_cashouts" => $influencer_cashouts
+			  ),
+			);
+	  
+			header('content-type: application/json');
+			echo json_encode($response);
+			return;
+		}
+  }
 
-  public function setting_influencer(){
+  public function influencer(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
 
@@ -100,7 +136,7 @@ class Admin extends CI_Controller{
   }
   
 
-  public function setting_influencers(){
+  public function influencers(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
         $influencers = $this->admin_model->getSettingInfluencers();
@@ -117,7 +153,7 @@ class Admin extends CI_Controller{
     }
   }
   
-  public function setting_influencer_promos(){
+  public function influencer_promos(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
         $per_page = $this->input->get('per_page') ?? 25;

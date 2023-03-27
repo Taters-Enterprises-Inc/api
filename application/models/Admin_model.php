@@ -6,13 +6,73 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    
+    public function getInfluencerCashoutsCount($status, $search){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('influencer_cashouts A');
+        $this->db->join('influencers B','B.id = A.influencer_id');
+        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
+        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
+
+
+        if($status)
+            $this->db->where('A.influencer_cashout_status_id', $status);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.cashout', $search);
+            $this->db->or_like('CONCAT(D.first_name," ",D.last_name)', $search);
+            $this->db->or_like('CONCAT(C.first_name," ",C.last_name)', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getInfluencerCashouts($row_no, $row_per_page, $status, $order_by,  $order, $search){
+        $this->db->select('
+            A.id,
+            A.cashout,
+            A.influencer_cashout_status_id,
+            A.dateadded,
+            CONCAT(C.first_name," ",C.last_name) as fb_user_name,
+            CONCAT(D.first_name," ",D.last_name) as mobile_user_name,
+        ');
+
+        $this->db->from('influencer_cashouts A');
+        $this->db->join('influencers B','B.id = A.influencer_id');
+        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
+        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
+
+        if($status)
+            $this->db->where('A.influencer_cashout_status_id', $status);
+
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.cashout', $search);
+            $this->db->or_like('CONCAT(D.first_name," ",D.last_name)', $search);
+            $this->db->or_like('CONCAT(C.first_name," ",C.last_name)', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     function insertInfluencerPromo($data){
         $this->db->trans_start();
 		$this->db->insert('influencer_promos', $data);
         $this->db->trans_complete();
     }
 
-    
     function getSettingInfluencers(){
 
         $this->db->select('
@@ -41,9 +101,9 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->or_like('A.referral_code', $search);
-            $this->db->or_like('fb_user_name', $search);
-            $this->db->or_like('mobile_user_name', $search);
+            $this->db->like('A.referral_code', $search);
+            $this->db->or_like('CONCAT(C.first_name," ",C.last_name)', $search);
+            $this->db->or_like('CONCAT(D.first_name," ",D.last_name)', $search);
             $this->db->or_like('A.customer_discount', $search);
             $this->db->or_like('A.influencer_discount', $search);
             $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
@@ -72,9 +132,9 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->or_like('A.referral_code', $search);
-            $this->db->or_like('fb_user_name', $search);
-            $this->db->or_like('mobile_user_name', $search);
+            $this->db->like('A.referral_code', $search);
+            $this->db->or_like('CONCAT(C.first_name," ",C.last_name)', $search);
+            $this->db->or_like('CONCAT(D.first_name," ",D.last_name)', $search);
             $this->db->or_like('A.customer_discount', $search);
             $this->db->or_like('A.influencer_discount', $search);
             $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
@@ -322,15 +382,15 @@ class Admin_model extends CI_Model
             $this->db->where('A.status', $status);
 
 
-            if($search){
-                $this->db->group_start();
-                $this->db->like('A.id_number', $search);
-                $this->db->or_like('A.first_name', $search);
-                $this->db->or_like('A.middle_name', $search);
-                $this->db->or_like('A.last_name', $search);
-                $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
-                $this->db->group_end();
-            }
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.id_number', $search);
+            $this->db->or_like('A.first_name', $search);
+            $this->db->or_like('A.middle_name', $search);
+            $this->db->or_like('A.last_name', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
 
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
@@ -627,7 +687,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->or_like('name', $search);
+            $this->db->like('name', $search);
             $this->db->or_like('original_price', $search);
             $this->db->or_like('promo_price', $search);
             $this->db->or_like('description', $search);
@@ -657,7 +717,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->or_like('name', $search);
+            $this->db->like('name', $search);
             $this->db->or_like('original_price', $search);
             $this->db->or_like('promo_price', $search);
             $this->db->or_like('description', $search);
@@ -883,7 +943,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->or_like('name', $search);
+            $this->db->like('name', $search);
             $this->db->or_like('description', $search);
             $this->db->or_like('price', $search);
             $this->db->or_like('add_details', $search);
@@ -912,7 +972,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->or_like('name', $search);
+            $this->db->like('name', $search);
             $this->db->or_like('description', $search);
             $this->db->or_like('price', $search);
             $this->db->or_like('add_details', $search);
@@ -1679,7 +1739,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->or_like('name', $search);
+            $this->db->like('name', $search);
             $this->db->or_like('description', $search);
             $this->db->or_like('price', $search);
             $this->db->or_like('add_details', $search);
@@ -1703,7 +1763,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->or_like('name', $search);
+            $this->db->like('name', $search);
             $this->db->or_like('description', $search);
             $this->db->or_like('price', $search);
             $this->db->or_like('add_details', $search);
@@ -1823,7 +1883,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->bsc_db->group_start();
-            $this->bsc_db->or_like('A.invoice_no', $search);
+            $this->bsc_db->like('A.invoice_no', $search);
             $this->bsc_db->or_like('B.name', $search);
             $this->bsc_db->or_like('C.first_name', $search);
             $this->bsc_db->or_like('C.last_name', $search);
@@ -1869,7 +1929,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->bsc_db->group_start();
-            $this->bsc_db->or_like('A.invoice_no', $search);
+            $this->bsc_db->like('A.invoice_no', $search);
             $this->bsc_db->or_like('B.name', $search);
             $this->bsc_db->or_like('C.first_name', $search);
             $this->bsc_db->or_like('C.last_name', $search);
