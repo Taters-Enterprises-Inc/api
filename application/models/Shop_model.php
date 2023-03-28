@@ -31,9 +31,13 @@ class Shop_model extends CI_Model
             A.dateadded,
             B.fb_user_id,
             B.mobile_user_id,
+            CONCAT(C.first_name," ",C.last_name) as fb_user_name,
+            CONCAT(D.first_name," ",D.last_name) as mobile_user_name,
         ');
         $this->db->from('influencer_promos A');
         $this->db->join('influencers B', 'B.id = A.influencer_id');
+        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
+        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
         $this->db->where('A.referral_code', $referral_code);
 
         $query = $this->db->get();

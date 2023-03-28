@@ -25,6 +25,52 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
   
+  public function influencer_cashout_change_status(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
+        
+        $influencer_cashout_id = $this->input->post('influencerCashoutId');
+        $status = $this->input->post('status');
+
+        $influencer_cashout = $this->admin_model->getInfluencerCashoutById($influencer_cashout_id);
+
+        $this->admin_model->changeStatusInfluencerCashout($influencer_cashout_id, $status);
+
+        // $real_time_notification = array(
+        //     "fb_user_id" => $influencer->fb_user_id,
+        //     "mobile_user_id" => $influencer->mobile_user_id,
+        //     "status" => $status,
+        // );
+
+        // notify('user-influencer','influencer-update', $real_time_notification);
+
+
+        $response = array(
+          "message" => 'Successfully update influencer status',
+        );
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
+  public function influencer_cashout($influencer_cashout_id){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $influencer_cashout = $this->admin_model->getInfluencerCashoutById($influencer_cashout_id);
+
+        $response = array(
+          "message" => 'Successfully fetch influencer cashout',
+          "data" => $influencer_cashout,
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+
   public function influencer_cashouts(){
 		switch($this->input->server('REQUEST_METHOD')){
 		  case 'GET':
@@ -64,6 +110,7 @@ class Admin extends CI_Controller{
   public function influencer(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
 
         $influencerPost = json_decode($this->input->post('influencer'), true);
         $referral_code = substr(md5(uniqid(mt_rand(), true)), 0, 6);
@@ -3520,10 +3567,15 @@ class Admin extends CI_Controller{
                 "unseen_notifications" => $this->notification_model->getNotifications($user_id, 6, true, 'admin'),
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 6, 'admin'),
               ),
-              "influencer" => array(
+              "influencer_application" => array(
                 'notifications'=> $this->notification_model->getNotifications($user_id, 7, false, 'admin'),
                 "unseen_notifications" => $this->notification_model->getNotifications($user_id, 7, true, 'admin'),
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 7, 'admin'),
+              ),
+              "influencer_cashout" => array(
+                'notifications'=> $this->notification_model->getNotifications($user_id, 8, false, 'admin'),
+                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 8, true, 'admin'),
+                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 8, 'admin'),
               ),
             ),
             "message" => "Successfully fetch notification"

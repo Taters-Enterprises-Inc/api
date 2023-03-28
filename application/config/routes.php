@@ -205,6 +205,8 @@ $route['admin/influencer/promos'] = 'admin/influencer_promos';
 $route['admin/influencers'] = 'admin/influencers';
 $route['admin/influencer'] = 'admin/influencer';
 $route['admin/influencer/cashouts'] = 'admin/influencer_cashouts';
+$route['admin/influencer/cashout/change-status'] = 'admin/influencer_cashout_change_status';
+$route['admin/influencer/cashout/(:num)'] = 'admin/influencer_cashout/$1';
 
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';

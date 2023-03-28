@@ -6,6 +6,40 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    public function changeStatusInfluencerCashout($influencer_cashout_id, $status){
+		$this->db->set('influencer_cashout_status_id', $status);
+        $this->db->where('id', $influencer_cashout_id);
+        $this->db->update("influencer_cashouts");
+    }
+
+    public function getInfluencerCashoutById($influencer_cashout_id){
+        $this->db->select('
+            A.id,
+            A.cashout,
+            A.influencer_cashout_status_id,
+            A.dateadded,
+            B.id_number,
+            B.first_name,
+            B.middle_name,
+            B.last_name,
+            B.id_front,
+            B.id_back,
+            B.fb_user_id,
+            B.mobile_user_id,
+            CONCAT(C.first_name," ",C.last_name) as fb_user_name,
+            CONCAT(D.first_name," ",D.last_name) as mobile_user_name,
+        ');
+        $this->db->from('influencer_cashouts A');
+        $this->db->join('influencers B','B.id = A.influencer_id');
+        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
+        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
+
+        $this->db->where('A.id', $influencer_cashout_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
     
     public function getInfluencerCashoutsCount($status, $search){
         $this->db->select('count(*) as all_count');

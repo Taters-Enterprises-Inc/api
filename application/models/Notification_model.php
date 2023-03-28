@@ -56,7 +56,9 @@ class Notification_model extends CI_Model {
 
             F.id as discount_user_id,
             
-            G.id as influencer_id
+            G.id as influencer_id,
+
+            H.id as influencer_cashout_id,
             
         ');
 
@@ -68,6 +70,7 @@ class Notification_model extends CI_Model {
         $this->db->join('deals_redeems_tb E', 'E.id = B.deals_redeems_tb_id','left');
         $this->db->join('discount_users F', 'F.id = B.discount_user_id','left');
         $this->db->join('influencers G', 'G.id = B.influencer_id','left');
+        $this->db->join('influencer_cashouts H', 'H.id = B.influencer_cashout_id','left');
 
         if($is_unseen){
             $this->db->where('A.dateseen', NULL);

@@ -22,8 +22,8 @@ class Shop extends CI_Controller {
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
 				$post = json_decode(file_get_contents("php://input"), true);
-				$fb_user_id = $this->session->userData['fb_user_id'] ?? null;
-				$mobile_user_id = $this->session->userData['mobile_user_id'] ?? null;
+				$fb_user_id = $this->session->userData['fb_user_id'] ?? '';
+				$mobile_user_id = $this->session->userData['mobile_user_id'] ?? '';
 
 				$referral_code = $post['referralCode'];
 

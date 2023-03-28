@@ -38,7 +38,50 @@ class Profile extends CI_Controller {
 					'influencer_cashout_status_id ' => 1,
 				);
 
-				$this->influencer_model->cashout($data);
+				$influencer_cashout_id = $this->influencer_model->cashout($data);
+
+				
+				$message = $this->session->userData['first_name'] . " " . $this->session->userData['last_name']  ." cashout!";
+                        
+				$notification_event_data = array(
+					"notification_event_type_id" => 8,
+					"influencer_cashout_id" => $influencer_cashout_id,
+					"text" => $message
+				);
+				
+				$notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
+
+				//admin
+				$admin_users = $this->user_model->getUsersByGroupId(1);
+				foreach($admin_users as $user){
+					$notifications_data = array(
+						"user_to_notify" => $user->user_id,
+						"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+						"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+						'notification_event_id' => $notification_event_id,
+						"dateadded" => date('Y-m-d H:i:s'),
+					);
+					$this->notification_model->insertNotification($notifications_data);   
+				}
+				
+				//csr admin
+				$csr_admin_users = $this->user_model->getUsersByGroupId(10);
+				foreach($csr_admin_users as $user){
+					$notifications_data = array(
+						"user_to_notify" => $user->user_id,
+						"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
+						"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
+						'notification_event_id' => $notification_event_id,
+						"dateadded" => date('Y-m-d H:i:s'),
+					);
+					$this->notification_model->insertNotification($notifications_data);   
+				}
+
+				$realtime_notification = array(
+					"message" => $message,
+				);
+
+				notify('admin-influencer','influencer-cashout', $realtime_notification);
 
 				$response = array(
 					'message' => 'Successfully cashout',

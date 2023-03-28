@@ -9,7 +9,10 @@ class Influencer_model extends CI_Model {
     function cashout($data){
         $this->db->trans_start();
         $this->db->insert('influencer_cashouts', $data);
+		$insert_id = $this->db->insert_id();
         $this->db->trans_complete();
+
+        return $insert_id;
     }
 
     function uploadContract($data,$influencer_id)
