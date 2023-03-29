@@ -28,14 +28,21 @@ class Admin extends CI_Controller{
   public function setting_edit_popclub_deal(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
-        $deal_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.jpg';
+        $deal_image_name = clean_str_for_img($this->input->post('name'). '-' . time());
 
         $deal_id = $this->input->post('id');
+        $ext = '';
 
         $deal = $this->admin_model->getPopclubDeal($deal_id);
 
         if(isset($_FILES['image500x500']['tmp_name']) && is_uploaded_file($_FILES['image500x500']['tmp_name'])){
-          $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$deal_image_name, 'jpg');
+
+          $image500x500 = explode(".", $_FILES['image500x500']['name']);
+          $ext = end($image500x500);
+
+          $deal_image_name = $deal_image_name . '.' . $ext;
+
+          $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$deal_image_name, $ext );
           if($image500x500_error){
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $image500x500_error));
@@ -44,13 +51,18 @@ class Admin extends CI_Controller{
         }else{
           $current_image_name = './assets/images/shared/products/500/' . $deal->product_image;
           
+          $product_image_name = explode(".", $deal->product_image);
+          $ext = end($product_image_name);
+
+          $deal_image_name = $deal_image_name . '.' . $ext;
+          
           if($deal->product_image !== $deal_image_name && file_exists($current_image_name)){
             rename($current_image_name,'./assets/images/shared/products/500/'. $deal_image_name);
           }
         }
         
         if(isset($_FILES['image250x250']['tmp_name']) && is_uploaded_file($_FILES['image250x250']['tmp_name'])){
-          $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$deal_image_name, 'jpg');
+          $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$deal_image_name, $ext);
           if($image250x250_error){
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $image250x250_error));
@@ -65,7 +77,7 @@ class Admin extends CI_Controller{
         }
         
         if(isset($_FILES['image75x75']['tmp_name']) && is_uploaded_file($_FILES['image75x75']['tmp_name'])){
-          $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$deal_image_name, 'jpg');
+          $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$deal_image_name, $ext);
           if($image75x75_error){
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $image75x75_error));
@@ -371,23 +383,26 @@ class Admin extends CI_Controller{
             is_uploaded_file($_FILES['image75x75']['tmp_name']) 
           ){
             
-            $deal_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.jpg';
+            $image500x500 = explode(".", $_FILES['image500x500']['name']);
+            $ext = end($image500x500);
+
+            $deal_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.'. $ext;
     
-            $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$deal_image_name, 'jpg');
+            $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$deal_image_name, $ext);
             if($image500x500_error){
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => $image500x500_error));
               return;
             }
             
-            $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$deal_image_name, 'jpg');
+            $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$deal_image_name, $ext);
             if($image250x250_error){
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => $image250x250_error));
               return;
             }
 
-            $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$deal_image_name, 'jpg');
+            $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$deal_image_name, $ext);
             if($image75x75_error){
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => $image75x75_error));

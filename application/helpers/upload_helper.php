@@ -9,7 +9,7 @@ if ( ! function_exists('upload')){
         if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
         
         $config['allowed_types']    = $allowed_types; 
-        $config['max_size']         = 2000;
+        // $config['max_size']         = 2000;
         $config['max_width']        = 0;
         $config['max_height']       = 0;
         $config['file_name']        = $name;
