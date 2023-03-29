@@ -650,8 +650,8 @@ class Shop_model extends CI_Model
                     
                     if($deal_products_promo_include){
                         foreach($deal_products_promo_include as $value){
-                            if($value->product_id === $val->product_id && empty($value->obtainable)){
-                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$value->promo_discount_percentage;
                                 break;
                             }
                         }
@@ -699,8 +699,8 @@ class Shop_model extends CI_Model
                     
                     if($deal_products_promo_include){
                         foreach($deal_products_promo_include as $value){
-                            if($value->product_id === $val->product_id && empty($value->obtainable)){
-                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$value->promo_discount_percentage;
                                 break;
                             }
                         }
@@ -748,8 +748,8 @@ class Shop_model extends CI_Model
 
                     if($deal_products_promo_include){
                         foreach($deal_products_promo_include as $value){
-                            if($value->product_id === $val->product_id && empty($value->obtainable)){
-                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$value->promo_discount_percentage;
                                 break;
                             }
                         }
@@ -796,8 +796,8 @@ class Shop_model extends CI_Model
                     
                     if($deal_products_promo_include){
                         foreach($deal_products_promo_include as $value){
-                            if($value->product_id === $val->product_id && empty($value->obtainable)){
-                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                            if($value->product_id === $val->product_id ){
+                                $promo_discount_percentage = (float)$value->promo_discount_percentage;
                                 break;
                             }
                         }
@@ -842,8 +842,8 @@ class Shop_model extends CI_Model
                     
                     if($deal_products_promo_include){
                         foreach($deal_products_promo_include as $value){
-                            if($value->product_id === $val->product_id && empty($value->obtainable)){
-                                $promo_discount_percentage = (float)$redeem_data['promo_discount_percentage'];
+                            if($value->product_id === $val->product_id){
+                                $promo_discount_percentage = (float)$value->promo_discount_percentage;
                                 break;
                             }
                         }
