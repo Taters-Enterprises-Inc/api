@@ -161,7 +161,7 @@ class Deals_model extends CI_Model
 				E.product_image,
 				E.name,
 				E.category,
-				E.product_price,
+				E.price as product_price,
 			');
 			$this->db->from('deals_product_promo_include_obtainable A');
 			$this->db->join('product_variant_option_combinations_tb C','C.product_variant_option_id = A.product_variant_option_tb_id','left');
