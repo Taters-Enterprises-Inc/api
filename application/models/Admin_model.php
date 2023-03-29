@@ -2726,6 +2726,7 @@ class Admin_model extends CI_Model
             A.remarks,
             A.product_label,
             A.deal_id,
+            A.deal_discount_percentage,
             B.id as product_id,
             B.name,
             B.description,

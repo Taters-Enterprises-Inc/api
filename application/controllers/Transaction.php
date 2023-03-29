@@ -465,10 +465,13 @@ class Transaction extends CI_Controller {
                                         foreach($deal_products_promo_include as $promo){
                                             if($promo->product_id === $value['prod_id']){
                                                 $deal_id = $this->session->redeem_data['deal_id'];
+                                                $deal_discount_percentage = $promo->promo_discount_percentage;
                                                 break;
                                             }
                                         }
 
+
+                                        $order_product['deal_discount_percentage'] = $deal_discount_percentage;
                                         $order_product['deal_id'] = $deal_id;
                                     }
 	
