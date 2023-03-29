@@ -282,17 +282,19 @@ class Transaction extends CI_Controller {
                                     foreach($_SESSION['redeem_data']['deal_products_promo_include'] as $deal_products_promo_include){
                                         if($val['prod_id'] === $deal_products_promo_include->product_id){
                                             foreach($deal_products_promo_include->obtainable as $obtainable){
-                                                $is_exist = false;
-                                                foreach($added_obtainables as $added_obtainable){
-                                                    if($added_obtainable->product_id === $obtainable->product_id){
-                                                        $is_exist = true;
-                                                        break;
+                                                if($obtainable->product_id === $val['prod_id']){
+                                                    $is_exist = false;
+                                                    foreach($added_obtainables as $added_obtainable){
+                                                        if($added_obtainable->product_id === $obtainable->product_id ){
+                                                            $is_exist = true;
+                                                            break;
+                                                        }
                                                     }
-                                                }
-                                                if($obtainable->price && $obtainable->promo_discount_percentage && $is_exist === false){
-                                                    $obtainable_discount_price = $obtainable->price - $obtainable->price * $obtainable->promo_discount_percentage;
-                                                    $obtainable_price += $obtainable->price;
-                                                    $added_obtainables[] = $obtainable;
+                                                    if($obtainable->price && $obtainable->promo_discount_percentage && $is_exist === false){
+                                                        $obtainable_discount_price = $obtainable->price - $obtainable->price * $obtainable->promo_discount_percentage;
+                                                        $obtainable_price += $obtainable->price;
+                                                        $added_obtainables[] = $obtainable;
+                                                    }
                                                 }
                                             }
                                             $deal_products_promo_include_match =  $deal_products_promo_include;
