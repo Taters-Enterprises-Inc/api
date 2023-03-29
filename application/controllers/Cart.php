@@ -78,7 +78,7 @@ class Cart extends CI_Controller {
                                     "prod_name" => $obtainable->name,
                                     "prod_qty" => $obtainable->quantity * $this->input->post('prod_qty'),
                                     "prod_price" => $obtainable->product_price,
-                                    "prod_calc_amount" =>  $obtainable->product_price * $obtainable->quantity * $this->input->post('prod_qty'),
+                                    "prod_calc_amount" => 0,
                                     "prod_with_drinks" => 0,
                                     "prod_size" => $obtainable->product_variant_option_tb_id,
                                     "prod_size_id" => '',
