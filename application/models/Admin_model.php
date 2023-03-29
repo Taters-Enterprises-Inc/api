@@ -1735,6 +1735,7 @@ class Admin_model extends CI_Model
             O.product_label,
             O.addon_base_product,
             O.addon_base_product_name,
+            O.deal_discount_percentage,
             D.alias,
             D.promo_discount_percentage
         ');

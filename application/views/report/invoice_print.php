@@ -236,7 +236,7 @@
                                 }
                               }
                               
-                              $row_sum = $obtainable_discount_price + $row_sum - $obtainable_price;
+                              $row_sum = $obtainable_discount_price + $row_sum - $obtainable_price - ($value->deal_discount_percentage * $row_sum );
                               echo number_format($row_sum,2);
                             }else{
                               echo number_format($row_sum,2);
