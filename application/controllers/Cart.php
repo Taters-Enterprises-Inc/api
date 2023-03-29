@@ -59,9 +59,68 @@ class Cart extends CI_Controller {
                 $set_value['prod_category']         = $product_details->category;
                 $set_value['prod_type']             = $this->input->post('prod_type');
                 $set_value['promo_discount_percentage'] = $this->input->post('promo_discount_percentage');
-
+                
                 $_SESSION['orders'][] = $set_value;
                 
+                if(
+                    isset($_SESSION['redeem_data']['deal_products_promo_include']) &&
+                    !empty($_SESSION['redeem_data']['deal_products_promo_include'])
+                ){
+                    foreach($_SESSION['redeem_data']['deal_products_promo_include'] as $deal_products_promo_include){
+                        if(
+                            $set_value['prod_id'] === $deal_products_promo_include->product_id && 
+                            $deal_products_promo_include->product_variant_option_tb_id === null 
+                        ){
+                            foreach($deal_products_promo_include->obtainable as $obtainable){
+                                $free_product = array(
+                                    "prod_id" => $obtainable->product_id,
+                                    "prod_image_name" => $obtainable->product_image,
+                                    "prod_name" => $obtainable->name,
+                                    "prod_qty" => $obtainable->quantity,
+                                    "prod_price" => $obtainable->price,
+                                    "prod_calc_amount" =>  $obtainable->price * $obtainable->quantity,
+                                    "prod_with_drinks" => 0,
+                                    "prod_size" => $obtainable->product_variant_option_tb_id,
+                                    "prod_size_id" => '',
+                                    "prod_multiflavors" => '',
+                                    "prod_sku_id" => '',
+                                    "prod_sku" => '',
+                                    "prod_discount" => 0,
+                                    "prod_category" => $obtainable->category,
+                                    "prod_type" => 'main',
+                                    "promo_discount_percentage" => null,
+                                );
+                                $_SESSION['orders'][] = $free_product;
+                            }
+                        }else if(
+                            $set_value['prod_id'] === $deal_products_promo_include->product_id && 
+                            $deal_products_promo_include->product_variant_option_tb_id
+                        ){
+                            foreach($deal_products_promo_include->obtainable as $obtainable){
+                                $free_product = array(
+                                    "prod_id" => $obtainable->product_id,
+                                    "prod_image_name" => $obtainable->product_image,
+                                    "prod_name" => $obtainable->name,
+                                    "prod_qty" => $obtainable->quantity,
+                                    "prod_price" => $obtainable->price,
+                                    "prod_calc_amount" =>  $obtainable->price * $obtainable->quantity,
+                                    "prod_with_drinks" => 0,
+                                    "prod_size" => $obtainable->product_variant_option_tb_id,
+                                    "prod_size_id" => '',
+                                    "prod_multiflavors" => '',
+                                    "prod_sku_id" => '',
+                                    "prod_sku" => '',
+                                    "prod_discount" => 0,
+                                    "prod_category" => $obtainable->category,
+                                    "prod_type" => 'main',
+                                    "promo_discount_percentage" => null,
+                                );
+                                $_SESSION['orders'][] = $free_product;
+                            }
+                        }
+                    }
+                }
+
                 // will be remove on January 2023
                 temporary_giftcard_promo_this_is_a_rush_solution_will_be_remove_soon();
 
