@@ -300,11 +300,7 @@ class Transaction extends CI_Controller {
                                     }
 
                                     if($deal_products_promo_include_match){
-                                        if(count($deal_products_promo_include_match->obtainable) > 0){
-                                            $comp_total += $obtainable_discount_price + $val['prod_calc_amount'] - $obtainable_price;
-                                        }else{
-                                            $comp_total += $val['prod_calc_amount'] - ($val['prod_calc_amount']  * $deal_products_promo_include_match->promo_discount_percentage);
-                                        }
+                                        $comp_total += $obtainable_discount_price + $val['prod_calc_amount'] - $obtainable_price - ($val['prod_calc_amount']  * $deal_products_promo_include_match->promo_discount_percentage);
                                     }
                                 }else{
                                     $promo_discount_percentage = $val['promo_discount_percentage'];
@@ -462,6 +458,9 @@ class Transaction extends CI_Controller {
                                     }
                                     
                                     if($deal_products_promo_include){
+                                        $deal_id = null;
+                                        $deal_discount_percentage = null;
+                                        
                                         foreach($deal_products_promo_include as $promo){
                                             if($promo->product_id === $value['prod_id']){
                                                 $deal_id = $this->session->redeem_data['deal_id'];
