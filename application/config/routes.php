@@ -114,6 +114,7 @@ $route['admin/payment'] = 'admin/payment';
 $route['admin/reference-num'] = 'admin/reference_num';
 $route['admin/admin-privilege'] = 'admin/admin_privilege';
 $route['admin/admin-catering-privilege'] = 'admin/admin_catering_privilege';
+$route['admin/partner-company-employee-id-number'] = 'admin/partner_company_employee_id_number';
 
 $route['admin/catering-update-status'] = 'admin/catering_update_status';
 $route['admin/catering'] = 'admin/catering';

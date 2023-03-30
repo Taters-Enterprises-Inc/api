@@ -574,6 +574,7 @@ class Deals_model extends CI_Model
 				$this->db->join('dotcom_deals_category C', 'C.id = B.platform_category_id');
 				$this->db->where('A.status',$is_available);
 				$this->db->where('B.platform_category_id',$deal_category->id);
+				$this->db->where('A.is_partner_company',0);
 				$this->db->group_start();
 				$this->db->where('A.available_end_datetime >=',date('Y-m-d H:i:s'));
 				$this->db->or_where('A.available_end_datetime',null);
@@ -623,6 +624,7 @@ class Deals_model extends CI_Model
 		  $this->db->join('dotcom_deals_platform_combination B', 'B.deal_id = A.id');
 		  $this->db->join('dotcom_deals_category C', 'C.id = B.platform_category_id');
 		  $this->db->where('A.status',$is_available);
+		  $this->db->where('A.is_partner_company',0);
 		  $this->db->where('B.platform_category_id',$deals_category->id);
 		  
 		  $this->db->group_start();

@@ -25,6 +25,24 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
 
+  public function partner_company_employee_id_number(){
+    
+    $_POST =  json_decode(file_get_contents("php://input"), true);
+
+    $user_id = $this->session->admin['user_id'];
+    $redeem_id = $this->input->post('redeemId');
+    $id_number = $this->input->post('idNumber');
+    $fetch_data = $this->admin_model->validate_partner_company_employee_id_number($redeem_id, $id_number);
+
+    if ($fetch_data == 1) {
+      header('content-type: application/json');
+      echo json_encode(array( "message" => 'Validation successful'));
+    } else {
+      $this->output->set_status_header('401');
+      echo json_encode(array( "message" => 'Invalid Emplyee Id Number'));
+    }
+  }
+
   public function setting_edit_popclub_deal(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
@@ -100,7 +118,7 @@ class Admin extends CI_Controller{
           "promo_price" => $this->input->post('promoPrice') ?  $this->input->post('promoPrice') : null,
           "promo_discount_percentage" => $this->input->post('promoDiscountPercentage') ?  $this->input->post('promoDiscountPercentage') : null,
           "minimum_purchase" => $this->input->post('minimumPurchase') ?  $this->input->post('minimumPurchase') : null,
-          "is_free_delivery" => $this->input->post('isFreeDelivery'),
+          "is_free_delivery" => json_decode($this->input->post('isFreeDelivery'))? 1 : 1,
           "description" => $this->input->post('description'),
           "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
           "available_start_time" => $this->input->post('availableStartTime') ?  $this->input->post('availableStartTime') : null,
@@ -418,7 +436,8 @@ class Admin extends CI_Controller{
               "promo_price" => $this->input->post('promoPrice') ? $this->input->post('promoPrice') : null,
               "promo_discount_percentage" => $this->input->post('promoDiscountPercentage') ? $this->input->post('promoDiscountPercentage') : null,
               "minimum_purchase" => $this->input->post('minimumPurchase') ? $this->input->post('minimumPurchase') : null,
-              "is_free_delivery" => $this->input->post('isFreeDelivery'),
+              "is_free_delivery" => json_decode($this->input->post('isFreeDelivery'))? 1 : 0,
+              "is_partner_company" => json_decode($this->input->post('isPartnerCompany'))? 1 : 0,
               "description" => $this->input->post('description'),
               "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
               "available_start_time" => $this->input->post('availableStartTime') ? $this->input->post('availableStartTime') : null,
