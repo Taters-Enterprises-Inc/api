@@ -6,6 +6,12 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    public function updateInfluencerPayable($influencer_id, $payable){
+		$this->db->set('payable', $payable);
+        $this->db->where('influencer_id', $influencer_id);
+        $this->db->update("influencer_profiles");
+    }
+
     public function changeStatusInfluencerCashout($influencer_cashout_id, $status){
 		$this->db->set('influencer_cashout_status_id', $status);
         $this->db->where('id', $influencer_cashout_id);
@@ -15,6 +21,7 @@ class Admin_model extends CI_Model
     public function getInfluencerCashoutById($influencer_cashout_id){
         $this->db->select('
             A.id,
+            A.influencer_id,
             A.cashout,
             A.influencer_cashout_status_id,
             A.dateadded,
@@ -28,11 +35,13 @@ class Admin_model extends CI_Model
             B.mobile_user_id,
             CONCAT(C.first_name," ",C.last_name) as fb_user_name,
             CONCAT(D.first_name," ",D.last_name) as mobile_user_name,
+            E.payable,
         ');
         $this->db->from('influencer_cashouts A');
         $this->db->join('influencers B','B.id = A.influencer_id');
         $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
         $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
+        $this->db->join('influencer_profiles E','E.influencer_id = A.influencer_id');
 
         $this->db->where('A.id', $influencer_cashout_id);
 

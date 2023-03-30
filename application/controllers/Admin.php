@@ -37,14 +37,23 @@ class Admin extends CI_Controller{
 
         $this->admin_model->changeStatusInfluencerCashout($influencer_cashout_id, $status);
 
-        // $real_time_notification = array(
-        //     "fb_user_id" => $influencer->fb_user_id,
-        //     "mobile_user_id" => $influencer->mobile_user_id,
-        //     "status" => $status,
-        // );
+        $message = '';
 
-        // notify('user-influencer','influencer-update', $real_time_notification);
+        switch($status){
+          case 2: 
+            $updated_payable = $influencer_cashout->payable - $influencer_cashout->cashout;
+            $this->admin_model->updateInfluencerPayable($influencer_cashout->influencer_id, $updated_payable);
+            $message = 'Your current cashout has been approved.';
+            break;
+        }
 
+        $real_time_notification = array(
+            "fb_user_id" => $influencer_cashout->fb_user_id,
+            "mobile_user_id" => $influencer_cashout->mobile_user_id,
+            "message" => $message,
+        );
+
+        notify('user-influencer','influencer-cashout-update', $real_time_notification);
 
         $response = array(
           "message" => 'Successfully update influencer status',
