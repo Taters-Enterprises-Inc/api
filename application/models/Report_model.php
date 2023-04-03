@@ -81,10 +81,10 @@ class Report_model extends CI_Model{
         if(!empty($store))
             $this->db->where_in('A.store', $store);
         
-        $this->db->where("DATE_FORMAT(A.serving_time, '%M %e, %Y') >=", $startDate);
-        $this->db->where("DATE_FORMAT(A.serving_time, '%M %e, %Y') <=", $endDate);
+        $this->db->where("A.serving_time >=", $startDate);
+        $this->db->where("A.serving_time <=", $endDate);
         // $this->db->where('A.status', 9);
-        $this->db->order_by("DATE_FORMAT(A.serving_time, '%M %e, %Y')", 'ASC');
+        $this->db->order_by("A.serving_time", 'ASC');
         $query = $this->db->get();
         return $query->result();
     }
