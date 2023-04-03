@@ -59,7 +59,7 @@ class Report_model extends CI_Model{
             A.tracking_no as TRACKING NO,
             B.fname as FIRSTNAME,
             B.lname as SURNAME,
-            A.serving_time as SERVING DATE,
+            FROM_UNIXTIME(A.serving_time,'%Y-%m-%d %H:%i:%s') as SERVING DATE,
             B.add_contact as CONTACT NUMBER,
             B.add_address as DELIVERY ADDRESS,
             B.email as EMAIL,
