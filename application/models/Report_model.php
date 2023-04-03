@@ -83,7 +83,7 @@ class Report_model extends CI_Model{
         
         $this->db->where('A.dateadded >=', $startDate);
         $this->db->where('A.dateadded <=', $endDate);
-        $this->db->where('A.status', 6);
+        $this->db->where('A.status', 9);
         $this->db->order_by('A.dateadded', 'ASC');
         $query = $this->db->get();
         return $query->result();
