@@ -2913,6 +2913,99 @@ class Admin extends CI_Controller{
         break;
     }
   }
+  
+  public function report_transaction_catering($startDate, $endDate){
+
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
+        $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
+        
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $data = array();
+        }else{
+          $data = $this->report_model->getReportTransactionCatering($start, $end, $store_id_array);
+        }
+        
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-disposition: attachment; filename=transaction_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
+       
+        $payment_options = array(
+          "' - '",
+          "BPI",
+          "BDO",
+          "CASH",
+          "GCASH",
+          "PAYMAYA",
+          "ROBINSONS-BANK",
+          "CHINABANK",
+        );
+
+        $booking_status = array(
+          "",
+          "Waiting for booking confirmation",
+          "Booking Confirmed",
+          "Contract Uploaded",
+          "Contract Verified",
+          "Initial Payment Uploaded",
+          "Initial Payment Verified",
+          "Final Payment Uploaded",
+          "Final payment verified",
+          "Catering booking completed",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "Booking denied",
+          "Contract denied",
+          "Initial Payment denied",
+          "Final Payment denied",
+        );
+
+        $flag = false;
+        foreach ($data as $row) {
+          if (!$flag) 
+          {
+            echo implode("\t", array_keys((array)$row)) . "\r\n";
+            $flag = true;
+          }
+
+          $line = "";
+          
+          foreach ((array)$row as $key => $val) {
+
+            switch($key){
+              case 'PAYMENT OPTION':
+                $line .= $payment_options[$val]. "\t";
+                break;
+              case 'STATUS':
+                $line .= $booking_status[$val]. "\t";
+                break;
+              case 'DISTANCE':
+                $line .= $val. " km\t";
+                break;
+              default:
+                $line .= $val . "\t";
+                break;
+            }
+          }
+
+          echo $line . "\r\n";
+        }
+        
+        break;
+    }
+  }
 
   public function report_pmix($startDate, $endDate){
     switch($this->input->server('REQUEST_METHOD')){

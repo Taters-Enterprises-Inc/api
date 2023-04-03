@@ -53,6 +53,41 @@ class Report_model extends CI_Model{
         $query = $this->db->get();
         return $query->result();
     }
+    
+    public function getReportTransactionCatering($startDate, $endDate, $store){
+        $this->db->select('
+            A.tracking_no as TRACKING NO,
+            B.fname as FIRSTNAME,
+            B.lname as SURNAME,
+            A.dateadded as ORDER DATE,
+            B.add_contact as CONTACT NUMBER,
+            B.add_address as DELIVERY ADDRESS,
+            B.email as EMAIL,
+            A.purchase_amount as AMOUNT,
+            A.distance_price as DELIVERY FEE,
+            (A.purchase_amount + A.distance_price) as " ",
+            A.status as STATUS,
+            C.name as STORE,
+            A.invoice_num as INVOICE NUMBER,
+            A.payops as PAYMENT OPTION,
+            B.moh as MODE OF HANDLING,
+            A.distance as DISTANCE,
+        ');
+
+        $this->db->from('catering_transaction_tb A');
+        $this->db->join('catering_client_tb B','B.id = A.client_id');
+        $this->db->join('store_tb C','C.store_id = A.store');
+
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+        
+        $this->db->where('A.dateadded >=', $startDate);
+        $this->db->where('A.dateadded <=', $endDate);
+        $this->db->where('A.status', 6);
+        $this->db->order_by('A.dateadded', 'ASC');
+        $query = $this->db->get();
+        return $query->result();
+    }
 
     public function getReportPmix($startDate, $endDate, $store){
         $this->db->select("
