@@ -59,7 +59,7 @@ class Report_model extends CI_Model{
             A.tracking_no as TRACKING NO,
             B.fname as FIRSTNAME,
             B.lname as SURNAME,
-            FROM_UNIXTIME(A.serving_time) as SERVING DATE,
+            from_unixtime(A.serving_time) as SERVING DATE,
             B.add_contact as CONTACT NUMBER,
             B.add_address as DELIVERY ADDRESS,
             B.email as EMAIL,
@@ -81,10 +81,10 @@ class Report_model extends CI_Model{
         if(!empty($store))
             $this->db->where_in('A.store', $store);
         
-        $this->db->where("FROM_UNIXTIME(A.serving_time) >=", $startDate);
-        $this->db->where("FROM_UNIXTIME(A.serving_time) <=", $endDate);
+        // $this->db->where("from_unixtime(A.serving_time) >=", $startDate);
+        // $this->db->where("from_unixtime(A.serving_time) <=", $endDate);
         // $this->db->where('A.status', 9);
-        $this->db->order_by("FROM_UNIXTIME(A.serving_time)", 'ASC');
+        // $this->db->order_by("from_unixtime(A.serving_time)", 'ASC');
         $query = $this->db->get();
         return $query->result();
     }
