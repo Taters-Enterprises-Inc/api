@@ -59,7 +59,7 @@ class Report_model extends CI_Model{
             A.tracking_no as TRACKING NO,
             B.fname as FIRSTNAME,
             B.lname as SURNAME,
-            dateadd(s,A.serving_time,'1970-01-01') as SERVING DATE,
+            DATE(A.serving_time) as SERVING DATE,
             B.add_contact as CONTACT NUMBER,
             B.add_address as DELIVERY ADDRESS,
             B.email as EMAIL,
