@@ -340,6 +340,9 @@ class Profile extends CI_Controller {
 						'dateadded' => date('Y-m-d H:i:s'),
 						'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
 						'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
+						'payment_selected' => $_POST['paymentSelected'],
+						'account_number' => $_POST['accountNumber'],
+						'account_name' => $_POST['accountName'],
 						'status' => 1
 					);
 

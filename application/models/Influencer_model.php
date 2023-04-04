@@ -119,6 +119,9 @@ class Influencer_model extends CI_Model {
             A.id_number,
             A.id_front,
             A.id_back,
+            A.payment_selected,
+            A.account_number,
+            A.account_name,
             A.status,
             B.payable,
         ');

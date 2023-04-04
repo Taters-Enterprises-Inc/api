@@ -98,6 +98,7 @@ $route['load-image-catering-contract/(:any)'] = 'image/load_catering_image_contr
 $route['load-image-user-discount/(:any)'] = 'image/load_image_user_discount/$1';
 $route['load-image-product/(:any)'] = 'image/load_image_product/$1';
 $route['load-image-influencer/(:any)'] = 'image/load_image_influencer/$1';
+$route['load-image-influencer-contract/(:any)'] = 'image/load_influencer_image_contract/$1';
 
 
 //Admin
