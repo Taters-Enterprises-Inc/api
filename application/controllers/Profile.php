@@ -26,6 +26,87 @@ class Profile extends CI_Controller {
 		$this->ion_auth->set_message_delimiters('', '');
 		$this->ion_auth->set_error_delimiters('', '');
 	}
+	
+	public function influencer_cashouts(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'GET':
+				$per_page = $this->input->get('per_page') ?? 25;
+				$page_no = $this->input->get('page_no') ?? 0;
+				$order = $this->input->get('order') ?? 'desc';
+				$order_by = $this->input->get('order_by') ?? 'dateadded';
+				$search = $this->input->get('search');
+				
+				if($page_no != 0){
+					$page_no = ($page_no - 1) * $per_page;
+				}
+		
+				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
+					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
+
+				if(!isset($logon_type)){
+
+					$response = array(
+						'message' => 'Error user not found',
+					);
+
+					header('content-type: application/json');
+					echo json_encode($response);
+					break;
+				}
+
+				switch($logon_type){
+					case 'facebook':
+						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
+						$influencer = $this->influencer_model->getInfluencer($get_fb_user_details->id, null);
+
+						$cashouts_count = $this->influencer_model->getInfluencerCashoutsCount($influencer->id, $search);
+						$cashouts = $this->influencer_model->getInfluencerCashouts($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
+
+
+						$pagination = array(
+							"total_rows" => $cashouts_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Successfully fetch history of inbox',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "cashouts" => $cashouts,
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						break;
+					case 'mobile':
+						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
+						$influencer = $this->influencer_model->getInfluencer(null, $get_mobile_user_details->id);
+
+						$referees_count = $this->influencer_model->getInfluencerCashoutsCount($influencer->id, $search);
+						$referees = $this->influencer_model->getInfluencerCashouts($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
+						
+						$pagination = array(
+							"total_rows" => $referees_count,
+							"per_page" => $per_page,
+						);		
+		
+						$response = array(
+							'message' => 'Successfully fetch history of inbox',
+							"data" => array(
+							  "pagination" => $pagination,
+							  "referees" => $referees,
+							),
+						);
+		
+						header('content-type: application/json');
+						echo json_encode($response);
+						break;
+				}
+				break;
+		}
+	}
+
 
 	public function influencer_cashout(){
 		switch($this->input->server('REQUEST_METHOD')){

@@ -69,6 +69,7 @@ $route['profile/influencer/cashout'] = 'profile/influencer_cashout';
 $route['profile/update-influencer'] = 'profile/update_influencer';
 $route['profile/influencer-referee'] = 'profile/influencer_referee';
 $route['profile/influencer-upload-contract'] = 'profile/influencer_upload_contract';
+$route['profile/influencer-cashouts'] = 'profile/influencer_cashouts';
 
 // Store
 $route['store'] = 'store';

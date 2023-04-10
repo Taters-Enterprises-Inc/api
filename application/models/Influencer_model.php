@@ -6,6 +6,54 @@ class Influencer_model extends CI_Model {
         $this->load->database();
     }
     
+
+    public function getInfluencerCashoutsCount($influencer_id, $search){
+        $this->db->select('count(*) as all_count');   
+
+
+        $this->db->from('influencer_cashouts A');
+        $this->db->where('A.influencer_id', $influencer_id);
+
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.cashout', $search);
+            $this->db->like('A.influencer_cashout_status_id', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+            
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getInfluencerCashouts($influencer_id,$row_no, $row_per_page, $order_by,  $order, $search){
+
+        $this->db->select('
+            A.id,
+            A.cashout,
+            A.influencer_cashout_status_id,
+            A.dateadded,
+        ');
+
+        $this->db->from('influencer_cashouts A');
+        $this->db->where('A.influencer_id', $influencer_id);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.cashout', $search);
+            $this->db->like('A.influencer_cashout_status_id', $search);
+            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
+            $this->db->group_end();
+        }
+            
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
     function cashout($data){
         $this->db->trans_start();
         $this->db->insert('influencer_cashouts', $data);
