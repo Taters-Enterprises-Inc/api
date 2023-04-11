@@ -156,11 +156,17 @@ class Deals_model extends CI_Model
 				A.product_id, 
 				A.product_variant_option_tb_id, 
 				A.promo_discount_percentage,
+				A.quantity,
 				D.price,
+				E.product_image,
+				E.name,
+				E.category,
+				E.price as product_price,
 			');
 			$this->db->from('deals_product_promo_include_obtainable A');
-			$this->db->join('product_variant_option_combinations_tb C','C.product_variant_option_id = A.product_variant_option_tb_id');
-			$this->db->join('product_skus_tb D','D.id = C.sku_id');
+			$this->db->join('product_variant_option_combinations_tb C','C.product_variant_option_id = A.product_variant_option_tb_id','left');
+			$this->db->join('product_skus_tb D','D.id = C.sku_id','left');
+			$this->db->join('products_tb E', 'E.id = A.product_id', 'left');
 			$this->db->where('A.deals_product_promo_include_id',$deals_product_promo_include->id);
 	
 			$query_deals_product_promo_includes_obtainable = $this->db->get();
@@ -571,6 +577,7 @@ class Deals_model extends CI_Model
 				$this->db->where('A.status',$is_available);
 				$this->db->where('A.influencer_discount', null);
 				$this->db->where('B.platform_category_id',$deal_category->id);
+				$this->db->where('A.is_partner_company',0);
 				$this->db->group_start();
 				$this->db->where('A.available_end_datetime >=',date('Y-m-d H:i:s'));
 				$this->db->or_where('A.available_end_datetime',null);
@@ -621,6 +628,7 @@ class Deals_model extends CI_Model
 		  $this->db->join('dotcom_deals_category C', 'C.id = B.platform_category_id');
 		  $this->db->where('A.status',$is_available);
 		  $this->db->where('A.influencer_discount', null);
+		  $this->db->where('A.is_partner_company',0);
 		  $this->db->where('B.platform_category_id',$deals_category->id);
 		  
 		  $this->db->group_start();

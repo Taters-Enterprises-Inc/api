@@ -1074,8 +1074,6 @@ class Admin_model extends CI_Model
         $this->db->join('store_menu_tb B', 'B.id = A.store_menu_type_id');
 		$this->db->join('region_store_combination_tb C', 'C.region_store_id = A.region_store_combination_id');
 
-        $this->db->where('A.status', 1);
-
         $query = $this->db->get();
         return $query->result();
     }
@@ -2136,6 +2134,7 @@ class Admin_model extends CI_Model
             O.product_label,
             O.addon_base_product,
             O.addon_base_product_name,
+            O.deal_discount_percentage,
             D.alias,
             D.promo_discount_percentage
         ');
@@ -2767,6 +2766,13 @@ class Admin_model extends CI_Model
 
     }
     
+    function validate_partner_company_employee_id_number($redeem_id, $id_number){   
+        $this->db->set('partner_company_id_number', $id_number);
+        $this->db->where('id', $redeem_id);
+        $this->db->update('deals_redeems_tb');
+        return ($this->db->affected_rows()) ? 1 : 0;
+    }
+
     function validate_ref_num($transaction_id, $ref_num){   
         $this->db->select('id');
         $this->db->from('transaction_tb');
@@ -2912,7 +2918,8 @@ class Admin_model extends CI_Model
             A.quantity,
             A.remarks,
             B.alias,
-            B.description
+            B.description,
+            B.is_partner_company,
         ");
         $this->db->from('deals_order_items A');
         $this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
@@ -2931,6 +2938,7 @@ class Admin_model extends CI_Model
             A.expiration,
             A.purchase_amount,
             A.invoice_num,
+            A.partner_company_id_number,
             B.add_name as client_name,
             B.fb_user_id,
             B.mobile_user_id,
@@ -3127,6 +3135,7 @@ class Admin_model extends CI_Model
             A.remarks,
             A.product_label,
             A.deal_id,
+            A.deal_discount_percentage,
             B.id as product_id,
             B.name,
             B.description,

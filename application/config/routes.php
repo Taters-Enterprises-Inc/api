@@ -124,6 +124,7 @@ $route['admin/payment'] = 'admin/payment';
 $route['admin/reference-num'] = 'admin/reference_num';
 $route['admin/admin-privilege'] = 'admin/admin_privilege';
 $route['admin/admin-catering-privilege'] = 'admin/admin_catering_privilege';
+$route['admin/partner-company-employee-id-number'] = 'admin/partner_company_employee_id_number';
 
 $route['admin/catering-update-status'] = 'admin/catering_update_status';
 $route['admin/catering'] = 'admin/catering';
@@ -170,6 +171,7 @@ $route['admin/notification/(:num)/seen'] = 'admin/notification_seen/$1';
 
 $route['admin/report-pmix/(:any)/(:any)'] = 'admin/report_pmix/$1/$2';
 $route['admin/report-transaction/(:any)/(:any)'] = 'admin/report_transaction/$1/$2';
+$route['admin/report-transaction-catering/(:any)/(:any)'] = 'admin/report_transaction_catering/$1/$2';
 $route['admin/report-popclub-store-visit/(:any)/(:any)'] = 'admin/report_popclub_store_visit/$1/$2';
 $route['admin/report-popclub-snacks-delivered/(:any)/(:any)'] = 'admin/report_popclub_snacks_delivered/$1/$2';
 $route['admin/report-customer-feedback/(:any)/(:any)'] = 'admin/report_customer_feedback/$1/$2';

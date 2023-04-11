@@ -244,17 +244,42 @@ class Admin extends CI_Controller{
     }
   }
 
+  public function partner_company_employee_id_number(){
+    
+    $_POST =  json_decode(file_get_contents("php://input"), true);
+
+    $user_id = $this->session->admin['user_id'];
+    $redeem_id = $this->input->post('redeemId');
+    $id_number = $this->input->post('idNumber');
+    $fetch_data = $this->admin_model->validate_partner_company_employee_id_number($redeem_id, $id_number);
+
+    if ($fetch_data == 1) {
+      header('content-type: application/json');
+      echo json_encode(array( "message" => 'Validation successful'));
+    } else {
+      $this->output->set_status_header('401');
+      echo json_encode(array( "message" => 'Invalid Emplyee Id Number'));
+    }
+  }
+
   public function setting_edit_popclub_deal(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
-        $deal_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.jpg';
+        $deal_image_name = clean_str_for_img($this->input->post('name'). '-' . time());
 
         $deal_id = $this->input->post('id');
+        $ext = '';
 
         $deal = $this->admin_model->getPopclubDeal($deal_id);
 
         if(isset($_FILES['image500x500']['tmp_name']) && is_uploaded_file($_FILES['image500x500']['tmp_name'])){
-          $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$deal_image_name, 'jpg');
+
+          $image500x500 = explode(".", $_FILES['image500x500']['name']);
+          $ext = end($image500x500);
+
+          $deal_image_name = $deal_image_name . '.' . $ext;
+
+          $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$deal_image_name, $ext );
           if($image500x500_error){
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $image500x500_error));
@@ -263,13 +288,18 @@ class Admin extends CI_Controller{
         }else{
           $current_image_name = './assets/images/shared/products/500/' . $deal->product_image;
           
+          $product_image_name = explode(".", $deal->product_image);
+          $ext = end($product_image_name);
+
+          $deal_image_name = $deal_image_name . '.' . $ext;
+          
           if($deal->product_image !== $deal_image_name && file_exists($current_image_name)){
             rename($current_image_name,'./assets/images/shared/products/500/'. $deal_image_name);
           }
         }
         
         if(isset($_FILES['image250x250']['tmp_name']) && is_uploaded_file($_FILES['image250x250']['tmp_name'])){
-          $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$deal_image_name, 'jpg');
+          $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$deal_image_name, $ext);
           if($image250x250_error){
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $image250x250_error));
@@ -284,7 +314,7 @@ class Admin extends CI_Controller{
         }
         
         if(isset($_FILES['image75x75']['tmp_name']) && is_uploaded_file($_FILES['image75x75']['tmp_name'])){
-          $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$deal_image_name, 'jpg');
+          $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$deal_image_name, $ext);
           if($image75x75_error){
             $this->output->set_status_header('401');
             echo json_encode(array( "message" => $image75x75_error));
@@ -307,7 +337,7 @@ class Admin extends CI_Controller{
           "promo_price" => $this->input->post('promoPrice') ?  $this->input->post('promoPrice') : null,
           "promo_discount_percentage" => $this->input->post('promoDiscountPercentage') ?  $this->input->post('promoDiscountPercentage') : null,
           "minimum_purchase" => $this->input->post('minimumPurchase') ?  $this->input->post('minimumPurchase') : null,
-          "is_free_delivery" => $this->input->post('isFreeDelivery'),
+          "is_free_delivery" => json_decode($this->input->post('isFreeDelivery'))? 1 : 1,
           "description" => $this->input->post('description'),
           "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
           "available_start_time" => $this->input->post('availableStartTime') ?  $this->input->post('availableStartTime') : null,
@@ -672,23 +702,26 @@ class Admin extends CI_Controller{
             is_uploaded_file($_FILES['image75x75']['tmp_name']) 
           ){
             
-            $deal_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.jpg';
+            $image500x500 = explode(".", $_FILES['image500x500']['name']);
+            $ext = end($image500x500);
+
+            $deal_image_name = clean_str_for_img($this->input->post('name'). '-' . time()) . '.'. $ext;
     
-            $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$deal_image_name, 'jpg');
+            $image500x500_error = upload('image500x500','./assets/images/shared/products/500',$deal_image_name, $ext);
             if($image500x500_error){
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => $image500x500_error));
               return;
             }
             
-            $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$deal_image_name, 'jpg');
+            $image250x250_error = upload('image250x250','./assets/images/shared/products/250',$deal_image_name, $ext);
             if($image250x250_error){
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => $image250x250_error));
               return;
             }
 
-            $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$deal_image_name, 'jpg');
+            $image75x75_error = upload('image75x75','./assets/images/shared/products/75',$deal_image_name, $ext);
             if($image75x75_error){
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => $image75x75_error));
@@ -705,8 +738,9 @@ class Admin extends CI_Controller{
               "promo_discount_percentage" => $this->input->post('promoDiscountPercentage') ? $this->input->post('promoDiscountPercentage') : null,
               "subtotal_promo_discount" => $this->input->post('subTotalPromoDiscount') ? $this->input->post('subTotalPromoDiscount') : null,
               "minimum_purchase" => $this->input->post('minimumPurchase') ? $this->input->post('minimumPurchase') : null,
-              "is_free_delivery" => $this->input->post('isFreeDelivery'),
+              "is_free_delivery" => json_decode($this->input->post('isFreeDelivery'))? 1 : 0,
               "influencer_discount" => $this->input->post('influencerDiscount'),
+              "is_partner_company" => json_decode($this->input->post('isPartnerCompany'))? 1 : 0,
               "description" => $this->input->post('description'),
               "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
               "available_start_time" => $this->input->post('availableStartTime') ? $this->input->post('availableStartTime') : null,
@@ -3236,6 +3270,99 @@ class Admin extends CI_Controller{
               // case 'REMARKS':
               //   $line .= $this->report_remarks($val) . "\t";
               //   break;
+              default:
+                $line .= $val . "\t";
+                break;
+            }
+          }
+
+          echo $line . "\r\n";
+        }
+        
+        break;
+    }
+  }
+  
+  public function report_transaction_catering($startDate, $endDate){
+
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $start = date("Y-m-d", strtotime($startDate)) . " 00:00:00";
+        $end = date("Y-m-d", strtotime($endDate)) . " 23:59:59";
+        
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $data = array();
+        }else{
+          $data = $this->report_model->getReportTransactionCatering($start, $end, $store_id_array);
+        }
+        
+        header("Content-Type: application/vnd.ms-excel");
+        header("Content-disposition: attachment; filename=transaction_" . $startDate . "_" . $endDate . "_" . date('Y-m-d H:i:s') . ".xls");
+       
+        $payment_options = array(
+          "' - '",
+          "BPI",
+          "BDO",
+          "CASH",
+          "GCASH",
+          "PAYMAYA",
+          "ROBINSONS-BANK",
+          "CHINABANK",
+        );
+
+        $booking_status = array(
+          "",
+          "Waiting for booking confirmation",
+          "Booking Confirmed",
+          "Contract Uploaded",
+          "Contract Verified",
+          "Initial Payment Uploaded",
+          "Initial Payment Verified",
+          "Final Payment Uploaded",
+          "Final payment verified",
+          "Catering booking completed",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "Booking denied",
+          "Contract denied",
+          "Initial Payment denied",
+          "Final Payment denied",
+        );
+
+        $flag = false;
+        foreach ($data as $row) {
+          if (!$flag) 
+          {
+            echo implode("\t", array_keys((array)$row)) . "\r\n";
+            $flag = true;
+          }
+
+          $line = "";
+          
+          foreach ((array)$row as $key => $val) {
+
+            switch($key){
+              case 'PAYMENT OPTION':
+                $line .= $payment_options[$val]. "\t";
+                break;
+              case 'STATUS':
+                $line .= $booking_status[$val]. "\t";
+                break;
+              case 'DISTANCE':
+                $line .= $val. " km\t";
+                break;
               default:
                 $line .= $val . "\t";
                 break;

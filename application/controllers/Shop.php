@@ -192,7 +192,7 @@ class Shop extends CI_Controller {
 							}
 						}else if($deal_products_promo_include){
 							foreach($deal_products_promo_include as $value){
-								if($value->product_id === $product->product_id && empty($value->obtainable)){
+								if($value->product_id === $product->product_id){
 									$order_details['order_details'][$key]->promo_discount_percentage = (float)$value->promo_discount_percentage;
 								}else{
 									$order_details['order_details'][$key]->promo_discount_percentage = null;
