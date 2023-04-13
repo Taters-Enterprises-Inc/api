@@ -118,7 +118,7 @@ class Admin extends CI_Controller{
           "promo_price" => $this->input->post('promoPrice') ?  $this->input->post('promoPrice') : null,
           "promo_discount_percentage" => $this->input->post('promoDiscountPercentage') ?  $this->input->post('promoDiscountPercentage') : null,
           "minimum_purchase" => $this->input->post('minimumPurchase') ?  $this->input->post('minimumPurchase') : null,
-          "is_free_delivery" => json_decode($this->input->post('isFreeDelivery'))? 1 : 1,
+          "is_free_delivery" => json_decode($this->input->post('isFreeDelivery'))? 1 : 0,
           "description" => $this->input->post('description'),
           "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
           "available_start_time" => $this->input->post('availableStartTime') ?  $this->input->post('availableStartTime') : null,
