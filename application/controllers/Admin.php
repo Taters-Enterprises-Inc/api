@@ -2220,13 +2220,14 @@ class Admin extends CI_Controller{
               if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
                 $another_filter = array();
               }else{
-                $start_date = date('Y-m-d', strtotime('-1 month'));
+                $start_date = date('Y-m-d', strtotime('-1 week'));
 
                 $snackshop_sales = $this->admin_model->getSnackshopSales($start_date, $store_id_array);
-                $catering_sales = $this->admin_model->getCateringSales($start_date, $store_id_array);
-                $popclub_sales = $this->admin_model->getPopClubSales($start_date, $store_id_array);
+                // $catering_sales = $this->admin_model->getCateringSales($start_date, $store_id_array);
+                // $popclub_sales = $this->admin_model->getPopClubSales($start_date, $store_id_array);
 
-                $overall_sales = array_merge($snackshop_sales, $catering_sales, $popclub_sales);
+                // $overall_sales = array_merge($snackshop_sales, $catering_sales, $popclub_sales);
+                $overall_sales = $snackshop_sales;
 
                 usort($overall_sales, function ($a, $b) {
                     return strtotime($a->dateadded) - strtotime($b->dateadded);
