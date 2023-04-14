@@ -135,7 +135,7 @@ class Catering extends CI_Controller {
 				}
 
 				$cod_fee = $order_details['clients_info']->cod_fee;
-				$grand_total = (int)$subtotal + (int)$transportation_fee + (int)$service_fee + (int)$night_diff_charge  + (int)$cod_fee - (double)$voucher_amount;
+				$grand_total = (int)$subtotal + (int)$transportation_fee + (int)$additional_fee + (int)$service_fee + (int)$night_diff_charge  + (int)$cod_fee - (double)$voucher_amount;
 				
 				$no_of_pax = 0;
 				$package_price = 0;
