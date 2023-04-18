@@ -225,8 +225,10 @@ $route['bsc/stores'] = 'bsc/stores';
 $route['bsc/user/(:num)'] = 'bsc/user/$1';
 $route['bsc/user/status'] = 'bsc/user_status';
 
-$route['admin/sales/(:any)'] = 'admin/sales/$1';
 $route['admin/sales/(:any)/sum'] = 'admin/total_sales/$1';
+$route['admin/dashboard/shop/sales-history'] = 'admin/snackshop_dashboard_sales_history';
+$route['admin/dashboard/catering/sales-history'] = 'admin/catering_dashboard_sales_history';
+$route['admin/dashboard/popclub/sales-history'] = 'admin/popclub_dashboard_sales_history';
 
 $route['admin/region-store-combination'] = 'admin/region_store_combination';
 $route['admin/locales'] = 'admin/locales';

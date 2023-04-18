@@ -24,6 +24,282 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 		$this->load->model('deals_model');
 	}
+
+  public function snackshop_dashboard_sales_history(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $another_filter = array();
+        }else{
+          $start_date = date('Y-m-d', strtotime('-1 week'));
+
+          $snackshop_sales = $this->admin_model->getSnackshopSales($start_date, $store_id_array);
+
+          usort($snackshop_sales, function ($a, $b) {
+              return strtotime($a->dateadded) - strtotime($b->dateadded);
+          });
+
+
+          $filtered = array();
+          
+          foreach($snackshop_sales as $snackshop_sales_key => $sales){
+            $is_exist = false;
+
+            foreach($filtered as $filtered_key => $filter){
+              if(date('Y-m-d', strtotime($filter->dateadded)) === date('Y-m-d', strtotime($sales->dateadded))){
+                $filtered[$filtered_key]->purchase_amount += (int) $sales->purchase_amount;
+                if(isset($filtered[$filtered_key]->quantity)){
+                  $filtered[$filtered_key]->quantity += 1;
+                }else{
+                  $filtered[$filtered_key]->quantity = 1;
+                }
+                $is_exist = true;
+                unset($snackshop_sales[$snackshop_sales_key]);  
+              }
+            }
+
+            if(!$is_exist){
+              $sales->dateadded = date('Y-m-d', strtotime($sales->dateadded));
+              $sales->purchase_amount = (int)$sales->purchase_amount;
+              if(isset($sales->quantity)){
+                $sales->quantity += 1;
+              }else{
+                $sales->quantity = 1;
+              }
+              $filtered[] = $sales;
+              unset($snackshop_sales[$snackshop_sales_key]);
+            }
+
+          }
+          $another_filter = array();
+          
+          foreach($filtered as $sales){
+
+            while($start_date < date('Y-m-d', strtotime($sales->dateadded))){
+              $another_filter[] = array(
+                'dateadded' => $start_date,
+                'purchase_amount' => 0,
+                'quantity' => 0,
+              );
+              
+              $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+            }
+            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+            
+            $another_filter[] = $sales;
+          }  
+        }
+
+        if(empty($another_filter)){
+          while($start_date < date('Y-m-d')){
+            $another_filter[] = array(
+              'dateadded' => $start_date,
+              'purchase_amount' => 0,
+              'quantity' => 0,
+            );
+            
+            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+          }
+        }
+
+        $response = array(
+          "message" => "Successfully get snackshop sales",
+          "data" => $another_filter,
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+  
+  public function catering_dashboard_sales_history(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $another_filter = array();
+        }else{
+          $start_date = date('Y-m-d', strtotime('-1 week'));
+
+          $catering_sales = $this->admin_model->getCateringSales($start_date, $store_id_array);
+
+          usort($catering_sales, function ($a, $b) {
+              return strtotime($a->dateadded) - strtotime($b->dateadded);
+          });
+
+
+          $filtered = array();
+          
+          foreach($catering_sales as $catering_sales_key => $sales){
+            $is_exist = false;
+
+            foreach($filtered as $filtered_key => $filter){
+              if(date('Y-m-d', strtotime($filter->dateadded)) === date('Y-m-d', strtotime($sales->dateadded))){
+                $filtered[$filtered_key]->purchase_amount += (int) $sales->purchase_amount;
+                if(isset($filtered[$filtered_key]->quantity)){
+                  $filtered[$filtered_key]->quantity += 1;
+                }else{
+                  $filtered[$filtered_key]->quantity = 1;
+                }
+                $is_exist = true;
+                unset($catering_sales[$catering_sales_key]);  
+              }
+            }
+
+            if(!$is_exist){
+              $sales->dateadded = date('Y-m-d', strtotime($sales->dateadded));
+              $sales->purchase_amount = (int)$sales->purchase_amount;
+              if(isset($sales->quantity)){
+                $sales->quantity += 1;
+              }else{
+                $sales->quantity = 1;
+              }
+              $filtered[] = $sales;
+              unset($catering_sales[$catering_sales_key]);
+            }
+
+          }
+          $another_filter = array();
+          
+          foreach($filtered as $sales){
+
+            while($start_date < date('Y-m-d', strtotime($sales->dateadded))){
+              $another_filter[] = array(
+                'dateadded' => $start_date,
+                'purchase_amount' => 0,
+                'quantity' => 0,
+              );
+              
+              $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+            }
+            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+            
+            $another_filter[] = $sales;
+          }  
+        }
+
+        if(empty($another_filter)){
+          while($start_date < date('Y-m-d')){
+            $another_filter[] = array(
+              'dateadded' => $start_date,
+              'purchase_amount' => 0,
+              'quantity' => 0,
+            );
+            
+            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+          }
+        }
+
+        $response = array(
+          "message" => "Successfully get catering sales",
+          "data" => $another_filter,
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+  
+  public function popclub_dashboard_sales_history(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $another_filter = array();
+        }else{
+          $start_date = date('Y-m-d', strtotime('-1 week'));
+
+          $popclub_sales = $this->admin_model->getPopClubSales($start_date, $store_id_array);
+
+          usort($popclub_sales, function ($a, $b) {
+              return strtotime($a->dateadded) - strtotime($b->dateadded);
+          });
+
+
+          $filtered = array();
+          
+          foreach($popclub_sales as $popclub_sales_key => $sales){
+            $is_exist = false;
+
+            foreach($filtered as $filtered_key => $filter){
+              if(date('Y-m-d', strtotime($filter->dateadded)) === date('Y-m-d', strtotime($sales->dateadded))){
+                $filtered[$filtered_key]->purchase_amount += (int) $sales->purchase_amount;
+                if(isset($filtered[$filtered_key]->quantity)){
+                  $filtered[$filtered_key]->quantity += 1;
+                }else{
+                  $filtered[$filtered_key]->quantity = 1;
+                }
+                $is_exist = true;
+                unset($popclub_sales[$popclub_sales_key]);  
+              }
+            }
+
+            if(!$is_exist){
+              $sales->dateadded = date('Y-m-d', strtotime($sales->dateadded));
+              $sales->purchase_amount = (int)$sales->purchase_amount;
+              if(isset($sales->quantity)){
+                $sales->quantity += 1;
+              }else{
+                $sales->quantity = 1;
+              }
+              $filtered[] = $sales;
+              unset($popclub_sales[$popclub_sales_key]);
+            }
+
+          }
+          $another_filter = array();
+          
+          foreach($filtered as $sales){
+
+            while($start_date < date('Y-m-d', strtotime($sales->dateadded))){
+              $another_filter[] = array(
+                'dateadded' => $start_date,
+                'purchase_amount' => 0,
+                'quantity' => 0,
+              );
+              
+              $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+            }
+            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+            
+            $another_filter[] = $sales;
+          }  
+        }
+
+        if(empty($another_filter)){
+          while($start_date < date('Y-m-d')){
+            $another_filter[] = array(
+              'dateadded' => $start_date,
+              'purchase_amount' => 0,
+              'quantity' => 0,
+            );
+            
+            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+          }
+        }
+
+        $response = array(
+          "message" => "Successfully get popclub sales",
+          "data" => $another_filter,
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
   
   public function influencer_cashout_change_status(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -190,7 +466,6 @@ class Admin extends CI_Controller{
 
     }
   }
-  
 
   public function influencers(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -531,7 +806,6 @@ class Admin extends CI_Controller{
     }
   }
 
-  
   public function influencer_change_status(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
@@ -1026,7 +1300,6 @@ class Admin extends CI_Controller{
 
   }
   
-
   public function setting_popclub_deals(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -1062,6 +1335,7 @@ class Admin extends CI_Controller{
         break;
     }
   }
+
   public function setting_copy_catering_package(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
@@ -1420,7 +1694,6 @@ class Admin extends CI_Controller{
 
   }
 
-  
   public function setting_catering_package(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -2207,110 +2480,6 @@ class Admin extends CI_Controller{
 
   }
 
-  public function sales($services){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-          switch($services){
-            case 'overall':
-
-              $store_id_array = array();
-              $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-              foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-      
-              if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-                $another_filter = array();
-              }else{
-                $start_date = date('Y-m-d', strtotime('-1 week'));
-
-                $snackshop_sales = $this->admin_model->getSnackshopSales($start_date, $store_id_array);
-                // $catering_sales = $this->admin_model->getCateringSales($start_date, $store_id_array);
-                // $popclub_sales = $this->admin_model->getPopClubSales($start_date, $store_id_array);
-
-                // $overall_sales = array_merge($snackshop_sales, $catering_sales, $popclub_sales);
-                $overall_sales = $snackshop_sales;
-
-                usort($overall_sales, function ($a, $b) {
-                    return strtotime($a->dateadded) - strtotime($b->dateadded);
-                });
-
-
-                $filtered = array();
-                
-                foreach($overall_sales as $overall_sales_key => $sales){
-                  $is_exist = false;
-
-                  foreach($filtered as $filtered_key => $filter){
-                    if(date('Y-m-d', strtotime($filter->dateadded)) === date('Y-m-d', strtotime($sales->dateadded))){
-                      $filtered[$filtered_key]->purchase_amount += (int) $sales->purchase_amount;
-                      if(isset($filtered[$filtered_key]->quantity)){
-                        $filtered[$filtered_key]->quantity += 1;
-                      }else{
-                        $filtered[$filtered_key]->quantity = 1;
-                      }
-                      $is_exist = true;
-                      unset($overall_sales[$overall_sales_key]);  
-                    }
-                  }
-
-                  if(!$is_exist){
-                    $sales->dateadded = date('Y-m-d', strtotime($sales->dateadded));
-                    $sales->purchase_amount = (int)$sales->purchase_amount;
-                    if(isset($sales->quantity)){
-                      $sales->quantity += 1;
-                    }else{
-                      $sales->quantity = 1;
-                    }
-                    $filtered[] = $sales;
-                    unset($overall_sales[$overall_sales_key]);
-                  }
-
-                }
-                $another_filter = array();
-                
-                foreach($filtered as $sales){
-
-                  while($start_date < date('Y-m-d', strtotime($sales->dateadded))){
-                    $another_filter[] = array(
-                      'dateadded' => $start_date,
-                      'purchase_amount' => 0,
-                      'quantity' => 0,
-                    );
-                    
-                    $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-                  }
-                  $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-                  
-                  $another_filter[] = $sales;
-                }  
-              }
-
-              if(empty($another_filter)){
-                while($start_date < date('Y-m-d')){
-                  $another_filter[] = array(
-                    'dateadded' => $start_date,
-                    'purchase_amount' => 0,
-                    'quantity' => 0,
-                  );
-                  
-                  $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-                }
-              }
-
-
-              
-              $response = array(
-                "message" => "Successfully get snackshop sales",
-                "data" => $another_filter,
-              );
-              
-              header('content-type: application/json');
-              echo json_encode($response);
-              break;
-          }
-        break;
-    }
-  }
-
   public function products(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -2359,6 +2528,7 @@ class Admin extends CI_Controller{
         break;
     }
   }
+
   public function setting_delete_shop_product(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'DELETE':
@@ -3647,7 +3817,6 @@ class Admin extends CI_Controller{
         break;
     }
   }
-  
 
   public function notification_seen($notification_id){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -3777,7 +3946,6 @@ class Admin extends CI_Controller{
         break;
     }
   }
-  
   
   public function store(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -4618,7 +4786,6 @@ class Admin extends CI_Controller{
     }
   }
 
-
   public function product_categories(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
@@ -5277,10 +5444,8 @@ class Admin extends CI_Controller{
 
     return $status;
   }
-
   
-  public function payment()
-  {
+  public function payment(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
 
