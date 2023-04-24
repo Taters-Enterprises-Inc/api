@@ -6,6 +6,32 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    public function getDashboardCompletedTransactionCount( $store){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('transaction_tb A');
+
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+
+        $this->db->where('A.status', 6);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getDashboardTransactionsCount( $store){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('transaction_tb A');
+
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
     public function updateInfluencerPayable($influencer_id, $payable){
 		$this->db->set('payable', $payable);
         $this->db->where('influencer_id', $influencer_id);
@@ -1340,86 +1366,6 @@ class Admin_model extends CI_Model
 
         $query = $this->db->get();
         return $query->result();
-    }
-
-    function getPopClubCompletedTransactionCount($store){
-        $this->db->select('count(*) as all_count');
-        $this->db->from('deals_redeems_tb');
-
-        $this->db->where('status', 6);
-        $this->db->where('platform_id', 1);
-        
-        if(!empty($store))
-            $this->db->where_in('store', $store);
-
-        $query = $this->db->get();
-        return $query->row()->all_count;
-    }
-
-    function getPopClubTotalCompletedPurchaseAmount($store){
-        $this->db->select_sum("purchase_amount");
-        $this->db->from('deals_redeems_tb');
-
-        $this->db->where('status', 6);
-        $this->db->where('platform_id', 1);
-
-        if(!empty($store))
-            $this->db->where_in('store', $store);
-
-        $query_transaction = $this->db->get();
-        return $query_transaction->result();
-    }
-
-    function getCateringCompletedTransactionCount($store){
-        $this->db->select('count(*) as all_count');
-        $this->db->from('catering_transaction_tb');
-
-        $this->db->where('status', 9);
-        
-        if(!empty($store))
-            $this->db->where_in('store', $store);
-
-        $query = $this->db->get();
-        return $query->row()->all_count;
-    }
-
-    function getCateringTotalCompletedPurchaseAmount($store){
-        $this->db->select_sum("purchase_amount");
-        $this->db->from('catering_transaction_tb');
-
-        $this->db->where('status', 9);
-
-        if(!empty($store))
-            $this->db->where_in('store', $store);
-
-        $query_transaction = $this->db->get();
-        return $query_transaction->result();
-    }
-
-    function getSnackshopCompletedTransactionCount($store){
-        $this->db->select('count(*) as all_count');
-        $this->db->from('transaction_tb');
-
-        $this->db->where('status', 6);
-
-        if(!empty($store))
-            $this->db->where_in('store', $store);
-
-        $query = $this->db->get();
-        return $query->row()->all_count;
-    }
-
-    function getSnackshopTotalCompletedPurchaseAmount($store){
-        $this->db->select_sum("purchase_amount");
-        $this->db->from('transaction_tb');
-        
-        $this->db->where('status', 6);
-
-        if(!empty($store))
-            $this->db->where_in('store', $store);
-
-        $query_transaction = $this->db->get();
-        return $query_transaction->result();
     }
 
     function getSnackshopSales($start_date, $store){

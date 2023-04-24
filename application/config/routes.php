@@ -2,11 +2,14 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 //Shop
 $route['shop/product'] = 'shop/product';
+$route['shop/product/view-log'] = 'shop/product_view_log';
 $route['shop/products'] = 'shop/products';
 $route['shop/orders'] = 'shop/orders';
 $route['shop/deals'] = 'shop/deals';
 $route['shop/get_product_sku'] = 'shop/get_product_sku';
 $route['shop/influencer-promo'] = 'shop/influencer_promo';
+$route['shop/initial-checkout-log'] = 'shop/initial_checkout_log';
+
 
 //Catering
 $route['catering/packages'] = 'catering/packages';
@@ -225,8 +228,9 @@ $route['bsc/stores'] = 'bsc/stores';
 $route['bsc/user/(:num)'] = 'bsc/user/$1';
 $route['bsc/user/status'] = 'bsc/user_status';
 
-$route['admin/sales/(:any)/sum'] = 'admin/total_sales/$1';
 $route['admin/dashboard/shop/sales-history'] = 'admin/snackshop_dashboard_sales_history';
+$route['admin/dashboard/shop/total-transaction'] = 'admin/snackshop_dashboard_transaction_total';
+$route['admin/dashboard/shop/total-completed-transaction'] = 'admin/snackshop_dashboard_completed_transaction_total';
 $route['admin/dashboard/catering/sales-history'] = 'admin/catering_dashboard_sales_history';
 $route['admin/dashboard/popclub/sales-history'] = 'admin/popclub_dashboard_sales_history';
 

@@ -368,7 +368,7 @@ class Shop_model extends CI_Model
 
     function fetch_product_sku($variants)
     {
-        $this->db->select("MAX(B.price) AS price,A.sku_id,MAX(B.sku) AS sku,MAX(B.product_id) AS product_id");
+        $this->db->select("MAX(B.price) AS price,A.sku_id,A.product_variant_option_id,MAX(B.sku) AS sku,MAX(B.product_id) AS product_id");
         $this->db->from('product_variant_option_combinations_tb A');
         $this->db->join('product_skus_tb B', 'A.sku_id = B.id');
         if(count($variants) === 1){

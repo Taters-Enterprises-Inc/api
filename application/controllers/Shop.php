@@ -15,7 +15,55 @@ class Shop extends CI_Controller {
 		$this->load->model('shop_model');
 		$this->load->model('user_model');
 		$this->load->model('deals_model');
+		$this->load->model('logs_model');
 		$this->load->library('images');
+	}
+
+	public function product_view_log(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+				$post = json_decode(file_get_contents("php://input"), true);
+
+                $this->logs_model->insertSnackshopProductViewLogs(
+                    $this->session->cache_data['store_id'] ?? null,
+                    $post['product_id'],
+					$post['product_variant_option_id'] ?? null,
+                    $this->session->userData['fb_user_id'] ?? null,
+                    $this->session->userData['mobile_user_id'] ?? null,
+                );
+
+				$response = array(
+					'message' => 'Successfully viewed product'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
+	}
+
+	public function initial_checkout_log(){
+		switch($this->input->server('REQUEST_METHOD')){
+			case 'POST':
+				$post = json_decode(file_get_contents("php://input"), true);
+
+                $this->logs_model->insertSnackshopInitialCheckoutLogs(
+                    $this->session->cache_data['store_id'] ?? null,
+                    $post['subtotal'],
+					$post['discount'],
+					$post['deliveryFee'],
+                    $this->session->userData['fb_user_id'] ?? null,
+                    $this->session->userData['mobile_user_id'] ?? null,
+                );
+
+				$response = array(
+					'message' => 'Successfully viewed initial checkout'
+				);
+
+				header('content-type: application/json');
+				echo json_encode($response);
+				break;
+		}
 	}
 
 	public function influencer_promo(){
