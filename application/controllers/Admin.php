@@ -25,6 +25,85 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
 
+  public function snackshop_initial_checkout_logs(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $total_initial_checkouts = 0;
+        }else{
+          $total_initial_checkouts = $this->admin_model->getDashboardShopInitialCheckoutsCount($store_id_array);
+        }
+
+
+        $response = array(
+          "data" => $total_initial_checkouts,
+          "message" => "Successfully get snackshop total initial checkout",
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
+  public function snackshop_product_view_logs(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $total_product_views = 0;
+        }else{
+          $total_product_views = $this->admin_model->getDashboardShopProductViewsCount($store_id_array);
+        }
+
+
+        $response = array(
+          "data" => $total_product_views,
+          "message" => "Successfully get snackshop total product views",
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
+
+  public function snackshop_add_to_cart_logs(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $total_add_to_carts = 0;
+        }else{
+          $total_add_to_carts = $this->admin_model->getDashboardShopAddToCartsCount($store_id_array);
+        }
+
+
+        $response = array(
+          "data" => $total_add_to_carts,
+          "message" => "Successfully get snackshop total add to cart",
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
   public function snackshop_dashboard_completed_transaction_total(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -34,14 +113,14 @@ class Admin extends CI_Controller{
         foreach ($store_id as $value) $store_id_array[] = $value->store_id;
 
         if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $total_transactions = array();
+          $total_completed_transactions = 0;
         }else{
-          $total_transactions = $this->admin_model->getDashboardCompletedTransactionCount($store_id_array);
+          $total_completed_transactions = $this->admin_model->getDashboardShopCompletedTransactionCount($store_id_array);
         }
 
 
         $response = array(
-          "data" => $total_transactions,
+          "data" => $total_completed_transactions,
           "message" => "Successfully get snackshop completed transaction total",
         );
         
@@ -59,9 +138,9 @@ class Admin extends CI_Controller{
         foreach ($store_id as $value) $store_id_array[] = $value->store_id;
 
         if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $total_transactions = array();
+          $total_transactions = 0;
         }else{
-          $total_transactions = $this->admin_model->getDashboardTransactionsCount($store_id_array);
+          $total_transactions = $this->admin_model->getDashboardShopTransactionsCount($store_id_array);
         }
 
 

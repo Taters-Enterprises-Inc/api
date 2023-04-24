@@ -231,6 +231,9 @@ $route['bsc/user/status'] = 'bsc/user_status';
 $route['admin/dashboard/shop/sales-history'] = 'admin/snackshop_dashboard_sales_history';
 $route['admin/dashboard/shop/total-transaction'] = 'admin/snackshop_dashboard_transaction_total';
 $route['admin/dashboard/shop/total-completed-transaction'] = 'admin/snackshop_dashboard_completed_transaction_total';
+$route['admin/dashboard/shop/add-to-cart-logs'] = 'admin/snackshop_add_to_cart_logs';
+$route['admin/dashboard/shop/product-view-logs'] = 'admin/snackshop_product_view_logs';
+$route['admin/dashboard/shop/initial-checkout-logs'] = 'admin/snackshop_initial_checkout_logs';
 $route['admin/dashboard/catering/sales-history'] = 'admin/catering_dashboard_sales_history';
 $route['admin/dashboard/popclub/sales-history'] = 'admin/popclub_dashboard_sales_history';
 

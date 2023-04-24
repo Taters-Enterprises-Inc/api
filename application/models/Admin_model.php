@@ -6,7 +6,44 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
-    public function getDashboardCompletedTransactionCount( $store){
+    public function getDashboardShopInitialCheckoutsCount( $store){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('snackshop_initial_checkout_logs A');
+
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getDashboardShopProductViewsCount( $store){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('snackshop_product_view_logs A');
+
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+
+    public function getDashboardShopAddToCartsCount( $store){
+        $this->db->select('count(*) as all_count');
+            
+        $this->db->from('snackshop_add_to_cart_logs A');
+
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    public function getDashboardShopCompletedTransactionCount( $store){
         $this->db->select('count(*) as all_count');
             
         $this->db->from('transaction_tb A');
@@ -20,7 +57,7 @@ class Admin_model extends CI_Model
         return $query->row()->all_count;
     }
 
-    public function getDashboardTransactionsCount( $store){
+    public function getDashboardShopTransactionsCount( $store){
         $this->db->select('count(*) as all_count');
             
         $this->db->from('transaction_tb A');
