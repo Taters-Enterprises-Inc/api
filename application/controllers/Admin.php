@@ -25,6 +25,34 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
 
+  public function snackshop_users_percentage(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $users = 0;
+        }else{
+          $users = $this->admin_model->getDashboardShopUsersCount($store_id_array);
+        }
+
+
+
+        $response = array(
+          "data" => $users,
+          "message" => "Successfully get users percentage",
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+
+  }
+
   public function snackshop_initial_checkout_logs(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':

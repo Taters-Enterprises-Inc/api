@@ -6,6 +6,20 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    public function getDashboardShopUsersCount( $store){
+        $this->db->select('B.fname');
+            
+        $this->db->from('transaction_tb A');
+        $this->db->join('client_tb B', 'B.id = A.client_id', 'left');
+        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
+
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     public function getDashboardShopInitialCheckoutsCount( $store){
         $this->db->select('count(*) as all_count');
             
