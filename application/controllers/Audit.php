@@ -12,8 +12,61 @@ class Audit extends CI_Controller
 		parent::__construct();
 
 		
+		$this->load->library('form_validation');
+        $this->load->helper(['url', 'language']);
 
+        $this->form_validation->set_error_delimiters('', '');
+        $this->ion_auth->set_message_delimiters('', '');
+        $this->ion_auth->set_error_delimiters('', '');
+
+        $this->lang->load('auth');
 		
+	}
+
+
+	public function login(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
+		        $this->data['title'] = $this->lang->line('login_heading');
+                $this->form_validation->set_rules('identity', str_replace(':', '', $this->lang->line('login_identity_label')), 'required');
+                $this->form_validation->set_rules('password', str_replace(':', '', $this->lang->line('login_password_label')), 'required');
+                
+		        if ($this->form_validation->run() === TRUE) {
+                    $remember = (bool) $this->input->post('remember');
+
+                    if ($this->ion_auth->audit_login($this->input->post('identity'), $this->input->post('password'), $remember)) {
+
+                        header('content-type: application/json');
+                        echo json_encode(array("message" =>  $this->ion_auth->messages()));
+                        return;
+                    } else {
+
+				        $this->output->set_status_header(401);
+                        header('content-type: application/json');
+                        echo json_encode(array("message" =>  $this->ion_auth->errors()));
+                        return;
+                    }
+
+                }else{ 
+                    $this->output->set_status_header(401);
+                    header('content-type: application/json');
+                    echo json_encode(array("message" =>  validation_errors()));
+                    return;
+                }
+
+                break;
+        }
+    }
+
+
+    public function logout(){
+		$this->data['title'] = "Logout";
+		$this->bsc_auth->logout();
+        
+        header('content-type: application/json');
+        echo json_encode(array("message" => 'Successfully logout user'));
+        return;
 	}
 
 	

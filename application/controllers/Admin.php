@@ -4708,6 +4708,7 @@ class Admin extends CI_Controller{
             "is_admin" => $this->ion_auth->in_group(1),
             "is_csr_admin" => $this->ion_auth->in_group(10),
             "is_catering_admin" => $this->ion_auth->in_group(14),
+            "is_audit_admin" => $this->ion_auth->in_group(15),
           )
         );
 

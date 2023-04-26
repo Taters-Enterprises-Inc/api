@@ -93,6 +93,9 @@ $route['load-image-product/(:any)'] = 'image/load_image_product/$1';
 
 
 //Admin
+$route['audit/login'] = 'audit/login';
+$route['audit/logout'] = 'audit/logout';
+
 $route['auth/login'] = 'auth/login';
 $route['auth/logout'] = 'auth/logout';
 $route['auth/create-user'] = 'auth/create_user';
