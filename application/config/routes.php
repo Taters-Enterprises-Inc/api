@@ -91,11 +91,12 @@ $route['load-image-catering-contract/(:any)'] = 'image/load_catering_image_contr
 $route['load-image-user-discount/(:any)'] = 'image/load_image_user_discount/$1';
 $route['load-image-product/(:any)'] = 'image/load_image_product/$1';
 
-
-//Admin
+//Audit
+$route['audit/settings/auditformquestions'] = 'audit/getAuditFormQuestions';
 $route['audit/login'] = 'audit/login';
 $route['audit/logout'] = 'audit/logout';
 
+//Admin
 $route['auth/login'] = 'auth/login';
 $route['auth/logout'] = 'auth/logout';
 $route['auth/create-user'] = 'auth/create_user';

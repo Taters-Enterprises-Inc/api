@@ -11,15 +11,16 @@ class Audit extends CI_Controller
 	public function __construct(){
 		parent::__construct();
 
-		
-		$this->load->library('form_validation');
+        $this->load->library('form_validation');
         $this->load->helper(['url', 'language']);
 
         $this->form_validation->set_error_delimiters('', '');
-        $this->ion_auth->set_message_delimiters('', '');
-        $this->ion_auth->set_error_delimiters('', '');
+        $this->bsc_auth->set_message_delimiters('', '');
+        $this->bsc_auth->set_error_delimiters('', '');
 
         $this->lang->load('auth');
+		$this->load->model('audit_model');
+
 		
 	}
 
@@ -68,6 +69,61 @@ class Audit extends CI_Controller
         echo json_encode(array("message" => 'Successfully logout user'));
         return;
 	}
+
+
+    public function getAuditFormQuestions(){
+
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET': 
+
+            $per_page = $this->input->get('per_page') ?? 25;
+            $page_no = $this->input->get('page_no') ?? 0;
+            $order = $this->input->get('order') ?? 'asc';
+            $order_by = $this->input->get('order_by') ?? 'id';
+            $search = $this->input->get('search');
+
+            if($page_no != 0){
+                $page_no = ($page_no - 1) * $per_page;
+              }
+
+            $questions_count = $this->audit_model->getFormQuestionsCount($search);
+            $questions = $this->audit_model->getFormQuestions($page_no, $per_page, $order_by, $order, $search);
+            
+            $pagination = array(
+                "total_rows" => $questions_count,
+                "per_page" => $per_page,
+              );
+
+            $response = array(
+            "message" => 'Successfully fetch Form questions',
+            "data" => array(
+                "pagination" => $pagination,
+                "questions" => $questions
+            ),
+            );
+    
+            header('content-type: application/json');
+            echo json_encode($response);
+            return;
+
+
+
+            case 'PUT':
+
+                $put = json_decode(file_get_contents("php://input"), true);
+                
+                $this->audit_model->updateQuestionStatus($put['id'], $put['status'], $put['type']);
+
+                $response = array(
+                    "message" => 'Successfully update questions active status',
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+                  break;
+          }
+
+    }   
 
 	
 }
