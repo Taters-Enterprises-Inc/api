@@ -6,18 +6,61 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
-    public function getDashboardShopUsersCount( $store){
-        $this->db->select('B.fname');
+    public function getDashboardShopFeaturedProducts($store){
+        $this->db->select('
+            CONCAT(B.product_label," ",C.name) as product_name,
+            C.product_image,
+            C.price,
+            count(*) as purchased,
+        ');
+            
+        $this->db->from('transaction_tb A');
+        $this->db->join('order_items B', 'B.transaction_id = A.id', 'left');
+        $this->db->join('products_tb C', 'C.id = B.product_id', 'left');
+
+        $this->db->group_by("product_name");
+        $this->db->where('C.name IS NOT NULL');
+        $this->db->where('A.status', 6);
+
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+
+        $this->db->order_by('purchased', 'DESC');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getDashboardShopMobileUsersCount($store){
+        $this->db->distinct();
+
+        $this->db->select('C.id, C.first_name');
             
         $this->db->from('transaction_tb A');
         $this->db->join('client_tb B', 'B.id = A.client_id', 'left');
-        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
+        $this->db->join('mobile_users C', 'C.id = B.mobile_user_id');
 
         if(!empty($store))
             $this->db->where_in('A.store', $store);
 
         $query = $this->db->get();
-        return $query->result();
+        return $query->num_rows();
+    }
+
+    public function getDashboardShopFbUsersCount($store){
+        $this->db->distinct();
+
+        $this->db->select('C.id, C.first_name');
+            
+        $this->db->from('transaction_tb A');
+        $this->db->join('client_tb B', 'B.id = A.client_id', 'left');
+        $this->db->join('fb_users C', 'C.id = B.fb_user_id');
+
+        if(!empty($store))
+            $this->db->where_in('A.store', $store);
+
+        $query = $this->db->get();
+        return $query->num_rows();
     }
 
     public function getDashboardShopInitialCheckoutsCount( $store){

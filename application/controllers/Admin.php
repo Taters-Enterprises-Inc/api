@@ -25,7 +25,8 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
 
-  public function snackshop_users_percentage(){
+  public function snackshop_featured_products(){
+    
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
 
@@ -34,16 +35,63 @@ class Admin extends CI_Controller{
         foreach ($store_id as $value) $store_id_array[] = $value->store_id;
 
         if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $users = 0;
+          $data = array();
         }else{
-          $users = $this->admin_model->getDashboardShopUsersCount($store_id_array);
+          $data = $this->admin_model->getDashboardShopFeaturedProducts($store_id_array);
+        }
+
+        
+        $response = array(
+          "data" => $data,
+          "message" => "Successfully get feature products",
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
+  public function snackshop_users_total(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $store_id_array = array();
+        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+
+        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+          $data = array(
+            array(
+              "name" => "Facebook",
+              "value" => 0,
+            ),
+            array(
+              "name" => "Mobile",
+              "value" => 0,
+            ),
+          );
+        }else{
+          $total_fb_users = $this->admin_model->getDashboardShopFbUsersCount($store_id_array);
+          $total_mobile_users = $this->admin_model->getDashboardShopMobileUsersCount($store_id_array);
+          
+          $data = array(
+            array(
+              "name" => "Facebook",
+              "value" => $total_fb_users,
+            ),
+            array(
+              "name" => "Mobile",
+              "value" => $total_mobile_users,
+            ),
+          );
         }
 
 
 
         $response = array(
-          "data" => $users,
           "message" => "Successfully get users percentage",
+          "data" => $data,
         );
         
         header('content-type: application/json');

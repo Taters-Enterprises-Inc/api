@@ -234,7 +234,8 @@ $route['admin/dashboard/shop/total-completed-transaction'] = 'admin/snackshop_da
 $route['admin/dashboard/shop/add-to-cart-logs'] = 'admin/snackshop_add_to_cart_logs';
 $route['admin/dashboard/shop/product-view-logs'] = 'admin/snackshop_product_view_logs';
 $route['admin/dashboard/shop/initial-checkout-logs'] = 'admin/snackshop_initial_checkout_logs';
-$route['admin/dashboard/shop/users-percentage'] = 'admin/snackshop_users_percentage';
+$route['admin/dashboard/shop/users-total'] = 'admin/snackshop_users_total';
+$route['admin/dashboard/shop/featured-products'] = 'admin/snackshop_featured_products';
 $route['admin/dashboard/catering/sales-history'] = 'admin/catering_dashboard_sales_history';
 $route['admin/dashboard/popclub/sales-history'] = 'admin/popclub_dashboard_sales_history';
 
