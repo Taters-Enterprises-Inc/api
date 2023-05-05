@@ -12,19 +12,22 @@ class audit_model extends CI_Model {
         $this->db->select("
             A.id,
             A.questions,
+            
+            B.equivalent_point,
+
             C.section_name,
             D.sub_section_name,
-            A.total_point,
-            A.is_active as status
+            A.is_active as status,
+            E.level as urgency_level
 
-           
     
         ");
         $this->db->from('form_questions A');
-        $this->db->join('form_questions_sections B', 'B.question_id = A.id', 'left');
+        $this->db->join('form_questions_information B', 'B.question_id = A.id', 'left');
         $this->db->join('form_sections C', 'C.id = B.section_id', 'left');
         $this->db->join('form_sub_section D', 'D.id = B.sub_section_id', 'left');
-        
+        $this->db->join('form_urgency_level E', 'B.urgency_id = E.id', 'left');
+
         
         if($search){
             $this->db->group_start();
@@ -47,7 +50,7 @@ class audit_model extends CI_Model {
         $this->db->select('count(*) as all_count');
             
         $this->db->from('form_questions A');
-        $this->db->join('form_questions_sections B', 'B.question_id = A.id', 'left');
+        $this->db->join('form_questions_information B', 'B.question_id = A.id', 'left');
         $this->db->join('form_sections C', 'C.id = B.section_id', 'left');
         $this->db->join('form_sub_section D', 'D.id = B.sub_section_id', 'left');
         
@@ -73,12 +76,7 @@ class audit_model extends CI_Model {
                 $this->db->where("id", $id);
                 $this->db->update("form_questions");
 
-            break;
-
-            case 'point':
-                $this->db->set('total_point', $status);        
-                $this->db->where("id", $id);
-                $this->db->update("form_questions");
+        
             break;
         }
             
