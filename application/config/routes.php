@@ -95,6 +95,7 @@ $route['load-image-product/(:any)'] = 'image/load_image_product/$1';
 $route['audit/settings/auditformquestions'] = 'audit/getAuditFormQuestions';
 $route['audit/login'] = 'audit/login';
 $route['audit/logout'] = 'audit/logout';
+$route['audit/stores'] = 'audit/stores';
 
 //Admin
 $route['auth/login'] = 'auth/login';

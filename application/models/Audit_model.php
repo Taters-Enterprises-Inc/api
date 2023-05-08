@@ -4,7 +4,7 @@ class audit_model extends CI_Model {
 
 	public function __construct(){
         $this->db = $this->load->database('audit', TRUE, TRUE);
-
+        $this->newteishop_db = $this->load->database('', TRUE, TRUE);
     }
 
 
@@ -81,6 +81,19 @@ class audit_model extends CI_Model {
         }
             
     }
+
+    function getStore(){
+        $this->newteishop_db->select('
+            store_id,
+            name,
+        ');
+
+        $this->newteishop_db->from('store_tb');
+
+        $query = $this->newteishop_db->get();
+        return $query->result();
+    }
+    
     
 
 

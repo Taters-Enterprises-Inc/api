@@ -125,5 +125,28 @@ class Audit extends CI_Controller
 
     }   
 
+
+
+    public function stores(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+                $store = $this->audit_model->getStore();
+
+                
+                $response = array(
+                    "message" => 'Successfully fetch all stores',
+                    "data"    => $store, 
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+                  break;
+
+
+            break;
+        }
+    }
+
 	
 }
