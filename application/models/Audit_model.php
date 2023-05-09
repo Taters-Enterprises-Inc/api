@@ -84,17 +84,31 @@ class audit_model extends CI_Model {
 
     function getStore(){
         $this->newteishop_db->select('
-            store_id,
-            name,
+            A.store_id,
+            A.name,
+            B.type_name,
         ');
 
         $this->newteishop_db->from('store_tb');
+        
 
         $query = $this->newteishop_db->get();
         return $query->result();
     }
+
+    function getStoreType(){
+        $this->db->select('
+            id,
+            type_name,
+        ');
+
+        $this->db->from('form_audit_type');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
     
-    
+
 
 
     
