@@ -238,6 +238,7 @@ $route['admin/dashboard/shop/users-total'] = 'admin/snackshop_users_total';
 $route['admin/dashboard/shop/featured-products'] = 'admin/snackshop_featured_products';
 $route['admin/dashboard/catering/sales-history'] = 'admin/catering_dashboard_sales_history';
 $route['admin/dashboard/popclub/sales-history'] = 'admin/popclub_dashboard_sales_history';
+$route['admin/dashboard/customer-feedback/ratings'] = 'admin/customer_feedback_ratings';
 
 $route['admin/region-store-combination'] = 'admin/region_store_combination';
 $route['admin/locales'] = 'admin/locales';

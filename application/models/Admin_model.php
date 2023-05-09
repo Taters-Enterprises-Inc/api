@@ -6,6 +6,80 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    public function getCustomerFeedBackAveragePerRatingsGroupsQuestion($question_id, $group_id, $store_id, $startDate, $endDate){
+        $this->bsc_db->select('E.lowest_rate, E.highest_rate,AVG(A.rate) as avg');
+            
+        $this->bsc_db->from('customer_survey_response_ratings A');
+        $this->bsc_db->join('survey_question_ratings B', 'B.id = A.survey_question_rating_id','left');
+        $this->bsc_db->join('survey_questions C', 'C.id = B.survey_question_id','left');
+        $this->bsc_db->join('survey_question_offered_ratings D', 'D.id = B.survey_question_offered_rating_id','left');
+        $this->bsc_db->join('survey_question_offered_rating_groups E', 'E.id = D.survey_question_offered_rating_group_id','left');
+        $this->bsc_db->join('customer_survey_responses F', 'F.id = A.customer_survey_response_id','left');
+
+        $this->bsc_db->where('C.id', $question_id);
+        $this->bsc_db->where('D.survey_question_offered_rating_group_id', $group_id);
+        $this->bsc_db->where('F.store_id', $store_id);
+
+        $this->bsc_db->where('F.dateadded >=', $startDate);
+        $this->bsc_db->where('F.dateadded <=', $endDate);
+
+        $this->bsc_db->group_by('C.survey_section_id');
+
+        $query = $this->bsc_db->get();
+        return $query->row();
+    }
+
+    public function getSurveyQuestionSectionQuestions($section_id){
+        $this->bsc_db->select('A.id, A.description as question_name');
+            
+        $this->bsc_db->from('survey_questions A');
+        $this->bsc_db->where('A.survey_section_id', $section_id);
+
+        $query = $this->bsc_db->get();
+        return $query->result();
+    }
+
+    public function getSurveyQuestionOfferedRatingGroups(){
+        $this->bsc_db->select('A.id, A.name,');
+            
+        $this->bsc_db->from('survey_question_offered_rating_groups A');
+
+        $query = $this->bsc_db->get();
+        return $query->result();
+    }
+
+    public function getCustomerFeedBackAveragePerRatingsGroups($section_id, $group_id, $store_id, $startDate, $endDate){
+        $this->bsc_db->select('E.lowest_rate, E.highest_rate,AVG(A.rate) as avg');
+            
+        $this->bsc_db->from('customer_survey_response_ratings A');
+        $this->bsc_db->join('survey_question_ratings B', 'B.id = A.survey_question_rating_id','left');
+        $this->bsc_db->join('survey_questions C', 'C.id = B.survey_question_id','left');
+        $this->bsc_db->join('survey_question_offered_ratings D', 'D.id = B.survey_question_offered_rating_id','left');
+        $this->bsc_db->join('survey_question_offered_rating_groups E', 'E.id = D.survey_question_offered_rating_group_id','left');
+        $this->bsc_db->join('customer_survey_responses F', 'F.id = A.customer_survey_response_id','left');
+
+        $this->bsc_db->where('C.survey_section_id', $section_id);
+        $this->bsc_db->where('D.survey_question_offered_rating_group_id', $group_id);
+        $this->bsc_db->where('F.store_id', $store_id);
+
+        $this->bsc_db->where('F.dateadded >=', $startDate);
+        $this->bsc_db->where('F.dateadded <=', $endDate);
+
+        $this->bsc_db->group_by('C.survey_section_id');
+
+        $query = $this->bsc_db->get();
+        return $query->row();
+    }
+
+    public function getSurveyQuestionSections(){
+        $this->bsc_db->select('A.id, A.name,');
+            
+        $this->bsc_db->from('survey_question_sections A');
+
+        $query = $this->bsc_db->get();
+        return $query->result();
+    }
+
     public function getDashboardShopFeaturedProducts($store){
         $this->db->select('
             CONCAT(B.product_label," ",C.name) as product_name,

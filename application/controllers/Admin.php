@@ -25,6 +25,98 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
 	}
 
+  public function customer_feedback_ratings(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+  
+        $store_id = $this->input->get('store_id');
+        $start_date = $this->input->get('start_date');
+        $end_date = $this->input->get('end_date');
+
+        $start = date("Y-m-d", strtotime($start_date)) . " 00:00:00";
+        $end = date("Y-m-d", strtotime($end_date)) . " 23:59:59";
+
+        $data = array();
+
+        $survey_question_sections = $this->admin_model->getSurveyQuestionSections();
+        $survey_question_offered_rating_groups = $this->admin_model->getSurveyQuestionOfferedRatingGroups();
+
+        foreach($survey_question_sections as $survey_question_section){
+          $section = array(
+            "section_name" => $survey_question_section->name,
+          );
+
+          $is_section_have_ratings = false;
+
+          foreach($survey_question_offered_rating_groups as $survey_question_offered_rating_group){
+            $avarage_object = $this->admin_model->getCustomerFeedBackAveragePerRatingsGroups($survey_question_section->id, $survey_question_offered_rating_group->id, $store_id, $start, $end);
+
+            if($avarage_object){
+              $is_section_have_ratings = true;
+
+              $section_constructor = array(
+                "name" => $survey_question_offered_rating_group->name,
+              );
+
+              $section_constructor['lowest_rate'] = $avarage_object->lowest_rate; 
+              $section_constructor['highest_rate'] = $avarage_object->highest_rate; 
+              $section_constructor['avg'] = $avarage_object->avg; 
+
+              $section['averages'][] = $section_constructor;
+            }
+
+          }
+
+          if($is_section_have_ratings){
+            $survey_question_section_questions = $this->admin_model->getSurveyQuestionSectionQuestions($survey_question_section->id);
+            
+            foreach($survey_question_section_questions as $survey_question_section_question){
+              $question = array(
+                "question_name" => $survey_question_section_question->question_name,
+              );
+              
+              $is_question_have_ratings = false;
+
+              foreach($survey_question_offered_rating_groups as $survey_question_offered_rating_group){
+                $avarage_object = $this->admin_model->getCustomerFeedBackAveragePerRatingsGroupsQuestion($survey_question_section_question->id, $survey_question_offered_rating_group->id, $store_id, $start, $end);
+
+                if($avarage_object){
+                  $is_question_have_ratings = true;
+
+                  $question_constructor = array(
+                    "name" => $survey_question_offered_rating_group->name,
+                  );
+
+                  $question_constructor['lowest_rate'] = $avarage_object->lowest_rate; 
+                  $question_constructor['highest_rate'] = $avarage_object->highest_rate; 
+                  $question_constructor['avg'] = $avarage_object->avg; 
+
+                  $question['averages'][] = $question_constructor;
+                }
+
+              }
+              
+              if($is_question_have_ratings){
+                $section['questions'][] = $question;
+              }
+
+            }
+
+            $data[] = $section;
+          }
+        }
+
+        $response = array(
+          "data" => $data,
+          "message" => "Successfully get feature products",
+        );
+        
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
   public function snackshop_featured_products(){
     
     switch($this->input->server('REQUEST_METHOD')){
