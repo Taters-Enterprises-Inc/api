@@ -132,11 +132,17 @@ class Audit extends CI_Controller
             case 'GET':
 
                 $store = $this->audit_model->getStore();
+                $getStoreType = $this->audit_model->getStoreType();
 
+                $data = array(
+                    "stores" => $store,
+                    "store_type" => $getStoreType,
+                );
                 
                 $response = array(
                     "message" => 'Successfully fetch all stores',
-                    "data"    => $store, 
+                    "data"    => $data, 
+
                   );
             
                   header('content-type: application/json');
