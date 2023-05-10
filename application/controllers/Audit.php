@@ -70,6 +70,28 @@ class Audit extends CI_Controller
         return;
 	}
 
+    public function  getAuditFormData(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+                $type = $this->input->get('type') ?? null;
+
+
+                $questions_data = $this->audit_model->getAuditEvaluationData($type);
+                // $questions_lifestyle = $this->audit_model->getAuditEvaluationData("Lifestyle");
+                // $questions_community = $this->audit_model->getAuditEvaluationData("Community");
+                // $questions_kiosk = $this->audit_model->getAuditEvaluationData("kiosk");
+
+                $response = array(
+                    "message" => 'Successfully fetch Form questions',
+                    "data" => $questions_data
+                    );
+            
+                    header('content-type: application/json');
+                    echo json_encode($response);
+                    return;
+            break;
+        }
+    }
 
     public function getAuditFormQuestions(){
 
@@ -153,6 +175,8 @@ class Audit extends CI_Controller
             break;
         }
     }
+
+    
 
 	
 }
