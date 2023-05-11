@@ -77,13 +77,12 @@ class Audit extends CI_Controller
 
 
                 $questions_data = $this->audit_model->getAuditEvaluationData($type);
-                // $questions_lifestyle = $this->audit_model->getAuditEvaluationData("Lifestyle");
-                // $questions_community = $this->audit_model->getAuditEvaluationData("Community");
-                // $questions_kiosk = $this->audit_model->getAuditEvaluationData("kiosk");
 
                 $response = array(
                     "message" => 'Successfully fetch Form questions',
-                    "data" => $questions_data
+                    "data" => 
+                        $questions_data,
+                        
                     );
             
                     header('content-type: application/json');

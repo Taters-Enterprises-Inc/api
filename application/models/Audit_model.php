@@ -10,43 +10,62 @@ class audit_model extends CI_Model {
 
     public function getAuditEvaluationData($type){
          $this->db->select("
-            A.type_name as audit_type_name,
-            A.id as audit_type_id,
-
-            C.id as question_id,
-            C.questions,
-
-            D.equivalent_point,
-
-            E.id as section_id,
-            E.section_name,
-
-            F.id as sub_section_id,
-            F.sub_section_name,
-
-            G.level as urgency_level
-
+            D.section_name,
+            E.sub_section_name,
+            F.level,
+            G.questions,
+            C.equivalent_point,
         ");
         $this->db->from('form_audit_type A');
         $this->db->join('form_criteria_availability B', 'B.audit_id = A.id', 'left');
-        $this->db->join('form_questions C', 'C.id = B.question_id', 'left');
-        $this->db->join('form_questions_information D', 'D.question_id = C.id', 'left');
-        $this->db->join('form_sections E', 'E.id = D.section_id', 'left');
-        $this->db->join('form_sub_section F', 'F.id = D.sub_section_id', 'left');
-        $this->db->join('form_urgency_level G', 'G.id = D.urgency_id', 'left');
-       
+        $this->db->join('form_questions_information C', 'C.id = B.question_id', 'left');
+        $this->db->join('form_sections D', 'D.id = C.section_id', 'left');
+        $this->db->join('form_sub_section E', 'E.id = C.sub_section_id', 'left');
+        $this->db->join('form_urgency_level F', 'F.id = C.urgency_id', 'left');
+        $this->db->join('form_questions G', 'G.id = C.question_id', 'left');
 
         if($type){
             $this->db->group_start();
             $this->db->where('A.type_name', $type);           
             $this->db->group_end();
         }
+
+        $query = $this->db->get();
+        $query = $query->result();
+
+
+        $this->db->select('H.section_name');
+        $this->db->from('form_sections H');
+        $section_query = $this->db->get();
+        $sections = $section_query->result();
+
+        $index = 0;
+
+        foreach ($sections as $section) {
+            $matching_queries = array();
+            foreach ($query as $querys) {
+                if ($section->section_name == $querys->section_name) {
+                    $matching_queries[] = $querys;
+                }
+            }
+            $join_data[$index]['section'] = $section->section_name;
+            $join_data[$index]['criteria'] = $matching_queries;
+            $index++;
+        }
+
+            
+        return $join_data;
+
+
+    }
+
+    public function getSections(){
+        $this->db->select('section_name');
+        $this->db->from('form_sections');
         
 
         $query = $this->db->get();
         return $query->result();
-
-
     }
 
 
