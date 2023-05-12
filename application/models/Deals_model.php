@@ -468,7 +468,7 @@ class Deals_model extends CI_Model
 
 			$this->db->select('*');
 			$this->db->from('product_variants_tb');
-			if($selected_option !== null){
+			if(isset($product_variant_option)){
 				$this->db->where('id !=',$product_variant_option->product_variant_id);
 			}
 			$this->db->where('product_id',$product_id);

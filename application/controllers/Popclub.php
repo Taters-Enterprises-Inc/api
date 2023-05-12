@@ -572,8 +572,13 @@ class Popclub extends CI_Controller {
 						
 						if($value->product_variant_options_id){
 							$product_variant_option =  $this->deals_model->getProductVariantOption($value->product_variant_options_id);
-							$product->name = $product_variant_option->name . ' ' . $product->name;
+							if(isset($product_variant_option)){
+								$product->name = $product_variant_option->name . ' ' . $product->name;
+							}
 						}
+
+						
+						
 
 						$product_variants = $this->deals_model->getDealProductVariantsWithSelectedOption($value->product_id, $value->product_variant_options_id);
 
