@@ -14,6 +14,7 @@ class audit_model extends CI_Model {
             E.sub_section_name,
             F.level,
             G.questions,
+            G.id,
             C.equivalent_point,
         ");
         $this->db->from('form_audit_type A');
