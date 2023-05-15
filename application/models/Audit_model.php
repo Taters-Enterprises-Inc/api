@@ -60,6 +60,20 @@ class audit_model extends CI_Model {
 
     }
 
+    public function insertAuditResponse($data){
+        $this->db->trans_start();
+		$this->db->insert('form_responses', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+		return $insert_id;
+	}
+
+    public function insertAuditAnswer($data){
+        $this->db->trans_start();
+		$this->db->insert('form_responses_answers', $data);
+        $this->db->trans_complete();
+	}
+
     public function getSections(){
         $this->db->select('section_name');
         $this->db->from('form_sections');
