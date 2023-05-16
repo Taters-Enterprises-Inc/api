@@ -70,7 +70,7 @@ class Audit extends CI_Controller
         return;
 	}
 
-    public function  getAuditFormData(){
+    public function getAuditFormData(){
         switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
                 $type = $this->input->get('type') ?? null;
@@ -89,13 +89,7 @@ class Audit extends CI_Controller
                     echo json_encode($response);
                     return;
             break;
-        }
-    }
 
-
-    public function getAuditResponse(){
-
-        switch($this->input->server('REQUEST_METHOD')){
             case 'POST': 
 
                 $_POST = json_decode(file_get_contents("php://input"), true);
@@ -153,6 +147,38 @@ class Audit extends CI_Controller
 				echo json_encode($response);
 
             break;
+
+        }
+    }
+
+
+    public function getAuditResponse($hash){
+
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+                if(!isset($hash)){
+					$this->output->set_status_header('401');
+					echo json_encode(array( "message" => 'Missing queries!'));
+					break;
+				}
+
+
+                $response_info = $this->audit_model->getAuditFormInformation($hash);
+                $answer_summary = $this->audit_model->getAuditFormInformation($hash);
+
+                $response = array(
+                    "message" => 'Successfully fetch Response Data',
+                    "data" => 
+                        $response_info
+                    );
+            
+                    header('content-type: application/json');
+                    echo json_encode($response);
+                    return;
+                
+                break;
+           
         }
 
 

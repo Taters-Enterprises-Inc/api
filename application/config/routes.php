@@ -98,6 +98,7 @@ $route['audit/logout'] = 'audit/logout';
 $route['audit/stores'] = 'audit/stores';
 $route['audit/response'] = 'audit/getAuditResponse';
 $route['audit/evaluation'] = 'audit/getAuditFormData';
+$route['audit/response/answer/(:any)'] = 'audit/getAuditResponse/$1';
 
 //Admin
 $route['auth/login'] = 'auth/login';

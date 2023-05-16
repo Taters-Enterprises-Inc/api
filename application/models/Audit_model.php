@@ -60,6 +60,58 @@ class audit_model extends CI_Model {
 
     }
 
+    public function getAuditFormInformation($hash){
+        $this->db->select('
+            A.id,
+            A.attention,
+            A.audit_period,
+            A.dateadded,
+
+            B.type_name,
+
+            C.name as store_name,
+        ');
+        $this->db->from('form_responses A');
+        $this->db->join('form_audit_type B', 'B.id = A.audit_type_id', 'left');
+        $this->db->join($this->newteishop_db->database.'.store_tb C', 'C.store_id = A.store_id');
+
+        $this->db->where("A.hash", $hash);
+
+        $info_query = $this->db->get();
+        $info = $info_query->row();
+
+        $this->db->select('
+            B.questions,
+            C.rating,
+            A.remarks,
+            D.equivalent_point,
+            E.level,
+            F.section_name,
+            G.sub_section_name,
+        ');
+        $this->db->from('form_responses_answers A');
+        $this->db->join('form_questions B', 'B.id = A.question_id', 'left');
+        $this->db->join('form_rating C', 'C.id = A.rating_id', 'left');
+        $this->db->join('form_questions_information D', 'D.id = A.question_id', 'left');
+        $this->db->join('form_urgency_level E', 'E.id = D.urgency_id', 'left');
+        $this->db->join('form_sections F', 'F.id = D.section_id', 'left');
+        $this->db->join('form_sub_section G', 'G.id = D.sub_section_id', 'left');
+
+        $this->db->where("A.response_id", $info->id);
+        $ans_query = $this->db->get();
+        $ans = $ans_query->result();
+
+
+        $join_data['information'] = $info;
+        $join_data['answers'] = $ans;
+
+        return $join_data;
+    }
+
+ 
+
+
+
     public function insertAuditResponse($data){
         $this->db->trans_start();
 		$this->db->insert('form_responses', $data);
