@@ -104,6 +104,7 @@ class Audit extends CI_Controller
                 $store_id = $this->input->post('selectedStoreId');
                 $type_id = $this->input->post('selectedTypeId');
                 $attention = $this->input->post('attention');
+                $period = $this->input->post('period');
                 $answers = $this->input->post('answers');
                 $generated_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
                 $message = "";
@@ -112,6 +113,7 @@ class Audit extends CI_Controller
                     "attention" => $attention,
                     "audit_type_id"   => $type_id,
                     "store_id"  => $store_id,
+                    "audit_period" => $period,
                     'dateadded' => date('Y-m-d H:i:s'),
                     'user_id'   => $this->session->admin['user_id'],
                     "hash"      => $generated_hash,
@@ -119,28 +121,32 @@ class Audit extends CI_Controller
 
                 $audit_response_id = $this->audit_model->insertAuditResponse($audit_information);
 
-
-                foreach($answers as $answer){
-                    $rating_id = $answer['form_rating_id'] ?? null;
-                    $remarks = $answer['remarks'] ?? 'N/A';
-
-                    $audit_response_rating = array(
-                        "response_id"   => $audit_response_id,
-                        "question_id"   => $answer['question_id'],
-                        'rating_id'     => $rating_id,
-                        'remarks'       => $remarks,
-                    );
+                if(isset($answers)){
+                    foreach($answers as $answer){
+                        $rating_id = $answer['form_rating_id'] ?? null;
+                        $remarks = $answer['remarks'] ?? 'N/A';
+    
+                        $audit_response_rating = array(
+                            "response_id"   => $audit_response_id,
+                            "question_id"   => $answer['question_id'],
+                            'rating_id'     => $rating_id,
+                            'remarks'       => $remarks,
+                        );
+                        
+                        $this->audit_model->insertAuditAnswer($audit_response_rating);
                     
-                    $this->audit_model->insertAuditAnswer($audit_response_rating);
-				
-				}
+                    }
+                }else {
+                    $message = "No Answer data";
+                }
+                
 
                 $response = array(
 					'message' => $message,
 					"data" => array(
 						"hash" => $generated_hash,
 					),
-					"test" => $audit_response_rating,
+					"test" => $audit_response_rating ?? null,
 				);
 
 				header('content-type: application/json');
