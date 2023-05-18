@@ -81,6 +81,7 @@ class audit_model extends CI_Model {
         $info = $info_query->row();
 
         $this->db->select('
+            A.question_id as id,
             B.questions,
             C.rating,
             A.remarks,
