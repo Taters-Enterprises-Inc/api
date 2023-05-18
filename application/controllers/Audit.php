@@ -125,6 +125,8 @@ class Audit extends CI_Controller
                             "question_id"   => $answer['question_id'],
                             'rating_id'     => $rating_id,
                             'remarks'       => $remarks,
+                            'urgency_rating' => $answer['level'],
+                            'equivalent_point' => $answer['equivalent_point'],
                         );
                         
                         $this->audit_model->insertAuditAnswer($audit_response_rating);
@@ -135,12 +137,15 @@ class Audit extends CI_Controller
                 }
                 
 
+                $response_info = $this->audit_model->getAuditFormInformation($hash);
+
+
                 $response = array(
 					'message' => $message,
 					"data" => array(
 						"hash" => $generated_hash,
 					),
-					"test" => $audit_response_rating ?? null,
+					"response_data" => $response_info ?? null,
 				);
 
 				header('content-type: application/json');
@@ -165,7 +170,6 @@ class Audit extends CI_Controller
 
 
                 $response_info = $this->audit_model->getAuditFormInformation($hash);
-                $answer_summary = $this->audit_model->getAuditFormInformation($hash);
 
                 $response = array(
                     "message" => 'Successfully fetch Response Data',
