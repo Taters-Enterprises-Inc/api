@@ -89,8 +89,7 @@ class audit_model extends CI_Model {
             E.level,
             F.section_name,
             G.sub_section_name,
-            H.id as category_id,
-            H.name as category_name,
+            H.id,
             
         ');
         $this->db->from('form_responses_answers A');
@@ -108,7 +107,18 @@ class audit_model extends CI_Model {
         $ans = $ans_query->result();
 
 
+        $this->db->select('
+            A.id,
+            A.name,
+        ');
+        $this->db->from('form_category A');
+        $cat_query = $this->db->get();
+        $cat = $cat_query->result();
+
+
+        
         $join_data['information'] = $info;
+        $join_data['category'] = $cat;
         $join_data['answers'] = $ans;
 
         return $join_data;
