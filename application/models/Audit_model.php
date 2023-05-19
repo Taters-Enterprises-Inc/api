@@ -89,6 +89,8 @@ class audit_model extends CI_Model {
             E.level,
             F.section_name,
             G.sub_section_name,
+            H.id as category_id,
+            
         ');
         $this->db->from('form_responses_answers A');
         $this->db->join('form_questions B', 'B.id = A.question_id', 'left');
@@ -97,6 +99,8 @@ class audit_model extends CI_Model {
         $this->db->join('form_urgency_level E', 'E.id = D.urgency_id', 'left');
         $this->db->join('form_sections F', 'F.id = D.section_id', 'left');
         $this->db->join('form_sub_section G', 'G.id = D.sub_section_id', 'left');
+        $this->db->join('form_category H', 'H.id = D.category_id', 'left');
+
 
         $this->db->where("A.response_id", $info->id);
         $ans_query = $this->db->get();
