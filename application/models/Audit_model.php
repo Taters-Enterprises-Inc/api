@@ -90,6 +90,7 @@ class audit_model extends CI_Model {
             F.section_name,
             G.sub_section_name,
             H.id as category_id,
+            H.name as category_name,
             
         ');
         $this->db->from('form_responses_answers A');
