@@ -67,6 +67,7 @@ class audit_model extends CI_Model {
             A.audit_period,
             A.dateadded,
 
+            B.id as type_id,
             B.type_name,
 
             C.name as store_name,
@@ -86,6 +87,7 @@ class audit_model extends CI_Model {
             C.rating,
             A.remarks,
             D.equivalent_point,
+            D.section_id,
             E.level,
             F.section_name,
             G.sub_section_name,
@@ -106,13 +108,55 @@ class audit_model extends CI_Model {
         $ans_query = $this->db->get();
         $ans = $ans_query->result();
 
+        
+        $this->db->select('
+            A.category_id,
+            A.weight,
+            B.name,
+        ');
+        $this->db->from('form_category_weight A');
+        $this->db->join('form_category B', 'B.id = A.category_id', 'left');
+        $this->db->where("A.type_id", $info->type_id);
+        $cat_query = $this->db->get();
+        $cat = $cat_query->result();
 
-   
+
+        $this->db->select('H.section_name, h.id');
+        $this->db->from('form_sections H');
+        $section_query = $this->db->get();
+        $sections = $section_query->result();
+
+        $index = 0;
+
+
+        $join_data['information'] = $info;
+        $join_data['default_weight_info'] = $cat;
+        // $join_data['answers'] = $ans;
+
+        foreach ($sections as $section) {
+            $matching_queries = array();
+            if($section->id == 1) continue;
+            foreach ($ans as $answers) {
+                if ($section->section_name == $answers->section_name) {
+                    $matching_queries[] = $answers;
+                }
+            }
+            $join_data['answers'][$index]['section'] = $section->section_name;
+            $join_data['answers'][$index]['criteria'] = $matching_queries;
+
+            $answerData = array(
+                $index => array(
+                    'criteria' => $matching_queries,
+                ),
+                
+            );
+
+            $index++;
+        }
 
 
         
-        $join_data['information'] = $info;
-        $join_data['answers'] = $ans;
+       
 
         return $join_data;
     }

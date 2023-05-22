@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 19, 2023 at 11:52 AM
+-- Generation Time: May 22, 2023 at 01:16 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -68,6 +68,62 @@ INSERT INTO `form_category` (`id`, `Name`) VALUES
 (6, 'Cash Handling'),
 (7, 'Equipment Maintenance'),
 (8, 'Resource Management');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `form_category_weight`
+--
+
+CREATE TABLE `form_category_weight` (
+  `id` int(11) NOT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `type_id` int(11) NOT NULL,
+  `weight` decimal(10,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `form_category_weight`
+--
+
+INSERT INTO `form_category_weight` (`id`, `category_id`, `type_id`, `weight`) VALUES
+(1, 1, 4, '0.14'),
+(2, 2, 4, '0.16'),
+(3, 3, 4, '0.18'),
+(4, 4, 4, '0.18'),
+(5, 5, 4, '0.10'),
+(6, 6, 4, '0.08'),
+(7, 7, 4, '0.08'),
+(8, 8, 4, '0.08'),
+(9, 1, 1, '0.14'),
+(10, 2, 1, '0.16'),
+(11, 3, 1, '0.18'),
+(12, 4, 1, '0.18'),
+(13, 5, 1, '0.10'),
+(14, 6, 1, '0.08'),
+(15, 7, 1, '0.08'),
+(16, 8, 1, '0.08'),
+(17, 1, 5, '0.15'),
+(18, 2, 5, '0.15'),
+(19, 3, 5, '0.20'),
+(20, 4, 5, '0.20'),
+(21, 5, 5, '0.10'),
+(22, 6, 5, '0.10'),
+(23, 7, 5, '0.10'),
+(24, 1, 3, '0.15'),
+(25, 2, 3, '0.15'),
+(26, 3, 3, '0.20'),
+(27, 4, 3, '0.20'),
+(28, 5, 3, '0.10'),
+(29, 6, 3, '0.10'),
+(30, 7, 3, '0.10'),
+(31, 1, 2, '0.15'),
+(32, 2, 2, '0.15'),
+(33, 3, 2, '0.20'),
+(34, 4, 2, '0.20'),
+(35, 5, 2, '0.10'),
+(36, 6, 2, '0.10'),
+(37, 7, 2, '0.10');
 
 -- --------------------------------------------------------
 
@@ -541,16 +597,16 @@ INSERT INTO `form_criteria_availability` (`id`, `question_id`, `audit_id`) VALUE
 (453, 48, 3),
 (454, 49, 3),
 (455, 50, 3),
-(456, 51, 3),
-(457, 52, 3),
-(458, 53, 3),
-(459, 54, 3),
-(460, 55, 3),
-(461, 57, 3),
-(462, 58, 3),
-(463, 59, 3),
-(464, 60, 3),
-(465, 61, 3),
+(456, 52, 3),
+(457, 53, 3),
+(458, 54, 3),
+(459, 55, 3),
+(460, 57, 3),
+(461, 58, 3),
+(462, 59, 3),
+(463, 60, 3),
+(464, 61, 3),
+(465, 51, 3),
 (466, 62, 3),
 (467, 63, 3),
 (468, 64, 3),
@@ -583,12 +639,12 @@ INSERT INTO `form_criteria_availability` (`id`, `question_id`, `audit_id`) VALUE
 (495, 101, 3),
 (496, 103, 3),
 (497, 105, 3),
-(498, 107, 3),
-(499, 114, 3),
-(500, 115, 3),
-(501, 119, 3),
-(502, 120, 3),
-(503, 122, 3),
+(498, 303, 3),
+(499, 107, 3),
+(500, 114, 3),
+(501, 115, 3),
+(502, 119, 3),
+(503, 120, 3),
 (504, 123, 3),
 (505, 124, 3),
 (506, 151, 3),
@@ -1036,7 +1092,7 @@ INSERT INTO `form_questions` (`id`, `questions`, `is_active`) VALUES
 (104, 'Refrigerator temperature is 0 - 5°C and being monitored in temperature monitoring form', 1),
 (105, 'All opened packed products have monitoring of its shelflife (includes wrong shelflife)', 1),
 (106, 'Personal food items should not mix or store inside the Ref or Freezer', 1),
-(107, 'All food iitems indicate their respective delivery or purchase date/s', 1),
+(107, 'All food items indicate their respective delivery or purchase date/s', 1),
 (108, 'Prevent potentially hazardous food from spending more than 4 hours in the temperature danger zone', 1),
 (109, 'Remove from the refrigerator only as much as you can prepare at one time', 1),
 (110, 'Thaw food in a refrigerator at 0° to 5°C on lower shelf to prevent dripping (including following to standard thawing procedures)', 1),
@@ -1231,7 +1287,8 @@ INSERT INTO `form_questions` (`id`, `questions`, `is_active`) VALUES
 (299, 'Average labor cost for the previous month is within acceptable level (12% & below = 3 pts, 12.1% -14% = 2 pts, 14.1% - 15% = 1 pt, 15.1% & above: 0 pt) ', 1),
 (300, 'Variances of Store Cost of Sales Theoretical vs Store PNL for the past month is within acceptable level of ±2.00%', 1),
 (301, 'Daily monitoring form of actual COGS is updated', 1),
-(302, 'Stock projection guide is being used', 1);
+(302, 'Stock projection guide is being used', 1),
+(303, 'All pre-packed popcorn and flavorings with expiration date attached on it', 1);
 
 -- --------------------------------------------------------
 
@@ -1555,7 +1612,8 @@ INSERT INTO `form_questions_information` (`id`, `question_id`, `section_id`, `ca
 (299, 299, 10, 8, NULL, 1, 3),
 (300, 300, 10, 8, NULL, 1, 3),
 (301, 301, 10, 8, NULL, 1, 3),
-(302, 302, 7, 5, NULL, 2, 2);
+(302, 302, 7, 5, NULL, 2, 2),
+(303, 303, 5, 3, 3, 3, 3);
 
 -- --------------------------------------------------------
 
@@ -1577,7 +1635,8 @@ CREATE TABLE `form_rating` (
 INSERT INTO `form_rating` (`id`, `rating`, `name`, `description`) VALUES
 (1, 1, '1 point', 'Less Critical'),
 (2, 2, '2 point', 'Critical'),
-(3, 3, '3 point', 'Most Critical');
+(3, 3, '3 point', 'Most Critical'),
+(4, 0, '0 point', 'zero point');
 
 -- --------------------------------------------------------
 
@@ -2176,6 +2235,12 @@ ALTER TABLE `form_category`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `form_category_weight`
+--
+ALTER TABLE `form_category_weight`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `form_criteria_availability`
 --
 ALTER TABLE `form_criteria_availability`
@@ -2258,22 +2323,28 @@ ALTER TABLE `form_audit_type`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `form_category_weight`
+--
+ALTER TABLE `form_category_weight`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+
+--
 -- AUTO_INCREMENT for table `form_criteria_availability`
 --
 ALTER TABLE `form_criteria_availability`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=827;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=828;
 
 --
 -- AUTO_INCREMENT for table `form_questions`
 --
 ALTER TABLE `form_questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=303;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=304;
 
 --
 -- AUTO_INCREMENT for table `form_questions_information`
 --
 ALTER TABLE `form_questions_information`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=303;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=304;
 
 --
 -- AUTO_INCREMENT for table `form_responses`
