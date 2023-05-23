@@ -16,6 +16,7 @@ class audit_model extends CI_Model {
             G.questions,
             G.id,
             C.equivalent_point,
+            C.category_id,
         ");
         $this->db->from('form_audit_type A');
         $this->db->join('form_criteria_availability B', 'B.audit_id = A.id', 'left');
@@ -33,7 +34,6 @@ class audit_model extends CI_Model {
 
         $query = $this->db->get();
         $query = $query->result();
-
 
         $this->db->select('H.section_name');
         $this->db->from('form_sections H');
@@ -54,9 +54,31 @@ class audit_model extends CI_Model {
             $index++;
         }
 
+
             
         return $join_data;
 
+
+    }
+
+
+    public function getDefaultWeight($type){
+
+         $this->db->select('
+            category_id,
+            type_id,
+            weight,');
+        $this->db->from('form_audit_type A');
+        $this->db->join('form_category_weight B', 'A.id = B.type_id', 'left');
+
+        if($type){
+        $this->db->where('A.type_name', $type);
+        }
+        $default_weight_query = $this->db->get();
+        $default_weight = $default_weight_query->result();
+
+
+        return $default_weight;
 
     }
 

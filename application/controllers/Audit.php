@@ -77,12 +77,14 @@ class Audit extends CI_Controller
 
 
                 $questions_data = $this->audit_model->getAuditEvaluationData($type);
-
+                $default_weight_date = $this->audit_model->getDefaultWeight($type);
                 $response = array(
                     "message" => 'Successfully fetch Form questions',
-                    "data" => 
-                        $questions_data,
+                    "data" => array(
+                     'default_weight' => $default_weight_date,
+                     'question_data' =>  $questions_data,
                         
+                    ),
                     );
             
                     header('content-type: application/json');
