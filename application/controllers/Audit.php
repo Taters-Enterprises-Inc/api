@@ -102,6 +102,7 @@ class Audit extends CI_Controller
                 $attention = $this->input->post('attention');
                 $period = $this->input->post('period');
                 $answers = $this->input->post('answers');
+                $results = $this->input->post('result');
                 $generated_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
                 $message = "";
 
@@ -137,9 +138,27 @@ class Audit extends CI_Controller
                 }else {
                     $message = "No Answer data";
                 }
+
+                if(isset($results)){
+                    foreach($results as $result){
+    
+                        $audit_response_result = array(
+                            "response_id"   => $audit_response_id,
+                            "category_id"   => $result['category'],
+                            'grade'         => $result['grade'],
+                            'weight'        => $result['weight'],
+                            'final_score'   => $result['final'],
+                        );
+                        
+                        $this->audit_model->insertAuditResult($audit_response_result);
+                    
+                    }
+                }else {
+                    $message = "No Answer data";
+                }
                 
 
-                $response_info = $this->audit_model->getAuditFormInformation($hash);
+                $response_info = $this->audit_model->getAuditFormInformation($generated_hash);
 
 
                 $response = array(

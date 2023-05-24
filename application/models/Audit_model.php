@@ -132,13 +132,13 @@ class audit_model extends CI_Model {
 
         
         $this->db->select('
-            A.category_id,
-            A.weight,
-            B.name,
+            category_id,
+            grade,
+            weight,
+            final_score,
         ');
-        $this->db->from('form_category_weight A');
-        $this->db->join('form_category B', 'B.id = A.category_id', 'left');
-        $this->db->where("A.type_id", $info->type_id);
+        $this->db->from('form_responses_result');
+        $this->db->where("response_id", $info->id);
         $cat_query = $this->db->get();
         $cat = $cat_query->result();
 
@@ -198,6 +198,12 @@ class audit_model extends CI_Model {
     public function insertAuditAnswer($data){
         $this->db->trans_start();
 		$this->db->insert('form_responses_answers', $data);
+        $this->db->trans_complete();
+	}
+
+    public function insertAuditResult($data){
+        $this->db->trans_start();
+		$this->db->insert('form_responses_result', $data);
         $this->db->trans_complete();
 	}
 
