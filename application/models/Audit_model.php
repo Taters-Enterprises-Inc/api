@@ -176,10 +176,6 @@ class audit_model extends CI_Model {
             $index++;
         }
 
-
-        
-       
-
         return $join_data;
     }
 
@@ -214,6 +210,62 @@ class audit_model extends CI_Model {
 
         $query = $this->db->get();
         return $query->result();
+    }
+
+    public function getAuditResponseInformation($row_no, $row_per_page, $order_by,  $order, $search){
+            $this->db->select('
+            A.id,
+            A.attention,
+            A.audit_period,
+            A.dateadded,
+            A.hash,
+            B.type_name,
+            C.name as store_name,
+        ');
+        $this->db->from('form_responses A');
+        $this->db->join('form_audit_type B', 'B.id = A.audit_type_id', 'left');
+        $this->db->join($this->newteishop_db->database.'.store_tb C', 'C.store_id = A.store_id');
+
+        
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.attention', $search);
+            $this->db->or_like("A.audit_period", $search);
+            $this->db->or_like('A.dateadded', $search);
+            $this->db->or_like('B.type_name', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $query = $this->db->get();
+        return $query->result();
+
+
+    }
+
+    public function getAuditResponseInformationCount($search){
+        $this->db->select('count(*) as all_count');      
+        $this->db->from('form_responses A');
+        $this->db->join('form_audit_type B', 'B.id = A.audit_type_id', 'left');
+        $this->db->join($this->newteishop_db->database.'.store_tb C', 'C.store_id = A.store_id');
+        
+
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.attention', $search);
+            $this->db->or_like("A.audit_period", $search);
+            $this->db->or_like('A.dateadded', $search);
+            $this->db->or_like('B.type_name', $search);
+            $this->db->or_like('C.name', $search);
+            $this->db->group_end();
+        }
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
     }
 
 
