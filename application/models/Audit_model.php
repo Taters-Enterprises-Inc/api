@@ -4,7 +4,6 @@ class audit_model extends CI_Model {
 
 	public function __construct(){
         $this->db = $this->load->database('audit', TRUE, TRUE);
-        $this->newteishop_db = $this->load->database('', TRUE, TRUE);
     }
 
 
@@ -92,11 +91,11 @@ class audit_model extends CI_Model {
             B.id as type_id,
             B.type_name,
 
-            C.name as store_name,
+            C.store_name,
         ');
         $this->db->from('form_responses A');
         $this->db->join('form_audit_type B', 'B.id = A.audit_type_id', 'left');
-        $this->db->join($this->newteishop_db->database.'.store_tb C', 'C.store_id = A.store_id');
+        $this->db->join('store C', 'C.id = A.store_id');
 
         $this->db->where("A.hash", $hash);
 
@@ -220,11 +219,11 @@ class audit_model extends CI_Model {
             A.dateadded,
             A.hash,
             B.type_name,
-            C.name as store_name,
+            C.store_name,
         ');
         $this->db->from('form_responses A');
         $this->db->join('form_audit_type B', 'B.id = A.audit_type_id', 'left');
-        $this->db->join($this->newteishop_db->database.'.store_tb C', 'C.store_id = A.store_id');
+        $this->db->join('store C', 'C.id = A.store_id', 'left');
 
         
         if($search){
@@ -233,7 +232,7 @@ class audit_model extends CI_Model {
             $this->db->or_like("A.audit_period", $search);
             $this->db->or_like('A.dateadded', $search);
             $this->db->or_like('B.type_name', $search);
-            $this->db->or_like('C.name', $search);
+            $this->db->or_like('C.store_name', $search);
             $this->db->group_end();
         }
 
@@ -250,7 +249,7 @@ class audit_model extends CI_Model {
         $this->db->select('count(*) as all_count');      
         $this->db->from('form_responses A');
         $this->db->join('form_audit_type B', 'B.id = A.audit_type_id', 'left');
-        $this->db->join($this->newteishop_db->database.'.store_tb C', 'C.store_id = A.store_id');
+        $this->db->join('store C', 'C.id = A.store_id', 'left');
         
 
 
@@ -260,7 +259,7 @@ class audit_model extends CI_Model {
             $this->db->or_like("A.audit_period", $search);
             $this->db->or_like('A.dateadded', $search);
             $this->db->or_like('B.type_name', $search);
-            $this->db->or_like('C.name', $search);
+            $this->db->or_like('C.store_name', $search);
             $this->db->group_end();
         }
 
