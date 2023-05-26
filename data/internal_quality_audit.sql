@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 25, 2023 at 01:14 PM
+-- Generation Time: May 26, 2023 at 09:14 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -39,7 +39,7 @@ CREATE TABLE `form_audit_type` (
 INSERT INTO `form_audit_type` (`id`, `type_name`) VALUES
 (1, 'Mall Cinema'),
 (2, 'Community'),
-(3, 'Non Cinema'),
+(3, 'Mall Non Cinema Kiosk'),
 (4, 'Leisure'),
 (5, 'Terminal'),
 (6, 'Amusement');
@@ -1655,6 +1655,13 @@ CREATE TABLE `form_responses` (
   `hash` varchar(265) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `form_responses`
+--
+
+INSERT INTO `form_responses` (`id`, `attention`, `audit_type_id`, `store_id`, `audit_period`, `dateadded`, `user_id`, `hash`) VALUES
+(1, 'Sir Lester', 4, 90, '2023-01', '2023-05-26 15:11:29', 884, '4d48f2c23a3e264a6ae0');
+
 -- --------------------------------------------------------
 
 --
@@ -1666,10 +1673,42 @@ CREATE TABLE `form_responses_answers` (
   `response_id` int(11) DEFAULT NULL,
   `question_id` int(11) DEFAULT NULL,
   `rating_id` int(11) DEFAULT NULL,
-  `remarks` varchar(512) DEFAULT NULL,
+  `remarks` varchar(1024) DEFAULT NULL,
   `urgency_rating` int(1) DEFAULT NULL,
   `equivalent_point` int(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `form_responses_answers`
+--
+
+INSERT INTO `form_responses_answers` (`id`, `response_id`, `question_id`, `rating_id`, `remarks`, `urgency_rating`, `equivalent_point`) VALUES
+(1, 1, 1, 2, 'N/A', 2, 2),
+(2, 1, 2, 2, 'N/A', 2, 2),
+(3, 1, 3, 2, 'N/A', 2, 2),
+(4, 1, NULL, NULL, 'no tv', NULL, 0),
+(5, 1, NULL, NULL, 'no tv', NULL, 0),
+(6, 1, 6, 3, 'N/A', 1, 3),
+(7, 1, 7, 3, 'N/A', 1, 3),
+(8, 1, 8, 0, 'did not mix', 2, 0),
+(9, 1, 9, 2, 'N/A', 2, 2),
+(10, 1, NULL, NULL, 'stickers with pending j.o', NULL, 0),
+(11, 1, 11, 2, 'N/A', 2, 2),
+(12, 1, 12, 2, 'N/A', 2, 2),
+(13, 1, 13, 2, 'N/A', 2, 2),
+(14, 1, 14, 2, 'N/A', 2, 2),
+(15, 1, 16, 2, 'N/A', 2, 2),
+(16, 1, 17, 2, 'N/A', 2, 2),
+(17, 1, 18, 2, 'N/A', 2, 2),
+(18, 1, 19, 2, 'N/A', 2, 2),
+(19, 1, 20, 2, 'N/A', 2, 2),
+(20, 1, NULL, NULL, 'menu board-handwritten price; tip box handwritten; alcohol faded name; bottled iced tea-below neck level(display); no unavailable stickers on menu board; no sticker label (strawberry cheesecake)', NULL, 0),
+(21, 1, NULL, NULL, 'c/o Bowling', NULL, 0),
+(22, 1, NULL, NULL, 'c/o Bowling', NULL, 0),
+(23, 1, 25, 2, 'N/A', 2, 2),
+(24, 1, 26, 1, 'N/A', 3, 1),
+(25, 1, 27, 1, 'N/A', 3, 1),
+(26, 1, 28, 1, 'N/A', 3, 1);
 
 -- --------------------------------------------------------
 
@@ -1759,6 +1798,277 @@ INSERT INTO `form_urgency_level` (`id`, `level`, `name`, `description`) VALUES
 (1, 1, 'Most Crtitical', 'needs immediate corrective and p'),
 (2, 2, 'Critical', 'needs immediate corrective actio'),
 (3, 3, 'Less Critical', 'needs immediate corrective action & must provide preventive action within 72 hrs.');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `store`
+--
+
+CREATE TABLE `store` (
+  `id` int(11) NOT NULL,
+  `store_code` varchar(32) DEFAULT NULL,
+  `store_name` varchar(256) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `store`
+--
+
+INSERT INTO `store` (`id`, `store_code`, `store_name`) VALUES
+(1, 'TSH-M', 'Mall of Alnor'),
+(2, 'EGM', 'Tuguegarao'),
+(3, 'OSS-CMB', 'City Mall Boracay'),
+(4, 'SEG-RG', 'Robinsons Galleria South'),
+(5, 'CPI-SMSR', 'SM Sta. Rosa'),
+(6, 'CPI-SMC', 'SM Calamba'),
+(7, 'JPO-SMMA', 'SM Manila'),
+(8, 'BSH-BFH', 'B.F. HOMES'),
+(9, 'GFK-BFR', 'BF Resort'),
+(10, 'JCGT-BL', 'Better Living'),
+(11, 'GSC-SF', 'South Forbes'),
+(12, 'CFS-SMM', 'SM Megamall'),
+(13, 'LCGT-FM', 'Festival Mall'),
+(14, 'KGC', 'Bacolod'),
+(15, 'TDCGT-S', 'Singalong'),
+(16, 'CPI-SML', 'SM Lipa'),
+(17, 'CFS-SMNE', 'SM North Edsa'),
+(18, 'LFFC-M', 'Maginhawa'),
+(19, 'BEFBK-SMB', 'SM Bacoor'),
+(20, 'KFPM-SMB', 'SM Batangas'),
+(21, 'JMSH-SMP', 'SM Pampanga'),
+(22, 'JMSH-SMC', 'SM Clark'),
+(23, 'JMSH-SMB', 'SM Baguio'),
+(24, 'CFS-SMGC', 'SM Grand Central'),
+(25, 'DFBK-SMM', 'SM Molino'),
+(26, 'CPI-SMD', 'SM Dasmariñas'),
+(27, 'LFH', 'C. Raymundo, Pasig City'),
+(28, 'TFPM-SMT', 'SM Tarlac'),
+(29, 'AFH-SMPP', 'SM Puerto Princessa'),
+(30, 'AFI-PPD', 'Paseo Perdices Dumaguete'),
+(31, 'JTO-SMI', 'SM Imus Cavite'),
+(32, 'DFBK-PITX', 'PITX,Paranaque City'),
+(33, 'JTO-WSM', 'Waltermart Sta Maria Bulacan'),
+(34, 'JFH-SMT', 'SM Tanza Cavite'),
+(35, 'EGM-SMT', 'SM Tuguegarao'),
+(36, 'SFO-FMM', 'Fishermall Malabon'),
+(37, 'SFO-FMQ', 'Fishermall Quezon Ave'),
+(38, 'JFBH-SMM', 'SM Muntinlupa'),
+(39, 'JFS-EK', 'Enchanted Kingdom'),
+(40, 'MSFI-A', 'Abreeza'),
+(41, 'MSFI-G', 'Gaisano'),
+(42, 'MSFI-B', 'NCCC Buhangin'),
+(43, 'MSFI-GD', 'Digos '),
+(44, 'MSFI-SMLG', 'SM Lanang'),
+(45, 'MSFI-TD', 'Tulip Drive'),
+(46, 'CCI-A', 'Cebu Ayala'),
+(47, 'CCI-SMC', 'Cebu SM'),
+(48, 'CCI-SMSS', 'Seaside'),
+(49, 'CCI-AMCB', 'Ayala Mall Central Bloc Cebu'),
+(50, 'SDMC-R', 'Calasiao'),
+(51, 'PACSI-RNT', 'Robinsons - North Tacloban'),
+(52, 'CNI-A', 'Marquee'),
+(53, 'CSI-A', 'Trinoma'),
+(54, 'OSSFC-C', 'Century'),
+(55, 'QSI-R', 'Magnolia'),
+(56, 'WIN-E', 'Evia'),
+(57, 'JI-R', 'Valencia'),
+(58, 'PI-A', 'Ayala Bacolod'),
+(59, 'FMFC-SMO', 'SM Central Olongapo'),
+(60, 'FMFC-AHP-C', 'Ayala Malls Harbor Point Cart'),
+(61, 'FMFC-AHP-IL', 'Ayala Malls Harbor Point '),
+(62, 'MSFI-SMD', 'SM Davao'),
+(63, 'CCI-SMC-B', 'SM Cebu-Bowling'),
+(64, 'CCI-SMSS-B', 'SM Seaside-Bowling'),
+(65, 'GPCFC-SMC', 'SM Mall, CDO'),
+(66, 'CCI-CG', 'Country Mall Gaisano'),
+(67, 'GPCFC-CMC', 'Centrio Mall'),
+(68, 'CCI-SMSS-S', 'SM Cebu Seaside Skating'),
+(69, 'SCI-A', 'Alabang'),
+(70, 'SCI-CC', 'Commercenter'),
+(71, 'CHIP-R', 'Antipolo'),
+(72, 'TEI-WM', 'Waltermart'),
+(73, 'TEI-MM', 'Market! Market!'),
+(74, 'TEI-IN', 'Iligan'),
+(75, 'TEI-CS', 'Central Square (BGC)'),
+(76, 'TEI-SMSM', 'SM South Mall'),
+(77, 'TEI-SMNE', 'SM City North Edsa'),
+(78, 'TEI-SMSL', 'SM San Lazaro'),
+(79, 'TEI-SMFW', 'SM Fairview'),
+(80, 'TEI-GA 4', 'Glorietta 4 Kiosk'),
+(81, 'TEI-BA', 'Bel-Air'),
+(82, 'TEI-AMC', 'Ayala Mall Circuit'),
+(83, 'TEI-WP', 'White Plains'),
+(84, 'TEI-SMSM-G', 'SM South Mall - Gamepark'),
+(85, 'TEI-SMM-B', 'SM Megamall - Bowling'),
+(86, 'TEI-SMFW-B', 'SM Fairview - Gamepark'),
+(87, 'TEI-SMM-S', 'SM Megamall - Skating'),
+(88, 'PACSI-R', 'Robinsons - Tacloban'),
+(89, 'TEI-SMMOA-S', 'SM MOA Skating'),
+(90, 'TEI-SMNE-B', 'SM North Edsa Bowling'),
+(91, 'TEI-SMMO', 'SM Marilao Bulacan'),
+(92, 'TEI-TCA', 'Town Center Acacia Estate Taguig City'),
+(93, 'TEI-SMBG', 'SM Baliuag Bulacan'),
+(94, 'TEI-HUB', 'TEI Hub');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `store_information`
+--
+
+CREATE TABLE `store_information` (
+  `id` int(11) NOT NULL,
+  `store_id` int(11) NOT NULL,
+  `store_type_id` int(11) NOT NULL,
+  `ownership_id` int(11) NOT NULL,
+  `mall_type_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `store_information`
+--
+
+INSERT INTO `store_information` (`id`, `store_id`, `store_type_id`, `ownership_id`, `mall_type_id`) VALUES
+(1, 1, 1, 1, 7),
+(2, 2, 1, 1, 2),
+(3, 3, 1, 3, 7),
+(4, 4, 1, 1, 2),
+(5, 5, 1, 3, 3),
+(6, 6, 1, 3, 3),
+(7, 7, 1, 3, 3),
+(8, 8, 1, 2, 7),
+(9, 9, 1, 2, 7),
+(10, 10, 1, 2, 7),
+(11, 11, 1, 2, 7),
+(12, 12, 1, 3, 3),
+(13, 13, 1, 3, 7),
+(14, 14, 1, 2, 7),
+(15, 15, 1, 2, 7),
+(16, 16, 1, 3, 3),
+(17, 17, 1, 3, 3),
+(18, 18, 1, 2, 7),
+(19, 19, 1, 3, 3),
+(20, 20, 1, 3, 3),
+(21, 21, 1, 3, 3),
+(22, 22, 1, 3, 3),
+(23, 23, 1, 3, 3),
+(24, 24, 1, 3, 3),
+(25, 25, 1, 3, 3),
+(26, 26, 1, 3, 3),
+(27, 27, 1, 2, 7),
+(28, 28, 1, 3, 3),
+(29, 29, 1, 3, 3),
+(30, 30, 1, 3, 7),
+(31, 31, 1, 3, 3),
+(32, 32, 1, 5, 7),
+(33, 33, 1, 3, 7),
+(34, 34, 1, 3, 3),
+(35, 35, 1, 3, 3),
+(36, 36, 1, 3, 7),
+(37, 37, 1, 3, 7),
+(38, 38, 1, 3, 3),
+(39, 39, 1, 0, 7),
+(40, 40, 2, 1, 1),
+(41, 41, 2, 1, 4),
+(42, 42, 2, 1, 6),
+(43, 43, 2, 1, 4),
+(44, 44, 2, 3, 3),
+(45, 45, 2, 2, 7),
+(46, 46, 2, 1, 1),
+(47, 47, 2, 3, 3),
+(48, 48, 2, 3, 3),
+(49, 49, 2, 1, 1),
+(50, 50, 2, 1, 2),
+(51, 51, 2, 1, 2),
+(52, 52, 2, 1, 1),
+(53, 53, 2, 1, 1),
+(54, 54, 2, 1, 7),
+(55, 55, 2, 1, 2),
+(56, 56, 2, 1, 7),
+(57, 57, 2, 3, 2),
+(58, 58, 2, 1, 1),
+(59, 59, 2, 3, 3),
+(60, 60, 2, 3, 1),
+(61, 61, 2, 1, 1),
+(62, 62, 2, 3, 3),
+(63, 63, 2, 4, 3),
+(64, 64, 2, 4, 3),
+(65, 65, 2, 3, 3),
+(66, 66, 2, 3, 4),
+(67, 67, 2, 1, 1),
+(68, 68, 2, 1, 3),
+(69, 69, 3, 1, 1),
+(70, 70, 3, 1, 7),
+(71, 71, 3, 1, 2),
+(72, 72, 4, 1, 3),
+(73, 73, 4, 1, 1),
+(74, 74, 4, 1, 2),
+(75, 75, 4, 1, 1),
+(76, 76, 4, 3, 3),
+(77, 77, 4, 3, 3),
+(78, 78, 4, 3, 3),
+(79, 79, 4, 3, 3),
+(80, 80, 4, 3, 1),
+(81, 81, 4, 2, 7),
+(82, 82, 4, 3, 1),
+(83, 83, 4, 2, 7),
+(84, 84, 4, 4, 3),
+(85, 85, 4, 4, 3),
+(86, 86, 4, 4, 3),
+(87, 87, 4, 4, 3),
+(88, 88, 2, 1, 2),
+(89, 89, 4, 4, 3),
+(90, 90, 4, 4, 3),
+(91, 91, 4, 3, 3),
+(92, 92, 4, 2, 7),
+(93, 93, 4, 3, 3),
+(94, 94, 4, 2, 7);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `store_mall_type`
+--
+
+CREATE TABLE `store_mall_type` (
+  `id` int(11) NOT NULL,
+  `mall_type` varchar(128) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `store_mall_type`
+--
+
+INSERT INTO `store_mall_type` (`id`, `mall_type`) VALUES
+(1, 'Ayala'),
+(2, 'Robinsons'),
+(3, 'SM'),
+(4, 'Gaisano'),
+(5, 'Filinvest'),
+(6, 'NCCC'),
+(7, 'Others');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `store_ownership`
+--
+
+CREATE TABLE `store_ownership` (
+  `id` int(11) NOT NULL,
+  `ownership_name` varchar(128) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `store_ownership`
+--
+
+INSERT INTO `store_ownership` (`id`, `ownership_name`) VALUES
+(1, '100% Franchise '),
+(2, 'TEI Stores'),
+(3, 'Family Owned'),
+(4, 'Branches');
 
 -- --------------------------------------------------------
 
@@ -1883,6 +2193,30 @@ ALTER TABLE `form_urgency_level`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `store`
+--
+ALTER TABLE `store`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `store_information`
+--
+ALTER TABLE `store_information`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `store_mall_type`
+--
+ALTER TABLE `store_mall_type`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `store_ownership`
+--
+ALTER TABLE `store_ownership`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -1932,19 +2266,43 @@ ALTER TABLE `form_questions_information`
 -- AUTO_INCREMENT for table `form_responses`
 --
 ALTER TABLE `form_responses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `form_responses_answers`
 --
 ALTER TABLE `form_responses_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `form_responses_result`
 --
 ALTER TABLE `form_responses_result`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `store`
+--
+ALTER TABLE `store`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
+
+--
+-- AUTO_INCREMENT for table `store_information`
+--
+ALTER TABLE `store_information`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=95;
+
+--
+-- AUTO_INCREMENT for table `store_mall_type`
+--
+ALTER TABLE `store_mall_type`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `store_ownership`
+--
+ALTER TABLE `store_ownership`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users`
