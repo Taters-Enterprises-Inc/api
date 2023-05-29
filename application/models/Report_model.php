@@ -149,6 +149,7 @@ class Report_model extends CI_Model{
 
         $this->db->select('
             A.redeem_code as REDEEM_CODE,
+            D.name as DEAL_NAME,
             A.dateadded as ORDER_DATE,
             A.expiration as EXPIRATION_DATE,
             A.cancelled_date as CANCELLED_DATE,
@@ -163,6 +164,7 @@ class Report_model extends CI_Model{
         $this->db->from('deals_redeems_tb A');
         $this->db->join('deals_client_tb B','B.id = A.client_id');
         $this->db->join('store_tb C','C.store_id = A.store');
+        $this->db->join('dotcom_deals_tb D','D.id = A.deal_id');
         
         if(!empty($store))
             $this->db->where_in('A.store', $store);

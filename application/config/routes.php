@@ -104,6 +104,15 @@ $route['load-image-product/(:any)'] = 'image/load_image_product/$1';
 $route['load-image-influencer/(:any)'] = 'image/load_image_influencer/$1';
 $route['load-image-influencer-contract/(:any)'] = 'image/load_influencer_image_contract/$1';
 
+//Audit
+$route['audit/settings/auditformquestions'] = 'audit/getAuditFormQuestions';
+$route['audit/login'] = 'audit/login';
+$route['audit/logout'] = 'audit/logout';
+$route['audit/stores'] = 'audit/stores';
+$route['audit/response'] = 'audit/getAuditResponse';
+$route['audit/evaluation'] = 'audit/getAuditFormData';
+$route['audit/response/answer/(:any)'] = 'audit/getAuditResponse/$1';
+$route['audit/response/quality/audit/information'] = 'audit/getAuditResponseInformation';
 
 //Admin
 $route['auth/login'] = 'auth/login';

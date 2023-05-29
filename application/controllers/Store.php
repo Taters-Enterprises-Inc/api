@@ -96,8 +96,7 @@ class Store extends CI_Controller {
 		}
 		
 	}
-	
-	
+
     public function get_night_diff($start_datetime, $end_datetime){
         date_default_timezone_set('Asia/Manila');
         $start   = date('Y-m-d 22:00:00',$start_datetime);
@@ -125,14 +124,14 @@ class Store extends CI_Controller {
         }
         return $night_diff * 500;
     }
-	
+
     public function get_succeeding_hour_charge($start_datetime, $end_datetime){
         $event_start = $start_datetime;
         $event_end = $end_datetime;
         $time_diff = $event_end - $event_start;
 
         $event_duration = ($time_diff/60)/60;
-        
+
         if ($event_duration > 3) {
             $comp = $event_duration - 3;
             $additional_fee = $comp * 500;
@@ -142,5 +141,4 @@ class Store extends CI_Controller {
 
         return $additional_fee;
     }
-
 }
