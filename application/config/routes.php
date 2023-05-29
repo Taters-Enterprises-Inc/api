@@ -2,10 +2,14 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 //Shop
 $route['shop/product'] = 'shop/product';
+$route['shop/product/view-log'] = 'shop/product_view_log';
 $route['shop/products'] = 'shop/products';
 $route['shop/orders'] = 'shop/orders';
 $route['shop/deals'] = 'shop/deals';
 $route['shop/get_product_sku'] = 'shop/get_product_sku';
+$route['shop/influencer-promo'] = 'shop/influencer_promo';
+$route['shop/initial-checkout-log'] = 'shop/initial_checkout_log';
+
 
 //Catering
 $route['catering/packages'] = 'catering/packages';
@@ -63,6 +67,12 @@ $route['profile/user-discount'] = 'profile/user_discount';
 $route['profile/update-user-discount'] = 'profile/update_user_discount';
 $route['profile/contact/(:num)'] = 'profile/contact/$1';
 $route['profile/inbox'] = 'profile/inbox';
+$route['profile/influencer'] = 'profile/influencer';
+$route['profile/influencer/cashout'] = 'profile/influencer_cashout';
+$route['profile/update-influencer'] = 'profile/update_influencer';
+$route['profile/influencer-referee'] = 'profile/influencer_referee';
+$route['profile/influencer-upload-contract'] = 'profile/influencer_upload_contract';
+$route['profile/influencer-cashouts'] = 'profile/influencer_cashouts';
 
 // Store
 $route['store'] = 'store';
@@ -83,6 +93,7 @@ $route['transaction/catering'] = 'transaction/catering';
 
 //Download
 $route['download/contract/(:any)'] = 'download/contract/$1';
+$route['download/influencer-contract'] = 'download/influencer_contract/';
 
 //Image
 $route['load-image/(:any)'] = 'image/load_image/$1';	
@@ -90,6 +101,8 @@ $route['load-image-catering/(:any)'] = 'image/load_catering_image/$1';
 $route['load-image-catering-contract/(:any)'] = 'image/load_catering_image_contract/$1';
 $route['load-image-user-discount/(:any)'] = 'image/load_image_user_discount/$1';
 $route['load-image-product/(:any)'] = 'image/load_image_product/$1';
+$route['load-image-influencer/(:any)'] = 'image/load_image_influencer/$1';
+$route['load-image-influencer-contract/(:any)'] = 'image/load_influencer_image_contract/$1';
 
 //Audit
 $route['audit/settings/auditformquestions'] = 'audit/getAuditFormQuestions';
@@ -145,8 +158,9 @@ $route['admin/popclub'] = 'admin/popclub';
 
 
 $route['admin/discount/user-discount-change-status'] = 'admin/user_discount_change_status';
-$route['admin/discount/(:any)'] = 'admin/discount/$1';
+$route['admin/discount/(:num)'] = 'admin/discount/$1';
 $route['admin/discounts'] = 'admin/discounts';
+
 
 $route['admin/availability/deal'] = 'admin/deal_availability';
 $route['admin/availability/product'] = 'admin/product_availability';
@@ -199,6 +213,17 @@ $route['admin/setting/deal-shop-products'] = 'admin/setting_deal_shop_products';
 $route['admin/setting/popclub-deal'] = 'admin/setting_popclub_deal';
 $route['admin/setting/edit-popclub-deal'] = 'admin/setting_edit_popclub_deal';
 
+
+$route['admin/influencer/applications'] = 'admin/influencer_applications';
+$route['admin/influencer/application/change-status'] = 'admin/influencer_change_status';
+$route['admin/influencer/application/(:num)'] = 'admin/influencer_application/$1';
+$route['admin/influencer/promos'] = 'admin/influencer_promos';
+$route['admin/influencers'] = 'admin/influencers';
+$route['admin/influencer'] = 'admin/influencer';
+$route['admin/influencer/cashouts'] = 'admin/influencer_cashouts';
+$route['admin/influencer/cashout/change-status'] = 'admin/influencer_cashout_change_status';
+$route['admin/influencer/cashout/(:num)'] = 'admin/influencer_cashout/$1';
+
 // BSC
 $route['auth-bsc/login'] = 'auth_bsc/login';
 $route['auth-bsc/logout'] = 'auth_bsc/logout';
@@ -212,8 +237,17 @@ $route['bsc/stores'] = 'bsc/stores';
 $route['bsc/user/(:num)'] = 'bsc/user/$1';
 $route['bsc/user/status'] = 'bsc/user_status';
 
-$route['admin/sales/(:any)'] = 'admin/sales/$1';
-$route['admin/sales/(:any)/sum'] = 'admin/total_sales/$1';
+$route['admin/dashboard/shop/sales-history'] = 'admin/snackshop_dashboard_sales_history';
+$route['admin/dashboard/shop/total-transaction'] = 'admin/snackshop_dashboard_transaction_total';
+$route['admin/dashboard/shop/total-completed-transaction'] = 'admin/snackshop_dashboard_completed_transaction_total';
+$route['admin/dashboard/shop/add-to-cart-logs'] = 'admin/snackshop_add_to_cart_logs';
+$route['admin/dashboard/shop/product-view-logs'] = 'admin/snackshop_product_view_logs';
+$route['admin/dashboard/shop/initial-checkout-logs'] = 'admin/snackshop_initial_checkout_logs';
+$route['admin/dashboard/shop/users-total'] = 'admin/snackshop_users_total';
+$route['admin/dashboard/shop/featured-products'] = 'admin/snackshop_featured_products';
+$route['admin/dashboard/catering/sales-history'] = 'admin/catering_dashboard_sales_history';
+$route['admin/dashboard/popclub/sales-history'] = 'admin/popclub_dashboard_sales_history';
+$route['admin/dashboard/customer-feedback/ratings'] = 'admin/customer_feedback_ratings';
 
 $route['admin/region-store-combination'] = 'admin/region_store_combination';
 $route['admin/locales'] = 'admin/locales';

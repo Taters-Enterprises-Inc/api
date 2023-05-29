@@ -166,7 +166,7 @@ class Shared extends CI_Controller {
 				}
 
                 header('content-type: application/json');
-                echo json_encode(array( "message" => 'Succesfully upload payment'));
+                echo json_encode(array( "message" => 'Successfully upload payment'));
             }
         } else {
 			$this->output->set_status_header('401');
@@ -227,7 +227,7 @@ class Shared extends CI_Controller {
 
 
                 header('content-type: application/json');
-                echo json_encode(array( "message" => 'Succesfully upload payment'));
+                echo json_encode(array( "message" => 'Successfully upload payment'));
             }
         } else {
 			$this->output->set_status_header('401');
