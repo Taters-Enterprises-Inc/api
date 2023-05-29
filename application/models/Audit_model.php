@@ -142,8 +142,8 @@ class audit_model extends CI_Model {
         $cat = $cat_query->result();
 
 
-        $this->db->select('H.section_name, h.id');
-        $this->db->from('form_sections H');
+        $this->db->select('section_name, id');
+        $this->db->from('form_sections');
         $section_query = $this->db->get();
         $sections = $section_query->result();
 
