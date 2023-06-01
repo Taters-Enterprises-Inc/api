@@ -101,6 +101,7 @@ class Audit extends CI_Controller
                 $type_id = $this->input->post('selectedTypeId');
                 $attention = $this->input->post('attention');
                 $period = $this->input->post('period');
+                $date = $this->input->post('date');
                 $answers = $this->input->post('answers');
                 $results = $this->input->post('result');
                 $generated_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
@@ -111,7 +112,7 @@ class Audit extends CI_Controller
                     "audit_type_id"   => $type_id,
                     "store_id"  => $store_id,
                     "audit_period" => $period,
-                    'dateadded' => date('Y-m-d H:i:s'),
+                    'dateadded' => $date,
                     'user_id'   => $this->session->admin['user_id'],
                     "hash"      => $generated_hash,
                 );
@@ -120,12 +121,12 @@ class Audit extends CI_Controller
 
                 if(isset($answers)){
                     foreach($answers as $answer){
-                        $rating_id = $answer['form_rating_id'] ?? null;
+                        $rating_id = $answer['form_rating_id'] == 0 ? 4 : $answer['form_rating_id'];
                         $remarks = $answer['remarks'] ?? 'N/A';
     
                         $audit_response_rating = array(
                             "response_id"   => $audit_response_id,
-                            "question_id"   => $answer['question_id'],
+                            "question_id"   => $answer['question_id'] ?? 4,
                             'rating_id'     => $rating_id,
                             'remarks'       => $remarks,
                             'urgency_rating' => $answer['level'],
