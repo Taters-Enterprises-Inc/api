@@ -5432,12 +5432,22 @@ class Admin extends CI_Controller{
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
 
+
+        if($this->session->admin['user_id']) {
+
+          $this->output->set_status_header(401);
+          header('content-type: application/json');
+          echo json_encode(array("message" =>  "No admin session"));
+          return;
+
+        }
+
         $data = array(
           "admin" => array(
             "identity" => $this->session->admin['identity'],
             "email" => $this->session->admin['email'],
             "user_id" => $this->session->admin['user_id'],
-            "old_last_login" => $this->session->admin['old_last_login'],
+            "old_last_login" => $this->session->admin['ol d_last_login'],
             "last_check" => $this->session->admin['last_check'],
             "is_admin" => $this->ion_auth->in_group(1),
             "is_csr_admin" => $this->ion_auth->in_group(10),
@@ -5483,14 +5493,17 @@ class Admin extends CI_Controller{
 
         }
 
-        $response = array(
-          "message" => 'Successfully fetch admin session',
-          "data" => $data,
-        );
+          $response = array(
+            "message" => 'Successfully fetch admin session',
+            "data" => $data,
+          );
   
-        header('content-type: application/json');
-        echo json_encode($response);
-        return;
+          header('content-type: application/json');
+          echo json_encode($response);
+          return;
+
+
+       break;
     }
   }
   
