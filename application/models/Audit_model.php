@@ -346,16 +346,19 @@ class audit_model extends CI_Model {
         $this->db->select('
             A.id,
             A.store_type_id,
-
+            
             B.store_code,
             B.store_name,
 
-            C.type_name
+            C.type_name,
+
+            D.mall_type
         ');
 
         $this->db->from('store_information A');
         $this->db->join('store B', 'B.id = A.store_id', 'left');
         $this->db->join('form_audit_type C', 'C.id = A.store_type_id', 'left');
+        $this->db->join('store_mall_type D', "D.id = A.ownership_id", 'left');
 
         $query = $this->db->get();
         return $query->result();
