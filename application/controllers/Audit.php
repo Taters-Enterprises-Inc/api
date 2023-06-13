@@ -305,6 +305,29 @@ class Audit extends CI_Controller
 
     }   
 
+    public function getAuditResults(){
+        switch($this->input->server('REQUEST_METHOD')){
+        
+            case 'GET': 
+
+                $StoreName = "SM South Mall";
+                $period = "";
+
+
+                $result_data = $this->audit_model->getAuditResult($StoreName, $period);
+                
+                $response = array(
+                    "message" => 'Successfully fetch store result',
+                    "data"    => $result_data,
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+
+                break;
+        
+        }
+    }
 
 
     public function stores(){

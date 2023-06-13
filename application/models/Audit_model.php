@@ -178,6 +178,65 @@ class audit_model extends CI_Model {
         return $join_data;
     }
 
+
+    function getAuditResult($StoreName, $period){
+
+        $this->db->select('id');
+        $this->db->from("store");
+        $this->db->where("store_name", $StoreName);
+        $store_query = $this->db->get();
+        $store_id = $store_query->row();
+
+
+        $this->db->select('
+            A.id,
+            A.audit_period,
+
+            B.id,
+            B.grade,
+            B.weight,
+            B.final_score,
+
+            C.Name as category_name,
+            
+        ');
+        $this->db->from("form_responses A");
+        $this->db->join("form_responses_result B", "B.response_id = A.id", "left");
+        $this->db->join("form_category C", "C.id = B.category_id", "left");
+        $this->db->where("store_id", $store_id->id);     
+        
+        if($period){
+            $this->db->group_start();
+            $this->db->like('A.audit_period', $period);
+            $this->db->group_end();
+        };
+
+        $response_query = $this->db->get();
+        $response_data = $response_query->result();
+
+
+        $joinData = [];
+
+        foreach($response_data as $response){
+            $auditPeriod = $response->audit_period;
+            $response = [
+                'id' => $response->id,
+                'category_name' => $response->category_name,
+                'grade' => $response->grade * 100,
+                'weight' => $response->weight * 100,
+                'final_score' => $response->final_score * 100,
+                'target' => 90,
+            ];
+            
+            if (!isset($joinData[$auditPeriod])) {
+                $joinData[$auditPeriod] = [];
+            }
+
+            $joinData[$auditPeriod][] = $response;
+
+        }
+        return $joinData;
+    }
  
 
 
@@ -363,6 +422,8 @@ class audit_model extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+
+    
 
 
     
