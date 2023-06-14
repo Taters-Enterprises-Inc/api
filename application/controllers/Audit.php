@@ -310,11 +310,11 @@ class Audit extends CI_Controller
         
             case 'GET': 
 
-                $StoreName = "SM South Mall";
-                $period = "";
+                $StoreName = $this->input->get('selectedStore');
+                // $StoreName = "SM South Mall";
 
-
-                $result_data = $this->audit_model->getAuditResult($StoreName, $period);
+                
+                $result_data = $this->audit_model->getAuditResult($StoreName);
                 
                 $response = array(
                     "message" => 'Successfully fetch store result',

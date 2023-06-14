@@ -179,7 +179,7 @@ class audit_model extends CI_Model {
     }
 
 
-    function getAuditResult($StoreName, $period){
+    function getAuditResult($StoreName){
 
         $this->db->select('id');
         $this->db->from("store");
@@ -204,13 +204,6 @@ class audit_model extends CI_Model {
         $this->db->join("form_responses_result B", "B.response_id = A.id", "left");
         $this->db->join("form_category C", "C.id = B.category_id", "left");
         $this->db->where("store_id", $store_id->id);     
-        
-        if($period){
-            $this->db->group_start();
-            $this->db->like('A.audit_period', $period);
-            $this->db->group_end();
-        };
-
         $response_query = $this->db->get();
         $response_data = $response_query->result();
 
