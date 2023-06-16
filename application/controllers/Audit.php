@@ -100,6 +100,7 @@ class Audit extends CI_Controller
                 $store_id = $this->input->post('selectedStoreId');
                 $type_id = $this->input->post('selectedTypeId');
                 $attention = $this->input->post('attention');
+                $auditor = $this->input->post('auditorName');
                 $period = $this->input->post('period');
                 $date = $this->input->post('date');
                 $answers = $this->input->post('answers');
@@ -109,12 +110,14 @@ class Audit extends CI_Controller
 
                 $audit_information = array(
                     "attention" => $attention,
+                    'auditor'   => $auditor,
                     "audit_type_id"   => $type_id,
                     "store_id"  => $store_id,
                     "audit_period" => $period,
                     'dateadded' => $date,
                     'user_id'   => $this->session->admin['user_id'],
                     "hash"      => $generated_hash,
+                    "isacknowledged" => 0,
                 );
 
                 $audit_response_id = $this->audit_model->insertAuditResponse($audit_information);
@@ -204,7 +207,27 @@ class Audit extends CI_Controller
                     return;
                 
                 break;
-           
+
+            case 'post':
+
+                $_POST = json_decode(file_get_contents("php://input"), true);
+
+                // if(is_uploaded_file($_FILES['image']['tmp_name'])){
+                //     print_r(true);
+                // }
+
+                $response = array(
+                    "message" => 'Successfully Acknowledge Audit Result Response Data',
+                   
+                    );
+            
+                    header('content-type: application/json');
+                    echo json_encode($response);
+                    return;
+
+
+                break;
+        
         }
 
 

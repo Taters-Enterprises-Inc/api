@@ -109,7 +109,8 @@ $route['audit/settings/auditformquestions'] = 'audit/getAuditFormQuestions';
 $route['audit/login'] = 'audit/login';
 $route['audit/logout'] = 'audit/logout';
 $route['audit/stores'] = 'audit/stores';
-$route['audit/response'] = 'audit/getAuditResponse';
+
+// $route['audit/response'] = 'audit/getAuditResponse';
 $route['audit/evaluation'] = 'audit/getAuditFormData';
 $route['audit/response/answer/(:any)'] = 'audit/getAuditResponse/$1';
 $route['audit/response/quality/audit/information'] = 'audit/getAuditResponseInformation';

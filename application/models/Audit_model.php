@@ -85,8 +85,12 @@ class audit_model extends CI_Model {
         $this->db->select('
             A.id,
             A.attention,
+            A.auditor,
             A.audit_period,
             A.dateadded,
+            A.isacknowledged,
+            A.signature_img,
+            A.acknowledged_by,
 
             B.id as type_id,
             B.type_name,
