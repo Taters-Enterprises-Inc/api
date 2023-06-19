@@ -842,7 +842,7 @@ class Admin extends CI_Controller{
 
         $deal_id = $this->input->post('id');
         $ext = '';
-
+        
         $deal = $this->admin_model->getPopclubDeal($deal_id);
 
         if(isset($_FILES['image500x500']['tmp_name']) && is_uploaded_file($_FILES['image500x500']['tmp_name'])){

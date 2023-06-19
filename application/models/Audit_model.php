@@ -85,8 +85,12 @@ class audit_model extends CI_Model {
         $this->db->select('
             A.id,
             A.attention,
+            A.auditor,
             A.audit_period,
             A.dateadded,
+            A.isacknowledged,
+            A.signature_img,
+            A.acknowledged_by,
 
             B.id as type_id,
             B.type_name,
@@ -178,6 +182,58 @@ class audit_model extends CI_Model {
         return $join_data;
     }
 
+
+    function getAuditResult($StoreName){
+
+        $this->db->select('id');
+        $this->db->from("store");
+        $this->db->where("store_name", $StoreName);
+        $store_query = $this->db->get();
+        $store_id = $store_query->row();
+
+
+        $this->db->select('
+            A.id,
+            A.audit_period,
+
+            B.id,
+            B.grade,
+            B.weight,
+            B.final_score,
+
+            C.Name as category_name,
+            
+        ');
+        $this->db->from("form_responses A");
+        $this->db->join("form_responses_result B", "B.response_id = A.id", "left");
+        $this->db->join("form_category C", "C.id = B.category_id", "left");
+        $this->db->where("store_id", $store_id->id);     
+        $response_query = $this->db->get();
+        $response_data = $response_query->result();
+
+
+        $joinData = [];
+
+        foreach($response_data as $response){
+            $auditPeriod = $response->audit_period;
+            $response = [
+                'id' => $response->id,
+                'category_name' => $response->category_name,
+                'grade' => $response->grade * 100,
+                'weight' => $response->weight * 100,
+                'final_score' => $response->final_score * 100,
+                'target' => 90,
+            ];
+            
+            if (!isset($joinData[$auditPeriod])) {
+                $joinData[$auditPeriod] = [];
+            }
+
+            $joinData[$auditPeriod][] = $response;
+
+        }
+        return $joinData;
+    }
  
 
 
@@ -342,24 +398,37 @@ class audit_model extends CI_Model {
             
     }
 
+    function acknowledgeResult($hash, $data){
+
+        $this->db->set($data);
+        $this->db->where("hash", $hash);
+        $this->db->update("form_responses");
+
+    }
+
     function getStore(){
         $this->db->select('
             A.id,
             A.store_type_id,
-
+            
             B.store_code,
             B.store_name,
 
-            C.type_name
+            C.type_name,
+
+            D.mall_type
         ');
 
         $this->db->from('store_information A');
         $this->db->join('store B', 'B.id = A.store_id', 'left');
         $this->db->join('form_audit_type C', 'C.id = A.store_type_id', 'left');
+        $this->db->join('store_mall_type D', "D.id = A.ownership_id", 'left');
 
         $query = $this->db->get();
         return $query->result();
     }
+
+    
 
 
     

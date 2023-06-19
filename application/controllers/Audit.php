@@ -100,6 +100,7 @@ class Audit extends CI_Controller
                 $store_id = $this->input->post('selectedStoreId');
                 $type_id = $this->input->post('selectedTypeId');
                 $attention = $this->input->post('attention');
+                $auditor = $this->input->post('auditorName');
                 $period = $this->input->post('period');
                 $date = $this->input->post('date');
                 $answers = $this->input->post('answers');
@@ -109,12 +110,16 @@ class Audit extends CI_Controller
 
                 $audit_information = array(
                     "attention" => $attention,
+                    'auditor'   => $auditor,
                     "audit_type_id"   => $type_id,
                     "store_id"  => $store_id,
                     "audit_period" => $period,
                     'dateadded' => $date,
                     'user_id'   => $this->session->admin['user_id'],
                     "hash"      => $generated_hash,
+                    "isacknowledged" => 0,
+                    "signature_img" => null,
+                    "acknowledged_by" => null,
                 );
 
                 $audit_response_id = $this->audit_model->insertAuditResponse($audit_information);
@@ -204,7 +209,58 @@ class Audit extends CI_Controller
                     return;
                 
                 break;
-           
+
+            case 'POST':
+
+                $acknowledgeBy = $this->input->post('acknowledgeby');
+                $hash = $this->input->post('hash');
+
+                $data = array(
+                    "isacknowledged"  => 1,
+                    "signature_img"   => null,
+                    "acknowledged_by" => $acknowledgeBy,
+                );
+
+                $this->audit_model->acknowledgeResult($hash, $data);
+
+                // if(isset($_FILES['image']['tmp_name']) && is_uploaded_file($_FILES['image']['tmp_name'])){
+
+                //     $image = explode(".", $_FILES['image']['name']);
+                //     $ext = end($image);
+          
+                //     $audit_image_name = $audit_image_name . '.' . $ext;
+          
+                //     $image_error = upload('image','./assets/images/shared/products/500',$audit_image_name, $ext );
+                //     if($image_error){
+                //       $this->output->set_status_header('401');
+                //       echo json_encode(array( "message" => $image_error));
+                //       return;
+                //     }
+                //   }else{
+                //     $current_image_name = './assets/images/shared/products/500/' . $deal->product_image;
+                    
+                //     $product_image_name = explode(".", $deal->product_image);
+                //     $ext = end($product_image_name);
+          
+                //     $audit_image_name = $audit_image_name . '.' . $ext;
+                    
+                //     if($deal->product_image !== $audit_image_name && file_exists($current_image_name)){
+                //       rename($current_image_name,'./assets/images/shared/products/500/'. $audit_image_name);
+                //     }
+                //   }
+
+                $response = array(
+                    "message" => 'Successfully Acknowledge Audit Result Response Data',
+                   
+                    );
+            
+                    header('content-type: application/json');
+                    echo json_encode($response);
+                    return;
+
+
+                break;
+        
         }
 
 
@@ -217,8 +273,8 @@ class Audit extends CI_Controller
 
             $per_page = $this->input->get('per_page') ?? 25;
             $page_no = $this->input->get('page_no') ?? 0;
-            $order = $this->input->get('order') ?? 'asc';
-            $order_by = $this->input->get('order_by') ?? 'id';
+            $order = $this->input->get('order') ?? 'desc';
+            $order_by = $this->input->get('order_by') ?? 'dateadded';
             $search = $this->input->get('search');
 
             if($page_no != 0){
@@ -305,6 +361,29 @@ class Audit extends CI_Controller
 
     }   
 
+    public function getAuditResults(){
+        switch($this->input->server('REQUEST_METHOD')){
+        
+            case 'GET': 
+
+                $StoreName = $this->input->get('selectedStore');
+                // $StoreName = "SM South Mall";
+
+                
+                $result_data = $this->audit_model->getAuditResult($StoreName);
+                
+                $response = array(
+                    "message" => 'Successfully fetch store result',
+                    "data"    => $result_data,
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+
+                break;
+        
+        }
+    }
 
 
     public function stores(){
