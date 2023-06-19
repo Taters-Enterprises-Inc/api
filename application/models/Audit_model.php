@@ -398,6 +398,14 @@ class audit_model extends CI_Model {
             
     }
 
+    function acknowledgeResult($hash, $data){
+
+        $this->db->set($data);
+        $this->db->where("hash", $hash);
+        $this->db->update("form_responses");
+
+    }
+
     function getStore(){
         $this->db->select('
             A.id,

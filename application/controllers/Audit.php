@@ -118,6 +118,8 @@ class Audit extends CI_Controller
                     'user_id'   => $this->session->admin['user_id'],
                     "hash"      => $generated_hash,
                     "isacknowledged" => 0,
+                    "signature_img" => null,
+                    "acknowledged_by" => null,
                 );
 
                 $audit_response_id = $this->audit_model->insertAuditResponse($audit_information);
@@ -208,13 +210,44 @@ class Audit extends CI_Controller
                 
                 break;
 
-            case 'post':
+            case 'POST':
 
-                $_POST = json_decode(file_get_contents("php://input"), true);
+                $acknowledgeBy = $this->input->post('acknowledgeby');
+                $hash = $this->input->post('hash');
 
-                // if(is_uploaded_file($_FILES['image']['tmp_name'])){
-                //     print_r(true);
-                // }
+                $data = array(
+                    "isacknowledged"  => 1,
+                    "signature_img"   => null,
+                    "acknowledged_by" => $acknowledgeBy,
+                );
+
+                $this->audit_model->acknowledgeResult($hash, $data);
+
+                // if(isset($_FILES['image']['tmp_name']) && is_uploaded_file($_FILES['image']['tmp_name'])){
+
+                //     $image = explode(".", $_FILES['image']['name']);
+                //     $ext = end($image);
+          
+                //     $audit_image_name = $audit_image_name . '.' . $ext;
+          
+                //     $image_error = upload('image','./assets/images/shared/products/500',$audit_image_name, $ext );
+                //     if($image_error){
+                //       $this->output->set_status_header('401');
+                //       echo json_encode(array( "message" => $image_error));
+                //       return;
+                //     }
+                //   }else{
+                //     $current_image_name = './assets/images/shared/products/500/' . $deal->product_image;
+                    
+                //     $product_image_name = explode(".", $deal->product_image);
+                //     $ext = end($product_image_name);
+          
+                //     $audit_image_name = $audit_image_name . '.' . $ext;
+                    
+                //     if($deal->product_image !== $audit_image_name && file_exists($current_image_name)){
+                //       rename($current_image_name,'./assets/images/shared/products/500/'. $audit_image_name);
+                //     }
+                //   }
 
                 $response = array(
                     "message" => 'Successfully Acknowledge Audit Result Response Data',
@@ -240,8 +273,8 @@ class Audit extends CI_Controller
 
             $per_page = $this->input->get('per_page') ?? 25;
             $page_no = $this->input->get('page_no') ?? 0;
-            $order = $this->input->get('order') ?? 'asc';
-            $order_by = $this->input->get('order_by') ?? 'id';
+            $order = $this->input->get('order') ?? 'desc';
+            $order_by = $this->input->get('order_by') ?? 'dateadded';
             $search = $this->input->get('search');
 
             if($page_no != 0){
