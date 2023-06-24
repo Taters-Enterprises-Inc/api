@@ -116,6 +116,11 @@ $route['audit/response/answer/(:any)'] = 'audit/getAuditResponse/$1';
 $route['audit/response/quality/audit/information'] = 'audit/getAuditResponseInformation';
 $route['audit/result'] = 'audit/getAuditResults';
 
+
+//Stock Ordering
+$route['stock/order/stores'] = 'stock_ordering/stores';
+
+
 //Admin
 $route['auth/login'] = 'auth/login';
 $route['auth/logout'] = 'auth/logout';
