@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 22, 2023 at 11:03 AM
+-- Generation Time: Jun 26, 2023 at 03:17 AM
 -- Server version: 10.4.27-MariaDB
--- PHP Version: 8.2.0
+-- PHP Version: 7.3.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -20,6 +20,47 @@ SET time_zone = "+00:00";
 --
 -- Database: `db_stock_ordering`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `category_tb`
+--
+
+CREATE TABLE `category_tb` (
+  `category_id` int(11) NOT NULL,
+  `category_name` varchar(15) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `category_tb`
+--
+
+INSERT INTO `category_tb` (`category_id`, `category_name`) VALUES
+(1, 'Frozen'),
+(2, 'Dry');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `product_tb`
+--
+
+CREATE TABLE `product_tb` (
+  `id` int(10) NOT NULL,
+  `product_id` int(10) NOT NULL,
+  `product_name` varchar(255) NOT NULL,
+  `uom` varchar(15) NOT NULL,
+  `category_id` int(10) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `product_tb`
+--
+
+INSERT INTO `product_tb` (`id`, `product_id`, `product_name`, `uom`, `category_id`) VALUES
+(1, 1, 'Product 1', 'sacks', 1),
+(2, 2, 'Product 2', 'packs', 2);
 
 -- --------------------------------------------------------
 
@@ -151,6 +192,18 @@ INSERT INTO `user_type` (`id`, `usertype_id`, `user_type_description`) VALUES
 --
 
 --
+-- Indexes for table `category_tb`
+--
+ALTER TABLE `category_tb`
+  ADD PRIMARY KEY (`category_id`);
+
+--
+-- Indexes for table `product_tb`
+--
+ALTER TABLE `product_tb`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -165,6 +218,18 @@ ALTER TABLE `user_type`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `category_tb`
+--
+ALTER TABLE `category_tb`
+  MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `product_tb`
+--
+ALTER TABLE `product_tb`
+  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `users`
