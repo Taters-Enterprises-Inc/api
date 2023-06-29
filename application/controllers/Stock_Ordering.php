@@ -93,6 +93,17 @@ class Stock_Ordering extends CI_Controller
         return;
 	}
 
+    public function products(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+                $products = $this->stock_ordering_model->getProduct();
+
+                header('content-type: application/json');
+                echo json_encode($products);
+            break;
+        }
+    }
+
  
 
 	

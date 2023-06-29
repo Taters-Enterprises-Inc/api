@@ -119,6 +119,7 @@ $route['audit/result'] = 'audit/getAuditResults';
 
 //Stock Ordering
 $route['stock/order/stores'] = 'stock_ordering/stores';
+$route['stock/order/products'] = 'stock_ordering/products';
 
 
 //Admin
