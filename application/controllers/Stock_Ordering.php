@@ -42,7 +42,35 @@ class Stock_Ordering extends CI_Controller
             
                   header('content-type: application/json');
                   echo json_encode($response);
-                  break;
+            break;
+        }
+    }
+
+    
+    public function products(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+
+                $_POST = json_decode(file_get_contents("php://input"), true);
+
+                $category = $this->input->post('category');
+                $store_id = $this->input->post('store_information')['store_id'];
+                $store_name = $this->input->post('store_information')['store_name'];
+
+                $products = $this->stock_ordering_model->getProduct($category, $store_id);
+
+                $data = array(
+                    "products" => $products,
+                );
+                
+                $response = array(
+                    "message" => 'Successfully fetch all products',
+                    "data"    => $data, 
+
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
             break;
         }
     }
@@ -92,19 +120,6 @@ class Stock_Ordering extends CI_Controller
         echo json_encode(array("message" => 'Successfully logout user'));
         return;
 	}
-
-    public function products(){
-        switch($this->input->server('REQUEST_METHOD')){
-            case 'GET':
-                $products = $this->stock_ordering_model->getProduct();
-
-                header('content-type: application/json');
-                echo json_encode($products);
-            break;
-        }
-    }
-
- 
 
 	
 }
