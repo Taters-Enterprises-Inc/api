@@ -43,6 +43,20 @@ class stock_ordering_model extends CI_Model {
         return $result;
     }
 
+    public function insertNewOrders($data){
+        $this->db->trans_start();
+		$this->db->insert('order_information_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+		return $insert_id;
+	}
+
+    public function insertNewOrdersProducts($data){
+        $this->db->trans_start();
+		$this->db->insert('order_item_tb', $data);
+        $this->db->trans_complete();
+	}
+
 
     function getStore(){
         $this->newteishop->select('

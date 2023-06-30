@@ -75,6 +75,61 @@ class Stock_Ordering extends CI_Controller
         }
     }
 
+    public function new_order(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+        case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $store_id = $this->input->post('selectedStoreId');
+            $delivery_date = $this->input->post('deliverydate');
+            $category_id = $this->input->post('category')['category_id'];
+            $product_data = $this->input->post('OrderData');    
+            $orderPlacementDate = date('Y-m-d H:i:s');
+
+
+            $order_information = array(
+                'store_id' => $store_id,
+                'requested_delivery_date' => $delivery_date,
+                'order_type_id' => $category_id,
+                'order_placement_date' => $orderPlacementDate,
+                'status_id' => 1, //For process id since its new order it is 1.
+                'payment_status_id' => 1
+            );
+
+            $new_order_id = $this->stock_ordering_model->insertNewOrders($order_information);
+
+            if(isset($product_data)){
+                foreach($product_data as $products){
+
+                    $order_product_data = array(
+                        "order_information_id"   => $new_order_id,
+                        "product_id"   => $products['productId'],
+                        'order_qty'     => $products['orderQty'],
+                    );
+                    
+                    $this->stock_ordering_model->insertNewOrdersProducts($order_product_data);
+                
+                }
+
+                $message = 'Successfully created new order';
+
+            }else {
+                $message = "No Product/s data";
+            }
+
+
+            $response = array(
+                "message" => $message,
+              );
+        
+              header('content-type: application/json');
+              echo json_encode($response);
+
+            break;
+        }
+    }
+
 
 	public function login(){
         switch($this->input->server('REQUEST_METHOD')){

@@ -1,10 +1,10 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 29, 2023 at 09:31 AM
--- Server version: 10.4.27-MariaDB
+-- Generation Time: Jun 30, 2023 at 12:22 PM
+-- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -24,13 +24,26 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `billing_information_tb`
+--
+
+CREATE TABLE `billing_information_tb` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `billing_id` varchar(128) DEFAULT NULL,
+  `billing_amount` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `category_tb`
 --
 
 CREATE TABLE `category_tb` (
   `category_id` int(11) NOT NULL,
   `category_name` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `category_tb`
@@ -43,6 +56,90 @@ INSERT INTO `category_tb` (`category_id`, `category_name`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `order_information_tb`
+--
+
+CREATE TABLE `order_information_tb` (
+  `id` int(11) NOT NULL,
+  `store_id` int(11) DEFAULT NULL,
+  `order_type_id` int(11) DEFAULT NULL,
+  `status_id` int(2) NOT NULL,
+  `order_placement_date` datetime NOT NULL,
+  `requested_delivery_date` datetime NOT NULL,
+  `commited_delivery_date` datetime NOT NULL,
+  `actual_delivery_date` datetime NOT NULL,
+  `payment_status_id` int(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_item_tb`
+--
+
+CREATE TABLE `order_item_tb` (
+  `id` int(11) NOT NULL,
+  `order_information_id` int(11) DEFAULT NULL,
+  `product_id` int(11) DEFAULT NULL,
+  `order_qty` int(7) DEFAULT NULL,
+  `commited_qty` int(7) DEFAULT NULL,
+  `delivered_qty` int(7) DEFAULT NULL,
+  `total_cost` int(7) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_status`
+--
+
+CREATE TABLE `order_status` (
+  `id` int(11) NOT NULL,
+  `short_name` varchar(256) DEFAULT NULL,
+  `description` varchar(512) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `order_status`
+--
+
+INSERT INTO `order_status` (`id`, `short_name`, `description`) VALUES
+(1, NULL, 'Newly placed order (Store)'),
+(2, NULL, 'UPDATE ORDER (SUPPLIER)'),
+(3, NULL, 'REVIEW ORDER (PROCUREMENT)'),
+(4, NULL, 'CONFIRM ORDER (PROCUREMENT)'),
+(5, NULL, 'DISPATCH ORDER (SUPPLIER)'),
+(6, NULL, 'ORDER EN ROUTE (SUPPLIER)'),
+(7, NULL, 'ORDER IN FREIGHT (SUPPLIER)'),
+(8, NULL, 'RECEIVE ORDER DELIVERY (STORE)'),
+(9, NULL, 'UPDATE BILLING (SUPPLIER)'),
+(10, NULL, 'PAY BILLING (STORE)'),
+(11, NULL, 'CONFIRM PAYMENT (SUPPLIER)'),
+(12, NULL, 'UPDATE STOCKS (SUPPLIER)');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `payment_status_tb`
+--
+
+CREATE TABLE `payment_status_tb` (
+  `id` int(11) NOT NULL,
+  `short_name` varchar(32) DEFAULT NULL,
+  `description` varchar(64) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `payment_status_tb`
+--
+
+INSERT INTO `payment_status_tb` (`id`, `short_name`, `description`) VALUES
+(1, 'unpaid', 'Order/s are not paid'),
+(2, 'paid', 'Order/s are paid');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `product_cost_tb`
 --
 
@@ -51,7 +148,7 @@ CREATE TABLE `product_cost_tb` (
   `product_id` varchar(6) DEFAULT NULL,
   `store_id` varchar(3) DEFAULT NULL,
   `cost` varchar(9) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `product_cost_tb`
@@ -369,7 +466,7 @@ CREATE TABLE `product_tb` (
   `product_name` varchar(60) DEFAULT NULL,
   `uom` varchar(4) DEFAULT NULL,
   `category_id` int(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `product_tb`
@@ -688,7 +785,7 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
   `usertype_id` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `users`
@@ -786,7 +883,7 @@ CREATE TABLE `user_type` (
   `id` int(10) NOT NULL,
   `usertype_id` int(10) NOT NULL,
   `user_type_description` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `user_type`
@@ -805,10 +902,41 @@ INSERT INTO `user_type` (`id`, `usertype_id`, `user_type_description`) VALUES
 --
 
 --
+-- Indexes for table `billing_information_tb`
+--
+ALTER TABLE `billing_information_tb`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `category_tb`
 --
 ALTER TABLE `category_tb`
   ADD PRIMARY KEY (`category_id`);
+
+--
+-- Indexes for table `order_information_tb`
+--
+ALTER TABLE `order_information_tb`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `order_item_tb`
+--
+ALTER TABLE `order_item_tb`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sos_order_id` (`order_information_id`);
+
+--
+-- Indexes for table `order_status`
+--
+ALTER TABLE `order_status`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `payment_status_tb`
+--
+ALTER TABLE `payment_status_tb`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `product_cost_tb`
@@ -839,10 +967,40 @@ ALTER TABLE `user_type`
 --
 
 --
+-- AUTO_INCREMENT for table `billing_information_tb`
+--
+ALTER TABLE `billing_information_tb`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `category_tb`
 --
 ALTER TABLE `category_tb`
   MODIFY `category_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `order_information_tb`
+--
+ALTER TABLE `order_information_tb`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `order_item_tb`
+--
+ALTER TABLE `order_item_tb`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `order_status`
+--
+ALTER TABLE `order_status`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `payment_status_tb`
+--
+ALTER TABLE `payment_status_tb`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `product_cost_tb`
@@ -867,6 +1025,16 @@ ALTER TABLE `users`
 --
 ALTER TABLE `user_type`
   MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `order_item_tb`
+--
+ALTER TABLE `order_item_tb`
+  ADD CONSTRAINT `order_item_tb_ibfk_1` FOREIGN KEY (`order_information_id`) REFERENCES `order_information_tb` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
