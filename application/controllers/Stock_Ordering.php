@@ -49,15 +49,13 @@ class Stock_Ordering extends CI_Controller
     
     public function products(){
         switch($this->input->server('REQUEST_METHOD')){
-            case 'POST':
+            case 'GET':
 
-                $_POST = json_decode(file_get_contents("php://input"), true);
+                $category = $this->input->get('category');
+                $store_info = json_decode($this->input->get('store_information'));
+                
 
-                $category = $this->input->post('category');
-                $store_id = $this->input->post('store_information')['store_id'];
-                $store_name = $this->input->post('store_information')['store_name'];
-
-                $products = $this->stock_ordering_model->getProduct($category, $store_id);
+                $products = $this->stock_ordering_model->getProduct($category, $store_info->store_name);
 
                 $data = array(
                     "products" => $products,
@@ -86,7 +84,6 @@ class Stock_Ordering extends CI_Controller
             $category_id = $this->input->post('category')['category_id'];
             $product_data = $this->input->post('OrderData');    
             $orderPlacementDate = date('Y-m-d H:i:s');
-
 
             $order_information = array(
                 'store_id' => $store_id,
@@ -127,6 +124,27 @@ class Stock_Ordering extends CI_Controller
               echo json_encode($response);
 
             break;
+        }
+    }
+
+    public function getOrder(){
+        switch($this->input->server('REQUEST_METHOD')){
+            
+            case 'GET':
+
+
+
+                $message = "Successfully fetched orders";
+
+                $response = array(
+                    "message" => $message,
+                  );
+            
+                header('content-type: application/json');
+                echo json_encode($response);
+    
+            break;
+            
         }
     }
 
