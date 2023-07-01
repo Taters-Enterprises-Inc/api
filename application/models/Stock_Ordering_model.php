@@ -60,11 +60,12 @@ class stock_ordering_model extends CI_Model {
 
         $this->db->select('
             A.id,
-            B.name,
+            B.name as store_name,
             E.category_name,
             A.order_placement_date,
             A.requested_delivery_date,
             A.commited_delivery_date,
+            A.order_confirmation_date,
             A.actual_delivery_date,
             C.description,
             D.billing_id,
@@ -77,7 +78,6 @@ class stock_ordering_model extends CI_Model {
         $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
-        $this->db->where('A.status_id', $status);
 
         if($search){
             $this->db->group_start();

@@ -90,7 +90,7 @@ class Stock_Ordering extends CI_Controller
                 'requested_delivery_date' => $delivery_date,
                 'order_type_id' => $category_id,
                 'order_placement_date' => $orderPlacementDate,
-                'status_id' => 0, //For process id since its new order it is 0.
+                'status_id' => 1, //For process id since its new order it is 0.
                 'payment_status_id' => 1
             );
 
@@ -132,7 +132,7 @@ class Stock_Ordering extends CI_Controller
             case 'GET':
 
                 
-                $currentTab = $this->input->get('current_tab');
+                $currentTab = $this->input->get('current_tab') + 1;
 
                 $per_page = $this->input->get('per_page') ?? 25;
                 $page_no = $this->input->get('page_no') ?? 0;
