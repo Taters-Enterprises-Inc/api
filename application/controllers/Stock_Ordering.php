@@ -127,10 +127,12 @@ class Stock_Ordering extends CI_Controller
         }
     }
 
-    public function getOrder(){
+    public function getOrders(){
         switch($this->input->server('REQUEST_METHOD')){
             
             case 'GET':
+
+                // $currentTab = $this->input->get('currentTab');
 
 
 
@@ -138,6 +140,7 @@ class Stock_Ordering extends CI_Controller
 
                 $response = array(
                     "message" => $message,
+                    "data"    => "",
                   );
             
                 header('content-type: application/json');
