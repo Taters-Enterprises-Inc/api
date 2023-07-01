@@ -121,7 +121,8 @@ $route['audit/result'] = 'audit/getAuditResults';
 $route['stock/order/stores'] = 'stock_ordering/stores';
 $route['stock/order/products'] = 'stock_ordering/products';
 $route['stock/new/order'] = 'stock_ordering/new_order';
-$route['stock/orders'] = 'stock_ordering/getOrders'; 
+$route['stock/orders'] = 'stock_ordering/getOrders';
+$route['stock/update-order'] = 'stock_ordering/update_order';
 
 //Admin
 $route['auth/login'] = 'auth/login';

@@ -133,5 +133,15 @@ class stock_ordering_model extends CI_Model {
         return $query->result();
     }
 
+    public function updateOrderInfo($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('order_information_tb', $data);
+    }
+
+     public function updateOrderItem($id, $data){
+        $this->db->where('product_id', $id);
+        $this->db->update('order_item_tb', $data);
+    }
+
 
 }
