@@ -8,6 +8,29 @@ class stock_ordering_model extends CI_Model {
 
     }
 
+    public function getProductData($order_id){
+        $this->db->select('
+            A.id,
+            B.product_id,
+            B.product_name,
+            B.uom,
+            B.category_id,
+            A.order_qty,
+            A.commited_qty,
+            A.delivered_qty,
+            A.total_cost,
+            A.order_information_id,
+        ');
+
+        //to be implemented cost and current stock
+        $this->db->from('order_item_tb A');
+        $this->db->join('product_tb B', 'B.product_id = A.product_id', 'left');
+        $this->db->where('A.order_information_id', $order_id);
+
+        $product_query = $this->db->get();
+        return $product_query->result_array();
+    }
+
 
     public function getProduct($category, $store_id){
         $this->db->select('p.product_id, p.product_name, p.uom, p.category_id, pc.cost');
@@ -78,12 +101,13 @@ class stock_ordering_model extends CI_Model {
         $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
+        $this->db->where('A.status_id', $status);
 
         if($search){
             $this->db->group_start();
             $this->db->like('A.id', $search);
             $this->db->or_like("B.store_name", $search);
-            $this->db->or_like('A.description', $search);
+            $this->db->or_like('C.description', $search);
             $this->db->or_like('F.short_name', $search);
             $this->db->group_end();
         }
@@ -111,7 +135,7 @@ class stock_ordering_model extends CI_Model {
             $this->db->group_start();
             $this->db->like('A.id', $search);
             $this->db->or_like("B.store_name", $search);
-            $this->db->or_like('A.description', $search);
+            $this->db->or_like('C.description', $search);
             $this->db->or_like('F.short_name', $search);
             $this->db->group_end();
         }

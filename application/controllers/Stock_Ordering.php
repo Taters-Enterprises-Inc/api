@@ -126,6 +126,35 @@ class Stock_Ordering extends CI_Controller
         }
     }
 
+    public function getProductData(){
+
+        switch($this->input->server('REQUEST_METHOD')){
+
+
+            
+            case 'GET': 
+
+                $order_id = $this->input->get('orderId');
+
+                $getProductData = $this->stock_ordering_model->getProductData($order_id);
+
+                $data = array(
+                    "product_data" => $getProductData,
+                  );
+            
+                $response = array(
+                    "message" => 'Successfully fetch Form questions',
+                    "data" => $data,
+                );
+
+                header('content-type: application/json');
+                echo json_encode($response);
+    
+            break;
+        }
+
+    }
+
     public function getOrders(){
         switch($this->input->server('REQUEST_METHOD')){
             
@@ -212,6 +241,7 @@ class Stock_Ordering extends CI_Controller
             break;
         }
     }
+    
 
 
 	public function login(){

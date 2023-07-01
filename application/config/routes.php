@@ -123,6 +123,9 @@ $route['stock/order/products'] = 'stock_ordering/products';
 $route['stock/new/order'] = 'stock_ordering/new_order';
 $route['stock/orders'] = 'stock_ordering/getOrders';
 $route['stock/update-order'] = 'stock_ordering/update_order';
+$route['stock/orders'] = 'stock_ordering/getOrders'; 
+$route['stock/ordered/products'] = 'stock_ordering/getProductData';
+
 
 //Admin
 $route['auth/login'] = 'auth/login';
