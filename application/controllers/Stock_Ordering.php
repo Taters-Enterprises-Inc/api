@@ -80,7 +80,7 @@ class Stock_Ordering extends CI_Controller
             $_POST =  json_decode(file_get_contents("php://input"), true);
 
             $store_id = $this->input->post('selectedStoreId');
-            $delivery_date = $this->input->post('deliverydate');
+            $delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('deliverydate')));;
             $category_id = $this->input->post('category')['category_id'];
             $product_data = $this->input->post('OrderData');    
             $orderPlacementDate = date('Y-m-d H:i:s');
@@ -90,7 +90,7 @@ class Stock_Ordering extends CI_Controller
                 'requested_delivery_date' => $delivery_date,
                 'order_type_id' => $category_id,
                 'order_placement_date' => $orderPlacementDate,
-                'status_id' => 1, //For process id since its new order it is 1.
+                'status_id' => 0, //For process id since its new order it is 0.
                 'payment_status_id' => 1
             );
 
@@ -115,7 +115,6 @@ class Stock_Ordering extends CI_Controller
                 $message = "No Product/s data";
             }
 
-
             $response = array(
                 "message" => $message,
               );
@@ -132,16 +131,34 @@ class Stock_Ordering extends CI_Controller
             
             case 'GET':
 
-                // $currentTab = $this->input->get('currentTab');
+                
+                $currentTab = $this->input->get('current_tab');
 
+                $per_page = $this->input->get('per_page') ?? 25;
+                $page_no = $this->input->get('page_no') ?? 0;
+                $order = $this->input->get('order') ?? 'asc';
+                $order_by = $this->input->get('order_by') ?? 'id';
+                $search = $this->input->get('search');
+                
+                if($page_no != 0){
+                    $page_no = ($page_no - 1) * $per_page;
+                  }
 
+                $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab);
+                $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab);
 
-                $message = "Successfully fetched orders";
-
-                $response = array(
-                    "message" => $message,
-                    "data"    => "",
+                $pagination = array(
+                    "total_rows" => $getOrdersCount,
+                    "per_page" => $per_page,
                   );
+
+                  $response = array(
+                    "message" => 'Successfully fetch Form questions',
+                    "data" => array(
+                        "pagination" => $pagination,
+                        "orders" => $getOrders
+                    ),
+                );
             
                 header('content-type: application/json');
                 echo json_encode($response);

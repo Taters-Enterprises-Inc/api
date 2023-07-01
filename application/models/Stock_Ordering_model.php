@@ -9,8 +9,7 @@ class stock_ordering_model extends CI_Model {
     }
 
 
-    function getProduct($category, $store_id){
-        //to updated with $store_id
+    public function getProduct($category, $store_id){
         $this->db->select('p.product_id, p.product_name, p.uom, p.category_id, pc.cost');
         $this->db->from('product_tb p');
         $this->db->join('product_cost_tb pc', 'p.product_id = pc.product_id', 'left');
@@ -57,8 +56,72 @@ class stock_ordering_model extends CI_Model {
         $this->db->trans_complete();
 	}
 
+    public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status){
 
-    function getStore(){
+        $this->db->select('
+            A.id,
+            B.name,
+            E.category_name,
+            A.order_placement_date,
+            A.requested_delivery_date,
+            A.commited_delivery_date,
+            A.actual_delivery_date,
+            C.description,
+            D.billing_id,
+            D.billing_amount,
+            F.short_name
+        ');
+        $this->db->from('order_information_tb A');
+        $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
+        $this->db->join('order_status C', 'C.id = A.status_id', 'left');
+        $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
+        $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
+        $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
+        $this->db->where('A.status_id', $status);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.id', $search);
+            $this->db->or_like("B.store_name", $search);
+            $this->db->or_like('A.description', $search);
+            $this->db->or_like('F.short_name', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+
+        $order_query = $this->db->get();
+        return $order_query->result();
+        
+    }
+
+    public function getOrdersCount($search, $status){
+
+        $this->db->select('count(*) as all_count');
+        $this->db->from('order_information_tb A');
+        $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
+        $this->db->join('order_status C', 'C.id = A.status_id', 'left');
+        $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
+        $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
+        $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
+        $this->db->where('A.status_id', $status);
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('A.id', $search);
+            $this->db->or_like("B.store_name", $search);
+            $this->db->or_like('A.description', $search);
+            $this->db->or_like('F.short_name', $search);
+            $this->db->group_end();
+        }
+
+        $order_query = $this->db->get();
+        return $order_query->row()->all_count;
+        
+    }
+
+    public function getStore(){
         $this->newteishop->select('
             A.store_id,
             A.name,
