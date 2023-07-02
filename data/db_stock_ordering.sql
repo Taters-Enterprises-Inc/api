@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 01, 2023 at 04:06 PM
+-- Generation Time: Jul 02, 2023 at 10:03 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -70,7 +70,14 @@ CREATE TABLE `order_information_tb` (
   `order_confirmation_date` datetime DEFAULT NULL,
   `actual_delivery_date` datetime DEFAULT NULL,
   `billing_information_id` int(11) DEFAULT NULL,
-  `payment_status_id` int(1) NOT NULL
+  `payment_status_id` int(1) NOT NULL,
+  `reviewed_date` datetime DEFAULT NULL,
+  `dispatch_date` datetime DEFAULT NULL,
+  `enroute_date` datetime DEFAULT NULL,
+  `payment_confirmation_date` datetime DEFAULT NULL,
+  `delivery_receipt` varchar(128) DEFAULT NULL,
+  `updated_delivery_receipt` varchar(128) DEFAULT NULL,
+  `payment_detail_image` varchar(128) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------

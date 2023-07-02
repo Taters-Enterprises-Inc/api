@@ -129,16 +129,16 @@ class Stock_Ordering extends CI_Controller
     public function getProductData(){
 
         switch($this->input->server('REQUEST_METHOD')){
-
-
-            
             case 'GET': 
 
                 $order_id = $this->input->get('orderId');
 
+                $getOrderData = $this->stock_ordering_model->getOrderData($order_id);
                 $getProductData = $this->stock_ordering_model->getProductData($order_id);
 
+
                 $data = array(
+                    "order_information" => $getOrderData,
                     "product_data" => $getProductData,
                   );
             
@@ -208,7 +208,8 @@ class Stock_Ordering extends CI_Controller
             $product_data = $this->input->post('product_data');
 
             $order_information = array(
-                'commited_delivery_date' => $commited_delivery_date
+                'commited_delivery_date' => $commited_delivery_date,
+                'status_id' => 2
             );
 
             $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);

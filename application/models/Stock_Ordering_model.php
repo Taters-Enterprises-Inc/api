@@ -79,6 +79,40 @@ class stock_ordering_model extends CI_Model {
         $this->db->trans_complete();
 	}
 
+    public function getOrderData($id){
+        $this->db->select('
+            B.name as store_name,
+            A.id,
+            E.category_name,
+            A.order_placement_date,
+            A.requested_delivery_date,
+            A.commited_delivery_date,
+            A.order_confirmation_date,
+            A.actual_delivery_date,
+            C.description,
+            D.billing_id,
+            D.billing_amount,
+            F.short_name,
+            A.reviewed_date,
+            A.dispatch_date,
+            A.enroute_date,
+            A.payment_confirmation_date,
+            A.delivery_receipt,
+            A.updated_delivery_receipt,
+            A.payment_detail_image,
+        ');
+        $this->db->from('order_information_tb A');
+        $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
+        $this->db->join('order_status C', 'C.id = A.status_id', 'left');
+        $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
+        $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
+        $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
+        $this->db->where('A.id', $id);
+
+        $order_query = $this->db->get();
+        return $order_query->row();
+    }
+
     public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status){
 
         $this->db->select('
