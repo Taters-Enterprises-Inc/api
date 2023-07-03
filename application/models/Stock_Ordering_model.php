@@ -212,5 +212,36 @@ class stock_ordering_model extends CI_Model {
         $this->db->update('order_information_tb', $data);
     }
 
+    public function dispatchOrder($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('order_information_tb', $data);
+    }
+
+    public function orderEnRoute($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('order_information_tb', $data);
+    }
+
+    public function updateActualDeliveryDate($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('order_information_tb', $data);
+    }
+
+    public function updateDeliveredQty($id, $data){
+        $this->db->where('product_id', $id);
+        $this->db->update('order_item_tb', $data);
+    }
+
+    public function insertBllingInfo($data){
+        $this->db->insert('billing_information_tb', $data);
+        $insert_id = $this->db->insert_id();
+        return $insert_id;
+    }
+
+    public function updateBillingInformationId($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('order_information_tb', $data);
+    }
+
 
 }

@@ -1,10 +1,10 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 02, 2023 at 10:03 AM
--- Server version: 10.4.22-MariaDB
+-- Generation Time: Jul 03, 2023 at 02:27 PM
+-- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.3.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -32,7 +32,7 @@ CREATE TABLE `billing_information_tb` (
   `user_id` int(11) DEFAULT NULL,
   `billing_id` varchar(128) DEFAULT NULL,
   `billing_amount` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -43,7 +43,7 @@ CREATE TABLE `billing_information_tb` (
 CREATE TABLE `category_tb` (
   `category_id` int(11) NOT NULL,
   `category_name` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `category_tb`
@@ -69,7 +69,7 @@ CREATE TABLE `order_information_tb` (
   `commited_delivery_date` datetime DEFAULT NULL,
   `order_confirmation_date` datetime DEFAULT NULL,
   `actual_delivery_date` datetime DEFAULT NULL,
-  `billing_information_id` int(11) DEFAULT NULL,
+  `billing_information_id` varchar(128) DEFAULT NULL,
   `payment_status_id` int(1) NOT NULL,
   `reviewed_date` datetime DEFAULT NULL,
   `dispatch_date` datetime DEFAULT NULL,
@@ -78,7 +78,7 @@ CREATE TABLE `order_information_tb` (
   `delivery_receipt` varchar(128) DEFAULT NULL,
   `updated_delivery_receipt` varchar(128) DEFAULT NULL,
   `payment_detail_image` varchar(128) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -94,7 +94,7 @@ CREATE TABLE `order_item_tb` (
   `commited_qty` int(7) DEFAULT NULL,
   `delivered_qty` int(7) DEFAULT NULL,
   `total_cost` int(7) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -106,7 +106,7 @@ CREATE TABLE `order_status` (
   `id` int(11) NOT NULL,
   `short_name` varchar(256) DEFAULT NULL,
   `description` varchar(512) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `order_status`
@@ -136,7 +136,7 @@ CREATE TABLE `payment_status_tb` (
   `id` int(11) NOT NULL,
   `short_name` varchar(32) DEFAULT NULL,
   `description` varchar(64) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `payment_status_tb`
@@ -157,7 +157,7 @@ CREATE TABLE `product_cost_tb` (
   `product_id` varchar(6) DEFAULT NULL,
   `store_id` varchar(3) DEFAULT NULL,
   `cost` varchar(9) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `product_cost_tb`
@@ -475,7 +475,7 @@ CREATE TABLE `product_tb` (
   `product_name` varchar(60) DEFAULT NULL,
   `uom` varchar(4) DEFAULT NULL,
   `category_id` int(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `product_tb`
@@ -794,7 +794,7 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
   `usertype_id` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
@@ -892,7 +892,7 @@ CREATE TABLE `user_type` (
   `id` int(10) NOT NULL,
   `usertype_id` int(10) NOT NULL,
   `user_type_description` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user_type`
