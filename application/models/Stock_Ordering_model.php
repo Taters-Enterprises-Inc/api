@@ -201,5 +201,15 @@ class stock_ordering_model extends CI_Model {
         $this->db->update('order_item_tb', $data);
     }
 
+    public function reviewOrder($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('order_information_tb', $data);
+    }
+
+    public function confirmOrder($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('order_information_tb', $data);
+    }
+
 
 }

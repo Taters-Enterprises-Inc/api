@@ -242,6 +242,74 @@ class Stock_Ordering extends CI_Controller
             break;
         }
     }
+
+    public function review_order(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+        case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $order_information_id = $this->input->post('id');
+            $reviewed_date = date('Y-m-d H:i:s');
+            $status = 3;
+
+            $order_information = array(
+                'reviewed_date' => $reviewed_date,
+                'status_id' => $status
+            );
+
+            $reviewed_order = $this->stock_ordering_model->reviewOrder($order_information_id, $order_information);
+
+            if (!$reviewed_order) {
+                $message = "Success!";
+            } else {
+                $message = "There's an error!";
+            }
+
+            $response = array(
+                "message" => $message,
+            );
+
+            header('content-type: application/json');
+            echo json_encode($response);
+
+            break;
+        }
+    }
+
+    public function confirm_order(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+        case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $order_information_id = $this->input->post('id');
+            $order_confirmation_date = date('Y-m-d H:i:s');
+            $status = 4;
+
+            $order_information = array(
+                'order_confirmation_date' => $order_confirmation_date,
+                'status_id' => $status
+            );
+
+            $confirmed_order = $this->stock_ordering_model->confirmOrder($order_information_id, $order_information);
+
+            if (!$confirmed_order) {
+                $message = "Success!";
+            } else {
+                $message = "There's an error!";
+            }
+
+            $response = array(
+                "message" => $message,
+            );
+
+            header('content-type: application/json');
+            echo json_encode($response);
+
+            break;
+        }
+    }
     
 
 
