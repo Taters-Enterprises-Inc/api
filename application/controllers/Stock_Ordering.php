@@ -411,7 +411,7 @@ class Stock_Ordering extends CI_Controller
                         "delivered_qty"   => $product['deliveryQuantity']
                     );
                     
-                    $this->stock_ordering_model->updateDeliveredQty($product_id, $order_item_data);
+                    $this->stock_ordering_model->updateDeliveredQty($order_information_id,$product_id, $order_item_data);
                 
                 }
 
