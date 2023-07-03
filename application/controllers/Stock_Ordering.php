@@ -356,7 +356,7 @@ class Stock_Ordering extends CI_Controller
 
             $order_information_id = $this->input->post('id');
             $reviewed_date = date('Y-m-d H:i:s');
-            $status = 6;
+            $status = 7;
 
             $order_information = array(
                 'enroute_date' => $reviewed_date,
