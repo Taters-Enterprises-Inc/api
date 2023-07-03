@@ -222,7 +222,7 @@ class Stock_Ordering extends CI_Controller
                         "commited_qty"   => $product['commitedQuantity']
                     );
                     
-                    $this->stock_ordering_model->updateOrderItem($product_id, $order_item_data);
+                    $this->stock_ordering_model->updateOrderItem($order_information_id, $product_id, $order_item_data);
                 
                 }
 
