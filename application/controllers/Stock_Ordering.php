@@ -321,7 +321,7 @@ class Stock_Ordering extends CI_Controller
             $delivery_receipt = $this->input->post('deliveryReceipt');
             $dispatch_date = date('Y-m-d H:i:s');
             $status = 5;
-            $path = "/uploads/screenshots/".$delivery_receipt['path'];
+            $path = "/assets/uploads/screenshots/".$delivery_receipt['path'];
 
             $order_information = array(
                 'delivery_receipt' => $path,
