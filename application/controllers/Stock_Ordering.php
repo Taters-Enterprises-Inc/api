@@ -321,9 +321,10 @@ class Stock_Ordering extends CI_Controller
             $delivery_receipt = $this->input->post('deliveryReceipt');
             $dispatch_date = date('Y-m-d H:i:s');
             $status = 5;
+            $path = "/uploads/screenshots/".$delivery_receipt['path'];
 
             $order_information = array(
-                'delivery_receipt' => $delivery_receipt,
+                'delivery_receipt' => $path,
                 'dispatch_date' => $dispatch_date,
                 'status_id' => $status
             );
@@ -337,11 +338,11 @@ class Stock_Ordering extends CI_Controller
             }
 
             $response = array(
-                "message" => $message,
+                "message" => $path,
             );
 
             header('content-type: application/json');
-            echo json_encode($response);
+            echo json_encode($message);
 
             break;
         }
