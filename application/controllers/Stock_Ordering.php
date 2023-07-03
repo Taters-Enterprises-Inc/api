@@ -310,6 +310,42 @@ class Stock_Ordering extends CI_Controller
             break;
         }
     }
+
+    public function dispatch_order(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+        case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $order_information_id = $this->input->post('id');
+            $delivery_receipt = $this->input->post('deliveryReceipt');
+            $dispatch_date = date('Y-m-d H:i:s');
+            $status = 5;
+
+            $order_information = array(
+                'delivery_receipt' => $delivery_receipt,
+                'dispatch_date' => $dispatch_date,
+                'status_id' => $status
+            );
+
+            $dispatch_order = $this->stock_ordering_model->dispatchOrder($order_information_id, $order_information);
+
+            if (!$dispatch_order) {
+                $message = "Success!";
+            } else {
+                $message = "There's an error!";
+            }
+
+            $response = array(
+                "message" => $message,
+            );
+
+            header('content-type: application/json');
+            echo json_encode($response);
+
+            break;
+        }
+    }
     
 
 
