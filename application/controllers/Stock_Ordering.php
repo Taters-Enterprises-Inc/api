@@ -347,6 +347,40 @@ class Stock_Ordering extends CI_Controller
             break;
         }
     }
+
+    public function order_en_route(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+        case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $order_information_id = $this->input->post('id');
+            $reviewed_date = date('Y-m-d H:i:s');
+            $status = 6;
+
+            $order_information = array(
+                'enroute_date' => $reviewed_date,
+                'status_id' => $status
+            );
+
+            $order_en_route = $this->stock_ordering_model->orderEnRoute($order_information_id, $order_information);
+
+            if (!$order_en_route) {
+                $message = "Success!";
+            } else {
+                $message = "There's an error!";
+            }
+
+            $response = array(
+                "message" => $message,
+            );
+
+            header('content-type: application/json');
+            echo json_encode($response);
+
+            break;
+        }
+    }
     
 
 
