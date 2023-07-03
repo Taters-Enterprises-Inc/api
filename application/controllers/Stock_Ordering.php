@@ -389,11 +389,14 @@ class Stock_Ordering extends CI_Controller
             $_POST =  json_decode(file_get_contents("php://input"), true);
 
             $order_information_id = $this->input->post('id');
+            $delivery_receipt = $this->input->post('updatedDeliveryReceipt');
             $actual_delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('actualDeliveryDate')));
             $product_data = $this->input->post('product_data');
             $status = 8;
+            $path = "/assets/uploads/screenshots/".$delivery_receipt['path'];
 
             $order_information = array(
+                'updated_delivery_receipt' => $path,
                 'actual_delivery_date' => $actual_delivery_date,
                 'status_id' => $status
             );
