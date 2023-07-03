@@ -127,6 +127,7 @@ $route['stock/review-order'] = 'stock_ordering/review_order';
 $route['stock/confirm-order'] = 'stock_ordering/confirm_order';
 $route['stock/dispatch-order'] = 'stock_ordering/dispatch_order';
 $route['stock/order-en-route'] = 'stock_ordering/order_en_route';
+$route['stock/receive-order-delivery'] = 'stock_ordering/receive_order_delivery';
 $route['stock/orders'] = 'stock_ordering/getOrders'; 
 $route['stock/ordered/products'] = 'stock_ordering/getProductData';
 

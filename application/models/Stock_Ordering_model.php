@@ -196,7 +196,7 @@ class stock_ordering_model extends CI_Model {
         $this->db->update('order_information_tb', $data);
     }
 
-     public function updateOrderItem($id, $data){
+    public function updateOrderItem($id, $data){
         $this->db->where('product_id', $id);
         $this->db->update('order_item_tb', $data);
     }
@@ -219,6 +219,16 @@ class stock_ordering_model extends CI_Model {
     public function orderEnRoute($id, $data){
         $this->db->where('id', $id);
         $this->db->update('order_information_tb', $data);
+    }
+
+    public function updateActualDeliveryDate($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('order_information_tb', $data);
+    }
+
+    public function updateDeliveredQty($id, $data){
+        $this->db->where('product_id', $id);
+        $this->db->update('order_item_tb', $data);
     }
 
 

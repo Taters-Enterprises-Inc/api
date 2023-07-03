@@ -381,6 +381,53 @@ class Stock_Ordering extends CI_Controller
             break;
         }
     }
+
+    public function receive_order_delivery(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+        case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $order_information_id = $this->input->post('id');
+            $actual_delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('actualDeliveryDate')));
+            $product_data = $this->input->post('product_data');
+            $status = 8;
+
+            $order_information = array(
+                'actual_delivery_date' => $actual_delivery_date,
+                'status_id' => $status
+            );
+
+            $this->stock_ordering_model->updateActualDeliveryDate($order_information_id, $order_information);
+
+            if(isset($product_data)){
+                foreach($product_data as $product){
+                    $product_id = $product['productId'];
+
+                    $order_item_data = array(
+                        "delivered_qty"   => $product['deliveryQuantity']
+                    );
+                    
+                    $this->stock_ordering_model->updateDeliveredQty($product_id, $order_item_data);
+                
+                }
+
+                $message = 'Success!';
+
+            }else {
+                $message = "No data!";
+            }
+
+            $response = array(
+                "message" => $message,
+              );
+        
+              header('content-type: application/json');
+              echo json_encode($response);
+
+            break;
+        }
+    }
     
 
 
