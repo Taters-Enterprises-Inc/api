@@ -431,6 +431,52 @@ class Stock_Ordering extends CI_Controller
             break;
         }
     }
+
+    public function update_billing(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+        case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $order_information_id = $this->input->post('id');
+            $billing_information_id = $this->input->post('billingInformationId');
+            $billing_id = $this->input->post('billingInformationId');
+            $billing_amount = $this->input->post('billingAmount');
+            $status = 9;
+
+            $billing_information = array(
+                'billing_id' => $billing_id,
+                'billing_amount' => $billing_amount
+            );
+
+            $billing_id = $this->stock_ordering_model->insertBllingInfo($billing_information);
+
+            if ($billing_id) {
+                
+                $id = $billing_id;
+
+                $order_information_data = array(
+                    "billing_information_id"   => $billing_information_id,
+                    "status_id"   => $status
+                );
+
+                $this->stock_ordering_model->updateBillingInformationId($id, $order_information_data);
+                
+                $message = "Success!";
+            } else {
+                $message = "There's an error!";
+            }
+
+            $response = array(
+                "message" => $message,
+            );
+
+            header('content-type: application/json');
+            echo json_encode($response);
+
+            break;
+        }
+    }
     
 
 
