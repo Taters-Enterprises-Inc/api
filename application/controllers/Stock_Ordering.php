@@ -338,7 +338,7 @@ class Stock_Ordering extends CI_Controller
             }
 
             $response = array(
-                "message" => $path,
+                "message" => $message,
             );
 
             header('content-type: application/json');
