@@ -1,10 +1,10 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 04, 2023 at 07:31 AM
--- Server version: 10.4.27-MariaDB
+-- Generation Time: Jul 04, 2023 at 08:55 AM
+-- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -32,7 +32,27 @@ CREATE TABLE `billing_information_tb` (
   `user_id` int(11) DEFAULT NULL,
   `billing_id` varchar(128) DEFAULT NULL,
   `billing_amount` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `billing_information_tb`
+--
+
+INSERT INTO `billing_information_tb` (`id`, `user_id`, `billing_id`, `billing_amount`) VALUES
+(1, NULL, '20321321', 20321321),
+(2, NULL, '32132131', 323123211),
+(3, NULL, '0000001', 100),
+(4, NULL, '0001500800', 100000),
+(5, NULL, '1000000', 258),
+(6, NULL, '0001', 200),
+(7, NULL, '000001', 100),
+(8, NULL, '01', 2),
+(9, NULL, '100000', 1000000),
+(10, NULL, '258', 1),
+(11, NULL, '200', 3),
+(12, NULL, '000041005080', 100000),
+(13, NULL, '0001520700', 100000),
+(14, NULL, '100000', 1);
 
 -- --------------------------------------------------------
 
@@ -43,7 +63,7 @@ CREATE TABLE `billing_information_tb` (
 CREATE TABLE `category_tb` (
   `category_id` int(11) NOT NULL,
   `category_name` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `category_tb`
@@ -79,7 +99,7 @@ CREATE TABLE `order_information_tb` (
   `delivery_receipt` varchar(128) DEFAULT NULL,
   `updated_delivery_receipt` varchar(128) DEFAULT NULL,
   `payment_detail_image` varchar(128) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -95,7 +115,7 @@ CREATE TABLE `order_item_tb` (
   `commited_qty` int(7) DEFAULT NULL,
   `delivered_qty` int(7) DEFAULT NULL,
   `total_cost` int(7) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -107,7 +127,7 @@ CREATE TABLE `order_status` (
   `id` int(11) NOT NULL,
   `short_name` varchar(256) DEFAULT NULL,
   `description` varchar(512) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `order_status`
@@ -116,16 +136,15 @@ CREATE TABLE `order_status` (
 INSERT INTO `order_status` (`id`, `short_name`, `description`) VALUES
 (1, NULL, 'Newly placed order (Store)'),
 (2, NULL, 'UPDATE ORDER (SUPPLIER)'),
-(3, NULL, 'REVIEW ORDER (PROCUREMENT)'),
-(4, NULL, 'CONFIRM ORDER (PROCUREMENT)'),
-(5, NULL, 'DISPATCH ORDER (SUPPLIER)'),
+(3, NULL, 'ORDER REVEIEWED (PROCUREMENT)'),
+(4, NULL, 'ORDER CONFIRMED (PROCUREMENT)'),
+(5, NULL, 'ORDER DISPATCHED (SUPPLIER)'),
 (6, NULL, 'ORDER EN ROUTE (SUPPLIER)'),
-(7, NULL, 'ORDER IN FREIGHT (SUPPLIER)'),
-(8, NULL, 'RECEIVE ORDER DELIVERY (STORE)'),
-(9, NULL, 'UPDATE BILLING (SUPPLIER)'),
-(10, NULL, 'PAY BILLING (STORE)'),
-(11, NULL, 'CONFIRM PAYMENT (SUPPLIER)'),
-(12, NULL, 'UPDATE STOCKS (SUPPLIER)');
+(7, NULL, 'ORDER RECIEVED (STORE)'),
+(8, NULL, 'BILLING UPDATED (SUPPLIER)'),
+(9, NULL, 'BILLING PAYED (STORE)'),
+(10, NULL, 'ORDER CONFIRMED & COMPLETED (SUPPLIER)'),
+(11, NULL, 'UPDATE STOCKS (SUPPLIER)');
 
 -- --------------------------------------------------------
 
@@ -137,7 +156,7 @@ CREATE TABLE `payment_status_tb` (
   `id` int(11) NOT NULL,
   `short_name` varchar(32) DEFAULT NULL,
   `description` varchar(64) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `payment_status_tb`
@@ -158,7 +177,7 @@ CREATE TABLE `product_cost_tb` (
   `product_id` varchar(6) DEFAULT NULL,
   `store_id` varchar(3) DEFAULT NULL,
   `cost` varchar(9) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `product_cost_tb`
@@ -476,7 +495,7 @@ CREATE TABLE `product_tb` (
   `product_name` varchar(60) DEFAULT NULL,
   `uom` varchar(4) DEFAULT NULL,
   `category_id` int(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `product_tb`
@@ -792,7 +811,7 @@ CREATE TABLE `transportation_tb` (
   `id` int(11) NOT NULL,
   `label` varchar(32) DEFAULT NULL,
   `description` varchar(65) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `transportation_tb`
@@ -816,7 +835,7 @@ CREATE TABLE `users` (
   `email` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL,
   `usertype_id` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `users`
@@ -914,7 +933,7 @@ CREATE TABLE `user_type` (
   `id` int(10) NOT NULL,
   `usertype_id` int(10) NOT NULL,
   `user_type_description` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `user_type`
@@ -1007,7 +1026,7 @@ ALTER TABLE `user_type`
 -- AUTO_INCREMENT for table `billing_information_tb`
 --
 ALTER TABLE `billing_information_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `category_tb`
