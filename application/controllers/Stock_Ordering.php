@@ -490,7 +490,8 @@ class Stock_Ordering extends CI_Controller
             $path = "/assets/uploads/screenshots/".$payment_detail_image['path'];
 
             $order_information = array(
-                'payment_detail_image' => $path
+                'payment_detail_image' => $path,
+                "status_id"   => $status
             );
 
             $upload_payment_img = $this->stock_ordering_model->uploadPaymentDetailImage($order_information_id, $order_information);
