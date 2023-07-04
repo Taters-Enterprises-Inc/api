@@ -528,7 +528,8 @@ class Stock_Ordering extends CI_Controller
 
             $order_information = array(
                 'payment_confirmation_date' => $payment_confirmation_date,
-                'status_id' => $status
+                'status_id' => $status,
+                'payment_status_id' => 2,
             );
 
             $payment_confirmation_date = $this->stock_ordering_model->confirmPayment($order_information_id, $order_information);
