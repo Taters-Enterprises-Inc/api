@@ -355,12 +355,14 @@ class Stock_Ordering extends CI_Controller
             $_POST =  json_decode(file_get_contents("php://input"), true);
 
             $order_information_id = $this->input->post('id');
+            $transportation_id = $this->input->post('transport');
             $reviewed_date = date('Y-m-d H:i:s');
             $status = 7;
 
             $order_information = array(
                 'enroute_date' => $reviewed_date,
-                'status_id' => $status
+                'status_id' => $status,
+                'transportation_id' => $transportation_id
             );
 
             $order_en_route = $this->stock_ordering_model->orderEnRoute($order_information_id, $order_information);
