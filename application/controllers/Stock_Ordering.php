@@ -512,6 +512,40 @@ class Stock_Ordering extends CI_Controller
             break;
         }
     }
+
+    public function confirm_payment(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+        case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $order_information_id = $this->input->post('id');
+            $payment_confirmation_date = date('Y-m-d H:i:s');
+            $status = 11;
+
+            $order_information = array(
+                'payment_confirmation_date' => $payment_confirmation_date,
+                'status_id' => $status
+            );
+
+            $payment_confirmation_date = $this->stock_ordering_model->confirmPayment($order_information_id, $order_information);
+
+            if (!$payment_confirmation_date) {
+                $message = "Success!";
+            } else {
+                $message = "There's an error!";
+            }
+
+            $response = array(
+                "message" => $message,
+            );
+
+            header('content-type: application/json');
+            echo json_encode($response);
+
+            break;
+        }
+    }
     
 
 
