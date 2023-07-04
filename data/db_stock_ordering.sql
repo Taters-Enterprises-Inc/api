@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 03, 2023 at 02:27 PM
+-- Generation Time: Jul 04, 2023 at 07:31 AM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.3.33
 
@@ -74,6 +74,7 @@ CREATE TABLE `order_information_tb` (
   `reviewed_date` datetime DEFAULT NULL,
   `dispatch_date` datetime DEFAULT NULL,
   `enroute_date` datetime DEFAULT NULL,
+  `transportation_id` int(11) NOT NULL,
   `payment_confirmation_date` datetime DEFAULT NULL,
   `delivery_receipt` varchar(128) DEFAULT NULL,
   `updated_delivery_receipt` varchar(128) DEFAULT NULL,
@@ -784,6 +785,27 @@ INSERT INTO `product_tb` (`id`, `product_id`, `product_name`, `uom`, `category_i
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `transportation_tb`
+--
+
+CREATE TABLE `transportation_tb` (
+  `id` int(11) NOT NULL,
+  `label` varchar(32) DEFAULT NULL,
+  `description` varchar(65) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `transportation_tb`
+--
+
+INSERT INTO `transportation_tb` (`id`, `label`, `description`) VALUES
+(1, 'By Land', 'Ground Transport'),
+(2, 'By Sea', 'Ocean Freight'),
+(3, 'By Air', 'Air Freight');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -960,6 +982,12 @@ ALTER TABLE `product_tb`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `transportation_tb`
+--
+ALTER TABLE `transportation_tb`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -1022,6 +1050,12 @@ ALTER TABLE `product_cost_tb`
 --
 ALTER TABLE `product_tb`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=299;
+
+--
+-- AUTO_INCREMENT for table `transportation_tb`
+--
+ALTER TABLE `transportation_tb`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
