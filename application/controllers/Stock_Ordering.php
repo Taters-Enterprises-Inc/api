@@ -477,6 +477,40 @@ class Stock_Ordering extends CI_Controller
             break;
         }
     }
+
+    public function pay_billing(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+        case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $order_information_id = $this->input->post('id');
+            $payment_detail_image = $this->input->post('paymentDetailImage');
+            $status = 10;
+            $path = "/assets/uploads/screenshots/".$payment_detail_image['path'];
+
+            $order_information = array(
+                'payment_detail_image' => $path
+            );
+
+            $upload_payment_img = $this->stock_ordering_model->uploadPaymentDetailImage($order_information_id, $order_information);
+
+            if (!$upload_payment_img) {
+                $message = "Success!";
+            } else {
+                $message = "There's an error!";
+            }
+
+            $response = array(
+                "message" => $message,
+            );
+
+            header('content-type: application/json');
+            echo json_encode($response);
+
+            break;
+        }
+    }
     
 
 
