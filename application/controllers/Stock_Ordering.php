@@ -357,7 +357,7 @@ class Stock_Ordering extends CI_Controller
             $order_information_id = $this->input->post('id');
             $transportation_id = $this->input->post('transport');
             $reviewed_date = date('Y-m-d H:i:s');
-            $status = 7;
+            $status = 6;
 
             $order_information = array(
                 'enroute_date' => $reviewed_date,
@@ -394,7 +394,7 @@ class Stock_Ordering extends CI_Controller
             $delivery_receipt = $this->input->post('updatedDeliveryReceipt');
             $actual_delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('actualDeliveryDate')));
             $product_data = $this->input->post('product_data');
-            $status = 8;
+            $status = 7;
             $path = "/assets/uploads/screenshots/".$delivery_receipt['path'];
 
             $order_information = array(
@@ -444,25 +444,26 @@ class Stock_Ordering extends CI_Controller
             $billing_information_id = $this->input->post('billingInformationId');
             $billing_id = $this->input->post('billingInformationId');
             $billing_amount = $this->input->post('billingAmount');
-            $status = 9;
+            $status = 8;
 
             $billing_information = array(
                 'billing_id' => $billing_id,
                 'billing_amount' => $billing_amount
             );
 
+
+            //needs to be changed when user is implemented
             $billing_id = $this->stock_ordering_model->insertBllingInfo($billing_information);
 
             if ($billing_id) {
-                
-                $id = $billing_id;
+            
 
                 $order_information_data = array(
-                    "billing_information_id"   => $billing_information_id,
+                    "billing_information_id"   => $billing_id,
                     "status_id"   => $status
                 );
 
-                $this->stock_ordering_model->updateBillingInformationId($id, $order_information_data);
+                $this->stock_ordering_model->updateBillingInformationId($order_information_id, $order_information_data);
                 
                 $message = "Success!";
             } else {
@@ -488,7 +489,7 @@ class Stock_Ordering extends CI_Controller
 
             $order_information_id = $this->input->post('id');
             $payment_detail_image = $this->input->post('paymentDetailImage');
-            $status = 10;
+            $status = 9;
             $path = "/assets/uploads/screenshots/".$payment_detail_image['path'];
 
             $order_information = array(
@@ -523,7 +524,7 @@ class Stock_Ordering extends CI_Controller
 
             $order_information_id = $this->input->post('id');
             $payment_confirmation_date = date('Y-m-d H:i:s');
-            $status = 11;
+            $status = 10;
 
             $order_information = array(
                 'payment_confirmation_date' => $payment_confirmation_date,
