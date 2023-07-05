@@ -341,34 +341,40 @@ class Stock_Ordering extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
 
         case 'POST':
-            $_POST =  json_decode(file_get_contents("php://input"), true);
+            $data =  json_decode(file_get_contents("php://input"), true);
 
-            $order_information_id = $this->input->post('id');
-            $delivery_receipt = $this->input->post('deliveryReceipt');
+            $order_information_id = $_POST['id'];
             $dispatch_date = date('Y-m-d H:i:s');
             $status = 5;
-            $path = "/assets/uploads/screenshots/".$delivery_receipt['path'];
+            $delivery_receipt_image_name = clean_str_for_img($this->input->post('deliveryReceipt'). '-' . time() ) . '.jpg';
+    
+            $deliveryReceipt_error = upload('deliveryReceipt','./assets/uploads/screenshots/',$delivery_receipt_image_name, 'jpg');
+            if($deliveryReceipt_error){
+              $this->output->set_status_header('401');
+              echo json_encode(array( "message" => $deliveryReceipt_error));
+              return;
+            }
 
             $order_information = array(
-                'delivery_receipt' => $path,
+                'delivery_receipt' => $delivery_receipt_image_name,
                 'dispatch_date' => $dispatch_date,
-                'status_id' => $status
+                'status_id' => $status,
             );
 
             $dispatch_order = $this->stock_ordering_model->dispatchOrder($order_information_id, $order_information);
 
             if (!$dispatch_order) {
                 $message = "Success!";
-            } else {
+            } else { 
                 $message = "There's an error!";
             }
-
+            
             $response = array(
                 "message" => $message,
             );
 
             header('content-type: application/json');
-            echo json_encode($message);
+            echo json_encode($response);
 
             break;
         }
@@ -414,37 +420,51 @@ class Stock_Ordering extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
 
         case 'POST':
-            $_POST =  json_decode(file_get_contents("php://input"), true);
+            $data =  json_decode(file_get_contents("php://input"), true);
 
             $order_information_id = $this->input->post('id');
             $delivery_receipt = $this->input->post('updatedDeliveryReceipt');
             $actual_delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('actualDeliveryDate')));
-            $product_data = $this->input->post('product_data');
             $status = 7;
-            $path = "/assets/uploads/screenshots/".$delivery_receipt['path'];
+
+            $updated_delivery_receipt_image_name = clean_str_for_img($this->input->post('updatedDeliveryReceipt'). '-' . time() ) . '.jpg';
+    
+            $updatedDeliveryReceipt_error = upload('updatedDeliveryReceipt','./assets/uploads/screenshots/',$updated_delivery_receipt_image_name, 'jpg');
+            if($updatedDeliveryReceipt_error){
+              $this->output->set_status_header('401');
+              echo json_encode(array( "message" => $updatedDeliveryReceipt_error));
+              return;
+            }
 
             $order_information = array(
-                'updated_delivery_receipt' => $path,
+                'updated_delivery_receipt' => $updated_delivery_receipt_image_name,
                 'actual_delivery_date' => $actual_delivery_date,
                 'status_id' => $status
             );
 
             $this->stock_ordering_model->updateActualDeliveryDate($order_information_id, $order_information);
 
-            if(isset($product_data)){
-                foreach($product_data as $product){
-                    $product_id = $product['productId'];
+            
+            $productData = array();
+            $index = 0;
+            $hasData = false;
+            while ($this->input->post('product_data_'.$index.'_id')) {
+                $deliveryQuantity = $this->input->post('product_data_'.$index.'_deliveryQuantity');
+                $productId = $this->input->post('product_data_'.$index.'_productId');
 
-                    $order_item_data = array(
-                        "delivered_qty"   => $product['deliveryQuantity']
-                    );
-                    
-                    $this->stock_ordering_model->updateDeliveredQty($order_information_id,$product_id, $order_item_data);
+                $delivered_qty_data = array(
+                    'delivered_qty' => $deliveryQuantity,
+                );
+
+                $this->stock_ordering_model->updateDeliveredQty($order_information_id, $productId, $delivered_qty_data);
+
+                $index++;
+                $hasData = true;
                 
-                }
+            }
 
-                $message = 'Success!';
-
+            if($hasData){
+                $message = "success!";
             }else {
                 $message = "No data!";
             }
@@ -511,15 +531,24 @@ class Stock_Ordering extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
 
         case 'POST':
-            $_POST =  json_decode(file_get_contents("php://input"), true);
+            $data =  json_decode(file_get_contents("php://input"), true);
 
             $order_information_id = $this->input->post('id');
             $payment_detail_image = $this->input->post('paymentDetailImage');
             $status = 9;
-            $path = "/assets/uploads/screenshots/".$payment_detail_image['path'];
+
+            $payment_detail_image_name = clean_str_for_img($this->input->post('paymentDetailImage'). '-' . time() ) . '.jpg';
+    
+            $paymentDetailImage_error = upload('paymentDetailImage','./assets/uploads/screenshots/',$payment_detail_image_name, 'jpg');
+            if($paymentDetailImage_error){
+              $this->output->set_status_header('401');
+              echo json_encode(array( "message" => $paymentDetailImage_error));
+              return;
+            }
+
 
             $order_information = array(
-                'payment_detail_image' => $path,
+                'payment_detail_image' => $payment_detail_image_name,
                 "status_id"   => $status
             );
 

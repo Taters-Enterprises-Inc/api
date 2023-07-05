@@ -100,6 +100,7 @@ class stock_ordering_model extends CI_Model {
             A.delivery_receipt,
             A.updated_delivery_receipt,
             A.payment_detail_image,
+            G.label as transport_route,
         ');
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
@@ -107,6 +108,7 @@ class stock_ordering_model extends CI_Model {
         $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
+        $this->db->join('transportation_tb G', 'G.id = A.transportation_id', 'left');
         $this->db->where('A.id', $id);
 
         $order_query = $this->db->get();
