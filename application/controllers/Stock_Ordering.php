@@ -176,16 +176,42 @@ class Stock_Ordering extends CI_Controller
                 $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab);
                 $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab);
 
+                $newOrder = $this->stock_ordering_model->getOrdersCount("", 1);
+                $reviewOrder = $this->stock_ordering_model->getOrdersCount("", 2);
+                $confirmOrder = $this->stock_ordering_model->getOrdersCount("", 3);
+                $dispatchOrder = $this->stock_ordering_model->getOrdersCount("", 4);
+                $enRouteOrder = $this->stock_ordering_model->getOrdersCount("", 5);
+                $receiveOrder = $this->stock_ordering_model->getOrdersCount("", 6);
+                $updateBilling = $this->stock_ordering_model->getOrdersCount("", 7);
+                $payBilling = $this->stock_ordering_model->getOrdersCount("", 8);
+                $confirmPayment = $this->stock_ordering_model->getOrdersCount("", 9);
+                $ordersComplete = $this->stock_ordering_model->getOrdersCount("", 10);
+
+                
+                $tabBadge = array(
+                    'neworder' => $newOrder,
+                    'revieworder' => $reviewOrder,
+                    'confirmorder' => $confirmOrder,
+                    'dispatchorder' => $dispatchOrder,
+                    'enrouteorder' => $enRouteOrder,
+                    'receiveOrder' => $receiveOrder,
+                    'updateBilling' => $updateBilling,
+                    'payBilling' => $payBilling,
+                    'confirmPayment' => $confirmPayment,
+                    'ordersComplete' => $ordersComplete,
+                );
+
                 $pagination = array(
                     "total_rows" => $getOrdersCount,
-                    "per_page" => $per_page,
+                    "per_page" => $per_page,                    
                   );
 
                   $response = array(
                     "message" => 'Successfully fetch Form questions',
                     "data" => array(
                         "pagination" => $pagination,
-                        "orders" => $getOrders
+                        "orders" => $getOrders,
+                        "tab" => array_values($tabBadge)
                     ),
                 );
             
