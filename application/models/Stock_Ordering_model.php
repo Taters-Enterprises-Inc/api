@@ -65,6 +65,34 @@ class stock_ordering_model extends CI_Model {
         return $result;
     }
 
+    public function getSchedule($category){
+
+        $order_date = date("l"); 
+        $order_date_num = date("N", strtotime($order_date));
+        $current_hour = date('H');
+        
+        $this->db->select('
+        available_delivery_date,
+        available_delivery_date_after_cutoff,
+        order_cutoff,
+        ');
+        $this->db->from('order_place_schedule_logic_tb');
+        $this->db->where('category_type_id', $category);
+        $this->db->where('order_date', $order_date_num);
+
+        $sched_query = $this->db->get();
+        $sched = $sched_query->row();
+        
+        if($current_hour < $sched->order_cutoff){
+            return $sched->available_delivery_date;
+        }else{
+            return $sched->available_delivery_date_after_cutoff;
+        }
+    
+
+        return $sched;
+    }
+
     public function insertNewOrders($data){
         $this->db->trans_start();
 		$this->db->insert('order_information_tb', $data);

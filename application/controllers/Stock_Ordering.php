@@ -53,12 +53,15 @@ class Stock_Ordering extends CI_Controller
 
                 $category = $this->input->get('category');
                 $store_info = json_decode($this->input->get('store_information'));
-                
 
                 $products = $this->stock_ordering_model->getProduct($category, $store_info->store_name);
-
+                if($category){
+                    $schedule = $this->stock_ordering_model->getSchedule($category);
+                }
                 $data = array(
                     "products" => $products,
+                    "schedule" => $schedule,
+                    
                 );
                 
                 $response = array(

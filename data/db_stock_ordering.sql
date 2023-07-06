@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 04, 2023 at 08:55 AM
+-- Generation Time: Jul 06, 2023 at 05:36 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
@@ -52,7 +52,10 @@ INSERT INTO `billing_information_tb` (`id`, `user_id`, `billing_id`, `billing_am
 (11, NULL, '200', 3),
 (12, NULL, '000041005080', 100000),
 (13, NULL, '0001520700', 100000),
-(14, NULL, '100000', 1);
+(14, NULL, '100000', 1),
+(15, NULL, '100200300', 100000),
+(16, NULL, '100200300', 1000000),
+(17, NULL, '100200500', 100);
 
 -- --------------------------------------------------------
 
@@ -116,6 +119,41 @@ CREATE TABLE `order_item_tb` (
   `delivered_qty` int(7) DEFAULT NULL,
   `total_cost` int(7) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `order_place_schedule_logic_tb`
+--
+
+CREATE TABLE `order_place_schedule_logic_tb` (
+  `id` int(11) NOT NULL,
+  `category_type_id` int(11) DEFAULT NULL,
+  `order_date` tinyint(4) NOT NULL,
+  `order_cutoff` time DEFAULT NULL,
+  `available_delivery_date` tinyint(4) DEFAULT NULL,
+  `available_delivery_date_after_cutoff` tinyint(4) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `order_place_schedule_logic_tb`
+--
+
+INSERT INTO `order_place_schedule_logic_tb` (`id`, `category_type_id`, `order_date`, `order_cutoff`, `available_delivery_date`, `available_delivery_date_after_cutoff`) VALUES
+(1, 1, 1, '14:00:00', 5, 1),
+(2, 1, 2, '14:00:00', 5, 1),
+(3, 1, 3, '14:00:00', 1, 3),
+(4, 1, 4, '14:00:00', 1, 3),
+(5, 1, 5, '14:00:00', 3, 5),
+(6, 1, 6, '14:00:00', 5, 5),
+(7, 1, 7, '14:00:00', 5, 5),
+(8, 2, 1, '14:00:00', 4, 2),
+(9, 2, 2, '14:00:00', 4, 2),
+(10, 2, 3, '14:00:00', 2, 4),
+(11, 2, 4, '14:00:00', 2, 4),
+(12, 2, 5, '14:00:00', 4, 4),
+(13, 2, 6, '14:00:00', 4, 4),
+(14, 2, 7, '14:00:00', 4, 4);
 
 -- --------------------------------------------------------
 
@@ -977,6 +1015,12 @@ ALTER TABLE `order_item_tb`
   ADD KEY `sos_order_id` (`order_information_id`);
 
 --
+-- Indexes for table `order_place_schedule_logic_tb`
+--
+ALTER TABLE `order_place_schedule_logic_tb`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `order_status`
 --
 ALTER TABLE `order_status`
@@ -1026,7 +1070,7 @@ ALTER TABLE `user_type`
 -- AUTO_INCREMENT for table `billing_information_tb`
 --
 ALTER TABLE `billing_information_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `category_tb`
@@ -1045,6 +1089,12 @@ ALTER TABLE `order_information_tb`
 --
 ALTER TABLE `order_item_tb`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `order_place_schedule_logic_tb`
+--
+ALTER TABLE `order_place_schedule_logic_tb`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `order_status`
