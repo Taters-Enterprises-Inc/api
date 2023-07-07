@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 07, 2023 at 09:18 AM
+-- Generation Time: Jul 07, 2023 at 10:49 AM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.3.33
 
@@ -117,7 +117,7 @@ CREATE TABLE `order_item_tb` (
   `order_qty` int(7) DEFAULT NULL,
   `commited_qty` int(7) DEFAULT NULL,
   `delivered_qty` int(7) DEFAULT NULL,
-  `total_cost` int(7) DEFAULT NULL
+  `total_cost` varchar(10) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
