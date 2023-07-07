@@ -455,8 +455,22 @@ class Stock_Ordering extends CI_Controller
                 $deliveryQuantity = $this->input->post('product_data_'.$index.'_deliveryQuantity');
                 $productId = $this->input->post('product_data_'.$index.'_productId');
 
+                /* MIKE CHANGES FOR MULTIPLIER */
+
+                $product = $this->stock_ordering_model->getProductCost($productId);
+                $product_cost = $product->cost;
+
+                $store = $this->stock_ordering_model->getStoreId($order_information_id);
+                $store_id = $store->store_id;
+
+                $store_multiplier = $this->stock_ordering_model->getProductMultiplier($store_id);
+                $multiplier = $store_multiplier->product_multiplier;
+
+                /* END */
+
                 $delivered_qty_data = array(
                     'delivered_qty' => $deliveryQuantity,
+                    'total_cost' => $product_cost * $multiplier * $deliveryQuantity,
                 );
 
                 $this->stock_ordering_model->updateDeliveredQty($order_information_id, $productId, $delivered_qty_data);

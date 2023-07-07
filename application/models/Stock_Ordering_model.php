@@ -284,5 +284,36 @@ class stock_ordering_model extends CI_Model {
         $this->db->update('order_information_tb', $data);
     }
 
+    /* MIKE CHANGES FOR MULTIPLIER */
+
+    public function getProductCost($product_id){
+        $this->db->select('cost');
+        $this->db->from('product_tb');
+        $this->db->where('product_id', $product_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function getStoreId($order_id){
+        $this->db->select('store_id');
+        $this->db->from('order_information_tb');
+        $this->db->where('order_type_id', $order_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function getProductMultiplier($store_id){
+        $this->db->select('product_multiplier');
+        $this->db->from('product_cost_per_store_tb');
+        $this->db->where('store_id', $store_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    /* END */
+
 
 }
