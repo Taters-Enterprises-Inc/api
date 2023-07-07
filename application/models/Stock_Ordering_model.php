@@ -284,8 +284,6 @@ class stock_ordering_model extends CI_Model {
         $this->db->update('order_information_tb', $data);
     }
 
-    /* MIKE CHANGES FOR MULTIPLIER */
-
     public function getProductCost($product_id){
         $this->db->select('cost');
         $this->db->from('product_tb');
@@ -312,8 +310,6 @@ class stock_ordering_model extends CI_Model {
         $query = $this->db->get();
         return $query->row();
     }
-
-    /* END */
 
 
 }

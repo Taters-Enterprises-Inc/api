@@ -455,7 +455,7 @@ class Stock_Ordering extends CI_Controller
                 $deliveryQuantity = $this->input->post('product_data_'.$index.'_deliveryQuantity');
                 $productId = $this->input->post('product_data_'.$index.'_productId');
 
-                /* MIKE CHANGES FOR MULTIPLIER */
+                /* Code that computes the final cost per product */
 
                 $product = $this->stock_ordering_model->getProductCost($productId);
                 $product_cost = $product->cost;
