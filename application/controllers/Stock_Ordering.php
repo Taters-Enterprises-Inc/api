@@ -470,7 +470,7 @@ class Stock_Ordering extends CI_Controller
 
                 $delivered_qty_data = array(
                     'delivered_qty' => $deliveryQuantity,
-                    'total_cost' => $product_cost * $multiplier * $deliveryQuantity,
+                    'total_cost' => $product_cost * $multiplier * $deliveryQuantity
                 );
 
                 $this->stock_ordering_model->updateDeliveredQty($order_information_id, $productId, $delivered_qty_data);
