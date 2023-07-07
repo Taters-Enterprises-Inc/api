@@ -20,6 +20,7 @@ class stock_ordering_model extends CI_Model {
             A.delivered_qty,
             A.total_cost,
             A.order_information_id,
+            A.dispatched_qty
         ');
 
         //to be implemented cost and current stock
@@ -140,7 +141,19 @@ class stock_ordering_model extends CI_Model {
         $this->db->where('A.id', $id);
 
         $order_query = $this->db->get();
-        return $order_query->row();
+        $orders = $order_query->row();
+
+        $this->db->select('remarks');
+        $this->db->from('remarks');
+        $this->db->where('order_information_id', $orders->id);
+        $remarks_query = $this->db->get();
+        $remarks = $remarks_query->result();
+      
+        $orders->remarks = $remarks;
+
+
+        return $orders;
+
     }
 
     public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status){
@@ -263,6 +276,12 @@ class stock_ordering_model extends CI_Model {
         $this->db->update('order_item_tb', $data);
     }
 
+    public function updateDispatchedQty($id,$id_product, $data){
+        $this->db->where('order_information_id', $id);
+        $this->db->where('product_id', $id_product);
+        $this->db->update('order_item_tb', $data);
+    }
+
     public function insertBllingInfo($data){
         $this->db->insert('billing_information_tb', $data);
         $insert_id = $this->db->insert_id();
@@ -309,6 +328,12 @@ class stock_ordering_model extends CI_Model {
 
         $query = $this->db->get();
         return $query->row();
+    }
+
+    public function insertRemarks($data){
+        $this->db->trans_start();
+		$this->db->insert('remarks', $data);
+        $this->db->trans_complete();
     }
 
 

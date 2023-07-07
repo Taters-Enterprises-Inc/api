@@ -287,13 +287,42 @@ class Stock_Ordering extends CI_Controller
                 'status_id' => $status
             );
 
-            $reviewed_order = $this->stock_ordering_model->reviewOrder($order_information_id, $order_information);
+            $this->stock_ordering_model->reviewOrder($order_information_id, $order_information);
 
-            if (!$reviewed_order) {
-                $message = "Success!";
-            } else {
-                $message = "There's an error!";
+            $remarks = $this->input->post('remarks');
+
+            if (isset($remarks) && !empty($remarks)) {
+
+                $remarks_information = array(
+                    'order_information_id' => $order_information_id,
+                    'order_status_id' => $status,
+                    'remarks' => $remarks,
+                );
+
+                $this->stock_ordering_model->insertRemarks($remarks_information);
             }
+
+
+            $product_data = $this->input->post('product_data');
+
+            if(isset($product_data)){
+                foreach($product_data as $product){
+                    $product_id = $product['productId'];
+
+                    $order_item_data = array(
+                        "commited_qty"   => $product['commitedQuantity']
+                    );
+                    
+                    $this->stock_ordering_model->updateOrderItem($order_information_id, $product_id, $order_item_data);
+                
+                }
+
+                $message = 'Success!';
+
+            }else {
+                $message = "No data!";
+            }
+
 
             $response = array(
                 "message" => $message,
@@ -306,39 +335,39 @@ class Stock_Ordering extends CI_Controller
         }
     }
 
-    public function confirm_order(){
-        switch($this->input->server('REQUEST_METHOD')){
+    // public function confirm_order(){
+    //     switch($this->input->server('REQUEST_METHOD')){
 
-        case 'POST':
-            $_POST =  json_decode(file_get_contents("php://input"), true);
+    //     case 'POST':
+    //         $_POST =  json_decode(file_get_contents("php://input"), true);
 
-            $order_information_id = $this->input->post('id');
-            $order_confirmation_date = date('Y-m-d H:i:s');
-            $status = 4;
+    //         $order_information_id = $this->input->post('id');
+    //         $order_confirmation_date = date('Y-m-d H:i:s');
+    //         $status = 4;
 
-            $order_information = array(
-                'order_confirmation_date' => $order_confirmation_date,
-                'status_id' => $status
-            );
+    //         $order_information = array(
+    //             'order_confirmation_date' => $order_confirmation_date,
+    //             'status_id' => $status
+    //         );
 
-            $confirmed_order = $this->stock_ordering_model->confirmOrder($order_information_id, $order_information);
+    //         $confirmed_order = $this->stock_ordering_model->confirmOrder($order_information_id, $order_information);
 
-            if (!$confirmed_order) {
-                $message = "Success!";
-            } else {
-                $message = "There's an error!";
-            }
+    //         if (!$confirmed_order) {
+    //             $message = "Success!";
+    //         } else {
+    //             $message = "There's an error!";
+    //         }
 
-            $response = array(
-                "message" => $message,
-            );
+    //         $response = array(
+    //             "message" => $message,
+    //         );
 
-            header('content-type: application/json');
-            echo json_encode($response);
+    //         header('content-type: application/json');
+    //         echo json_encode($response);
 
-            break;
-        }
-    }
+    //         break;
+    //     }
+    // }
 
     public function dispatch_order(){
         switch($this->input->server('REQUEST_METHOD')){
@@ -347,10 +376,11 @@ class Stock_Ordering extends CI_Controller
             $data =  json_decode(file_get_contents("php://input"), true);
 
             $order_information_id = $_POST['id'];
-            $dispatch_date = date('Y-m-d H:i:s');
-            $status = 5;
+            $dispatch_date = $this->input->post('dispatchDeliveryDate');
+            $transport_id = $this->input->post('transport');
+            $status = 4;            
+          
             $delivery_receipt_image_name = clean_str_for_img($this->input->post('deliveryReceipt'). '-' . time() ) . '.jpg';
-    
             $deliveryReceipt_error = upload('deliveryReceipt','./assets/uploads/screenshots/',$delivery_receipt_image_name, 'jpg');
             if($deliveryReceipt_error){
               $this->output->set_status_header('401');
@@ -362,14 +392,34 @@ class Stock_Ordering extends CI_Controller
                 'delivery_receipt' => $delivery_receipt_image_name,
                 'dispatch_date' => $dispatch_date,
                 'status_id' => $status,
+                'transportation_id' => $transport_id,
             );
 
             $dispatch_order = $this->stock_ordering_model->dispatchOrder($order_information_id, $order_information);
 
-            if (!$dispatch_order) {
-                $message = "Success!";
-            } else { 
-                $message = "There's an error!";
+            $productData = array();
+            $index = 0;
+            $hasData = false;
+
+            while ($this->input->post('product_data_'.$index.'_id')) {
+                $dispatchedQuantity = $this->input->post('product_data_'.$index.'_dispatchedQuantity');
+                $productId = $this->input->post('product_data_'.$index.'_productId');
+
+                $dispatched_qty_data = array(
+                    'dispatched_qty' => $dispatchedQuantity,
+                );
+
+                $this->stock_ordering_model->updateDispatchedQty($order_information_id, $productId, $dispatched_qty_data);
+
+                $index++;
+                $hasData = true;
+                
+            }
+
+            if($hasData){
+                $message = "success!";
+            }else {
+                $message = "No data!";
             }
             
             $response = array(
@@ -383,41 +433,41 @@ class Stock_Ordering extends CI_Controller
         }
     }
 
-    public function order_en_route(){
-        switch($this->input->server('REQUEST_METHOD')){
+    // public function order_en_route(){
+    //     switch($this->input->server('REQUEST_METHOD')){
 
-        case 'POST':
-            $_POST =  json_decode(file_get_contents("php://input"), true);
+    //     case 'POST':
+    //         $_POST =  json_decode(file_get_contents("php://input"), true);
 
-            $order_information_id = $this->input->post('id');
-            $transportation_id = $this->input->post('transport');
-            $reviewed_date = date('Y-m-d H:i:s');
-            $status = 6;
+    //         $order_information_id = $this->input->post('id');
+    //         $transportation_id = $this->input->post('transport');
+    //         $reviewed_date = date('Y-m-d H:i:s');
+    //         $status = 6;
 
-            $order_information = array(
-                'enroute_date' => $reviewed_date,
-                'status_id' => $status,
-                'transportation_id' => $transportation_id
-            );
+    //         $order_information = array(
+    //             'enroute_date' => $reviewed_date,
+    //             'status_id' => $status,
+    //             'transportation_id' => $transportation_id
+    //         );
 
-            $order_en_route = $this->stock_ordering_model->orderEnRoute($order_information_id, $order_information);
+    //         $order_en_route = $this->stock_ordering_model->orderEnRoute($order_information_id, $order_information);
 
-            if (!$order_en_route) {
-                $message = "Success!";
-            } else {
-                $message = "There's an error!";
-            }
+    //         if (!$order_en_route) {
+    //             $message = "Success!";
+    //         } else {
+    //             $message = "There's an error!";
+    //         }
 
-            $response = array(
-                "message" => $message,
-            );
+    //         $response = array(
+    //             "message" => $message,
+    //         );
 
-            header('content-type: application/json');
-            echo json_encode($response);
+    //         header('content-type: application/json');
+    //         echo json_encode($response);
 
-            break;
-        }
-    }
+    //         break;
+    //     }
+    // }
 
     public function receive_order_delivery(){
         switch($this->input->server('REQUEST_METHOD')){
@@ -428,7 +478,7 @@ class Stock_Ordering extends CI_Controller
             $order_information_id = $this->input->post('id');
             $delivery_receipt = $this->input->post('updatedDeliveryReceipt');
             $actual_delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('actualDeliveryDate')));
-            $status = 7;
+            $status = 5;
 
             $updated_delivery_receipt_image_name = clean_str_for_img($this->input->post('updatedDeliveryReceipt'). '-' . time() ) . '.jpg';
     
@@ -507,7 +557,7 @@ class Stock_Ordering extends CI_Controller
             $billing_information_id = $this->input->post('billingInformationId');
             $billing_id = $this->input->post('billingInformationId');
             $billing_amount = $this->input->post('billingAmount');
-            $status = 8;
+            $status = 6;
 
             $billing_information = array(
                 'billing_id' => $billing_id,
@@ -552,7 +602,7 @@ class Stock_Ordering extends CI_Controller
 
             $order_information_id = $this->input->post('id');
             $payment_detail_image = $this->input->post('paymentDetailImage');
-            $status = 9;
+            $status = 7;
 
             $payment_detail_image_name = clean_str_for_img($this->input->post('paymentDetailImage'). '-' . time() ) . '.jpg';
     
@@ -587,6 +637,7 @@ class Stock_Ordering extends CI_Controller
             break;
         }
     }
+    
 
     public function confirm_payment(){
         switch($this->input->server('REQUEST_METHOD')){
@@ -596,7 +647,7 @@ class Stock_Ordering extends CI_Controller
 
             $order_information_id = $this->input->post('id');
             $payment_confirmation_date = date('Y-m-d H:i:s');
-            $status = 10;
+            $status = 8;
 
             $order_information = array(
                 'payment_confirmation_date' => $payment_confirmation_date,
@@ -622,7 +673,58 @@ class Stock_Ordering extends CI_Controller
             break;
         }
     }
+
+    public function delivery_receive_approval(){
+
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST': 
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+                
+                $order_information_id = $this->input->post('id');
+                $status = $this->input->post('status');
+                $remarks = $this->input->post('remarks');
+                
+                if(isset($status) && isset($order_information_id)){
+
+                    $order_information = array(
+                        'status_id' => $status,
+                    );
+
+                    $this->stock_ordering_model->confirmPayment($order_information_id, $order_information);
+
+
+                    if (isset($remarks) && !empty($remarks)) {
+                    
+                        $remarks_information = array(
+                            'order_information_id' => $order_information_id,
+                            'order_status_id' => 5,
+                            'remarks' => $remarks,
+                        );
     
+                        $this->stock_ordering_model->insertRemarks($remarks_information);
+    
+                        $message = "Success!";
+    
+                    }
+
+
+                    $message = "Success!";
+
+                }else{
+                    $message = "There's an error!";
+                }
+
+
+                $response = array(
+                    "message" => $message,
+                );
+    
+                header('content-type: application/json');
+                echo json_encode($response);
+
+                break;
+            }
+    }
 
 
 	public function login(){

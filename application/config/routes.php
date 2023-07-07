@@ -133,6 +133,10 @@ $route['stock/pay-billing'] = 'stock_ordering/pay_billing';
 $route['stock/confirm-payment'] = 'stock_ordering/confirm_payment';
 $route['stock/orders'] = 'stock_ordering/getOrders'; 
 $route['stock/ordered/products'] = 'stock_ordering/getProductData';
+$route['stock/order/delivery-receive-approval'] = 'stock_ordering/delivery_receive_approval';
+
+$route['stock/ordered/download-payment/(:any)'] = 'download/stock_order_download_payment_information/$1';
+
 
 
 //Admin
