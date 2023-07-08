@@ -243,6 +243,22 @@ class Stock_Ordering extends CI_Controller
 
             $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
 
+
+            $remarks = $this->input->post('remarks');
+
+            if (isset($remarks) && !empty($remarks)) {
+
+                $remarks_information = array(
+                    'order_information_id' => $order_information_id,
+                    'order_status_id' => 2,
+                    'remarks' => $remarks,
+                );
+
+                $this->stock_ordering_model->insertRemarks($remarks_information);
+
+            }
+
+
             if(isset($product_data)){
                 foreach($product_data as $product){
                     $product_id = $product['productId'];
