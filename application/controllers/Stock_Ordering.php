@@ -573,7 +573,7 @@ class Stock_Ordering extends CI_Controller
             $billing_information_id = $this->input->post('billingInformationId');
             $billing_id = $this->input->post('billingInformationId');
             $billing_amount = $this->input->post('billingAmount');
-            $status = 6;
+            $status = 7;
 
             $billing_information = array(
                 'billing_id' => $billing_id,
@@ -618,7 +618,7 @@ class Stock_Ordering extends CI_Controller
 
             $order_information_id = $this->input->post('id');
             $payment_detail_image = $this->input->post('paymentDetailImage');
-            $status = 7;
+            $status = 8;
 
             $payment_detail_image_name = clean_str_for_img($this->input->post('paymentDetailImage'). '-' . time() ) . '.jpg';
     
@@ -663,7 +663,7 @@ class Stock_Ordering extends CI_Controller
 
             $order_information_id = $this->input->post('id');
             $payment_confirmation_date = date('Y-m-d H:i:s');
-            $status = 8;
+            $status = 9;
 
             $order_information = array(
                 'payment_confirmation_date' => $payment_confirmation_date,
@@ -743,50 +743,7 @@ class Stock_Ordering extends CI_Controller
     }
 
 
-	public function login(){
-        switch($this->input->server('REQUEST_METHOD')){
-            case 'POST':
-				$_POST =  json_decode(file_get_contents("php://input"), true);
-		        $this->data['title'] = $this->lang->line('login_heading');
-                $this->form_validation->set_rules('identity', str_replace(':', '', $this->lang->line('login_identity_label')), 'required');
-                $this->form_validation->set_rules('password', str_replace(':', '', $this->lang->line('login_password_label')), 'required');
-                
-		        if ($this->form_validation->run() === TRUE) {
-                    $remember = (bool) $this->input->post('remember');
-
-                    if ($this->ion_auth->audit_login($this->input->post('identity'), $this->input->post('password'), $remember)) {
-
-                        header('content-type: application/json');
-                        echo json_encode(array("message" =>  $this->ion_auth->messages()));
-                        return;
-                    } else {
-
-				        $this->output->set_status_header(401);
-                        header('content-type: application/json');
-                        echo json_encode(array("message" =>  $this->ion_auth->errors()));
-                        return;
-                    }
-
-                }else{ 
-                    $this->output->set_status_header(401);
-                    header('content-type: application/json');
-                    echo json_encode(array("message" =>  validation_errors()));
-                    return;
-                }
-
-                break;
-        }
-    }
-
-
-    public function logout(){
-		$this->data['title'] = "Logout";
-		$this->bsc_auth->logout();
-        
-        header('content-type: application/json');
-        echo json_encode(array("message" => 'Successfully logout user'));
-        return;
-	}
+	
 
 	
 }

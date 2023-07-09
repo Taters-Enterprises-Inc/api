@@ -336,5 +336,36 @@ class stock_ordering_model extends CI_Model {
         $this->db->trans_complete();
     }
 
+    public function getUserGroup(){
+        $this->db->select("
+            id,
+            usertype_id as name,
+            user_type_description as description,
+        ");
+
+        $this->db->from('user_type');
+        
+        $query = $this->db->get();
+        return $query->result();
+
+    }
+
+       public function getUserGroups($user_id){
+        
+        $this->db->select("
+            B.id,
+            B.usertype_id as name,
+            B.user_type_description as description,
+        ");
+
+        $this->db->from('user_group A');
+        $this->db->join('user_type B', 'B.id = A.group_id');
+        $this->db->where('A.user_id',$user_id);
+        
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
 
 }

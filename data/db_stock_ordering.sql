@@ -1,10 +1,10 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.0
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 07, 2023 at 10:49 AM
--- Server version: 10.4.27-MariaDB
+-- Generation Time: Jul 09, 2023 at 03:21 PM
+-- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.3.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -32,30 +32,18 @@ CREATE TABLE `billing_information_tb` (
   `user_id` int(11) DEFAULT NULL,
   `billing_id` varchar(128) DEFAULT NULL,
   `billing_amount` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `billing_information_tb`
 --
 
 INSERT INTO `billing_information_tb` (`id`, `user_id`, `billing_id`, `billing_amount`) VALUES
-(1, NULL, '20321321', 20321321),
-(2, NULL, '32132131', 323123211),
-(3, NULL, '0000001', 100),
-(4, NULL, '0001500800', 100000),
-(5, NULL, '1000000', 258),
-(6, NULL, '0001', 200),
-(7, NULL, '000001', 100),
-(8, NULL, '01', 2),
-(9, NULL, '100000', 1000000),
-(10, NULL, '258', 1),
-(11, NULL, '200', 3),
-(12, NULL, '000041005080', 100000),
-(13, NULL, '0001520700', 100000),
-(14, NULL, '100000', 1),
-(15, NULL, '100200300', 100000),
-(16, NULL, '100200300', 1000000),
-(17, NULL, '100200500', 100);
+(1, NULL, '100200300', 500),
+(2, NULL, '1000', 1),
+(3, NULL, '1', 1),
+(4, NULL, '1', 1),
+(5, NULL, '10', 10);
 
 -- --------------------------------------------------------
 
@@ -66,7 +54,7 @@ INSERT INTO `billing_information_tb` (`id`, `user_id`, `billing_id`, `billing_am
 CREATE TABLE `category_tb` (
   `category_id` int(11) NOT NULL,
   `category_name` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `category_tb`
@@ -102,7 +90,15 @@ CREATE TABLE `order_information_tb` (
   `delivery_receipt` varchar(128) DEFAULT NULL,
   `updated_delivery_receipt` varchar(128) DEFAULT NULL,
   `payment_detail_image` varchar(128) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `order_information_tb`
+--
+
+INSERT INTO `order_information_tb` (`id`, `store_id`, `order_type_id`, `status_id`, `order_placement_date`, `requested_delivery_date`, `commited_delivery_date`, `order_confirmation_date`, `actual_delivery_date`, `billing_information_id`, `payment_status_id`, `reviewed_date`, `dispatch_date`, `enroute_date`, `transportation_id`, `payment_confirmation_date`, `delivery_receipt`, `updated_delivery_receipt`, `payment_detail_image`) VALUES
+(1, 3, 1, 9, '2023-07-09 18:07:14', '2023-07-17 18:06:55', '2023-07-09 20:16:13', NULL, '2023-07-09 20:39:09', '4', 2, '2023-07-09 20:27:02', '2023-07-09 20:35:01', NULL, 2, '2023-07-09 20:55:10', '-1688906125.jpg', '-1688906368.jpg', '-1688907200.jpg'),
+(2, 3, 1, 9, '2023-07-09 20:59:43', '2023-07-09 20:59:22', '2023-07-09 21:01:07', NULL, '2023-07-09 21:03:18', '5', 2, '2023-07-09 21:02:01', '2023-07-09 21:02:20', NULL, 1, '2023-07-09 21:07:16', '-1688907756.jpg', '-1688907841.jpg', '-1688907979.jpg');
 
 -- --------------------------------------------------------
 
@@ -117,8 +113,22 @@ CREATE TABLE `order_item_tb` (
   `order_qty` int(7) DEFAULT NULL,
   `commited_qty` int(7) DEFAULT NULL,
   `delivered_qty` int(7) DEFAULT NULL,
+  `dispatched_qty` int(11) DEFAULT NULL,
   `total_cost` varchar(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `order_item_tb`
+--
+
+INSERT INTO `order_item_tb` (`id`, `order_information_id`, `product_id`, `order_qty`, `commited_qty`, `delivered_qty`, `dispatched_qty`, `total_cost`) VALUES
+(1, 1, '10014A', 12, 1, 1, 1, '1908'),
+(2, 1, '100421', 21, 10, 10, 10, '22176'),
+(3, 1, '100423', 1, 1, 1, 1, '65'),
+(4, 1, '100751', 2, 4, 4, 4, '221'),
+(5, 2, '10014A', 10, 10, 10, 10, '0'),
+(6, 2, '100421', 10, 10, 10, 10, '0'),
+(7, 2, '100423', 10, 10, 10, 10, '0');
 
 -- --------------------------------------------------------
 
@@ -133,7 +143,7 @@ CREATE TABLE `order_place_schedule_logic_tb` (
   `order_cutoff` time DEFAULT NULL,
   `available_delivery_date` tinyint(4) DEFAULT NULL,
   `available_delivery_date_after_cutoff` tinyint(4) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `order_place_schedule_logic_tb`
@@ -165,24 +175,22 @@ CREATE TABLE `order_status` (
   `id` int(11) NOT NULL,
   `short_name` varchar(256) DEFAULT NULL,
   `description` varchar(512) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `order_status`
 --
 
 INSERT INTO `order_status` (`id`, `short_name`, `description`) VALUES
-(1, NULL, 'Newly placed order (Store)'),
-(2, NULL, 'UPDATE ORDER (SUPPLIER)'),
-(3, NULL, 'ORDER REVEIEWED (PROCUREMENT)'),
-(4, NULL, 'ORDER CONFIRMED (PROCUREMENT)'),
-(5, NULL, 'ORDER DISPATCHED (SUPPLIER)'),
-(6, NULL, 'ORDER EN ROUTE (SUPPLIER)'),
-(7, NULL, 'ORDER RECIEVED (STORE)'),
-(8, NULL, 'BILLING UPDATED (SUPPLIER)'),
-(9, NULL, 'BILLING PAYED (STORE)'),
-(10, NULL, 'ORDER CONFIRMED & COMPLETED (SUPPLIER)'),
-(11, NULL, 'UPDATE STOCKS (SUPPLIER)');
+(1, 'New Order', 'Newly placed order (Store)'),
+(2, 'Review Order', 'UPDATE ORDER (SUPPLIER)'),
+(3, 'Dispatched Order', 'ORDER REVIEWED (PROCUREMENT)'),
+(4, 'Receive Order', 'ORDER DISPATCHED (SUPPLIER)'),
+(5, 'Delivery Receive Approval', 'ORDER RECIEVED AND WAITING FOR APPROVAL'),
+(6, 'Update Billing', 'DELIVERY RECEIVE APPROVED'),
+(7, 'Pay Billing', 'BILLING UPDATED (SUPPLIER)'),
+(8, 'Confirm Payment', 'BILLING PAYED (STORE)'),
+(9, 'Order Complete', 'ORDER CONFIRMED & COMPLETED (SUPPLIER)');
 
 -- --------------------------------------------------------
 
@@ -194,7 +202,7 @@ CREATE TABLE `payment_status_tb` (
   `id` int(11) NOT NULL,
   `short_name` varchar(32) DEFAULT NULL,
   `description` varchar(64) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `payment_status_tb`
@@ -215,7 +223,7 @@ CREATE TABLE `product_cost_per_store_tb` (
   `store_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
   `product_multiplier` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `product_cost_per_store_tb`
@@ -434,7 +442,7 @@ CREATE TABLE `product_cost_tb` (
   `product_id` varchar(6) DEFAULT NULL,
   `store_id` varchar(3) DEFAULT NULL,
   `cost` varchar(9) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `product_cost_tb`
@@ -753,7 +761,7 @@ CREATE TABLE `product_tb` (
   `uom` varchar(4) DEFAULT NULL,
   `category_id` int(1) DEFAULT NULL,
   `cost` varchar(9) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `product_tb`
@@ -1071,7 +1079,7 @@ CREATE TABLE `product_tb_backup` (
   `product_name` varchar(60) DEFAULT NULL,
   `uom` varchar(4) DEFAULT NULL,
   `category_id` int(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `product_tb_backup`
@@ -1380,6 +1388,30 @@ INSERT INTO `product_tb_backup` (`id`, `product_id`, `product_name`, `uom`, `cat
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `remarks`
+--
+
+CREATE TABLE `remarks` (
+  `id` int(11) NOT NULL,
+  `order_information_id` int(11) DEFAULT NULL,
+  `order_status_id` int(11) DEFAULT NULL,
+  `remarks` varchar(128) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `remarks`
+--
+
+INSERT INTO `remarks` (`id`, `order_information_id`, `order_status_id`, `remarks`) VALUES
+(1, 1, 2, 'testing view order supplier'),
+(2, 1, 3, 'testing procurement review'),
+(3, 2, 2, 'good'),
+(4, 2, 3, 'Perfect'),
+(5, 2, 5, 'Looking good');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `transportation_tb`
 --
 
@@ -1387,7 +1419,7 @@ CREATE TABLE `transportation_tb` (
   `id` int(11) NOT NULL,
   `label` varchar(32) DEFAULT NULL,
   `description` varchar(65) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `transportation_tb`
@@ -1401,103 +1433,27 @@ INSERT INTO `transportation_tb` (`id`, `label`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Table structure for table `user_group`
 --
 
-CREATE TABLE `users` (
-  `id` int(10) NOT NULL,
-  `last_name` varchar(250) NOT NULL,
-  `first_name` varchar(250) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `password` varchar(100) NOT NULL,
-  `usertype_id` int(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CREATE TABLE `user_group` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `group_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `users`
+-- Dumping data for table `user_group`
 --
 
-INSERT INTO `users` (`id`, `last_name`, `first_name`, `email`, `password`, `usertype_id`) VALUES
-(1, 'Tanchanco', 'Ana Maria', 'actanchanco@gmail.com', 'password', 1),
-(2, 'Tanchanco', 'Joseph Brian', 'briantanchanco@gmail.com', 'password', 1),
-(3, 'Tiong', 'Alaine Czarina', 'alaine.tiong.tei@gmail.com', 'password', 1),
-(4, 'Lumalang', 'Jocel ', 'jocel.lumalang.tei@gmail.com', 'password', 1),
-(5, 'Pe', 'Pablo ', 'pablo.penalba.tei@gmail.com', 'password', 1),
-(6, 'Sarmiento', 'Domingo ', 'domingo.sarmiento.tei@gmail.com', 'password', 1),
-(7, 'Tiongco', 'Noel ', 'noel.tiongco.tei@gmail.com', 'password', 1),
-(8, 'Tolentino', 'Rainier Philip', 'rainier.tolentino.tei@gmail.com', 'password', 1),
-(9, 'Peralta', 'Alberto ', 'alberto.peralta.tei@gmail.com', 'password', 1),
-(10, 'Jaspe', 'Jessa ', 'jessa.jaspe.tei@gmail.com', 'password', 1),
-(11, 'Lavarro', 'Aj ', 'aj.lavarro.tei@gmail.com', 'password', 1),
-(12, 'Amper', 'Jezreel ', 'jezreel.amper.tei@gmail.com', 'password', 1),
-(13, 'Abuy', 'Jay-ar ', 'jayar.abuy.tei@gmail.com', 'password', 1),
-(14, 'Angel', 'Neil Bryan', 'neil.angel.tei@gmail.com', 'password', 1),
-(15, 'Borromeo', 'John David', 'david.borromeo.tei@gmail.com', 'password', 1),
-(16, 'Malonzo', 'Daica ', 'daica.malonzo.tei@gmail.com', 'password', 1),
-(17, 'Dumlao', 'Jovet Christian', 'jovet.dumlao.tei@gmail.com', 'password', 1),
-(18, 'Fabro', 'Marcus Lloyd', 'marcus.fabro.tei@gmail.com', 'password', 1),
-(19, 'Garbin', 'Michael Angelo', 'michael.garbin.tei@gmail.com', 'password', 1),
-(20, 'Mamaril', 'Julius Victor', 'julius.mamaril.tei@gmail.com', 'password', 1),
-(21, 'Dangel', 'Emelito ', 'emelito.dangel.tei@gmail.com', 'password', 1),
-(22, 'Dizon', 'Lander Jade', 'lander.dizon.tei@gmail.com', 'password', 1),
-(23, 'Solis', 'Edgar Allan', 'allan.solis.tei@gmail.com', 'password', 1),
-(24, 'Cruz', 'Femma Dela', 'femsanchez.tei@gmail.com', 'password', 1),
-(25, 'Firmalino', 'Darelle John', 'darelle.firmalino.tei@gmail.com', 'password', 1),
-(26, 'Abalon', 'Jayson', 'jayson.abalon.tei@gmail.com', 'password', 1),
-(27, 'Bugay', 'Crisnald', 'crisnald.bugay.tei@gmail.com', 'password', 1),
-(28, 'Villaraza', 'Jerico ', 'jerico.villaraza.tei@gmail.com', 'password', 1),
-(29, 'Aquino', 'Michael Ryan', 'michael.aquino.tei@gmail.com', 'password', 1),
-(30, 'Vera', 'Andrew De', 'andrew.devera.tei@gmail.com', 'password', 1),
-(31, 'Oresca', 'Ken ', 'ken.oresca.tei@gmail.com', 'password', 1),
-(32, 'Lungca', 'Alexander ', 'alexander.lungca.tei@gmail.com', 'password', 1),
-(33, 'Mosquera', 'Jeneth ', 'jeneth.mosquera.tei@gmail.com', 'password', 1),
-(34, 'Paez', 'Riza ', 'riza.paez.tei@gmail.com', 'password', 1),
-(35, 'Pilla', 'Jecel ', 'jecel.pilla.tei@gmail.com', 'password', 1),
-(36, 'Valenzuela', 'Sheryl ', 'sheryl.valenzuela.tei@gmail.com', 'password', 1),
-(37, 'Federico', 'Jonna ', 'jonna.federico.tei@gmail.com', 'password', 1),
-(38, 'Martinez', 'Marilou ', 'malou.martinez.tei@gmail.com', 'password', 1),
-(39, 'Barte', 'Ivana ', 'ivana.barte.tei@gmail.com', 'password', 1),
-(40, 'Castro', 'Elena De', 'elena.decastro.tei@gmail.com', 'password', 1),
-(41, 'Nilo', 'Gemma ', 'gemma.nilo.tei@gmail.com', 'password', 1),
-(42, 'Sibayan', 'Jericho ', 'jericho.sibayan.tei@gmail.com', 'password', 1),
-(43, 'Rojo', 'Jonalyn ', 'jonalyn.rojo.tei@gmail.com', 'password', 1),
-(44, 'Tango', 'Reazel ', 'reazel.tango.tei@gmail.com', 'password', 1),
-(45, 'Firmante', 'Jayson ', 'jayson.firmante.tei@gmail.com', 'password', 1),
-(46, 'Bautista', 'Jennylyn ', 'jennylyn.bautista.tei@gmail.com', 'password', 1),
-(47, 'Bautista', 'Margarette Ann', 'margarette.bautista.tei@gmail.com', 'password', 1),
-(48, 'Dominise', 'Roy ', 'roy.dominise.tei@gmail.com', 'password', 1),
-(49, 'Rosal', 'Crisanto ', 'cris.rosal.tei@gmail.com\n', 'password', 1),
-(50, 'Upod', 'Hansel ', 'hansel.upod.tei@gmail.com', 'password', 1),
-(51, 'Monsalud', 'Michael ', 'michael.monsalud.tei@gmail.com', 'password', 1),
-(52, 'Mejio', 'Jomar ', 'jomarmejio.tei@gmail.com', 'password', 1),
-(53, 'Lavarias', 'Maricris ', 'maricris.lavarias.tei@gmail.com', 'password', 1),
-(54, 'Palomique', 'EJ ', 'ej.palomique.tei@gmail.com', 'password', 1),
-(55, 'Diato', 'Edvin Patrick', 'patrick.diato.tei@gmail.com', 'password', 1),
-(56, 'Gerez', 'Grace Mae', 'grace.gerez.tei@gmail.com', 'password', 1),
-(57, 'Aguila', 'Stephanie Gail', 'stephaniegail.aguila.tei@gmail.com', 'password', 1),
-(58, 'Lachica', 'Sarah May', 'sarah.lachica.tei@gmail.com', 'password', 1),
-(59, 'Acedera', 'Ben Joseph', 'benjoseph.acederaIII.tei@gmail.com', 'password', 1),
-(60, 'Zaldivia', 'Ellen ', 'ellen.zaldivia.tei@gmail.com', 'password', 1),
-(61, 'Medina', 'Rozano ', 'rozano.medina.tei@gmail.com', 'password', 1),
-(62, 'Taban-ud', 'Arleen ', 'arleen.tabanud.tei@gmail.com', 'password', 1),
-(63, 'Sabado', 'Francis ', 'francis.sabado.tei@gmail.com', 'password', 1),
-(64, 'Sanchez', 'Virginia ', 'virginia.sanchez.tei@gmail.com', 'password', 1),
-(65, 'Daguman', 'Vincent Howell', 'howell.daguman.tei@gmail.com', 'password', 1),
-(66, 'Llanera', 'Ederlyn ', 'ederlyn.llanera.tei@gmail.com', 'password', 1),
-(67, 'Villarente', 'Raymart ', 'raymart.villarente.tei@gmail.com', 'password', 1),
-(68, 'Puno', 'Emily ', 'emily.puno.tei@gmail.com', 'password', 1),
-(69, 'Lunar', 'Ruselo ', 'ruselo.lunar.tei@gmail.com', 'password', 1),
-(70, 'Nero', 'Jeffrey ', 'jeffrey.nero.tei@gmail.com', 'password', 1),
-(71, 'Andino', 'Karl Angelo', 'karl.andino.tei@gmail.com', 'password', 1),
-(72, 'Tolentino', 'Ken Lester', 'ken.tolentino.tei@gmail.com', 'password', 1),
-(73, 'Order', 'TEI Shell', 'orders.shell.tei@gmail.com', 'password', 1),
-(74, 'Castro', 'Tara De', 'tara.decastro.tei@gmail.com', 'password', 1),
-(75, 'Palmares', 'Careyl Jay', 'careyl.palmares.tei@gmail.com', 'password', 1),
-(76, 'Jimenez', 'Raffy ', 'raffy.jimenez.tei@gmail.com', 'password', 1),
-(77, 'Tariman', 'Danica ', 'danica.tariman.tei@gmail.com', 'password', 1),
-(78, 'De Villa', 'Jasmine ', 'jasmine.devilla.tei@gmail.com', 'password', 1),
-(79, 'Sabello', 'Ena Claire', 'enaclaire.sabello.tei@gmail.com', 'password', 1),
-(80, 'Administrator', 'TEI', 'admin@admin.com', 'password', 1);
+INSERT INTO `user_group` (`id`, `user_id`, `group_id`) VALUES
+(2, 886, 3),
+(3, 889, 4),
+(4, 1, 6),
+(5, 890, 2),
+(6, 890, 1),
+(7, 885, 2),
+(8, 885, 1);
 
 -- --------------------------------------------------------
 
@@ -1509,7 +1465,7 @@ CREATE TABLE `user_type` (
   `id` int(10) NOT NULL,
   `usertype_id` int(10) NOT NULL,
   `user_type_description` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `user_type`
@@ -1595,15 +1551,21 @@ ALTER TABLE `product_tb_backup`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `remarks`
+--
+ALTER TABLE `remarks`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `transportation_tb`
 --
 ALTER TABLE `transportation_tb`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `users`
+-- Indexes for table `user_group`
 --
-ALTER TABLE `users`
+ALTER TABLE `user_group`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -1620,7 +1582,7 @@ ALTER TABLE `user_type`
 -- AUTO_INCREMENT for table `billing_information_tb`
 --
 ALTER TABLE `billing_information_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `category_tb`
@@ -1632,13 +1594,13 @@ ALTER TABLE `category_tb`
 -- AUTO_INCREMENT for table `order_information_tb`
 --
 ALTER TABLE `order_information_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `order_item_tb`
 --
 ALTER TABLE `order_item_tb`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `order_place_schedule_logic_tb`
@@ -1650,7 +1612,7 @@ ALTER TABLE `order_place_schedule_logic_tb`
 -- AUTO_INCREMENT for table `order_status`
 --
 ALTER TABLE `order_status`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `payment_status_tb`
@@ -1683,16 +1645,22 @@ ALTER TABLE `product_tb_backup`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=299;
 
 --
+-- AUTO_INCREMENT for table `remarks`
+--
+ALTER TABLE `remarks`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
 -- AUTO_INCREMENT for table `transportation_tb`
 --
 ALTER TABLE `transportation_tb`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT for table `user_group`
 --
-ALTER TABLE `users`
-  MODIFY `id` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+ALTER TABLE `user_group`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `user_type`
