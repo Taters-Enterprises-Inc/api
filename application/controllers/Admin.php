@@ -5013,7 +5013,7 @@ class Admin extends CI_Controller{
       case 'GET': 
 
         $groups =  $this->admin_model->getGroups();
-        $stock_order = $this->stock_ordering_model->getUserGroup();
+        $stock_order = $this->Stock_Ordering_model->getUserGroup();
 
         $group_data = array(
           "shop" => $groups,
@@ -5038,7 +5038,7 @@ class Admin extends CI_Controller{
 
         $user =  $this->admin_model->getUser($user_id);
         $user->groups = $this->admin_model->getUserGroups($user->id);
-        $user->stockOrderGroup = $this->stock_ordering_model->getUserGroups($user->id);
+        $user->stockOrderGroup = $this->Stock_Ordering_model->getUserGroups($user->id);
 
         $response = array(
           "message" => 'Successfully fetch snackshop user',
@@ -5458,7 +5458,7 @@ class Admin extends CI_Controller{
 
         $data["admin"]['user_details'] = $this->admin_model->getUser($this->session->admin['user_id']);
         $data["admin"]['user_details']->groups = $this->admin_model->getUserGroups($this->session->admin['user_id']);
-        $data["admin"]['user_details']->sos_groups = $this->stock_ordering_model->getUserGroups($this->session->admin['user_id']);
+        $data["admin"]['user_details']->sos_groups = $this->Stock_Ordering_model->getUserGroups($this->session->admin['user_id']);
 
         if($this->ion_auth->in_group(1) || $this->ion_auth->in_group(10)){
           $data["admin"]['user_details']->stores = $this->user_model->get_all_store();
