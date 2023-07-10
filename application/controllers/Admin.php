@@ -23,7 +23,7 @@ class Admin extends CI_Controller{
 		$this->load->model('notification_model');
 		$this->load->model('report_model');
 		$this->load->model('deals_model');
-    $this->load->model('stock_ordering_model');
+    $this->load->model('Stock_Ordering_model');
 
 	}
 
