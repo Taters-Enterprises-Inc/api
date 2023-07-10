@@ -237,4 +237,22 @@ class Download extends CI_Controller {
         return $additional_fee;
     }
 
+
+	public function stock_order_download_payment_information($filename){
+		$imagePath = './assets/uploads/screenshots/' . $filename;
+
+		if (file_exists($imagePath)) {
+			header('Content-Type: image/jpeg');
+			header('Content-Disposition: attachment; filename="' . $filename . '"');
+			
+			header('Content-Disposition: attachment; filename="payment_info.jpg"');
+
+
+			header('Content-Length: ' . filesize($imagePath));
+			readfile($imagePath);
+		  } else {
+			show_404();
+		  }
+    }
+
 }

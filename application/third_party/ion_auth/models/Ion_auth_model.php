@@ -205,16 +205,20 @@ class Ion_auth_model extends CI_Model
 
 		// initialize the database
 		$group_name = $this->config->item('database_group_name', 'ion_auth');
+
 		if (empty($group_name)) 
 		{
 			// By default, use CI's db that should be already loaded
 			$CI =& get_instance();
 			$this->db = $CI->db;
+			// $this->db = $this->load->database($sos_group_name, TRUE, TRUE);
+
 		}
 		else
 		{
 			// For specific group name, open a new specific connection
 			$this->db = $this->load->database($group_name, TRUE, TRUE);
+
 		}   
 
 		// initialize db tables data
@@ -877,7 +881,7 @@ class Ion_auth_model extends CI_Model
 			// add to groups
 			foreach ($groups as $group)
 			{
-				$this->add_to_group($group, $id);
+				$this->add_to_group($group, $id, 1);
 			}
 		}
 
@@ -1718,7 +1722,7 @@ class Ion_auth_model extends CI_Model
 	 * @return int
 	 * @author Ben Edmunds
 	 */
-	public function add_to_group($group_ids, $user_id = FALSE)
+	public function add_to_group($group_ids, $user_id = FALSE, $group_type)
 	{
 		$this->trigger_events('add_to_group');
 
@@ -1733,30 +1737,59 @@ class Ion_auth_model extends CI_Model
 		$return = 0;
 
 		// Then insert each into the database
-		foreach ($group_ids as $group_id)
-		{
-			// Cast to float to support bigint data type
-			if ($this->db->insert($this->tables['users_groups'],
-								  [ $this->join['groups'] => (float)$group_id,
-									$this->join['users']  => (float)$user_id  ]))
-			{
-				if (isset($this->_cache_groups[$group_id]))
+		switch($group_type){
+			case 1:
+				foreach ($group_ids as $group_id)
 				{
-					$group_name = $this->_cache_groups[$group_id];
-				}
-				else
-				{
-					$group = $this->group($group_id)->result();
-					$group_name = $group[0]->name;
-					$this->_cache_groups[$group_id] = $group_name;
-				}
-				$this->_cache_user_in_group[$user_id][$group_id] = $group_name;
+					// Cast to float to support bigint data type
+					if ($this->db->insert($this->tables['users_groups'],
+										[ $this->join['groups'] => (float)$group_id,
+											$this->join['users']  => (float)$user_id  ]))
+					{
+						if (isset($this->_cache_groups[$group_id]))
+						{
+							$group_name = $this->_cache_groups[$group_id];
+						}
+						else
+						{
+							$group = $this->group($group_id)->result();
+							$group_name = $group[0]->name;
+							$this->_cache_groups[$group_id] = $group_name;
+						}
+						$this->_cache_user_in_group[$user_id][$group_id] = $group_name;
 
-				// Return the number of groups added
-				$return++;
-			}
+						// Return the number of groups added
+						$return++;
+					}
+				}
+			break;
+
+			case 2:
+				foreach ($group_ids as $group_id)
+				{
+					// Cast to float to support bigint data type
+					if ($this->db->insert($this->tables['user_group'],
+										[ $this->join['user_type'] => (float)$group_id,
+											$this->join['users']  => (float)$user_id  ]))
+					{
+						if (isset($this->_cache_groups[$group_id]))
+						{
+							$group_name = $this->_cache_groups[$group_id];
+						}
+						else
+						{
+							$group = $this->group($group_id)->result();
+							$group_name = $group[0]->name;
+							$this->_cache_groups[$group_id] = $group_name;
+						}
+						$this->_cache_user_in_group[$user_id][$group_id] = $group_name;
+
+						// Return the number of groups added
+						$return++;
+					}
+				}
+			break;
 		}
-
 		return $return;
 	}
 
@@ -1769,7 +1802,7 @@ class Ion_auth_model extends CI_Model
 	 * @return bool
 	 * @author Ben Edmunds
 	 */
-	public function remove_from_group($group_ids = FALSE, $user_id = FALSE)
+	public function remove_from_group($group_ids = FALSE, $user_id = FALSE, $group_type)
 	{
 		$this->trigger_events('remove_from_group');
 
@@ -1787,28 +1820,60 @@ class Ion_auth_model extends CI_Model
 				$group_ids = [$group_ids];
 			}
 
-			foreach ($group_ids as $group_id)
-			{
-				// Cast to float to support bigint data type
-				$this->db->delete(
-					$this->tables['users_groups'],
-					[$this->join['groups'] => (float)$group_id, $this->join['users'] => (float)$user_id]
-				);
-				if (isset($this->_cache_user_in_group[$user_id]) && isset($this->_cache_user_in_group[$user_id][$group_id]))
-				{
-					unset($this->_cache_user_in_group[$user_id][$group_id]);
-				}
+			switch($group_type) {
+			
+				case 1:	
+					foreach ($group_ids as $group_id)
+					{
+						// Cast to float to support bigint data type
+						$this->db->delete(
+							$this->tables['users_groups'],
+							[$this->join['groups'] => (float)$group_id, $this->join['users'] => (float)$user_id]
+						);
+						if (isset($this->_cache_user_in_group[$user_id]) && isset($this->_cache_user_in_group[$user_id][$group_id]))
+						{
+							unset($this->_cache_user_in_group[$user_id][$group_id]);
+						}
+					}
+					break;
+				
+				case 2: 
+					foreach ($group_ids as $group_id)
+					{
+						// Cast to float to support bigint data type
+						$this->db->delete(
+							$this->tables['user_group'],
+							[$this->join['user_type'] => (float)$group_id, $this->join['users'] => (float)$user_id]
+						);
+						if (isset($this->_cache_user_in_group[$user_id]) && isset($this->_cache_user_in_group[$user_id][$group_id]))
+						{
+							unset($this->_cache_user_in_group[$user_id][$group_id]);
+						}
+					}
+					break;
 			}
-
 			$return = TRUE;
 		}
 		// otherwise remove user from all groups
 		else
 		{
 			// Cast to float to support bigint data type
-			if ($return = $this->db->delete($this->tables['users_groups'], [$this->join['users'] => (float)$user_id]))
-			{
-				$this->_cache_user_in_group[$user_id] = [];
+			switch($group_type) {
+
+				case 1: 
+					if ($return = $this->db->delete($this->tables['users_groups'], [$this->join['users'] => (float)$user_id]))
+					{
+						$this->_cache_user_in_group[$user_id] = [];
+					}
+
+					break;
+				case 2: 
+					if ($return = $this->db->delete($this->tables['user_group'], [$this->join['users'] => (float)$user_id]))
+					{
+						$this->_cache_user_in_group[$user_id] = [];
+					}
+
+					break;
 			}
 		}
 		return $return;
@@ -1970,7 +2035,9 @@ class Ion_auth_model extends CI_Model
 		$this->db->trans_begin();
 
 		// remove user from groups
-		$this->remove_from_group(NULL, $id);
+		$this->remove_from_group(NULL, $id, 1);
+		$this->remove_from_group(NULL, $id, 2);
+
 
 		// delete user from users table should be placed after remove from group
 		$this->db->delete($this->tables['users'], ['id' => $id]);
