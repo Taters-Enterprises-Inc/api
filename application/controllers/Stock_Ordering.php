@@ -528,8 +528,9 @@ class Stock_Ordering extends CI_Controller
 
                 $store = $this->stock_ordering_model->getStoreId($order_information_id);
                 $store_id = $store->store_id;
+                $category_id = $store->order_type_id;
 
-                $store_multiplier = $this->stock_ordering_model->getProductMultiplier($store_id);
+                $store_multiplier = $this->stock_ordering_model->getProductMultiplier($store_id, $category_id);
                 $multiplier = $store_multiplier->product_multiplier;
 
                 /* END */

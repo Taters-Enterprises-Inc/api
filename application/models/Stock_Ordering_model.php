@@ -313,19 +313,20 @@ class stock_ordering_model extends CI_Model {
     }
 
     public function getStoreId($order_id){
-        $this->db->select('store_id');
+        $this->db->select('store_id, order_type_id');
         $this->db->from('order_information_tb');
-        $this->db->where('order_type_id', $order_id);
+        $this->db->where('id', $order_id);
 
         $query = $this->db->get();
         return $query->row();
     }
 
-    public function getProductMultiplier($store_id){
+    public function getProductMultiplier($store_id, $category_id){
         $this->db->select('product_multiplier');
         $this->db->from('product_cost_per_store_tb');
         $this->db->where('store_id', $store_id);
-
+        $this->db->where('category_id', $category_id);
+        
         $query = $this->db->get();
         return $query->row();
     }
