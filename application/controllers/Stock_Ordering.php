@@ -99,6 +99,8 @@ class Stock_Ordering extends CI_Controller
 
             $new_order_id = $this->stock_ordering_model->insertNewOrders($order_information);
 
+            $this->transaction_log($new_order_id, 1, date('Y-m-d H:i:s'));
+
             if(isset($product_data)){
                 foreach($product_data as $products){
 
@@ -242,6 +244,7 @@ class Stock_Ordering extends CI_Controller
             );
 
             $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+            $this->transaction_log($order_information_id, 2, date('Y-m-d H:i:s'));
 
 
             $remarks = $this->input->post('remarks');
@@ -304,6 +307,7 @@ class Stock_Ordering extends CI_Controller
             );
 
             $this->stock_ordering_model->reviewOrder($order_information_id, $order_information);
+            $this->transaction_log($order_information_id, 3, date('Y-m-d H:i:s'));
 
             $remarks = $this->input->post('remarks');
 
@@ -412,6 +416,7 @@ class Stock_Ordering extends CI_Controller
             );
 
             $dispatch_order = $this->stock_ordering_model->dispatchOrder($order_information_id, $order_information);
+            $this->transaction_log($order_information_id, 4, date('Y-m-d H:i:s'));
 
             $productData = array();
             $index = 0;
@@ -512,6 +517,7 @@ class Stock_Ordering extends CI_Controller
             );
 
             $this->stock_ordering_model->updateActualDeliveryDate($order_information_id, $order_information);
+            $this->transaction_log($order_information_id, 5, date('Y-m-d H:i:s'));
 
             
             $productData = array();
@@ -594,6 +600,7 @@ class Stock_Ordering extends CI_Controller
                 );
 
                 $this->stock_ordering_model->updateBillingInformationId($order_information_id, $order_information_data);
+                $this->transaction_log($order_information_id, 7, date('Y-m-d H:i:s'));
                 
                 $message = "Success!";
             } else {
@@ -637,6 +644,7 @@ class Stock_Ordering extends CI_Controller
             );
 
             $upload_payment_img = $this->stock_ordering_model->uploadPaymentDetailImage($order_information_id, $order_information);
+            $this->transaction_log($order_information_id, 8, date('Y-m-d H:i:s'));
 
             if (!$upload_payment_img) {
                 $message = "Success!";
@@ -673,6 +681,7 @@ class Stock_Ordering extends CI_Controller
             );
 
             $payment_confirmation_date = $this->stock_ordering_model->confirmPayment($order_information_id, $order_information);
+            $this->transaction_log($order_information_id, 9, date('Y-m-d H:i:s'));
 
             if (!$payment_confirmation_date) {
                 $message = "Success!";
@@ -708,6 +717,7 @@ class Stock_Ordering extends CI_Controller
                     );
 
                     $this->stock_ordering_model->confirmPayment($order_information_id, $order_information);
+                    $this->transaction_log($order_information_id, $status, date('Y-m-d H:i:s'));
 
 
                     if (isset($remarks) && !empty($remarks)) {
@@ -741,6 +751,17 @@ class Stock_Ordering extends CI_Controller
 
                 break;
             }
+    }
+
+    public function transaction_log($order_id, $process_id, $t_date){
+        $transaction_log_info = array(
+            'order_id' => $order_id,
+            'user_id' => $this->session->admin['user_id'],
+            'process_id' => $process_id,
+            'transaction_date' => $t_date,
+        );
+
+        $this->stock_ordering_model->insertTransactionLog($transaction_log_info);
     }
 
 

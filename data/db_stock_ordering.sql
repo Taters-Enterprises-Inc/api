@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 11, 2023 at 11:16 AM
+-- Generation Time: Jul 11, 2023 at 12:23 PM
 -- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.3.33
 
@@ -1412,6 +1412,20 @@ INSERT INTO `remarks` (`id`, `order_information_id`, `order_status_id`, `remarks
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `transaction_logs_tb`
+--
+
+CREATE TABLE `transaction_logs_tb` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `process_id` int(11) NOT NULL,
+  `transaction_date` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `transportation_tb`
 --
 
@@ -1557,6 +1571,12 @@ ALTER TABLE `remarks`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `transaction_logs_tb`
+--
+ALTER TABLE `transaction_logs_tb`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `transportation_tb`
 --
 ALTER TABLE `transportation_tb`
@@ -1649,6 +1669,12 @@ ALTER TABLE `product_tb_backup`
 --
 ALTER TABLE `remarks`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `transaction_logs_tb`
+--
+ALTER TABLE `transaction_logs_tb`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `transportation_tb`
