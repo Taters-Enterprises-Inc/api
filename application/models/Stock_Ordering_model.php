@@ -43,6 +43,9 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('product_tb');
         $this->db->where('category_id', $category);
 
+        $query = $this->db->get();
+        $result = $query->result_array();
+
 
         // $data = array(
         //     array("frozen" => array()),
