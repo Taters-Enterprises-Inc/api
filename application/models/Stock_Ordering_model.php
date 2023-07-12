@@ -34,13 +34,14 @@ class Stock_ordering_model extends CI_Model {
 
 
     public function getProduct($category, $store_id){
-        $this->db->select('p.product_id, p.product_name, p.uom, p.category_id, pc.cost');
-        $this->db->from('product_tb p');
-        $this->db->join('product_cost_tb pc', 'p.product_id = pc.product_id', 'left');
-        $this->db->where('p.category_id', $category);
+        // $this->db->select('p.product_id, p.product_name, p.uom, p.category_id, pc.cost');
+        // $this->db->from('product_tb p');
+        // $this->db->join('product_cost_tb pc', 'p.product_id = pc.product_id', 'left');
+        // $this->db->where('p.category_id', $category);
 
-        $query = $this->db->get();
-        $result = $query->result_array();
+        $this->db->select('product_id, product_name, uom, category_id, cost');
+        $this->db->from('product_tb');
+        $this->db->where('category_id', $category);
 
 
         // $data = array(
