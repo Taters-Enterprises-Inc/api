@@ -372,5 +372,11 @@ class Stock_Ordering_model extends CI_Model {
         return $query->result();
     }
 
+    public function insertTransactionLog($data){
+        $this->db->trans_start();
+        $this->db->insert('transaction_logs_tb', $data);
+        $this->db->trans_complete();
+    }
+
 
 }
