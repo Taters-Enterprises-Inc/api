@@ -14,6 +14,7 @@ class Download extends CI_Controller {
 		$this->load->model('catering_model');
 		$this->load->model('client_model');
 		$this->load->model('influencer_model');
+		$this->load->model('stock_ordering_model');
 		$this->load->library('images');
 	}
 
@@ -253,6 +254,31 @@ class Download extends CI_Controller {
 		  } else {
 			show_404();
 		  }
+    }
+
+    public function theoretical_sales_invoice(){
+    	switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+            $order_id = $this->input->get('orderId');
+            //$order_id = 1;
+
+            $store = $this->stock_ordering_model->getStoreNameForPdf($order_id);
+            $store_name = $store->name;
+
+            $products = $this->stock_ordering_model->getProductData($order_id);
+
+            $data['products'] = $products;
+            $data['store_name'] = $store_name;
+
+            $file_name = 'Theoretical Sales Invoice';
+
+            $this->load->library('pdf');
+            $this->pdf->legalPotrait('stock_ordering/sales_invoice_download', $data);
+            $this->pdf->render();
+            $this->pdf->stream($file_name);
+    
+            break;
+        }
     }
 
 }
