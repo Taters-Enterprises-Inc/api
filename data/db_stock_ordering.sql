@@ -1,10 +1,10 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 09, 2023 at 03:21 PM
--- Server version: 10.4.22-MariaDB
+-- Generation Time: Jul 11, 2023 at 12:23 PM
+-- Server version: 10.4.27-MariaDB
 -- PHP Version: 7.3.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -32,7 +32,7 @@ CREATE TABLE `billing_information_tb` (
   `user_id` int(11) DEFAULT NULL,
   `billing_id` varchar(128) DEFAULT NULL,
   `billing_amount` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `billing_information_tb`
@@ -54,7 +54,7 @@ INSERT INTO `billing_information_tb` (`id`, `user_id`, `billing_id`, `billing_am
 CREATE TABLE `category_tb` (
   `category_id` int(11) NOT NULL,
   `category_name` varchar(15) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `category_tb`
@@ -90,7 +90,7 @@ CREATE TABLE `order_information_tb` (
   `delivery_receipt` varchar(128) DEFAULT NULL,
   `updated_delivery_receipt` varchar(128) DEFAULT NULL,
   `payment_detail_image` varchar(128) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `order_information_tb`
@@ -115,7 +115,7 @@ CREATE TABLE `order_item_tb` (
   `delivered_qty` int(7) DEFAULT NULL,
   `dispatched_qty` int(11) DEFAULT NULL,
   `total_cost` varchar(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `order_item_tb`
@@ -143,7 +143,7 @@ CREATE TABLE `order_place_schedule_logic_tb` (
   `order_cutoff` time DEFAULT NULL,
   `available_delivery_date` tinyint(4) DEFAULT NULL,
   `available_delivery_date_after_cutoff` tinyint(4) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `order_place_schedule_logic_tb`
@@ -175,7 +175,7 @@ CREATE TABLE `order_status` (
   `id` int(11) NOT NULL,
   `short_name` varchar(256) DEFAULT NULL,
   `description` varchar(512) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `order_status`
@@ -202,7 +202,7 @@ CREATE TABLE `payment_status_tb` (
   `id` int(11) NOT NULL,
   `short_name` varchar(32) DEFAULT NULL,
   `description` varchar(64) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `payment_status_tb`
@@ -223,7 +223,7 @@ CREATE TABLE `product_cost_per_store_tb` (
   `store_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
   `product_multiplier` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `product_cost_per_store_tb`
@@ -434,21 +434,21 @@ INSERT INTO `product_cost_per_store_tb` (`id`, `store_id`, `category_id`, `produ
 -- --------------------------------------------------------
 
 --
--- Table structure for table `product_cost_tb`
+-- Table structure for table `product_cost_tb_backup`
 --
 
-CREATE TABLE `product_cost_tb` (
+CREATE TABLE `product_cost_tb_backup` (
   `id` int(11) NOT NULL,
   `product_id` varchar(6) DEFAULT NULL,
   `store_id` varchar(3) DEFAULT NULL,
   `cost` varchar(9) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
--- Dumping data for table `product_cost_tb`
+-- Dumping data for table `product_cost_tb_backup`
 --
 
-INSERT INTO `product_cost_tb` (`id`, `product_id`, `store_id`, `cost`) VALUES
+INSERT INTO `product_cost_tb_backup` (`id`, `product_id`, `store_id`, `cost`) VALUES
 (1, '10014A', 'N/A', '159.04'),
 (2, '100421', 'N/A', '184.8'),
 (3, '100423', 'N/A', '5.38'),
@@ -761,7 +761,7 @@ CREATE TABLE `product_tb` (
   `uom` varchar(4) DEFAULT NULL,
   `category_id` int(1) DEFAULT NULL,
   `cost` varchar(9) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `product_tb`
@@ -1079,7 +1079,7 @@ CREATE TABLE `product_tb_backup` (
   `product_name` varchar(60) DEFAULT NULL,
   `uom` varchar(4) DEFAULT NULL,
   `category_id` int(1) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Dumping data for table `product_tb_backup`
@@ -1396,7 +1396,7 @@ CREATE TABLE `remarks` (
   `order_information_id` int(11) DEFAULT NULL,
   `order_status_id` int(11) DEFAULT NULL,
   `remarks` varchar(128) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `remarks`
@@ -1412,6 +1412,20 @@ INSERT INTO `remarks` (`id`, `order_information_id`, `order_status_id`, `remarks
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `transaction_logs_tb`
+--
+
+CREATE TABLE `transaction_logs_tb` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `order_id` int(11) NOT NULL,
+  `process_id` int(11) NOT NULL,
+  `transaction_date` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `transportation_tb`
 --
 
@@ -1419,7 +1433,7 @@ CREATE TABLE `transportation_tb` (
   `id` int(11) NOT NULL,
   `label` varchar(32) DEFAULT NULL,
   `description` varchar(65) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `transportation_tb`
@@ -1440,7 +1454,7 @@ CREATE TABLE `user_group` (
   `id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
   `group_id` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user_group`
@@ -1465,7 +1479,7 @@ CREATE TABLE `user_type` (
   `id` int(10) NOT NULL,
   `usertype_id` int(10) NOT NULL,
   `user_type_description` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user_type`
@@ -1533,9 +1547,9 @@ ALTER TABLE `product_cost_per_store_tb`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `product_cost_tb`
+-- Indexes for table `product_cost_tb_backup`
 --
-ALTER TABLE `product_cost_tb`
+ALTER TABLE `product_cost_tb_backup`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -1554,6 +1568,12 @@ ALTER TABLE `product_tb_backup`
 -- Indexes for table `remarks`
 --
 ALTER TABLE `remarks`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `transaction_logs_tb`
+--
+ALTER TABLE `transaction_logs_tb`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -1627,9 +1647,9 @@ ALTER TABLE `product_cost_per_store_tb`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=201;
 
 --
--- AUTO_INCREMENT for table `product_cost_tb`
+-- AUTO_INCREMENT for table `product_cost_tb_backup`
 --
-ALTER TABLE `product_cost_tb`
+ALTER TABLE `product_cost_tb_backup`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=299;
 
 --
@@ -1649,6 +1669,12 @@ ALTER TABLE `product_tb_backup`
 --
 ALTER TABLE `remarks`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `transaction_logs_tb`
+--
+ALTER TABLE `transaction_logs_tb`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `transportation_tb`

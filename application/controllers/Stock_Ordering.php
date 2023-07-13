@@ -6,7 +6,7 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
 
 date_default_timezone_set('Asia/Manila');
 
-class Stock_Ordering extends CI_Controller
+class Stock_ordering extends CI_Controller
 {
 	public function __construct(){
 		parent::__construct();
