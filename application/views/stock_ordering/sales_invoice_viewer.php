@@ -99,9 +99,9 @@
 			<tr>
 				<td><?php echo $product['product_name']; ?></td>
 				<td><?php echo $product['uom']; ?></td>
-				<td><?php echo $product['commited_qty']; ?></td>
-				<td>0</td>
-				<td>0</td>
+				<td><?php echo $product['delivered_qty']; ?></td>
+				<td><?php echo number_format($product['product_rate']); ?></td>
+				<td><?php echo number_format($product['total_cost']); ?></td>
 			</tr>
 			<?php
 		}
@@ -113,38 +113,38 @@
 	<table style="width:100%">
 		<tr>
 			<th style="text-align: left">SHIP TO:</th>
-			<th style="text-align: left">VATABLE SALES: <span class="custom-span">0</span></th>
-			<th style="text-align: left">TOTAL SALES: <span class="custom-span">0</span></th>
+			<th style="text-align: left">VATABLE SALES: <span class="custom-span"><?php echo number_format($si_details->vatable_sales); ?></span></th>
+			<th style="text-align: left">TOTAL SALES: <span class="custom-span"><?php echo number_format($si_details->total_sales); ?></span></th>
 		</tr>
 		<tr>
-			<td>ship_to_value</td>
+			<td><?php echo $store_details->ship_to_address; ?></td>
 			<td>&nbsp;</td>
-			<td style="font-size: 16px; font-weight: bold;">LESS 12% VAT: <span class="custom-span">0</span></td>
+			<td style="font-size: 16px; font-weight: bold;">LESS 12% VAT: <span class="custom-span"><?php echo number_format($si_details->less_vat); ?></span></td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td style="text-align: left; font-size: 16px; font-weight: bold;">VAT EXEMPT SALE: <span class="custom-span">0</span></td>
-			<td style="text-align: left; font-size: 16px; font-weight: bold;">AMOUNT (VAT EX): <span class="custom-span">0</span></td>
+			<td style="text-align: left; font-size: 16px; font-weight: bold;">VAT EXEMPT SALE: <span class="custom-span"><?php echo $si_details->vat_exempt_sales; ?></span></td>
+			<td style="text-align: left; font-size: 16px; font-weight: bold;">AMOUNT (VAT EX): <span class="custom-span"><?php echo number_format($si_details->vat_ex_amount); ?></span></td>
 		</tr>
 		<tr>
 			<td style="font-size: 16px; font-weight: bold;">REMARKS:</td>
 			<td>&nbsp;</td>
-			<td style="text-align: left; font-size: 16px; font-weight: bold;">LESS SC/PWD: <span class="custom-span">0</span></td>
+			<td style="text-align: left; font-size: 16px; font-weight: bold;">LESS SC/PWD: <span class="custom-span"><?php echo $si_details->less_sc_pwd; ?></span></td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td style="text-align: left; font-size: 16px; font-weight: bold;">ZERO RATE SALES: <span class="custom-span">0</span></td>
-			<td style="text-align: left; font-size: 16px; font-weight: bold;">AMOUNT DUE: <span class="custom-span">0</span></td>
+			<td style="text-align: left; font-size: 16px; font-weight: bold;">ZERO RATE SALES: <span class="custom-span"><?php echo $si_details->zero_rated_sales; ?></span></td>
+			<td style="text-align: left; font-size: 16px; font-weight: bold;">AMOUNT DUE: <span class="custom-span"><?php echo number_format($si_details->amount_due); ?></span></td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
 			<td>&nbsp;</td>
-			<td style="text-align: left; font-size: 16px; font-weight: bold;">ADD 12% VAT: <span class="custom-span">0</span></td>
+			<td style="text-align: left; font-size: 16px; font-weight: bold;">ADD 12% VAT: <span class="custom-span"><?php echo number_format($si_details->add_vat); ?></span></td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>
-			<td style="text-align: left; font-size: 16px; font-weight: bold;">VAT AMOUNT: <span class="custom-span">0</span></td>
-			<td style="text-align: left; font-size: 16px; font-weight: bold;">TOTAL AMOUNT DUE: <span class="custom-span">0</span></td>
+			<td style="text-align: left; font-size: 16px; font-weight: bold;">VAT AMOUNT: <span class="custom-span"><?php echo number_format($si_details->vat_amount); ?></span></td>
+			<td style="text-align: left; font-size: 16px; font-weight: bold;">TOTAL AMOUNT DUE: <span class="custom-span"><?php echo number_format($si_details->total_amount_due); ?></span></td>
 		</tr>
 		<tr>
 			<td>&nbsp;</td>

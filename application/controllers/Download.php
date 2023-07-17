@@ -263,10 +263,12 @@ class Download extends CI_Controller {
             // $order_id = 1;
 
             $store = $this->stock_ordering_model->getStoreDetailsForPdf($order_id);
-            $products = $this->stock_ordering_model->getProductData($order_id);
+            $products = $this->stock_ordering_model->getProductDataForPdf($order_id);
+            $si_details = $this->stock_ordering_model->getSiOtherDetails($order_id);
 
             $data['products'] = $products;
             $data['store_details'] = $store;
+            $data['si_details'] = $si_details;
 
             $file_name = 'Theoretical Sales Invoice';
 

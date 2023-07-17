@@ -552,6 +552,7 @@ class Stock_ordering extends CI_Controller
 
                 $delivered_qty_data = array(
                     'delivered_qty' => $deliveryQuantity,
+                    'product_rate' => $product_cost * $multiplier,
                     'total_cost' => $product_cost * $multiplier * $deliveryQuantity
                 );
 
@@ -561,6 +562,31 @@ class Stock_ordering extends CI_Controller
                 $hasData = true;
                 
             }
+
+            $sum_for_sipdf = $this->stock_ordering_model->getSumForSiPdf($order_information_id);
+            $sum_of_dqty = $sum_for_sipdf->sum_dqty;
+            $total_cost = $sum_for_sipdf->total_cost;
+            $total_sales = $sum_of_dqty * $total_cost;
+            $vatable_sales = $total_sales / 1.12;
+            $vat_amount = $total_sales - $vatable_sales;
+            $less_vat = $total_sales - $vatable_sales;
+            $vat_ex_amount = $total_sales - $less_vat;
+            $amount_due = $total_sales / 1.12;
+            $add_vat = $total_sales - $vatable_sales;
+            $total_amount_due = $sum_of_dqty * $total_cost;
+
+            $order_information_v1 = array(
+                'total_sales' => $total_sales,
+                'vatable_sales' => $vatable_sales,
+                'vat_amount' => $vatable_sales,
+                'less_vat' => $less_vat,
+                'vat_ex_amount' => $vat_ex_amount,
+                'amount_due' => $amount_due,
+                'add_vat' => $add_vat,
+                'total_amount_due' => $total_amount_due
+            );
+            
+            $this->stock_ordering_model->updateforSI($order_information_id, $order_information_v1);
 
             if($hasData){
                 $message = "success!";

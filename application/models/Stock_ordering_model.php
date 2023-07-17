@@ -398,11 +398,59 @@ class Stock_ordering_model extends CI_Model {
         $this->db->select('
             A.store_id,
             B.name,
-            B.address
+            B.address,
+            A.ship_to_address
         ');
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
         $this->db->where('A.id', $order_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function getProductDataForPdf($order_id){
+        $this->db->select('
+            A.id,
+            B.product_id,
+            B.product_name,
+            B.uom,
+            B.category_id,
+            A.order_qty,
+            A.commited_qty,
+            A.delivered_qty,
+            A.total_cost,
+            A.order_information_id,
+            A.dispatched_qty,
+            A.product_rate
+        ');
+
+        $this->db->from('order_item_tb A');
+        $this->db->join('product_tb B', 'B.product_id = A.product_id', 'left');
+        $this->db->where('A.order_information_id', $order_id);
+
+        $product_query = $this->db->get();
+        return $product_query->result_array();
+    }
+
+    public function getSumForSiPdf($order_id){
+        $this->db->select('SUM(delivered_qty) AS `sum_dqty`, SUM(total_cost) AS `total_cost`');
+        $this->db->from('order_item_tb');
+        $this->db->where('order_information_id', $order_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function updateforSI($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('order_information_tb', $data);
+    }
+
+    public function getSiOtherDetails($order_id){
+        $this->db->select('total_sales, vatable_sales, vat_exempt_sales, zero_rated_sales, vat_amount,  less_vat, vat_ex_amount, less_sc_pwd, amount_due, add_vat, total_amount_due');
+        $this->db->from('order_information_tb');
+        $this->db->where('id', $order_id);
 
         $query = $this->db->get();
         return $query->row();
