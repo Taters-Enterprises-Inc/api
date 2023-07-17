@@ -1,6 +1,6 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Stock_Ordering_model extends CI_Model {
+class Stock_ordering_model extends CI_Model {
 
 	public function __construct(){
         $this->db = $this->load->database('stock-ordering', TRUE, TRUE);
