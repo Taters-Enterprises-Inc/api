@@ -134,8 +134,8 @@ $route['stock/confirm-payment'] = 'Stock_ordering/confirm_payment';
 $route['stock/orders'] = 'Stock_ordering/getOrders'; 
 $route['stock/ordered/products'] = 'Stock_ordering/getProductData';
 $route['stock/order/delivery-receive-approval'] = 'Stock_ordering/delivery_receive_approval';
-$route['stock/generate-si-pdf'] = 'download/theoretical_sales_invoice';
 
+$route['stock/generate-si-pdf/(:any)'] = 'download/theoretical_sales_invoice/$1';
 $route['stock/ordered/download-payment/(:any)'] = 'download/stock_order_download_payment_information/$1';
 
 

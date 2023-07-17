@@ -256,11 +256,11 @@ class Download extends CI_Controller {
 		  }
     }
 
-    public function theoretical_sales_invoice(){
+    public function theoretical_sales_invoice($order_id){
     	switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
-            //$order_id = $this->input->get('orderId');
-            $order_id = 1;
+            // $order_id = $this->input->get('orderId');
+            // $order_id = 1;
 
             $store = $this->stock_ordering_model->getStoreDetailsForPdf($order_id);
             $products = $this->stock_ordering_model->getProductData($order_id);

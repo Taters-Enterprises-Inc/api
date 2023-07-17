@@ -28,10 +28,15 @@ class Stock_ordering extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
 
+                $store_id = $this->input->get('store_id');
+
                 $store = $this->stock_ordering_model->getStore();
+                $ship_to_address = $this->stock_ordering_model->getShipToAddress($store_id);
+                
 
                 $data = array(
                     "stores" => $store,
+                    "ship_to_address" => $ship_to_address,
                 );
                 
                 $response = array(
@@ -43,6 +48,8 @@ class Stock_ordering extends CI_Controller
                   header('content-type: application/json');
                   echo json_encode($response);
             break;
+
+            
         }
     }
 
@@ -87,9 +94,11 @@ class Stock_ordering extends CI_Controller
             $category_id = $this->input->post('category')['category_id'];
             $product_data = $this->input->post('OrderData');    
             $orderPlacementDate = date('Y-m-d H:i:s');
+            $ship_to_address = $this->input->post('selectedAddress');
 
             $order_information = array(
                 'store_id' => $store_id,
+                'ship_to_address' => $ship_to_address,
                 'requested_delivery_date' => $delivery_date,
                 'order_type_id' => $category_id,
                 'order_placement_date' => $orderPlacementDate,

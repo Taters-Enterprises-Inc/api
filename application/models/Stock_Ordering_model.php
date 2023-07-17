@@ -238,6 +238,22 @@ class Stock_ordering_model extends CI_Model {
         return $query->result();
     }
 
+    public function getShipToAddress($id){
+        $this->db->select('
+            store_id,
+            ship_to_address,
+        ');
+
+        $this->db->from('ship_to_tb');
+
+        if(isset($id)){
+            $this->db->where('store_id', $id);
+        }
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     public function updateOrderInfo($id, $data){
         $this->db->where('id', $id);
         $this->db->update('order_information_tb', $data);
