@@ -378,10 +378,11 @@ class Stock_ordering_model extends CI_Model {
         $this->db->trans_complete();
     }
 
-    public function getStoreNameForPdf($order_id){
+    public function getStoreDetailsForPdf($order_id){
         $this->db->select('
             A.store_id,
-            B.name
+            B.name,
+            B.address
         ');
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');

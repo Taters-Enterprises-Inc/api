@@ -259,16 +259,14 @@ class Download extends CI_Controller {
     public function theoretical_sales_invoice(){
     	switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
-            $order_id = $this->input->get('orderId');
-            //$order_id = 1;
+            //$order_id = $this->input->get('orderId');
+            $order_id = 1;
 
-            $store = $this->stock_ordering_model->getStoreNameForPdf($order_id);
-            $store_name = $store->name;
-
+            $store = $this->stock_ordering_model->getStoreDetailsForPdf($order_id);
             $products = $this->stock_ordering_model->getProductData($order_id);
 
             $data['products'] = $products;
-            $data['store_name'] = $store_name;
+            $data['store_details'] = $store;
 
             $file_name = 'Theoretical Sales Invoice';
 
