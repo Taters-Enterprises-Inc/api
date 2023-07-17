@@ -238,6 +238,22 @@ class Stock_Ordering_model extends CI_Model {
         return $query->result();
     }
 
+    public function getShipToAddress($id){
+        $this->db->select('
+            store_id,
+            ship_to_address,
+        ');
+
+        $this->db->from('ship_to_tb');
+
+        if(isset($id)){
+            $this->db->where('store_id', $id);
+        }
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     public function updateOrderInfo($id, $data){
         $this->db->where('id', $id);
         $this->db->update('order_information_tb', $data);
@@ -376,6 +392,20 @@ class Stock_Ordering_model extends CI_Model {
         $this->db->trans_start();
         $this->db->insert('transaction_logs_tb', $data);
         $this->db->trans_complete();
+    }
+
+    public function getStoreDetailsForPdf($order_id){
+        $this->db->select('
+            A.store_id,
+            B.name,
+            B.address
+        ');
+        $this->db->from('order_information_tb A');
+        $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
+        $this->db->where('A.id', $order_id);
+
+        $query = $this->db->get();
+        return $query->row();
     }
 
 
