@@ -118,22 +118,22 @@ $route['audit/result'] = 'audit/getAuditResults';
 
 
 //Stock Ordering
-$route['stock/order/stores'] = 'Stock_ordering/stores';
-$route['stock/order/products'] = 'Stock_ordering/products';
-$route['stock/new/order'] = 'Stock_ordering/new_order';
-$route['stock/orders'] = 'Stock_ordering/getOrders';
-$route['stock/update-order'] = 'Stock_ordering/update_order';
-$route['stock/review-order'] = 'Stock_ordering/review_order';
-$route['stock/confirm-order'] = 'Stock_ordering/confirm_order';
-$route['stock/dispatch-order'] = 'Stock_ordering/dispatch_order';
-$route['stock/order-en-route'] = 'Stock_ordering/order_en_route';
-$route['stock/receive-order-delivery'] = 'Stock_ordering/receive_order_delivery';
-$route['stock/update-billing'] = 'Stock_ordering/update_billing';
-$route['stock/pay-billing'] = 'Stock_ordering/pay_billing';
-$route['stock/confirm-payment'] = 'Stock_ordering/confirm_payment';
-$route['stock/orders'] = 'Stock_ordering/getOrders'; 
-$route['stock/ordered/products'] = 'Stock_ordering/getProductData';
-$route['stock/order/delivery-receive-approval'] = 'Stock_ordering/delivery_receive_approval';
+$route['stock/order/stores'] = 'Stock_Ordering/stores';
+$route['stock/order/products'] = 'Stock_Ordering/products';
+$route['stock/new/order'] = 'Stock_Ordering/new_order';
+$route['stock/orders'] = 'Stock_Ordering/getOrders';
+$route['stock/update-order'] = 'Stock_Ordering/update_order';
+$route['stock/review-order'] = 'Stock_Ordering/review_order';
+$route['stock/confirm-order'] = 'Stock_Ordering/confirm_order';
+$route['stock/dispatch-order'] = 'Stock_Ordering/dispatch_order';
+$route['stock/order-en-route'] = 'Stock_Ordering/order_en_route';
+$route['stock/receive-order-delivery'] = 'Stock_Ordering/receive_order_delivery';
+$route['stock/update-billing'] = 'Stock_Ordering/update_billing';
+$route['stock/pay-billing'] = 'Stock_Ordering/pay_billing';
+$route['stock/confirm-payment'] = 'Stock_Ordering/confirm_payment';
+$route['stock/orders'] = 'Stock_Ordering/getOrders'; 
+$route['stock/ordered/products'] = 'Stock_Ordering/getProductData';
+$route['stock/order/delivery-receive-approval'] = 'Stock_Ordering/delivery_receive_approval';
 
 $route['stock/generate-si-pdf/(:any)'] = 'download/theoretical_sales_invoice/$1';
 $route['stock/ordered/download-payment/(:any)'] = 'download/stock_order_download_payment_information/$1';
