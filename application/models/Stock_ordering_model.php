@@ -502,6 +502,15 @@ class Stock_ordering_model extends CI_Model {
         
     }
 
+    public function getProductInfo($product_id){
+        $this->db->select('*');
+        $this->db->from('product_tb');
+        $this->db->where('product_id', $product_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
     public function getProductAvailablity($product_id){
         $this->db->select('
             A.store_id,
