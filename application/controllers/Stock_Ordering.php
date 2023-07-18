@@ -805,6 +805,30 @@ class Stock_ordering extends CI_Controller
         $this->stock_ordering_model->insertTransactionLog($transaction_log_info);
     }
 
+    public function get_product_list(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $product_list = $this->stock_ordering_model->getProductList();
+
+            $data = array(
+                "products" => $product_list
+            );
+
+            $response = array(
+                "message" => 'Successfully fetch all products',
+                "data"    => $data, 
+
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+
+            
+        }
+    }
+
     public function add_product_availability(){
         switch($this->input->server('REQUEST_METHOD')){
 

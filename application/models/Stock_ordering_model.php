@@ -492,6 +492,16 @@ class Stock_ordering_model extends CI_Model {
         return $query->row();
     }
 
+    public function getProductList(){
+
+        $this->db->select('*');
+        $this->db->from('product_tb');
+
+        $order_query = $this->db->get();
+        return $order_query->result();
+        
+    }
+
     public function insertProductAvailability($data){
         $this->db->trans_start();
         $this->db->insert('product_availability_tb', $data);
