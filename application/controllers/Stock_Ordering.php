@@ -803,5 +803,45 @@ class Stock_ordering extends CI_Controller
         $this->stock_ordering_model->insertTransactionLog($transaction_log_info);
     }
 
+    public function add_product_availability(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+            case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $product_id = $this->input->post('productId');
+            $store_data = $this->input->post('StoreData');
+            $status = 1;
+
+            if(isset($store_data)){
+                foreach($store_data as $stores){
+
+                    $product_availability_data = array(
+                        "product_id"   => $product_id,
+                        "store_id"   => $stores['store_id'],
+                        'status'     => $status,
+                    );
+                    
+                    $this->stock_ordering_model->insertProductAvailability($product_availability_data);
+
+                }
+
+                $message = 'Successfully added new product availability';
+
+            }else {
+                $message = "No data";
+            }
+
+            $response = array(
+                "message" => $message,
+            );
+
+            header('content-type: application/json');
+            echo json_encode($response);
+
+            break;
+        }
+    }
+
 	
 }
