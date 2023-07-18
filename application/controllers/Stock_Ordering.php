@@ -60,13 +60,15 @@ class Stock_ordering extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
 
-                // $category = $this->input->get('category');
-                $category = 1;
+                $category = $this->input->get('category');
+
                 $store_info = json_decode($this->input->get('store_information'));
                 
-                $store_id = 18;
+                // $store_id = 18;
+                // $category = 1;
 
-                $products = $this->stock_ordering_model->getProduct($category, $store_id);
+
+                $products = $this->stock_ordering_model->getProduct($category, $store_info->store_id);
                 if($category){
                     $schedule = $this->stock_ordering_model->getSchedule($category);
                 }
