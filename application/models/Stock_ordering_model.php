@@ -502,6 +502,19 @@ class Stock_ordering_model extends CI_Model {
         
     }
 
+    public function getProductAvailablity($product_id){
+        $this->db->select('
+            A.store_id,
+            B.name
+        ');
+        $this->db->from('product_availability_tb A');
+        $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
+        $this->db->where('A.product_id', $product_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     public function insertProductAvailability($data){
         $this->db->trans_start();
         $this->db->insert('product_availability_tb', $data);

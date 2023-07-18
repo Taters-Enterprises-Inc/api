@@ -829,6 +829,31 @@ class Stock_ordering extends CI_Controller
         }
     }
 
+    public function get_product_availability(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $product_id = $this->input->get('productId');
+            $product_availability = $this->stock_ordering_model->getProductAvailablity();
+
+            $data = array(
+                "product_availability" => $product_availability
+            );
+
+            $response = array(
+                "message" => 'Successfully fetch all data.',
+                "data"    => $data, 
+
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+
+            
+        }
+    }
+
     public function add_product_availability(){
         switch($this->input->server('REQUEST_METHOD')){
 
