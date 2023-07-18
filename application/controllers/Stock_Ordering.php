@@ -29,8 +29,10 @@ class Stock_ordering extends CI_Controller
             case 'GET':
 
                 $store_id = $this->input->get('store_id');
+                $user_id = $this->input->get('user_id');
 
-                $store = $this->stock_ordering_model->getStore();
+
+                $store = $this->stock_ordering_model->getStore($user_id);
                 $ship_to_address = $this->stock_ordering_model->getShipToAddress($store_id);
                 
 

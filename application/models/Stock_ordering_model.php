@@ -226,13 +226,25 @@ class Stock_ordering_model extends CI_Model {
         
     }
 
-    public function getStore(){
-        $this->newteishop->select('
-            A.store_id,
-            A.name,
-        ');
+    public function getStore($user_id){
 
-        $this->newteishop->from('store_tb A');
+        if($user_id == 1){
+            $this->newteishop->select('store_id, name');
+            $this->newteishop->from('store_tb');
+            $this->newteishop->where('branch_status', 1);
+        }else{
+
+            $this->newteishop->select('
+                A.store_id,
+                A.name,
+            ');
+
+            $this->newteishop->from('store_tb A');
+            $this->newteishop->join('users_store_groups B', 'B.store_id = A.store_id', 'left');
+            $this->newteishop->where('A.branch_status', 1);
+            $this->newteishop->where('B.user_id', $user_id);
+
+        }
 
         $query = $this->newteishop->get();
         return $query->result();
@@ -240,8 +252,10 @@ class Stock_ordering_model extends CI_Model {
 
     public function getShipToAddress($id){
         $this->db->select('
+            
             store_id,
             ship_to_address,
+            
         ');
 
         $this->db->from('ship_to_tb');
@@ -250,8 +264,30 @@ class Stock_ordering_model extends CI_Model {
             $this->db->where('store_id', $id);
         }
 
-        $query = $this->db->get();
-        return $query->result();
+        $ship_query = $this->db->get();
+        $ship_to = $ship_query->result();
+
+
+        $this->newteishop->select('
+        
+            store_id,
+            address as ship_to_address,
+        ');
+        $this->newteishop->from('store_tb');
+        
+        if(isset($id)){
+            $this->newteishop->where('store_id', $id);
+        }
+
+        $address_query = $this->newteishop->get();
+        $store_address = $address_query->result();
+
+        $data = array_merge(
+            $ship_to,
+            $store_address
+        );
+
+        return $data;
     }
 
     public function updateOrderInfo($id, $data){
