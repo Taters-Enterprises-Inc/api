@@ -492,6 +492,8 @@ class Stock_ordering_model extends CI_Model {
         return $query->row();
     }
 
+    /* All codes that are related to the Product Availability feature */
+
     public function getProductList(){
 
         $this->db->select('*');
@@ -529,6 +531,8 @@ class Stock_ordering_model extends CI_Model {
         $this->db->insert('product_availability_tb', $data);
         $this->db->trans_complete();
     }
+
+    /* End */
 
 
 }
