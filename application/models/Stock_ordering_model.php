@@ -32,8 +32,47 @@ class Stock_ordering_model extends CI_Model {
         return $product_query->result_array();
     }
 
-
     public function getProduct($category, $store_id){
+        // $this->db->select('p.product_id, p.product_name, p.uom, p.category_id, pc.cost');
+        // $this->db->from('product_tb p');
+        // $this->db->join('product_cost_tb pc', 'p.product_id = pc.product_id', 'left');
+        // $this->db->where('p.category_id', $category);
+
+        $this->db->select('B.product_id, B.product_name, B.uom, B.category_id, B.cost');
+        $this->db->from('product_availability_tb A');
+        $this->db->join('product_tb B', 'B.product_id = A.product_id', 'left');
+        $this->db->where('A.store_id', $store_id);
+        $this->db->where('B.category_id', $category);
+
+        $query = $this->db->get();
+        $result = $query->result_array();
+
+
+        // $data = array(
+        //     array("frozen" => array()),
+        //     array("dry" => array())
+        // );
+
+        // foreach ($result as $row) {
+        //     $product = array(
+        //         'productId' => $row['product_id'],
+        //         'productName' => $row['product_name'],
+        //         'uom' => $row['uom'],
+        //         'cost' => $row['cost']
+        //     );
+
+        //     if ($row["category_id"] == 1) {
+        //         array_push($data[0]["frozen"], $product);
+        //     } elseif ($row["category_id"] == 2) {
+        //         array_push($data[1]["dry"], $product);
+        //     }
+        // }
+
+        return $result;
+    }
+
+
+    /*public function getProduct($category, $store_id){
         // $this->db->select('p.product_id, p.product_name, p.uom, p.category_id, pc.cost');
         // $this->db->from('product_tb p');
         // $this->db->join('product_cost_tb pc', 'p.product_id = pc.product_id', 'left');
@@ -68,7 +107,7 @@ class Stock_ordering_model extends CI_Model {
         // }
 
         return $result;
-    }
+    }*/
 
     public function getSchedule($category){
 
