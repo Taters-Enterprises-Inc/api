@@ -834,7 +834,7 @@ class Stock_ordering extends CI_Controller
             case 'GET':
 
             $product_id = $this->input->get('productId');
-            $product_availability = $this->stock_ordering_model->getProductAvailablity();
+            $product_availability = $this->stock_ordering_model->getProductAvailablity($product_id);
 
             $data = array(
                 "product_availability" => $product_availability
