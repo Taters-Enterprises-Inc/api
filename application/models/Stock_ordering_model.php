@@ -186,8 +186,14 @@ class Stock_ordering_model extends CI_Model {
         $order_query = $this->db->get();
         $orders = $order_query->row();
 
-        $this->db->select('remarks');
-        $this->db->from('remarks');
+        $this->db->select('
+            A.remarks, 
+            A.date,
+            B.first_name,
+            B.last_name
+        ');
+        $this->db->from('remarks A'); 
+        $this->db->join($this->newteishop->database.'.users B', 'B.id = A.user_id', 'left');
         $this->db->where('order_information_id', $orders->id);
         $remarks_query = $this->db->get();
         $remarks = $remarks_query->result();

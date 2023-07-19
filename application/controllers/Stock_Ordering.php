@@ -264,6 +264,7 @@ class Stock_ordering extends CI_Controller
 
 
             $remarks = $this->input->post('remarks');
+            $user_id = $this->input->post('user_id');
 
             if (isset($remarks) && !empty($remarks)) {
 
@@ -271,6 +272,8 @@ class Stock_ordering extends CI_Controller
                     'order_information_id' => $order_information_id,
                     'order_status_id' => 2,
                     'remarks' => $remarks,
+                    'user_id' => $user_id,
+                    'date'    => date('Y-m-d H:i:s'),
                 );
 
                 $this->stock_ordering_model->insertRemarks($remarks_information);
@@ -326,13 +329,16 @@ class Stock_ordering extends CI_Controller
             $this->transaction_log($order_information_id, 3, date('Y-m-d H:i:s'));
 
             $remarks = $this->input->post('remarks');
+            $user_id = $this->input->post('user_id');
 
             if (isset($remarks) && !empty($remarks)) {
 
                 $remarks_information = array(
                     'order_information_id' => $order_information_id,
-                    'order_status_id' => $status,
+                    'order_status_id' => 3,
                     'remarks' => $remarks,
+                    'user_id' => $user_id,
+                    'date'    => date('Y-m-d H:i:s'),
                 );
 
                 $this->stock_ordering_model->insertRemarks($remarks_information);
@@ -751,6 +757,7 @@ class Stock_ordering extends CI_Controller
                 $order_information_id = $this->input->post('id');
                 $status = $this->input->post('status');
                 $remarks = $this->input->post('remarks');
+                $user_id = $this->input->post('user_id');
                 
                 if(isset($status) && isset($order_information_id)){
 
@@ -766,8 +773,10 @@ class Stock_ordering extends CI_Controller
                     
                         $remarks_information = array(
                             'order_information_id' => $order_information_id,
-                            'order_status_id' => 5,
+                            'order_status_id' => $status,
                             'remarks' => $remarks,
+                            'user_id' => $user_id,
+                            'date'    => date('Y-m-d H:i:s'),
                         );
     
                         $this->stock_ordering_model->insertRemarks($remarks_information);
