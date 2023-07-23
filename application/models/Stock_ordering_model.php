@@ -297,7 +297,6 @@ class Stock_ordering_model extends CI_Model {
 
     public function getShipToAddress($id){
         $this->db->select('
-            
             store_id,
             ship_to_address,
             
