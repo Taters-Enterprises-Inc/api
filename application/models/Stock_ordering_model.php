@@ -109,30 +109,27 @@ class Stock_ordering_model extends CI_Model {
         return $result;
     }*/
 
-    public function getSchedule($category){
+    public function getSchedule($category,$store_id){
 
-        $order_date = date("l"); 
-        $order_date_num = date("N", strtotime($order_date));
-        $current_hour = date('H');
-        
         $this->db->select('
-        available_delivery_date,
-        available_delivery_date_after_cutoff,
-        order_cutoff,
+            A.leadtime,
+            A.cutoff,
+            A.is_mwf,
+            A.is_tths,
         ');
-        $this->db->from('order_place_schedule_logic_tb');
-        $this->db->where('category_type_id', $category);
-        $this->db->where('order_date', $order_date_num);
+        $this->db->from('order_schedule_logic_tb A');
+        $this->db->join('store_region_combination B', 'B.region_id = A.region_id', 'left');
+        $this->db->join($this->newteishop->database.'.store_tb C', 'C.store_id = B.store_id', 'left');
+        $this->db->where('A.category_id', $category);
+        $this->db->where('C.store_id', $store_id);
 
-        $sched_query = $this->db->get();
-        $sched = $sched_query->row();
-        
-        if($current_hour < $sched->order_cutoff){
-            return $sched->available_delivery_date;
-        }else{
-            return $sched->available_delivery_date_after_cutoff;
+        $query = $this->db->get();
+        $sched = $query->row();
+
+        if ($sched) {
+            $sched->is_mwf = (bool) $sched->is_mwf;
+            $sched->is_tths = (bool) $sched->is_tths;
         }
-    
 
         return $sched;
     }
@@ -155,6 +152,7 @@ class Stock_ordering_model extends CI_Model {
         $this->db->select('
             B.name as store_name,
             A.id,
+            A.ship_to_address,
             E.category_name,
             A.order_placement_date,
             A.requested_delivery_date,
@@ -205,7 +203,7 @@ class Stock_ordering_model extends CI_Model {
 
     }
 
-    public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status){
+    public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status, $store_id){
 
         $this->db->select('
             A.id,
@@ -227,12 +225,13 @@ class Stock_ordering_model extends CI_Model {
         $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
+        $this->db->where_in('A.store_id', $store_id);
         $this->db->where('A.status_id', $status);
 
         if($search){
             $this->db->group_start();
             $this->db->like('A.id', $search);
-            $this->db->or_like("B.store_name", $search);
+            $this->db->or_like("B.name", $search);
             $this->db->or_like('C.description', $search);
             $this->db->or_like('F.short_name', $search);
             $this->db->group_end();
@@ -246,7 +245,7 @@ class Stock_ordering_model extends CI_Model {
         
     }
 
-    public function getOrdersCount($search, $status){
+    public function getOrdersCount($search, $status, $store_id){
 
         $this->db->select('count(*) as all_count');
         $this->db->from('order_information_tb A');
@@ -255,12 +254,13 @@ class Stock_ordering_model extends CI_Model {
         $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
+        $this->db->where_in('A.store_id', $store_id);
         $this->db->where('A.status_id', $status);
 
         if($search){
             $this->db->group_start();
             $this->db->like('A.id', $search);
-            $this->db->or_like("B.store_name", $search);
+            $this->db->or_like("B.name", $search);
             $this->db->or_like('C.description', $search);
             $this->db->or_like('F.short_name', $search);
             $this->db->group_end();
@@ -331,6 +331,18 @@ class Stock_ordering_model extends CI_Model {
             $ship_to,
             $store_address
         );
+
+
+        $unique_ship_to = array_reduce($ship_to, function ($carry, $item) {
+            $address = $item->ship_to_address;
+            if (!isset($carry[$address])) {
+                $carry[$address] = $item;
+            }
+            return $carry;
+        }, array());
+
+        $data = array_values($unique_ship_to);
+
 
         return $data;
     }

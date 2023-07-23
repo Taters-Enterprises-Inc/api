@@ -5069,6 +5069,8 @@ class Admin extends CI_Controller{
 
         foreach($users as $user){
           $user->groups = $this->admin_model->getUserGroups($user->id);
+          $user->stockOrderGroup = $this->stock_ordering_model->getUserGroups($user->id);
+
         }
 
         $pagination = array(
