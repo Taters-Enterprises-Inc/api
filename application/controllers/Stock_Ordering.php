@@ -29,7 +29,7 @@ class Stock_ordering extends CI_Controller
             case 'GET':
 
                 $store_id = $this->input->get('store_id');
-                $user_id = $this->input->get('user_id');
+                $user_id = $this->session->admin['user_id'];
 
 
                 $store = $this->stock_ordering_model->getStore($user_id);
@@ -98,7 +98,7 @@ class Stock_ordering extends CI_Controller
             $_POST =  json_decode(file_get_contents("php://input"), true);
 
             $store_id = $this->input->post('selectedStoreId');
-            $delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('deliverydate')));;
+            $delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('deliveryScheduleData')));;
             $category_id = $this->input->post('category')['category_id'];
             $product_data = $this->input->post('OrderData');    
             $orderPlacementDate = date('Y-m-d H:i:s');
@@ -213,17 +213,17 @@ class Stock_ordering extends CI_Controller
                     $page_no = ($page_no - 1) * $per_page;
                   }
 
-                  $getOrdersBadgeCount = array_fill(0, 9, 0);
-                  
-                  $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab, $store_id);
-                  $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab, $store_id);
+                $getOrdersBadgeCount = array_fill(0, 9, 0);
+                
+                $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab, $store_id);
+                $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab, $store_id);
 
 
-                foreach($store_id as $id){
-                    for($i=0; $i < 9; $i++){
-                        $getOrdersBadgeCount[$i] += $this->stock_ordering_model->getOrdersCount("", $i + 1, $id);
-                    }
+                
+                for($i=0; $i < 9; $i++){
+                    $getOrdersBadgeCount[$i] += $this->stock_ordering_model->getOrdersCount("", $i + 1, $store_id);
                 }
+                
 
                 $pagination = array(
                     "total_rows" => $getOrdersCount,

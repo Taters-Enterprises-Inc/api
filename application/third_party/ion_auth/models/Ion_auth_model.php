@@ -1768,8 +1768,8 @@ class Ion_auth_model extends CI_Model
 				foreach ($group_ids as $group_id)
 				{
 					// Cast to float to support bigint data type
-					if ($this->db->insert($this->tables['user_group'],
-										[ $this->join['user_type'] => (float)$group_id,
+					if ($this->db->insert($this->tables['tab_combination'],
+										[ $this->join['order_status_id'] => (float)$group_id,
 											$this->join['users']  => (float)$user_id  ]))
 					{
 						if (isset($this->_cache_groups[$group_id]))
@@ -1842,8 +1842,8 @@ class Ion_auth_model extends CI_Model
 					{
 						// Cast to float to support bigint data type
 						$this->db->delete(
-							$this->tables['user_group'],
-							[$this->join['user_type'] => (float)$group_id, $this->join['users'] => (float)$user_id]
+							$this->tables['tab_combination'],
+							[$this->join['order_status_id'] => (float)$group_id, $this->join['users'] => (float)$user_id]
 						);
 						if (isset($this->_cache_user_in_group[$user_id]) && isset($this->_cache_user_in_group[$user_id][$group_id]))
 						{
@@ -1868,7 +1868,7 @@ class Ion_auth_model extends CI_Model
 
 					break;
 				case 2: 
-					if ($return = $this->db->delete($this->tables['user_group'], [$this->join['users'] => (float)$user_id]))
+					if ($return = $this->db->delete($this->tables['tab_combination'], [$this->join['users'] => (float)$user_id]))
 					{
 						$this->_cache_user_in_group[$user_id] = [];
 					}

@@ -47,8 +47,8 @@ $config['tables']['groups']          = 'groups';
 $config['tables']['users_groups']    = 'users_groups';
 $config['tables']['login_attempts']  = 'login_attempts';
 
-$config['tables']['user_type']		 = $config['sos_database_group_name'].'.user_type';
-$config['tables']['user_group']		 = $config['sos_database_group_name'].'.user_group';
+$config['tables']['order_status'] = $config['sos_database_group_name'].'.order_status';
+$config['tables']['tab_combination'] = $config['sos_database_group_name'].'.user_tab_combination';
 
 /*
  | Users table column and Group table column you want to join WITH.
@@ -59,7 +59,9 @@ $config['tables']['user_group']		 = $config['sos_database_group_name'].'.user_gr
 $config['join']['users']  = 'user_id';
 $config['join']['groups'] = 'group_id';
 
-$config['join']['user_type'] = 'group_id';
+//----------------------------------------
+
+$config['join']['order_status_id'] = 'order_status_id';
 
 /*
  | -------------------------------------------------------------------------
