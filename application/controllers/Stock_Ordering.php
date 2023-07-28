@@ -990,10 +990,10 @@ class Stock_ordering extends CI_Controller
     }
 
     public function most_ordered_product($startDate, $endDate){
-        // $user_id = $this->session->admin['user_id'];
+        $user_id = $this->session->admin['user_id'];
 
         /* For test only */
-        $user_id = 893;
+        // $user_id = 893;
         /* End */
         
         $store_ids = $this->report_model->getUserStoreIds($user_id);
