@@ -997,6 +997,12 @@ class Stock_ordering extends CI_Controller
         /* End */
         
         $store_ids = $this->report_model->getUserStoreIds($user_id);
+
+        if (empty($store_ids)) {
+            echo "No data was found on the date range you generated";
+            exit();
+        }
+
         // $start_date = $this->input->post('startDate');
         // $end_date = $this->input->post('endDate');
 
