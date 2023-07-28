@@ -20,8 +20,7 @@ class Stock_ordering extends CI_Controller
 
         $this->lang->load('auth');
 		$this->load->model('stock_ordering_model');
-
-		
+        $this->load->model('report_model');
 	}
 
     public function stores(){
@@ -967,6 +966,68 @@ class Stock_ordering extends CI_Controller
 
             break;
         }
+    }
+
+    public function generate_report($file_name, $data){
+        $file_name = $file_name . " " . date('F j, Y') . ".xls";
+
+        // Headers for download 
+        header("Content-Disposition: attachment; filename=\"$file_name\"");
+        header("Content-Type: application/vnd.ms-excel");
+
+        $flag = false;
+        foreach($data as $row) {
+            if(!$flag) {
+            // display column names as first row
+                echo implode("\t", array_keys($row)) . "\n";
+                $flag = true;
+            }
+
+            // filter data
+            echo implode("\t", array_values($row)) . "\n";
+        }
+        exit;
+    }
+
+    public function most_ordered_product($startDate, $endDate){
+        // $user_id = $this->session->admin['user_id'];
+
+        /* For test only */
+        $user_id = 893;
+        /* End */
+        
+        $store_ids = $this->report_model->getUserStoreIds($user_id);
+        // $start_date = $this->input->post('startDate');
+        // $end_date = $this->input->post('endDate');
+
+        /* For test only */
+        // $start_date = '2023-07-01';
+        // $end_date = '2023-07-25';
+        $start_date = $startDate;
+        $end_date = $endDate;
+        /* End */
+
+        // print_r($store_ids);
+
+        // echo "\n";
+        // echo $start_date . "\n" . $end_date . "\n";
+        // echo "\n";
+
+        $order_ids = $this->report_model->getOrderIds($store_ids, $start_date, $end_date);
+
+        if (empty($order_ids)) {
+            echo "No data was found on the date range you generated";
+            exit();
+        }
+        
+        // print_r($order_ids);
+
+        $most_ordered_product = $this->report_model->getMostOrderedProduct($order_ids);
+        // print_r($most_ordered_product);
+
+        $file_name = "Most Ordered Product as of";
+
+        $this->generate_report($file_name, $most_ordered_product);
     }
 
 	

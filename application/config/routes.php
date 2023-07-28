@@ -143,6 +143,8 @@ $route['stock/add-product-availability'] = 'Stock_Ordering/add_product_availabil
 $route['stock/generate-si-pdf/(:any)'] = 'download/theoretical_sales_invoice/$1';
 $route['stock/ordered/download-payment/(:any)'] = 'download/stock_order_download_payment_information/$1';
 
+$route['stock/most-ordered-product/(:any)/(:any)'] = 'Stock_Ordering/most_ordered_product/$1/$2';
+
 
 
 //Admin
