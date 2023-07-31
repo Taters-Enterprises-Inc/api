@@ -151,6 +151,7 @@ class Stock_ordering_model extends CI_Model {
     public function getOrderData($id){
         $this->db->select('
             B.name as store_name,
+            B.store_id,
             A.id,
             A.ship_to_address,
             E.category_name,
@@ -292,7 +293,7 @@ class Stock_ordering_model extends CI_Model {
         }
 
         $query = $this->newteishop->get();
-        return $query->result();
+        return $query->result_array();
     }
 
     public function getShipToAddress($id){
@@ -411,6 +412,11 @@ class Stock_ordering_model extends CI_Model {
     }
 
     public function confirmPayment($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('order_information_tb', $data);
+    }
+
+    public function cancelledOrder($id, $data){
         $this->db->where('id', $id);
         $this->db->update('order_information_tb', $data);
     }
@@ -594,6 +600,24 @@ class Stock_ordering_model extends CI_Model {
         $this->db->trans_start();
         $this->db->insert('product_availability_tb', $data);
         $this->db->trans_complete();
+    }
+
+    public function getCommitedDate($id){
+        $this->db->select('commited_delivery_date');
+        $this->db->from('order_information_tb');
+        $this->db->where('id', $id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function getWindowTime($store_id){
+        $this->db->select('start_time, end_Time');
+        $this->db->from('store_windows_time');
+        $this->db->where('store_id', $store_id);
+
+        $query = $this->db->get();
+        return $query->row();
     }
 
     /* End */

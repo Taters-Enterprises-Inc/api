@@ -134,6 +134,9 @@ $route['stock/confirm-payment'] = 'Stock_Ordering/confirm_payment';
 $route['stock/orders'] = 'Stock_Ordering/getOrders'; 
 $route['stock/ordered/products'] = 'Stock_Ordering/getProductData';
 $route['stock/order/delivery-receive-approval'] = 'Stock_Ordering/delivery_receive_approval';
+$route['stock/cancelled'] = 'Stock_Ordering/cancelled_order'; 
+$route['stock/get-window-time'] = 'Stock_Ordering/getWindowTime'; 
+
 
 $route['stock/get-product-list'] = 'Stock_Ordering/get_product_list';
 $route['stock/get-product-info'] = 'Stock_Ordering/get_product_info';
