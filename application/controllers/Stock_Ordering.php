@@ -718,14 +718,14 @@ class Stock_ordering extends CI_Controller
             $user_id = $this->session->admin['user_id'];
             $status = 8;
 
-            $payment_detail_image_name = clean_str_for_img($this->input->post('paymentDetailImage'). '-' . time() ) . '.jpg';
+            // $payment_detail_image_name = clean_str_for_img($this->input->post('paymentDetailImage'). '-' . time() ) . '.jpg';
     
-            $paymentDetailImage_error = upload('paymentDetailImage','./assets/uploads/screenshots/',$payment_detail_image_name, 'jpg');
-            if($paymentDetailImage_error){
-              $this->output->set_status_header('401');
-              echo json_encode(array( "message" => $paymentDetailImage_error));
-              return;
-            }
+            // $paymentDetailImage_error = upload('paymentDetailImage','./assets/uploads/screenshots/',$payment_detail_image_name, 'jpg');
+            // if($paymentDetailImage_error){
+            //   $this->output->set_status_header('401');
+            //   echo json_encode(array( "message" => $paymentDetailImage_error));
+            //   return;
+            // }
 
 
             $order_information = array(
