@@ -240,20 +240,28 @@ class Download extends CI_Controller {
 
 
 	public function stock_order_download_payment_information($filename){
-		$imagePath = './assets/uploads/screenshots/' . $filename;
+		$filePath = './assets/uploads/screenshots/' . $filename;
 
-		if (file_exists($imagePath)) {
-			header('Content-Type: image/jpeg');
+		if (file_exists($filePath)) {
+			$fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
+	
+			$allowedTypes = array(
+				'pdf' => 'application/pdf',
+				'png' => 'image/png',
+				'jpg' => 'image/jpeg',
+			);
+	
+			if (isset($allowedTypes[$fileExtension])) {
+				header('Content-Type: ' . $allowedTypes[$fileExtension]);
+			} else {
+				header('Content-Type: application/octet-stream');
+			}
 			header('Content-Disposition: attachment; filename="' . $filename . '"');
-			
-			header('Content-Disposition: attachment; filename="payment_info.jpg"');
-
-
-			header('Content-Length: ' . filesize($imagePath));
-			readfile($imagePath);
-		  } else {
+			header('Content-Length: ' . filesize($filePath));
+			readfile($filePath);
+		} else {
 			show_404();
-		  }
+		}
     }
 
     public function theoretical_sales_invoice($order_id){
