@@ -719,30 +719,30 @@ class Stock_ordering extends CI_Controller
             $status = 8;
 
 
-            // $uploadedReceipt_image_name = clean_str_for_img($this->input->post('uploadedReceipt'). '-' . time());
+            $payment_detail_image_name = clean_str_for_img($this->input->post('paymentDetailImage'). '-' . time());
 
-            // $uploadedReceipt = explode(".", $_FILES['uploadedReceipt']['name']);
-            // $ext = end($uploadedReceipt);
-            // $uploadedReceipt_image_name = $uploadedReceipt_image_name . '.' . $ext;
+            $payment_detail_image = explode(".", $_FILES['paymentDetailImage']['name']);
+            $ext = end($payment_detail_image);
+            $payment_detail_image_name = $payment_detail_image_name . '.' . $ext;
 
-            // $uploadedReceipt_error = upload('uploadedReceipt','./assets/uploads/screenshots/',$uploadedReceipt_image_name, $ext );
+            $payment_detail_image_name_error = upload('paymentDetailImage','./assets/uploads/screenshots/',$payment_detail_image_name, $ext );
 
-            // if($uploadedReceipt_error){
-            // $this->output->set_status_header('401');
-            // echo json_encode(array( "message" => $uploadedReceipt_error));
-            // return;
-            // }
-
-
-
-            $payment_detail_image_name = clean_str_for_img($this->input->post('paymentDetailImage'). '-' . time() ) . '.jpg';
-    
-            $paymentDetailImage_error = upload('paymentDetailImage','./assets/uploads/screenshots/',$payment_detail_image_name, 'jpg');
-            if($paymentDetailImage_error){
-              $this->output->set_status_header('401');
-              echo json_encode(array( "message" => $paymentDetailImage_error));
-              return;
+            if($payment_detail_image_name_error){
+            $this->output->set_status_header('401');
+            echo json_encode(array( "message" => $payment_detail_image_name_error));
+            return;
             }
+
+
+
+            // $payment_detail_image_name = clean_str_for_img($this->input->post('paymentDetailImage'). '-' . time() ) . '.jpg';
+    
+            // $paymentDetailImage_error = upload('paymentDetailImage','./assets/uploads/screenshots/',$payment_detail_image_name, 'jpg');
+            // if($paymentDetailImage_error){
+            //   $this->output->set_status_header('401');
+            //   echo json_encode(array( "message" => $paymentDetailImage_error));
+            //   return;
+            // }
 
 
             $order_information = array(
