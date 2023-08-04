@@ -34,7 +34,7 @@ class Stock_ordering extends CI_Controller
                 $store = $this->stock_ordering_model->getStore($user_id);
                 $ship_to_address = $this->stock_ordering_model->getShipToAddress($store_id);
                 $window_time = $this->stock_ordering_model->getWindowTime($store_id);
-
+                
 
                 $data = array(
                     "stores" => $store,
@@ -635,48 +635,58 @@ class Stock_ordering extends CI_Controller
             $user_id = $this->session->admin['user_id'];
             $with_new_si = $this->input->post('withNewSI');
             $status = 7;
+            $message = "";
 
-            if($with_new_si === true){
+            $uploadedGoodsReceipt_image_name = null;
+            $uploadedRegionReceipt_image_name = null;
+            // Updated Sales Invoice
+            if(isset($_FILES['uploadedGoodsReceipt'])){
+                $uploadedGoodsReceipt_image_name = clean_str_for_img($this->input->post('uploadedGoodsReceipt'). '-g-' . time());
 
-                // Updated Sales Invoice
-                $uploadedReceipt_image_name = clean_str_for_img($this->input->post('uploadedReceipt'). '-' . time());
+                $uploadedGoodsReceipt = explode(".", $_FILES['uploadedGoodsReceipt']['name']);
+                $ext = end($uploadedGoodsReceipt);
+                $uploadedGoodsReceipt_image_name = $uploadedGoodsReceipt_image_name . '.' . $ext;
 
-                $uploadedReceipt = explode(".", $_FILES['uploadedReceipt']['name']);
-                $ext = end($uploadedReceipt);
-                $uploadedReceipt_image_name = $uploadedReceipt_image_name . '.' . $ext;
+                $uploadedGoodsReceipt_error = upload('uploadedGoodsReceipt','./assets/uploads/screenshots/',$uploadedGoodsReceipt_image_name, $ext );
 
-                $uploadedReceipt_error = upload('uploadedReceipt','./assets/uploads/screenshots/',$uploadedReceipt_image_name, $ext );
-
-                if($uploadedReceipt_error){
+                if($uploadedGoodsReceipt_error){
                 $this->output->set_status_header('401');
-                echo json_encode(array( "message" => $uploadedReceipt_error));
+                echo json_encode(array( "message" => $uploadedGoodsReceipt_error));
                 return;
                 }
-
-                $order_information_data = array(
-                    "status_id"   => $status,
-                    'updated_delivery_receipt' => $updated_delivery_receipt_image_name,
-                    'last_updated' => date('Y-m-d H:i:s'),
-                );
-
-                $this->stock_ordering_model->updateBillingInformationId($order_information_id, $order_information_data);
-                $this->transaction_log($order_information_id, 7, date('Y-m-d H:i:s'));
-
-
-            }else{
-
-                $order_information_data = array(
-                    "status_id"   => $status,
-                    'last_updated' => date('Y-m-d H:i:s'),
-                );
-
-                $this->stock_ordering_model->updateBillingInformationId($order_information_id, $order_information_data);
-                $this->transaction_log($order_information_id, 7, date('Y-m-d H:i:s'));
-
             }
 
-            
-          
+            if(isset($_FILES['uploadedRegionReceipt'])){
+                $uploadedRegionReceipt_image_name = clean_str_for_img($this->input->post('uploadedRegionReceipt'). '-r-' . time());
+
+                $uploadedRegionReceipt = explode(".", $_FILES['uploadedRegionReceipt']['name']);
+                $ext = end($uploadedRegionReceipt);
+                $uploadedRegionReceipt_image_name = $uploadedRegionReceipt_image_name . '.' . $ext;
+
+                $uploadedRegionReceipt_error = upload('uploadedRegionReceipt','./assets/uploads/screenshots/',$uploadedRegionReceipt_image_name, $ext );
+
+                if($uploadedRegionReceipt_error){
+                $this->output->set_status_header('401');
+                echo json_encode(array( "message" => $uploadedRegionReceipt_error));
+                return;
+                }
+            }
+
+            $order_information_data = array(
+                "status_id"   => $status,
+                'updated_delivery_goods_receipt' => $uploadedGoodsReceipt_image_name ?? null,
+                'updated_delivery_region_receipt' => $uploadedRegionReceipt_image_name ?? null,
+                'last_updated' => date('Y-m-d H:i:s'),
+            );
+
+            $insertError = $this->stock_ordering_model->updateBillingInformationId($order_information_id, $order_information_data);
+            $this->transaction_log($order_information_id, 7, date('Y-m-d H:i:s'));
+
+            if(isset($insertError)){
+                $this->output->set_status_header('401');
+                echo json_encode(array( "message" => "Error Inserting"));
+                return;
+            }
 
             
             if (isset($remarks) && !empty($remarks)) {
@@ -689,14 +699,18 @@ class Stock_ordering extends CI_Controller
                     'date'    => date('Y-m-d H:i:s'),
                 );
 
-                $this->stock_ordering_model->insertRemarks($remarks_information);
+                $insertError = $this->stock_ordering_model->insertRemarks($remarks_information);
 
-                $message = "Success!";
+                if(isset($insertError)){
+                    $this->output->set_status_header('401');
+                    echo json_encode(array( "message" => "Error Inserting"));
+                    return;
+                }
 
             }
 
             $response = array(
-                "message" => $message,
+                "message" => "Success!",
             );
 
             header('content-type: application/json');
@@ -712,11 +726,17 @@ class Stock_ordering extends CI_Controller
         case 'POST':
             $data =  json_decode(file_get_contents("php://input"), true);
 
-            $order_information_id = $this->input->post('id');
             $payment_detail_image = $this->input->post('paymentDetailImage');
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
             $status = 8;
+
+            $index = 0;
+            $order_information_id = array();
+            while($this->input->post('id_'.$index)){
+                $order_information_id[$index] = $this->input->post('id_'.$index);
+                $index++;
+            }
 
 
             $payment_detail_image_name = clean_str_for_img($this->input->post('paymentDetailImage'). '-' . time());
@@ -733,18 +753,6 @@ class Stock_ordering extends CI_Controller
             return;
             }
 
-
-
-            // $payment_detail_image_name = clean_str_for_img($this->input->post('paymentDetailImage'). '-' . time() ) . '.jpg';
-    
-            // $paymentDetailImage_error = upload('paymentDetailImage','./assets/uploads/screenshots/',$payment_detail_image_name, 'jpg');
-            // if($paymentDetailImage_error){
-            //   $this->output->set_status_header('401');
-            //   echo json_encode(array( "message" => $paymentDetailImage_error));
-            //   return;
-            // }
-
-
             $order_information = array(
                 'payment_detail_image' => $payment_detail_image_name,
                 "status_id"   => $status,
@@ -752,7 +760,6 @@ class Stock_ordering extends CI_Controller
             );
 
             $upload_payment_img = $this->stock_ordering_model->uploadPaymentDetailImage($order_information_id, $order_information);
-            $this->transaction_log($order_information_id, 8, date('Y-m-d H:i:s'));
 
             if (!$upload_payment_img) {
                 $message = "Success!";
@@ -762,16 +769,20 @@ class Stock_ordering extends CI_Controller
 
 
             if (isset($remarks) && !empty($remarks)) {
-                    
-                $remarks_information = array(
-                    'order_information_id' => $order_information_id,
-                    'order_status_id' => $status,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
 
-                $this->stock_ordering_model->insertRemarks($remarks_information);
+                foreach($order_information_id as $id){
+                    $this->transaction_log($id, 8, date('Y-m-d H:i:s'));
+
+                    $remarks_information = array(
+                        'order_information_id' => $id,
+                        'order_status_id' => $status,
+                        'remarks' => $remarks,
+                        'user_id' => $user_id,
+                        'date'    => date('Y-m-d H:i:s'),
+                    );
+                    $this->stock_ordering_model->insertRemarks($remarks_information);
+                }
+
 
                 $message = "Success!";
 
