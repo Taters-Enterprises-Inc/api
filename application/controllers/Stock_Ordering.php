@@ -405,7 +405,7 @@ class Stock_ordering extends CI_Controller
             
             $status = 4;            
 
-
+            
             // Update Dispatch date time 
             $dispatch_date = DateTime::createFromFormat('h:i:s a', $dispatch_date)->format('H:i:s');
             $get_commited_date = $this->stock_ordering_model->getCommitedDate($order_information_id);
@@ -419,15 +419,17 @@ class Stock_ordering extends CI_Controller
             $deliveryReceipt = explode(".", $_FILES['deliveryReceipt']['name']);
             $ext = end($deliveryReceipt);
             $delivery_receipt_image_name = $delivery_receipt_image_name . '.' . $ext;
+            $path = './assets/uploads/screenshots/'.$delivery_receipt_image_name;
 
-            $deliveryReceipt_error = upload('deliveryReceipt','./assets/uploads/screenshots/',$delivery_receipt_image_name, $ext );
+            $deliveryReceipt_error = upload('deliveryReceipt','./assets/uploads/screenshots/', $delivery_receipt_image_name, $ext );
 
             if($deliveryReceipt_error){
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => $deliveryReceipt_error));
               return;
             }
-
+            
+            $this->import_si($order_information_id, $path);
 
             $order_information = array(
                 'delivery_receipt' => $delivery_receipt_image_name,
@@ -1170,44 +1172,13 @@ class Stock_ordering extends CI_Controller
         }
     }
 
-
-    // public function get_windows_time(){
-    //     switch($this->input->server('REQUEST_METHOD')){
-    //         case 'GET':
-
-    //         $store_id = 18;
-
-    //         $window_time = $this->stock_ordering_model->getWindowTime($store_id);
-
-    //         $data = array(
-    //             "windowTime" => $window_time,
-    //         );
-
-    //         $response = array(
-    //             "message" => 'Successfully windows time',
-    //             "data"    => $data, 
-
-    //         );
-            
-    //         header('content-type: application/json');
-    //         echo json_encode($response);
-    //         break;
-    //     }
-    // }
-
     public function import_view(){
         $this->load->view('stock_ordering/import_view');
     }
 
-    public function import_si(){
-        switch($this->input->server('REQUEST_METHOD')){
-            case 'POST':
-            $_POST =  json_decode(file_get_contents("php://input"), true);
+    public function import_si($order_information_id, $path){
 
-            $order_information_id = $this->input->post('id');
-
-            if (isset($_FILES["file"]["name"])) {
-                $path = $_FILES["file"]["tmp_name"];
+            if (isset($path)) {
                 $object = PHPExcel_IOFactory::load($path);
 
                 foreach($object->getWorksheetIterator() as $worksheet) {
@@ -1251,15 +1222,7 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            $response = array(
-                "message" => $message,
-            );
-            
-            header('content-type: application/json');
-            echo json_encode($response);
-            break;
+            return $message;
         }
-    }
-
 	
 }
