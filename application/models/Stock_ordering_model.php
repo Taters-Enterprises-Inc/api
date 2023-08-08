@@ -629,5 +629,9 @@ class Stock_ordering_model extends CI_Model {
 
     /* End */
 
+    public function insertSiTb($data){
+        $this->db->insert_batch('multim_si_tb', $data);
+    }
+
 
 }

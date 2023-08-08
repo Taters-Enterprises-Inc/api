@@ -148,6 +148,9 @@ $route['stock/ordered/download-payment/(:any)'] = 'download/stock_order_download
 
 $route['stock/most-ordered-product/(:any)/(:any)'] = 'Stock_Ordering/most_ordered_product/$1/$2';
 
+$route['stock/import-view'] = 'Stock_Ordering/import_view';
+$route['stock/import-si'] = 'Stock_Ordering/import_si';
+
 
 
 //Admin

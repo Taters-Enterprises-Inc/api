@@ -12,6 +12,7 @@ class Stock_ordering extends CI_Controller
 		parent::__construct();
 
         $this->load->library('form_validation');
+        $this->load->library('excel');
         $this->load->helper(['url', 'language']);
 
         $this->form_validation->set_error_delimiters('', '');
@@ -1193,6 +1194,72 @@ class Stock_ordering extends CI_Controller
     //         break;
     //     }
     // }
+
+    public function import_view(){
+        $this->load->view('stock_ordering/import_view');
+    }
+
+    public function import_si(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $order_information_id = $this->input->post('id');
+
+            if (isset($_FILES["file"]["name"])) {
+                $path = $_FILES["file"]["tmp_name"];
+                $object = PHPExcel_IOFactory::load($path);
+
+                foreach($object->getWorksheetIterator() as $worksheet) {
+                    $highestRow     =    $worksheet->getHighestRow();
+                    $highestColumn  =    $worksheet->getHighestColumn();
+
+                    for ($row=2; $row<=$highestRow; $row++) { 
+                        $requested_date      = $worksheet->getCellByColumnAndRow(0, $row)->getValue();
+                        $si                  = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
+                        $store               = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
+                        $multim_product_code = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
+                        $multim_product_name = $worksheet->getCellByColumnAndRow(4, $row)->getValue();
+                        $unit_of_measure     = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
+                        $base_price_extended = $worksheet->getCellByColumnAndRow(6, $row)->getValue();
+                        $total               = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
+
+
+                        // "quantity" => (preg_match('/(\d+\.\d+)\s+(.+)/', $unit_of_measure, $matches)) ? $matches[1] : "",
+                        // "uom" => (preg_match('/(\d+\.\d+)\s+(.+)/', $unit_of_measure, $matches)) ? $matches[2] : "",
+
+                        $data[] = array(
+                            "order_id" => $order_information_id,
+                            "requested_date" => $requested_date,
+                            "si" => preg_replace("/[^0-9]/", "", $si),
+                            "store" => $store,
+                            "multim_product_code" => $multim_product_code,
+                            "multim_product_name" => $multim_product_name,
+                            "quantity" => $unit_of_measure,
+                            "base_price_extended" => (preg_match('/[\d,]+(?:\.\d+)?/', $base_price_extended, $matches)) ? clean_str_for_decimal($matches[0]) : "",
+                            "total" => (preg_match('/[\d,]+(?:\.\d+)?/', $total, $matches)) ? clean_str_for_decimal($matches[0]) : ""
+                        );
+                    }
+                }
+
+                $import = $this->stock_ordering_model->insertSiTb($data);
+
+                if (!$import) {
+                    $message = "Success";
+                } else {
+                    $message = "Failed!";
+                }
+            }
+
+            $response = array(
+                "message" => $message,
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
+    }
 
 	
 }
