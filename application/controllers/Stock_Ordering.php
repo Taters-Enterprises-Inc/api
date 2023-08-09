@@ -747,6 +747,7 @@ class Stock_ordering extends CI_Controller
             $payment_detail_image = explode(".", $_FILES['paymentDetailImage']['name']);
             $ext = end($payment_detail_image);
             $payment_detail_image_name = $payment_detail_image_name . '.' . $ext;
+            $path = './assets/uploads/screenshots/'.$payment_detail_image_name;
 
             $payment_detail_image_name_error = upload('paymentDetailImage','./assets/uploads/screenshots/',$payment_detail_image_name, $ext );
 
@@ -755,6 +756,8 @@ class Stock_ordering extends CI_Controller
             echo json_encode(array( "message" => $payment_detail_image_name_error));
             return;
             }
+
+            $this->import_pay_bill_payment($path);
 
             $order_information = array(
                 'payment_detail_image' => $payment_detail_image_name,
