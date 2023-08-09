@@ -1214,15 +1214,15 @@ class Stock_ordering extends CI_Controller
                     $highestRow     =    $worksheet->getHighestRow();
                     $highestColumn  =    $worksheet->getHighestColumn();
 
-                    for ($row=2; $row<=$highestRow; $row++) { 
-                        $requested_date      = $worksheet->getCellByColumnAndRow(0, $row)->getValue();
-                        $si                  = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
-                        $store               = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
-                        $multim_product_code = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
-                        $multim_product_name = $worksheet->getCellByColumnAndRow(4, $row)->getValue();
-                        $unit_of_measure     = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
-                        $base_price_extended = $worksheet->getCellByColumnAndRow(6, $row)->getValue();
-                        $total               = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
+                    for ($row=3; $row<=$highestRow; $row++) { 
+                        $requested_date      = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
+                        $si                  = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
+                        $store               = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
+                        $multim_product_code = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
+                        $multim_product_name = $worksheet->getCellByColumnAndRow(6, $row)->getValue();
+                        $uom                 = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
+                        $quantity            = $worksheet->getCellByColumnAndRow(8, $row)->getValue();
+                        $total               = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
 
 
                         // "quantity" => (preg_match('/(\d+\.\d+)\s+(.+)/', $unit_of_measure, $matches)) ? $matches[1] : "",
@@ -1235,8 +1235,8 @@ class Stock_ordering extends CI_Controller
                             "store" => $store,
                             "multim_product_code" => $multim_product_code,
                             "multim_product_name" => $multim_product_name,
-                            "quantity" => $unit_of_measure,
-                            "base_price_extended" => (preg_match('/[\d,]+(?:\.\d+)?/', $base_price_extended, $matches)) ? clean_str_for_decimal($matches[0]) : "",
+                            "uom" => $uom,
+                            "quantity" => $quantity,
                             "total" => (preg_match('/[\d,]+(?:\.\d+)?/', $total, $matches)) ? clean_str_for_decimal($matches[0]) : ""
                         );
                     }
