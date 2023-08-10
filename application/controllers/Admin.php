@@ -2335,6 +2335,10 @@ class Admin extends CI_Controller{
             "minimum_rate" => $this->input->post('minimumRate'),
             "catering_delivery_rate" => $this->input->post('cateringDeliveryRate'),
             "catering_minimum_rate" => $this->input->post('cateringMinimumRate'),
+            "status" => 0,
+            "catering_status" => 0,
+            "popclub_walk_in_status" => 0,
+            "popclub_online_delivery_status" => 0,
           );
 
           $store_primary_key = $this->admin_model->insertStore($data);
