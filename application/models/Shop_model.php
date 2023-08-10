@@ -7,97 +7,43 @@ class Shop_model extends CI_Model
 		$this->db =  $this->load->database('default', TRUE, TRUE);
         $this->bscDB = $this->load->database('bsc', TRUE, TRUE);
     }
-    
-    public function getUserInboxHistoryCount($type, $id, $search){
-        $this->db->select('count(*) as all_count');
-            
-        $this->db->from('notifications A');
-        $this->db->join('notification_events B', 'B.id = A.notification_event_id');
-        $this->db->join($this->bscDB->database.'.customer_survey_responses C', 'C.id = B.customer_survey_response_id', 'left');
-        $this->db->join('transaction_tb D', 'D.id = C.transaction_id', 'left');
-        $this->db->join('catering_transaction_tb E', 'E.id = C.catering_transaction_id', 'left');
-        $this->db->or_where('B.notification_event_type_id', 4);
-        $this->db->or_where('B.notification_event_type_id', 5);
-        $this->db->or_where('B.notification_event_type_id', 6);
 
-        
-        if ($type == 'mobile') {
-            $this->db->where('A.mobile_user_to_notify', $id);
+    public function getInfluencerPromo($referral_code){
+        $this->db->select('A.id');
 
-        } else if($type == 'facebook') {
-            $this->db->where('A.fb_user_to_notify', $id);
-        }
+        $this->db->from('transaction_tb A');
+        $this->db->join('influencer_promos B', 'B.id = A.influencer_promo_id', 'left');
 
-            
-        if($search){
-            $this->db->group_start();
-            $this->db->like('A.tracking_no', $search);
-            $this->db->or_like('B.text', $search);
-            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
-            $this->db->group_end();
-        }
+        $this->db->where('B.referral_code', $referral_code);
 
         $query = $this->db->get();
-        return $query->row()->all_count;
+
+        return $query->row();
     }
-
-    public function getUserInboxHistory($type, $id, $row_no, $row_per_page, $order_by,  $order, $search){
-
+    
+    public function getInfluencerPromoByReferralCode($referral_code){
         $this->db->select('
-            A.id,
+            A.id, 
+            A.influencer_id,
+            A.referral_code, 
+            A.customer_discount, 
+            A.influencer_discount,
             A.dateadded,
-            B.notification_event_type_id,
-            B.text,
-            C.invoice_no,
-            C.hash as survey_hash,
-            D.hash_key as transaction_hash,
-            E.hash_key as catering_transaction_hash,
-
-            F.title,
-            F.body,
-            F.closing,
-            F.closing_salutation,
-            F.image_title,
-            F.image_url,
-            F.internal_link_title,
-            F.internal_link_url,
-            F.message_from,
-            F.email,
-            F.contact_number,
+            B.fb_user_id,
+            B.mobile_user_id,
+            CONCAT(C.first_name," ",C.last_name) as fb_user_name,
+            CONCAT(D.first_name," ",D.last_name) as mobile_user_name,
         ');
-
-        $this->db->from('notifications A');
-        $this->db->join('notification_events B', 'B.id = A.notification_event_id');
-        $this->db->join($this->bscDB->database.'.customer_survey_responses C', 'C.id = B.customer_survey_response_id', 'left');
-        $this->db->join('transaction_tb D', 'D.id = B.transaction_tb_id', 'left');
-        $this->db->join('catering_transaction_tb E', 'E.id = B.catering_transaction_tb_id', 'left');
-
-        $this->db->join('notification_messages F', 'F.id = B.notification_message_id', 'left');
-
-        $this->db->or_where('B.notification_event_type_id', 4);
-
-        if ($type == 'mobile') {
-            $this->db->where('A.mobile_user_to_notify', $id);
-
-        } else if($type == 'facebook') {
-            $this->db->where('A.fb_user_to_notify', $id);
-        }
-        
-        if($search){
-            $this->db->group_start();
-            $this->db->like('A.tracking_no', $search);
-            $this->db->or_like('B.text', $search);
-            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
-            $this->db->group_end();
-        }
-            
-        $this->db->limit($row_per_page, $row_no);
-        $this->db->order_by($order_by, $order);
+        $this->db->from('influencer_promos A');
+        $this->db->join('influencers B', 'B.id = A.influencer_id');
+        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
+        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
+        $this->db->where('A.referral_code', $referral_code);
 
         $query = $this->db->get();
-        return $query->result();
+        return $query->row();
     }
-    
+
     public function get_store_id_by_hash_key($hash_key){
         $this->db->select('store');
         $this->db->where('hash_key', $hash_key);
@@ -422,7 +368,7 @@ class Shop_model extends CI_Model
 
     function fetch_product_sku($variants)
     {
-        $this->db->select("MAX(B.price) AS price,A.sku_id,MAX(B.sku) AS sku,MAX(B.product_id) AS product_id");
+        $this->db->select("MAX(B.price) AS price,A.sku_id,A.product_variant_option_id,MAX(B.sku) AS sku,MAX(B.product_id) AS product_id");
         $this->db->from('product_variant_option_combinations_tb A');
         $this->db->join('product_skus_tb B', 'A.sku_id = B.id');
         if(count($variants) === 1){

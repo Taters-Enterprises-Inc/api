@@ -362,11 +362,13 @@ class Deals_model extends CI_Model
 				B.promo_price,
 				C.url_name as platform_url_name,
 				D.address,
+				E.referral_code
 			');
 			$this->db->from('deals_redeems_tb A');
 			$this->db->join('dotcom_deals_tb B', 'B.id = A.deal_id');
 			$this->db->join('dotcom_deals_platform C', 'C.id = A.platform_id');
 			$this->db->join('deals_client_tb D', 'D.id = A.client_id');
+			$this->db->join('influencer_deals E', 'E.id = A.influencer_deal_id', 'left');
 			$this->db->where('A.client_id', $client->id);
 			$this->db->where('A.status', 1);
 
@@ -573,6 +575,7 @@ class Deals_model extends CI_Model
 				$this->db->join('dotcom_deals_platform_combination B', 'B.deal_id = A.id');
 				$this->db->join('dotcom_deals_category C', 'C.id = B.platform_category_id');
 				$this->db->where('A.status',$is_available);
+				$this->db->where('A.influencer_discount', null);
 				$this->db->where('B.platform_category_id',$deal_category->id);
 				$this->db->where('A.is_partner_company',0);
 				$this->db->group_start();
@@ -624,6 +627,7 @@ class Deals_model extends CI_Model
 		  $this->db->join('dotcom_deals_platform_combination B', 'B.deal_id = A.id');
 		  $this->db->join('dotcom_deals_category C', 'C.id = B.platform_category_id');
 		  $this->db->where('A.status',$is_available);
+		  $this->db->where('A.influencer_discount', null);
 		  $this->db->where('A.is_partner_company',0);
 		  $this->db->where('B.platform_category_id',$deals_category->id);
 		  

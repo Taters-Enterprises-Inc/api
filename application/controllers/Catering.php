@@ -55,7 +55,7 @@ class Catering extends CI_Controller {
 				notify('admin-catering','contract-booking', $real_time_notification);
 
                 header('content-type: application/json');
-                echo json_encode(array( "message" => 'Succesfully upload contract'));
+                echo json_encode(array( "message" => 'Successfully upload contract'));
             }
         } else {
 			$this->output->set_status_header('401');

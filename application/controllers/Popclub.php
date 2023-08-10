@@ -19,6 +19,7 @@ class Popclub extends CI_Controller {
 		$this->load->model('notification_model');
 		$this->load->model('user_model');
 		$this->load->model('store_model');
+		$this->load->model('influencer_model');
 	}
 
 	public function orders(){
@@ -225,7 +226,6 @@ class Popclub extends CI_Controller {
 	public function redeem_deal(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'POST':
-
 				if(
 					(!isset($_SESSION['cache_data']) && 
 					!isset($_SESSION['userData']) ) 
@@ -255,20 +255,29 @@ class Popclub extends CI_Controller {
 					$store_id = $this->session->cache_data['store_id'];
 		
 					$client_id = $client_details['id'];
+					
+					$referral_code = $post['referralCode'];
+					$influencer_deal_id = null;
+
+					if($referral_code != ""){
+						$influencer_deal = $this->influencer_model->getInfluencerDealByReferralCode($referral_code);
+						$influencer_deal_id = $influencer_deal->id;
+					}
 		
 					$redeems_transaction_data = array(
-							'redeem_code' 					=> $redeem_code,
-							'deal_id'						=> $deal->id,
-							'client_id' 	   				=> $client_id,
-							'purchase_amount'   			=> $deal->promo_price === NULL? 0 :  $deal->promo_price,
-							'remarks' 		    			=> $post['remarks'],
-							'platform_id'					=> $deal->platform_id,
-							'status' 		    			=> 1,
-							'dateadded'         			=> $date_redeemed,
-							'expiration'					=> $expiration_date,
-							'hash_key'          			=> $trans_hash_key,
-							'logon_type'        			=> "facebook",
-							'store'							=> $_SESSION['cache_data']['store_id'],
+						'redeem_code' 					=> $redeem_code,
+						'deal_id'						=> $deal->id,
+						'client_id' 	   				=> $client_id,
+						'purchase_amount'   			=> $deal->promo_price === NULL? 0 :  $deal->promo_price,
+						'remarks' 		    			=> $post['remarks'],
+						'platform_id'					=> $deal->platform_id,
+						'status' 		    			=> 1,
+						'dateadded'         			=> $date_redeemed,
+						'expiration'					=> $expiration_date,
+						'hash_key'          			=> $trans_hash_key,
+						'logon_type'        			=> "facebook",
+						'store'							=> $_SESSION['cache_data']['store_id'],
+						'influencer_deal_id'			=> $influencer_deal_id,
 					);
 					
 					$query_transaction_result = $this->transaction_model->insertPopClubTransactionDetails($redeems_transaction_data);
@@ -567,6 +576,9 @@ class Popclub extends CI_Controller {
 								$product->name = $product_variant_option->name . ' ' . $product->name;
 							}
 						}
+
+						
+						
 
 						$product_variants = $this->deals_model->getDealProductVariantsWithSelectedOption($value->product_id, $value->product_variant_options_id);
 
