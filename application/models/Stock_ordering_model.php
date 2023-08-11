@@ -305,7 +305,7 @@ class Stock_ordering_model extends CI_Model {
 
     public function getShipToAddress($id){
         $this->db->select('
-            store_id,
+            
             ship_to_address,
             
         ');
@@ -631,6 +631,25 @@ class Stock_ordering_model extends CI_Model {
 
     public function insertSiTb($data){
         $this->db->insert_batch('multim_si_tb', $data);
+    }
+
+    public function getOrderMSI(){
+        $this->db->select('
+            A.si,
+            A.order_id,
+            A.store,
+            B.order_placement_date,
+            B.requested_delivery_date,
+            B.commited_delivery_date,
+
+        ');
+        $this->db->from('multim_si_tb A');
+        $this->db->join('order_information_tb B', 'B.id = A.order_id', 'inner');
+        $this->db->where('B.payment_status_id', 1); // Payment Status 1 for unpaid
+        $this->db->group_by('A.si');
+
+        $query = $this->db->get();
+        return $query->result();
     }
 
 

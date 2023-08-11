@@ -39,7 +39,7 @@ class Stock_ordering extends CI_Controller
 
                 $data = array(
                     "stores" => $store,
-                    "ship_to_address" => $ship_to_address,
+                    "address" => $ship_to_address,
                     "window_time" => $window_time
                 );
                 
@@ -110,7 +110,7 @@ class Stock_ordering extends CI_Controller
 
             $order_information = array(
                 'store_id' => $store_id,
-                'ship_to_address' => $ship_to_address,
+                'ship_to_address' => $ship_to_address['ship_to_address'],
                 'requested_delivery_date' => $delivery_date,
                 'order_type_id' => $category_id,
                 'order_placement_date' => $orderPlacementDate,
@@ -725,6 +725,23 @@ class Stock_ordering extends CI_Controller
 
     public function pay_billing(){
         switch($this->input->server('REQUEST_METHOD')){
+
+        case 'GET': 
+
+
+            $order_msi = $this->stock_ordering_model->getOrderMSI();
+
+              $response = array(
+                "message" => 'Successfully fetch',
+                "data" => array(
+                    "orders" => $order_msi,
+                ),
+            );
+
+            header('content-type: application/json');
+            echo json_encode($response);
+
+            break;
 
         case 'POST':
             $data =  json_decode(file_get_contents("php://input"), true);
