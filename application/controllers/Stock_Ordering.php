@@ -764,6 +764,7 @@ class Stock_ordering extends CI_Controller
             $payment_detail_image = explode(".", $_FILES['paymentDetailImage']['name']);
             $ext = end($payment_detail_image);
             $payment_detail_image_name = $payment_detail_image_name . '.' . $ext;
+            $path = './assets/uploads/screenshots/'.$payment_detail_image_name;
 
             $payment_detail_image_name_error = upload('paymentDetailImage','./assets/uploads/screenshots/',$payment_detail_image_name, $ext );
 
@@ -772,6 +773,8 @@ class Stock_ordering extends CI_Controller
             echo json_encode(array( "message" => $payment_detail_image_name_error));
             return;
             }
+
+            $this->import_pay_bill_payment($path);
 
             $order_information = array(
                 'payment_detail_image' => $payment_detail_image_name,
@@ -1195,51 +1198,88 @@ class Stock_ordering extends CI_Controller
 
     public function import_si($order_information_id, $path){
 
-            if (isset($path)) {
-                $object = PHPExcel_IOFactory::load($path);
+        if (isset($path)) {
+            $object = PHPExcel_IOFactory::load($path);
 
-                foreach($object->getWorksheetIterator() as $worksheet) {
-                    $highestRow     =    $worksheet->getHighestRow();
-                    $highestColumn  =    $worksheet->getHighestColumn();
+            foreach($object->getWorksheetIterator() as $worksheet) {
+                $highestRow     =    $worksheet->getHighestRow();
+                $highestColumn  =    $worksheet->getHighestColumn();
 
-                    for ($row=3; $row<=$highestRow; $row++) { 
-                        $requested_date      = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
-                        $si                  = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
-                        $store               = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
-                        $multim_product_code = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
-                        $multim_product_name = $worksheet->getCellByColumnAndRow(6, $row)->getValue();
-                        $uom                 = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
-                        $quantity            = $worksheet->getCellByColumnAndRow(8, $row)->getValue();
-                        $total               = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
+                for ($row=3; $row<=$highestRow; $row++) { 
+                    $requested_date      = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
+                    $si                  = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
+                    $store               = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
+                    $multim_product_code = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
+                    $multim_product_name = $worksheet->getCellByColumnAndRow(6, $row)->getValue();
+                    $uom                 = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
+                    $quantity            = $worksheet->getCellByColumnAndRow(8, $row)->getValue();
+                    $total               = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
 
+                    // "quantity" => (preg_match('/(\d+\.\d+)\s+(.+)/', $unit_of_measure, $matches)) ? $matches[1] : "",
+                    // "uom" => (preg_match('/(\d+\.\d+)\s+(.+)/', $unit_of_measure, $matches)) ? $matches[2] : "",
 
-                        // "quantity" => (preg_match('/(\d+\.\d+)\s+(.+)/', $unit_of_measure, $matches)) ? $matches[1] : "",
-                        // "uom" => (preg_match('/(\d+\.\d+)\s+(.+)/', $unit_of_measure, $matches)) ? $matches[2] : "",
-
-                        $data[] = array(
-                            "order_id" => $order_information_id,
-                            "requested_date" => $requested_date,
-                            "si" => preg_replace("/[^0-9]/", "", $si),
-                            "store" => $store,
-                            "multim_product_code" => $multim_product_code,
-                            "multim_product_name" => $multim_product_name,
-                            "uom" => $uom,
-                            "quantity" => $quantity,
-                            "total" => (preg_match('/[\d,]+(?:\.\d+)?/', $total, $matches)) ? clean_str_for_decimal($matches[0]) : ""
-                        );
-                    }
-                }
-
-                $import = $this->stock_ordering_model->insertSiTb($data);
-
-                if (!$import) {
-                    $message = "Success";
-                } else {
-                    $message = "Failed!";
+                    $data[] = array(
+                        "order_id" => $order_information_id,
+                        "requested_date" => $requested_date,
+                        "si" => preg_replace("/[^0-9]/", "", $si),
+                        "store" => $store,
+                        "multim_product_code" => $multim_product_code,
+                        "multim_product_name" => $multim_product_name,
+                        "uom" => $uom,
+                        "quantity" => $quantity,
+                        "total" => (preg_match('/[\d,]+(?:\.\d+)?/', $total, $matches)) ? clean_str_for_decimal($matches[0]) : ""
+                    );
                 }
             }
 
-            return $message;
+            $import = $this->stock_ordering_model->insertSiTb($data);
+
+            if (!$import) {
+                $message = "Success";
+            } else {
+                $message = "Failed!";
+            }
         }
+
+        return $message;
+    }
+
+    public function import_pay_bill_payment($path){
+
+        if (isset($path)) {
+            $object = PHPExcel_IOFactory::load($path);
+
+            foreach($object->getWorksheetIterator() as $worksheet) {
+                $highestRow     =    $worksheet->getHighestRow();
+                $highestColumn  =    $worksheet->getHighestColumn();
+
+                for ($row=2; $row<=$highestRow; $row++) { 
+                    $selected      = $worksheet->getCellByColumnAndRow(0, $row)->getValue();
+                    $reference_no  = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
+                    $ap_total      = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
+                    $total_payment = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
+                    $wtax_amt      = $worksheet->getCellByColumnAndRow(4, $row)->getValue();
+
+                    $data[] = array(
+                        "selected" => $selected,
+                        "reference_no" => $reference_no,
+                        "ap_total" => $ap_total,
+                        "total_payment" => $total_payment,
+                        "wtax_amt" => $wtax_amt
+                    );
+                }
+            }
+
+            $import = $this->stock_ordering_model->insertPayBillPaymentTb($data);
+
+            if (!$import) {
+                $message = "Success";
+            } else {
+                $message = "Failed!";
+            }
+        }
+
+        return $message;
+    }
 	
 }
