@@ -305,7 +305,7 @@ class Stock_ordering_model extends CI_Model {
 
     public function getShipToAddress($id){
         $this->db->select('
-            
+            store_id,
             ship_to_address,
             
         ');
@@ -633,7 +633,6 @@ class Stock_ordering_model extends CI_Model {
         $this->db->insert_batch('multim_si_tb', $data);
     }
 
-<<<<<<< HEAD
     public function getOrderMSI(){
         $this->db->select('
             A.si,
@@ -651,10 +650,10 @@ class Stock_ordering_model extends CI_Model {
 
         $query = $this->db->get();
         return $query->result();
-=======
+    }
+
     public function insertPayBillPaymentTb($data){
         $this->db->insert_batch('pay_bill_payment_tb', $data);
->>>>>>> db6ca179c84e86a9247f1b9261210049b5d1955e
     }
 
 
