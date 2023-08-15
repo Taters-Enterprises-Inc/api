@@ -646,6 +646,7 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('multim_si_tb A');
         $this->db->join('order_information_tb B', 'B.id = A.order_id', 'inner');
         $this->db->where('B.payment_status_id', 1); // Payment Status 1 for unpaid
+        $this->db->where('B.status_id', 7);
         $this->db->group_by('A.si');
 
         $query = $this->db->get();
@@ -656,5 +657,6 @@ class Stock_ordering_model extends CI_Model {
         $this->db->insert_batch('pay_bill_payment_tb', $data);
     }
 
+    
 
 }

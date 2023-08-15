@@ -752,21 +752,32 @@ class Stock_ordering extends CI_Controller
             $status = 8;
 
             $index = 0;
-            $order_information_id = array();
-            while($this->input->post('id_'.$index)){
-                $order_information_id[$index] = $this->input->post('id_'.$index);
+
+            $order_information_data = array();
+            while($this->input->post('selectedData_'.$index.'_orderId')){
+                $order_information_data[$index]['order_id'] = $this->input->post('selectedData_'.$index.'_orderId');
+                $order_information_data[$index]['invoice'] = $this->input->post('selectedData_'.$index.'_invoice');
                 $index++;
             }
 
+            for($i=0; $i < count($order_information_data); $i++){
+                if($order_information_data[$i]['order_id'] != $order_information_data[0]['order_id']){
+                        $this->output->set_status_header('401');
+                        echo json_encode(array( "message" => "Invalid OrderId. Select Invoice Number with the same orderId"));
+                        return;
+                }
+            }
+            
+            $order_information_OrderId = $order_information_data[0]['order_id'];
 
-            $payment_detail_image_name = clean_str_for_img($this->input->post('paymentDetailImage'). '-' . time());
+            $payment_detail_image_name = clean_str_for_img($this->input->post('paymentFile'). '-' . time());
 
-            $payment_detail_image = explode(".", $_FILES['paymentDetailImage']['name']);
+            $payment_detail_image = explode(".", $_FILES['paymentFile']['name']);
             $ext = end($payment_detail_image);
             $payment_detail_image_name = $payment_detail_image_name . '.' . $ext;
             $path = './assets/uploads/screenshots/'.$payment_detail_image_name;
 
-            $payment_detail_image_name_error = upload('paymentDetailImage','./assets/uploads/screenshots/',$payment_detail_image_name, $ext );
+            $payment_detail_image_name_error = upload('paymentFile','./assets/uploads/screenshots/',$payment_detail_image_name, $ext );
 
             if($payment_detail_image_name_error){
             $this->output->set_status_header('401');
@@ -774,7 +785,13 @@ class Stock_ordering extends CI_Controller
             return;
             }
 
-            $this->import_pay_bill_payment($path);
+            $import = $this->import_pay_bill_payment($path, $order_information_data);
+
+            if($import != ""){
+                $this->output->set_status_header('401');
+                echo json_encode(array( "message" => $import));
+                return;
+            }
 
             $order_information = array(
                 'payment_detail_image' => $payment_detail_image_name,
@@ -782,7 +799,7 @@ class Stock_ordering extends CI_Controller
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
-            $upload_payment_img = $this->stock_ordering_model->uploadPaymentDetailImage($order_information_id, $order_information);
+            $upload_payment_img = $this->stock_ordering_model->uploadPaymentDetailImage($order_information_OrderId, $order_information);
 
             if (!$upload_payment_img) {
                 $message = "Success!";
@@ -793,23 +810,20 @@ class Stock_ordering extends CI_Controller
 
             if (isset($remarks) && !empty($remarks)) {
 
-                foreach($order_information_id as $id){
-                    $this->transaction_log($id, 8, date('Y-m-d H:i:s'));
-
-                    $remarks_information = array(
-                        'order_information_id' => $id,
-                        'order_status_id' => $status,
-                        'remarks' => $remarks,
-                        'user_id' => $user_id,
-                        'date'    => date('Y-m-d H:i:s'),
-                    );
-                    $this->stock_ordering_model->insertRemarks($remarks_information);
-                }
-
-
+                $remarks_information = array(
+                    'order_information_id' => $order_information_OrderId,
+                    'order_status_id' => $status,
+                    'remarks' => $remarks,
+                    'user_id' => $user_id,
+                    'date'    => date('Y-m-d H:i:s'),
+                );
+                $this->stock_ordering_model->insertRemarks($remarks_information);
+                
                 $message = "Success!";
-
             }
+
+            $this->transaction_log($order_information_OrderId, 8, date('Y-m-d H:i:s'));
+
 
             $response = array(
                 "message" => $message,
@@ -1244,7 +1258,7 @@ class Stock_ordering extends CI_Controller
         return $message;
     }
 
-    public function import_pay_bill_payment($path){
+    public function import_pay_bill_payment($path, $order_information_data){
 
         if (isset($path)) {
             $object = PHPExcel_IOFactory::load($path);
@@ -1270,13 +1284,37 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            $import = $this->stock_ordering_model->insertPayBillPaymentTb($data);
+            $message = "";
 
-            if (!$import) {
-                $message = "Success";
-            } else {
-                $message = "Failed!";
+            if(count($order_information_data) != count($data)){
+                if(count($order_information_data) != count($data)){
+                    $message = "Invoice row length does not match file selected length";
+                    return $message;
+                }
             }
+
+            $matching_invoice = array_fill(0, count($order_information_data), false);
+            $index = 0;
+
+            foreach($order_information_data as $payment){
+                foreach($data as $xlsData){
+                    if($payment['invoice'] == $xlsData['reference_no']){
+                        $matching_invoice[$index] = true;
+                    }
+                }
+                $index++;
+            }
+
+            for($i=0; $i < count($matching_invoice); $i++){
+                if($matching_invoice[$i] == false){
+                    $message = 'Selected invoices does not match from the uploaded file';
+                    break;
+                }
+            }
+
+            if (isset($import)) {
+                $this->stock_ordering_model->insertPayBillPaymentTb($data);
+            } 
         }
 
         return $message;
