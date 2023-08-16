@@ -1234,7 +1234,7 @@ class Stock_ordering extends CI_Controller
 
                     $data[] = array(
                         "order_id" => $order_information_id,
-                        "requested_date" => $requested_date,
+                        "invoice_date" => $requested_date,
                         "si" => preg_replace("/[^0-9]/", "", $si),
                         "store" => $store,
                         "multim_product_code" => $multim_product_code,
