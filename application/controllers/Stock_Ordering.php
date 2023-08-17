@@ -413,8 +413,6 @@ class Stock_ordering extends CI_Controller
             $dispatch_date = substr_replace($get_commited_date, $dispatch_date, 11, 8);
 
             //****** 
-
-            // Upload file with pdf
             $delivery_receipt_image_name = clean_str_for_img($this->input->post('deliveryReceipt'). '-' . time());
             $deliveryReceipt = explode(".", $_FILES['deliveryReceipt']['name']);
             $ext = end($deliveryReceipt);
@@ -762,7 +760,7 @@ class Stock_ordering extends CI_Controller
 
             for($i=0; $i < count($order_information_data); $i++){
                 if($order_information_data[$i]['order_id'] != $order_information_data[0]['order_id']){
-                        $this->output->set_status_header('401');
+                        $this->output->set_status_header('400');
                         echo json_encode(array( "message" => "Invalid OrderId. Select Invoice Number with the same orderId"));
                         return;
                 }
@@ -788,7 +786,7 @@ class Stock_ordering extends CI_Controller
             $import = $this->import_pay_bill_payment($path, $order_information_data);
 
             if($import != ""){
-                $this->output->set_status_header('401');
+                $this->output->set_status_header('400');
                 echo json_encode(array( "message" => $import));
                 return;
             }

@@ -239,7 +239,7 @@ class Download extends CI_Controller {
     }
 
 
-	public function stock_order_download_payment_information($filename){
+	public function stock_order_download_uploaded_file_information($filename){
 		$filePath = './assets/uploads/screenshots/' . $filename;
 
 		if (file_exists($filePath)) {
@@ -249,6 +249,8 @@ class Download extends CI_Controller {
 				'pdf' => 'application/pdf',
 				'png' => 'image/png',
 				'jpg' => 'image/jpeg',
+				'xls' => 'application/xls',
+				'xlsx' => 'application/xlsx',
 			);
 	
 			if (isset($allowedTypes[$fileExtension])) {
@@ -260,7 +262,10 @@ class Download extends CI_Controller {
 			header('Content-Length: ' . filesize($filePath));
 			readfile($filePath);
 		} else {
-			show_404();
+
+			$this->output->set_status_header('401');
+			echo json_encode(array( "message" => "File does not exist"));
+			return;
 		}
     }
 
