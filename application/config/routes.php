@@ -150,6 +150,8 @@ $route['stock/most-ordered-product/(:any)/(:any)'] = 'Stock_Ordering/most_ordere
 
 $route['stock/import-view'] = 'Stock_Ordering/import_view';
 
+$route['stock/generate-multim-si-pdf/(:any)'] = 'download/multim_sales_invoice/$1';
+
 
 
 //Admin

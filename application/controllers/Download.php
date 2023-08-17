@@ -289,4 +289,24 @@ class Download extends CI_Controller {
         }
     }
 
+    public function multim_sales_invoice($order_id){
+    	switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $multi_m = $this->stock_ordering_model->getMultiMSiPdf($order_id);
+            $multi_m_details = $this->stock_ordering_model->getMultiMSiDetailsForPdf($order_id);
+
+            $data['multi_m'] = $multi_m;
+
+            $file_name = $multi_m_details->order_id . "-" . $multi_m_details->store;
+
+            $this->load->library('pdf');
+            $this->pdf->legalPotrait('stock_ordering/multim_sales_invoice_download', $data);
+            $this->pdf->render();
+            $this->pdf->stream($file_name);
+    
+            break;
+        }
+    }
+
 }

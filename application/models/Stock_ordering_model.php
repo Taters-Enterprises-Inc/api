@@ -657,6 +657,24 @@ class Stock_ordering_model extends CI_Model {
         $this->db->insert_batch('pay_bill_payment_tb', $data);
     }
 
+    public function getMultiMSiPdf($order_id){
+        $this->db->select('*');
+        $this->db->from('multim_si_tb');
+        $this->db->where('order_id', $order_id);
+
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+    public function getMultiMSiDetailsForPdf($order_id){
+        $this->db->select('order_id, store');
+        $this->db->from('multim_si_tb');
+        $this->db->where('order_id', $order_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
     
 
 }
