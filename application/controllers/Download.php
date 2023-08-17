@@ -239,7 +239,7 @@ class Download extends CI_Controller {
     }
 
 
-	public function stock_order_download_payment_information($filename){
+	public function stock_order_download_uploaded_file_information($filename){
 		$filePath = './assets/uploads/screenshots/' . $filename;
 
 		if (file_exists($filePath)) {
@@ -249,6 +249,8 @@ class Download extends CI_Controller {
 				'pdf' => 'application/pdf',
 				'png' => 'image/png',
 				'jpg' => 'image/jpeg',
+				'xls' => 'application/xls',
+				'xlsx' => 'application/xlsx',
 			);
 	
 			if (isset($allowedTypes[$fileExtension])) {
@@ -260,7 +262,10 @@ class Download extends CI_Controller {
 			header('Content-Length: ' . filesize($filePath));
 			readfile($filePath);
 		} else {
-			show_404();
+
+			$this->output->set_status_header('401');
+			echo json_encode(array( "message" => "File does not exist"));
+			return;
 		}
     }
 
@@ -282,6 +287,26 @@ class Download extends CI_Controller {
 
             $this->load->library('pdf');
             $this->pdf->legalPotrait('stock_ordering/sales_invoice_download', $data);
+            $this->pdf->render();
+            $this->pdf->stream($file_name);
+    
+            break;
+        }
+    }
+
+    public function multim_sales_invoice($order_id){
+    	switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $multi_m = $this->stock_ordering_model->getMultiMSiPdf($order_id);
+            $multi_m_details = $this->stock_ordering_model->getMultiMSiDetailsForPdf($order_id);
+
+            $data['multi_m'] = $multi_m;
+
+            $file_name = $multi_m_details->order_id . "-" . $multi_m_details->store;
+
+            $this->load->library('pdf');
+            $this->pdf->legalPotrait('stock_ordering/multim_sales_invoice_download', $data);
             $this->pdf->render();
             $this->pdf->stream($file_name);
     

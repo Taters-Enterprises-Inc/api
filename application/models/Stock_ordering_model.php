@@ -158,18 +158,16 @@ class Stock_ordering_model extends CI_Model {
             A.order_placement_date,
             A.requested_delivery_date,
             A.commited_delivery_date,
-            A.order_confirmation_date,
             A.actual_delivery_date,
             C.description,
-            D.billing_id,
-            D.billing_amount,
             F.short_name,
             A.reviewed_date,
             A.dispatch_date,
-            A.enroute_date,
             A.payment_confirmation_date,
             A.delivery_receipt,
             A.updated_delivery_receipt,
+            A.updated_delivery_goods_receipt,
+            A.updated_delivery_region_receipt,
             A.payment_detail_image,
             G.label as transport_route,
             H.region_id,
@@ -655,6 +653,24 @@ class Stock_ordering_model extends CI_Model {
 
     public function insertPayBillPaymentTb($data){
         $this->db->insert_batch('pay_bill_payment_tb', $data);
+    }
+
+    public function getMultiMSiPdf($order_id){
+        $this->db->select('*');
+        $this->db->from('multim_si_tb');
+        $this->db->where('order_id', $order_id);
+
+        $query = $this->db->get();
+        return $query->result_array();
+    }
+
+    public function getMultiMSiDetailsForPdf($order_id){
+        $this->db->select('order_id, store');
+        $this->db->from('multim_si_tb');
+        $this->db->where('order_id', $order_id);
+
+        $query = $this->db->get();
+        return $query->row();
     }
 
     
