@@ -13,8 +13,6 @@ class Download extends CI_Controller {
 		$this->load->model('store_model');
 		$this->load->model('catering_model');
 		$this->load->model('client_model');
-		$this->load->model('influencer_model');
-		$this->load->model('stock_ordering_model');
 		$this->load->library('images');
 	}
 
@@ -168,30 +166,6 @@ class Download extends CI_Controller {
 		}
 
     }
-	
-
-    public function influencer_contract(){
-
-		$influencer = $this->influencer_model->getInfluencer(
-			$this->session->userData['fb_user_id'] ?? null,
-			$this->session->userData['mobile_user_id'] ?? null
-		);
-
-		$full_name = $influencer->first_name . ' ' . $influencer->middle_name . ' ' . $influencer->last_name;
-		
-		$contract_data = array(
-			"full_name" => $full_name,
-		);
-
-		$file_name = 'influencer-contract';
-
-
-		$this->load->library('pdf');
-		$this->pdf->legalPotrait('influencer_contract_download',$contract_data);
-		$this->pdf->render();
-		$this->pdf->stream($file_name);
-
-    }
     
     private function get_night_diff($start_datetime, $end_datetime){
         date_default_timezone_set('Asia/Manila');
@@ -236,82 +210,6 @@ class Download extends CI_Controller {
         }
 
         return $additional_fee;
-    }
-
-
-	public function stock_order_download_uploaded_file_information($filename){
-		$filePath = './assets/uploads/screenshots/' . $filename;
-
-		if (file_exists($filePath)) {
-			$fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
-	
-			$allowedTypes = array(
-				'pdf' => 'application/pdf',
-				'png' => 'image/png',
-				'jpg' => 'image/jpeg',
-				'xls' => 'application/xls',
-				'xlsx' => 'application/xlsx',
-			);
-	
-			if (isset($allowedTypes[$fileExtension])) {
-				header('Content-Type: ' . $allowedTypes[$fileExtension]);
-			} else {
-				header('Content-Type: application/octet-stream');
-			}
-			header('Content-Disposition: attachment; filename="' . $filename . '"');
-			header('Content-Length: ' . filesize($filePath));
-			readfile($filePath);
-		} else {
-
-			$this->output->set_status_header('401');
-			echo json_encode(array( "message" => "File does not exist"));
-			return;
-		}
-    }
-
-    public function theoretical_sales_invoice($order_id){
-    	switch($this->input->server('REQUEST_METHOD')){
-            case 'GET':
-            // $order_id = $this->input->get('orderId');
-            // $order_id = 1;
-
-            $store = $this->stock_ordering_model->getStoreDetailsForPdf($order_id);
-            $products = $this->stock_ordering_model->getProductDataForPdf($order_id);
-            $si_details = $this->stock_ordering_model->getSiOtherDetails($order_id);
-
-            $data['products'] = $products;
-            $data['store_details'] = $store;
-            $data['si_details'] = $si_details;
-
-            $file_name = 'Theoretical Sales Invoice';
-
-            $this->load->library('pdf');
-            $this->pdf->legalPotrait('stock_ordering/sales_invoice_download', $data);
-            $this->pdf->render();
-            $this->pdf->stream($file_name);
-    
-            break;
-        }
-    }
-
-    public function multim_sales_invoice($order_id){
-    	switch($this->input->server('REQUEST_METHOD')){
-            case 'GET':
-
-            $multi_m = $this->stock_ordering_model->getMultiMSiPdf($order_id);
-            $multi_m_details = $this->stock_ordering_model->getMultiMSiDetailsForPdf($order_id);
-
-            $data['multi_m'] = $multi_m;
-
-            $file_name = $multi_m_details->order_id . "-" . $multi_m_details->store;
-
-            $this->load->library('pdf');
-            $this->pdf->legalPotrait('stock_ordering/multim_sales_invoice_download', $data);
-            $this->pdf->render();
-            $this->pdf->stream($file_name);
-    
-            break;
-        }
     }
 
 }

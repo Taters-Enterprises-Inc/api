@@ -4,11 +4,8 @@ assets/upload/catering_upload_contract/*
 assets/upload/proof_payment/*
 assets/upload/catering_proof_payment/*
 assets/upload/user_discount/*
-assets/upload/influencer_upload_contract/*
-assets/upload/influencer/*
 assets/upload/catering/*
 assets/upload/reciepts/*
-assets/uploads/screenshots/*
 
 application/views/errors/*
 
@@ -22,7 +19,6 @@ application/logs/*
 
 composer.lock
 tests/mocks/database/ci_test.sqlite
-
 
 user_guide_src/build/*
 user_guide_src/cilexer/build/*

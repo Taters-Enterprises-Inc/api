@@ -6,500 +6,6 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
-    public function getCustomerFeedBackAveragePerRatingsGroupsQuestion($question_id, $group_id, $store_id, $startDate, $endDate){
-        $this->bsc_db->select('E.lowest_rate, E.highest_rate,AVG(A.rate) as avg');
-            
-        $this->bsc_db->from('customer_survey_response_ratings A');
-        $this->bsc_db->join('survey_question_ratings B', 'B.id = A.survey_question_rating_id','left');
-        $this->bsc_db->join('survey_questions C', 'C.id = B.survey_question_id','left');
-        $this->bsc_db->join('survey_question_offered_ratings D', 'D.id = B.survey_question_offered_rating_id','left');
-        $this->bsc_db->join('survey_question_offered_rating_groups E', 'E.id = D.survey_question_offered_rating_group_id','left');
-        $this->bsc_db->join('customer_survey_responses F', 'F.id = A.customer_survey_response_id','left');
-
-        $this->bsc_db->where('C.id', $question_id);
-        $this->bsc_db->where('D.survey_question_offered_rating_group_id', $group_id);
-        $this->bsc_db->where('F.store_id', $store_id);
-
-        $this->bsc_db->where('F.dateadded >=', $startDate);
-        $this->bsc_db->where('F.dateadded <=', $endDate);
-
-        $this->bsc_db->group_by('C.survey_section_id');
-
-        $query = $this->bsc_db->get();
-        return $query->row();
-    }
-
-    public function getSurveyQuestionSectionQuestions($section_id){
-        $this->bsc_db->select('A.id, A.description as question_name');
-            
-        $this->bsc_db->from('survey_questions A');
-        $this->bsc_db->where('A.survey_section_id', $section_id);
-
-        $query = $this->bsc_db->get();
-        return $query->result();
-    }
-
-    public function getSurveyQuestionOfferedRatingGroups(){
-        $this->bsc_db->select('A.id, A.name,');
-            
-        $this->bsc_db->from('survey_question_offered_rating_groups A');
-
-        $query = $this->bsc_db->get();
-        return $query->result();
-    }
-
-    public function getCustomerFeedBackAveragePerRatingsGroups($section_id, $group_id, $store_id, $startDate, $endDate){
-        $this->bsc_db->select('E.lowest_rate, E.highest_rate,AVG(A.rate) as avg');
-            
-        $this->bsc_db->from('customer_survey_response_ratings A');
-        $this->bsc_db->join('survey_question_ratings B', 'B.id = A.survey_question_rating_id','left');
-        $this->bsc_db->join('survey_questions C', 'C.id = B.survey_question_id','left');
-        $this->bsc_db->join('survey_question_offered_ratings D', 'D.id = B.survey_question_offered_rating_id','left');
-        $this->bsc_db->join('survey_question_offered_rating_groups E', 'E.id = D.survey_question_offered_rating_group_id','left');
-        $this->bsc_db->join('customer_survey_responses F', 'F.id = A.customer_survey_response_id','left');
-
-        $this->bsc_db->where('C.survey_section_id', $section_id);
-        $this->bsc_db->where('D.survey_question_offered_rating_group_id', $group_id);
-        $this->bsc_db->where('F.store_id', $store_id);
-
-        $this->bsc_db->where('F.dateadded >=', $startDate);
-        $this->bsc_db->where('F.dateadded <=', $endDate);
-
-        $this->bsc_db->group_by('C.survey_section_id');
-
-        $query = $this->bsc_db->get();
-        return $query->row();
-    }
-
-    public function getSurveyQuestionSections(){
-        $this->bsc_db->select('A.id, A.name,');
-            
-        $this->bsc_db->from('survey_question_sections A');
-
-        $query = $this->bsc_db->get();
-        return $query->result();
-    }
-
-    public function getDashboardShopFeaturedProducts($store){
-        $this->db->select('
-            CONCAT(B.product_label," ",C.name) as product_name,
-            C.product_image,
-            C.price,
-            count(*) as purchased,
-        ');
-            
-        $this->db->from('transaction_tb A');
-        $this->db->join('order_items B', 'B.transaction_id = A.id', 'left');
-        $this->db->join('products_tb C', 'C.id = B.product_id', 'left');
-
-        $this->db->group_by("product_name");
-        $this->db->where('C.name IS NOT NULL');
-        $this->db->where('A.status', 6);
-
-        if(!empty($store))
-            $this->db->where_in('A.store', $store);
-
-        $this->db->order_by('purchased', 'DESC');
-
-        $query = $this->db->get();
-        return $query->result();
-    }
-
-    public function getDashboardShopMobileUsersCount($store){
-        $this->db->distinct();
-
-        $this->db->select('C.id, C.first_name');
-            
-        $this->db->from('transaction_tb A');
-        $this->db->join('client_tb B', 'B.id = A.client_id', 'left');
-        $this->db->join('mobile_users C', 'C.id = B.mobile_user_id');
-
-        if(!empty($store))
-            $this->db->where_in('A.store', $store);
-
-        $query = $this->db->get();
-        return $query->num_rows();
-    }
-
-    public function getDashboardShopFbUsersCount($store){
-        $this->db->distinct();
-
-        $this->db->select('C.id, C.first_name');
-            
-        $this->db->from('transaction_tb A');
-        $this->db->join('client_tb B', 'B.id = A.client_id', 'left');
-        $this->db->join('fb_users C', 'C.id = B.fb_user_id');
-
-        if(!empty($store))
-            $this->db->where_in('A.store', $store);
-
-        $query = $this->db->get();
-        return $query->num_rows();
-    }
-
-    public function getDashboardShopInitialCheckoutsCount( $store){
-        $this->db->select('count(*) as all_count');
-            
-        $this->db->from('snackshop_initial_checkout_logs A');
-
-        if(!empty($store))
-            $this->db->where_in('A.store', $store);
-
-        $query = $this->db->get();
-        return $query->row()->all_count;
-    }
-
-    public function getDashboardShopProductViewsCount( $store){
-        $this->db->select('count(*) as all_count');
-            
-        $this->db->from('snackshop_product_view_logs A');
-
-        if(!empty($store))
-            $this->db->where_in('A.store', $store);
-
-        $query = $this->db->get();
-        return $query->row()->all_count;
-    }
-
-
-    public function getDashboardShopAddToCartsCount( $store){
-        $this->db->select('count(*) as all_count');
-            
-        $this->db->from('snackshop_add_to_cart_logs A');
-
-        if(!empty($store))
-            $this->db->where_in('A.store', $store);
-
-        $query = $this->db->get();
-        return $query->row()->all_count;
-    }
-
-    public function getDashboardShopCompletedTransactionCount( $store){
-        $this->db->select('count(*) as all_count');
-            
-        $this->db->from('transaction_tb A');
-
-        if(!empty($store))
-            $this->db->where_in('A.store', $store);
-
-        $this->db->where('A.status', 6);
-
-        $query = $this->db->get();
-        return $query->row()->all_count;
-    }
-
-    public function getDashboardShopTransactionsCount( $store){
-        $this->db->select('count(*) as all_count');
-            
-        $this->db->from('transaction_tb A');
-
-        if(!empty($store))
-            $this->db->where_in('A.store', $store);
-
-        $query = $this->db->get();
-        return $query->row()->all_count;
-    }
-
-    public function updateInfluencerPayable($influencer_id, $payable){
-		$this->db->set('payable', $payable);
-        $this->db->where('influencer_id', $influencer_id);
-        $this->db->update("influencer_profiles");
-    }
-
-    public function changeStatusInfluencerCashout($influencer_cashout_id, $status){
-		$this->db->set('influencer_cashout_status_id', $status);
-        $this->db->where('id', $influencer_cashout_id);
-        $this->db->update("influencer_cashouts");
-    }
-
-    public function getInfluencerCashoutById($influencer_cashout_id){
-        $this->db->select('
-            A.id,
-            A.influencer_id,
-            A.cashout,
-            A.influencer_cashout_status_id,
-            A.dateadded,
-            B.id_number,
-            B.first_name,
-            B.middle_name,
-            B.last_name,
-            B.id_front,
-            B.id_back,
-            B.fb_user_id,
-            B.mobile_user_id,
-            B.payment_selected,
-            B.account_number,
-            B.account_name,
-            CONCAT(C.first_name," ",C.last_name) as fb_user_name,
-            CONCAT(D.first_name," ",D.last_name) as mobile_user_name,
-            E.payable,
-        ');
-        $this->db->from('influencer_cashouts A');
-        $this->db->join('influencers B','B.id = A.influencer_id');
-        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
-        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
-        $this->db->join('influencer_profiles E','E.influencer_id = A.influencer_id');
-
-        $this->db->where('A.id', $influencer_cashout_id);
-
-        $query = $this->db->get();
-        return $query->row();
-    }
-
-    
-    public function getInfluencerCashoutsCount($status, $search){
-        $this->db->select('count(*) as all_count');
-            
-        $this->db->from('influencer_cashouts A');
-        $this->db->join('influencers B','B.id = A.influencer_id');
-        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
-        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
-
-
-        if($status)
-            $this->db->where('A.influencer_cashout_status_id', $status);
-
-        if($search){
-            $this->db->group_start();
-            $this->db->like('A.cashout', $search);
-            $this->db->or_like('CONCAT(D.first_name," ",D.last_name)', $search);
-            $this->db->or_like('CONCAT(C.first_name," ",C.last_name)', $search);
-            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
-            $this->db->group_end();
-        }
-
-        $query = $this->db->get();
-        return $query->row()->all_count;
-    }
-
-    public function getInfluencerCashouts($row_no, $row_per_page, $status, $order_by,  $order, $search){
-        $this->db->select('
-            A.id,
-            A.cashout,
-            A.influencer_cashout_status_id,
-            A.dateadded,
-            CONCAT(C.first_name," ",C.last_name) as fb_user_name,
-            CONCAT(D.first_name," ",D.last_name) as mobile_user_name,
-        ');
-
-        $this->db->from('influencer_cashouts A');
-        $this->db->join('influencers B','B.id = A.influencer_id');
-        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
-        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
-
-        if($status)
-            $this->db->where('A.influencer_cashout_status_id', $status);
-
-
-        if($search){
-            $this->db->group_start();
-            $this->db->like('A.cashout', $search);
-            $this->db->or_like('CONCAT(D.first_name," ",D.last_name)', $search);
-            $this->db->or_like('CONCAT(C.first_name," ",C.last_name)', $search);
-            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
-            $this->db->group_end();
-        }
-
-        $this->db->limit($row_per_page, $row_no);
-        $this->db->order_by($order_by, $order);
-
-        $query = $this->db->get();
-        return $query->result();
-    }
-
-    function insertInfluencerPromo($data){
-        $this->db->trans_start();
-		$this->db->insert('influencer_promos', $data);
-        $this->db->trans_complete();
-    }
-
-    function getSettingInfluencers(){
-
-        $this->db->select('
-            A.id,
-            CONCAT(B.first_name," ",B.last_name) as fb_user_name,
-            CONCAT(C.first_name," ",C.last_name) as mobile_user_name,
-        ');
-
-        $this->db->from('influencers A');
-        $this->db->join('fb_users B', 'B.id = A.fb_user_id', 'left');
-        $this->db->join('mobile_users C', 'C.id = A.mobile_user_id', 'left');
-
-        $this->db->where('A.status', 9);
-
-        $query = $this->db->get();
-        return $query->result();
-    }
-
-    public function getInfluencerPromosCount($search){
-        $this->db->select('count(*) as all_count');
-            
-        $this->db->from('influencer_promos A');
-        $this->db->join('influencers B', 'B.id = A.influencer_id');
-        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
-        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
-
-        if($search){
-            $this->db->group_start();
-            $this->db->like('A.referral_code', $search);
-            $this->db->or_like('CONCAT(C.first_name," ",C.last_name)', $search);
-            $this->db->or_like('CONCAT(D.first_name," ",D.last_name)', $search);
-            $this->db->or_like('A.customer_discount', $search);
-            $this->db->or_like('A.influencer_discount', $search);
-            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
-            $this->db->group_end();
-        }
-
-        $query = $this->db->get();
-        return $query->row()->all_count;
-    }
-    
-    function getInfluencerPromos($row_no, $row_per_page, $order_by,  $order, $search){
-        $this->db->select('
-            A.id,
-            A.referral_code,
-            A.customer_discount,
-            A.influencer_discount,
-            A.dateadded,
-            CONCAT(C.first_name," ",C.last_name) as fb_user_name,
-            CONCAT(D.first_name," ",D.last_name) as mobile_user_name,
-        ');
-
-        $this->db->from('influencer_promos A');
-        $this->db->join('influencers B', 'B.id = A.influencer_id');
-        $this->db->join('fb_users C', 'C.id = B.fb_user_id', 'left');
-        $this->db->join('mobile_users D', 'D.id = B.mobile_user_id', 'left');
-
-        if($search){
-            $this->db->group_start();
-            $this->db->like('A.referral_code', $search);
-            $this->db->or_like('CONCAT(C.first_name," ",C.last_name)', $search);
-            $this->db->or_like('CONCAT(D.first_name," ",D.last_name)', $search);
-            $this->db->or_like('A.customer_discount', $search);
-            $this->db->or_like('A.influencer_discount', $search);
-            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
-            $this->db->group_end();
-        }
-
-        $this->db->limit($row_per_page, $row_no);
-        $this->db->order_by($order_by, $order);
-
-        $query = $this->db->get();
-        return $query->result();
-    }
-    
-
-    function getInfluencerById($influencer_id){
-        $this->db->select('
-            id,
-            fb_user_id,
-            mobile_user_id,
-        ');
-
-        $this->db->from('influencers');
-
-        $this->db->where('id', $influencer_id);
-
-        $query = $this->db->get();
-        return $query->row();
-    }
-
-    function getDiscountUserById($discount_user_id){
-        $this->db->select('
-            id,
-            fb_user_id,
-            mobile_user_id,
-        ');
-
-        $this->db->from('discount_users');
-
-        $this->db->where('id', $discount_user_id);
-
-        $query = $this->db->get();
-        return $query->row();
-    }
-
-    public function getInfluencerByFbOrMobileUser($fb_user_id, $mobile_user_id){
-        $this->db->select('
-            A.id,
-            A.first_name,
-            A.middle_name,
-            A.last_name,
-            A.birthday,
-            A.id_number,
-            A.id_front,
-            A.id_back,
-            A.status,
-        ');
-
-        $this->db->from('influencers A');
-        $this->db->join('influencer_profiles B', 'B.influencer_id = A.id');
-        
-        if(isset($fb_user_id)){
-            $this->db->where('A.fb_user_id', $fb_user_id);
-        }elseif(isset($mobile_user_id)){
-            $this->db->where('A.mobile_user_id', $mobile_user_id);
-        }
-
-        $query = $this->db->get();
-        return $query->row();
-    }
-
-    function getInfluencerProfile($influencer_id){
-
-        $this->db->select('payable');
-
-        $this->db->from('influencer_profiles');
-        $this->db->where('influencer_id', $influencer_id);
-
-        $query = $this->db->get();
-
-        return $query->row();
-    }
-
-    function updateInfluencerProfilePayable($influencer_id, $payable){
-        $this->db->set('payable',$payable);
-        $this->db->where("influencer_id", $influencer_id);
-        $this->db->update("influencer_profiles");
-    }
-
-    function getTransactionById($transaction_id){
-        $this->db->select('
-            A.hash_key,
-            A.influencer_discount,
-            B.fb_user_id,
-            B.mobile_user_id,
-            D.influencer_id,
-        ');
-
-        $this->db->from('transaction_tb A');
-        $this->db->join('client_tb B', 'B.id = A.client_id');
-        $this->db->join('influencer_promos D', 'D.id = A.influencer_promo_id', 'left');
-
-        $this->db->where('A.id', $transaction_id);
-
-        $query = $this->db->get();
-
-        return $query->row();
-    }
-
-    function insertInfluencerDeal($data){
-        $this->db->trans_start();
-		$this->db->insert('influencer_deals', $data);
-        $this->db->trans_complete();
-    }
-
-    function getInfluencersId(){
-        $this->db->select('id, fb_user_id, mobile_user_id ');
-
-        $this->db->from('influencers');
-
-        $query = $this->db->get();
-
-        return $query->result();
-    }
-
-
     function updatePopclubDealStatus($deal_id, $status){
         $this->db->set('status', $status);
         $this->db->where("id", $deal_id);
@@ -565,105 +71,6 @@ class Admin_model extends CI_Model
     function updatePopclubDeal($deal_id, $data){
         $this->db->where('id', $deal_id);
         $this->db->update('dotcom_deals_tb', $data);
-    }
-
-    public function changeStatusInfluencer($influencer_user_id, $status){
-		$this->db->set('status', (int) $status);
-        $this->db->where('id', $influencer_user_id);
-        $this->db->update("influencers");
-    }
-
-    public function getInfluencerApplication($influencer_user_id){
-        $this->db->select("
-            A.id,
-            A.first_name,
-            A.middle_name,
-            A.last_name,
-            A.birthday,
-            A.id_number,
-            A.dateadded,
-            A.id_front,
-            A.id_back,
-            A.payment_selected,
-            A.account_number,
-            A.account_name,
-            A.contract,
-            A.status,
-
-            B.first_name as fb_first_name,
-            B.last_name as fb_last_name,
-
-            C.first_name as mobile_first_name,
-            C.last_name as mobile_last_name,
-        ");
-        $this->db->from('influencers A');
-        $this->db->join('fb_users B', 'B.id = A.fb_user_id','left');
-        $this->db->join('mobile_users C', 'C.id = A.mobile_user_id','left');
-
-        $this->db->where('A.id', $influencer_user_id);
-
-        $query = $this->db->get();
-        return $query->row();
-    }
-
-
-    public function getInfluencerApplications($row_no, $row_per_page, $status, $order_by,  $order, $search){
-        
-        $this->db->select("
-            A.id,
-            A.first_name,
-            A.middle_name,
-            A.last_name,
-            A.birthday,
-            A.id_number,
-            A.dateadded,
-            A.status,
-        ");
-        $this->db->from('influencers A');
-        
-            
-        if($status)
-            $this->db->where('A.status', $status);
-
-
-        if($search){
-            $this->db->group_start();
-            $this->db->like('A.id_number', $search);
-            $this->db->or_like('A.first_name', $search);
-            $this->db->or_like('A.middle_name', $search);
-            $this->db->or_like('A.last_name', $search);
-            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
-            $this->db->group_end();
-        }
-
-        $this->db->limit($row_per_page, $row_no);
-        $this->db->order_by($order_by, $order);
-
-        $query = $this->db->get();
-        return $query->result();
-    }
-    
-    public function getInfluencerApplicationsCount($status, $search){
-        $this->db->select('count(*) as all_count');
-            
-        $this->db->from('influencers A');
-
-        if($status)
-            $this->db->where('A.status', $status);
-
-            
-        if($search){
-            $this->db->group_start();
-            $this->db->like('A.id_number', $search);
-            $this->db->or_like('A.first_name', $search);
-            $this->db->or_like('A.middle_name', $search);
-            $this->db->or_like('A.last_name', $search);
-            $this->db->or_like("DATE_FORMAT(A.dateadded, '%M %e, %Y')", $search);
-            $this->db->group_end();
-        }
-
-        $query = $this->db->get();
-        return $query->row()->all_count;
     }
 
     function getPopclubDealStores($deal_id){
@@ -931,7 +338,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->like('name', $search);
+            $this->db->or_like('name', $search);
             $this->db->or_like('original_price', $search);
             $this->db->or_like('promo_price', $search);
             $this->db->or_like('description', $search);
@@ -961,7 +368,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->like('name', $search);
+            $this->db->or_like('name', $search);
             $this->db->or_like('original_price', $search);
             $this->db->or_like('promo_price', $search);
             $this->db->or_like('description', $search);
@@ -1187,7 +594,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->like('name', $search);
+            $this->db->or_like('name', $search);
             $this->db->or_like('description', $search);
             $this->db->or_like('price', $search);
             $this->db->or_like('add_details', $search);
@@ -1216,7 +623,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->like('name', $search);
+            $this->db->or_like('name', $search);
             $this->db->or_like('description', $search);
             $this->db->or_like('price', $search);
             $this->db->or_like('add_details', $search);
@@ -1534,6 +941,86 @@ class Admin_model extends CI_Model
 
         $query = $this->db->get();
         return $query->result();
+    }
+
+    function getPopClubCompletedTransactionCount($store){
+        $this->db->select('count(*) as all_count');
+        $this->db->from('deals_redeems_tb');
+
+        $this->db->where('status', 6);
+        $this->db->where('platform_id', 1);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    function getPopClubTotalCompletedPurchaseAmount($store){
+        $this->db->select_sum("purchase_amount");
+        $this->db->from('deals_redeems_tb');
+
+        $this->db->where('status', 6);
+        $this->db->where('platform_id', 1);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query_transaction = $this->db->get();
+        return $query_transaction->result();
+    }
+
+    function getCateringCompletedTransactionCount($store){
+        $this->db->select('count(*) as all_count');
+        $this->db->from('catering_transaction_tb');
+
+        $this->db->where('status', 9);
+        
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    function getCateringTotalCompletedPurchaseAmount($store){
+        $this->db->select_sum("purchase_amount");
+        $this->db->from('catering_transaction_tb');
+
+        $this->db->where('status', 9);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query_transaction = $this->db->get();
+        return $query_transaction->result();
+    }
+
+    function getSnackshopCompletedTransactionCount($store){
+        $this->db->select('count(*) as all_count');
+        $this->db->from('transaction_tb');
+
+        $this->db->where('status', 6);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;
+    }
+
+    function getSnackshopTotalCompletedPurchaseAmount($store){
+        $this->db->select_sum("purchase_amount");
+        $this->db->from('transaction_tb');
+        
+        $this->db->where('status', 6);
+
+        if(!empty($store))
+            $this->db->where_in('store', $store);
+
+        $query_transaction = $this->db->get();
+        return $query_transaction->result();
     }
 
     function getSnackshopSales($start_date, $store){
@@ -1901,7 +1388,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->like('name', $search);
+            $this->db->or_like('name', $search);
             $this->db->or_like('description', $search);
             $this->db->or_like('price', $search);
             $this->db->or_like('add_details', $search);
@@ -1925,7 +1412,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->db->group_start();
-            $this->db->like('name', $search);
+            $this->db->or_like('name', $search);
             $this->db->or_like('description', $search);
             $this->db->or_like('price', $search);
             $this->db->or_like('add_details', $search);
@@ -2045,7 +1532,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->bsc_db->group_start();
-            $this->bsc_db->like('A.invoice_no', $search);
+            $this->bsc_db->or_like('A.invoice_no', $search);
             $this->bsc_db->or_like('B.name', $search);
             $this->bsc_db->or_like('C.first_name', $search);
             $this->bsc_db->or_like('C.last_name', $search);
@@ -2091,7 +1578,7 @@ class Admin_model extends CI_Model
 
         if($search){
             $this->bsc_db->group_start();
-            $this->bsc_db->like('A.invoice_no', $search);
+            $this->bsc_db->or_like('A.invoice_no', $search);
             $this->bsc_db->or_like('B.name', $search);
             $this->bsc_db->or_like('C.first_name', $search);
             $this->bsc_db->or_like('C.last_name', $search);

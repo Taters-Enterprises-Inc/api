@@ -23,801 +23,7 @@ class Admin extends CI_Controller{
 		$this->load->model('notification_model');
 		$this->load->model('report_model');
 		$this->load->model('deals_model');
-    $this->load->model('stock_ordering_model');
-
 	}
-
-  public function customer_feedback_ratings(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-  
-        $store_id = $this->input->get('store_id');
-        $start_date = $this->input->get('start_date');
-        $end_date = $this->input->get('end_date');
-
-        $start = date("Y-m-d", strtotime($start_date)) . " 00:00:00";
-        $end = date("Y-m-d", strtotime($end_date)) . " 23:59:59";
-
-        $data = array();
-
-        $survey_question_sections = $this->admin_model->getSurveyQuestionSections();
-        $survey_question_offered_rating_groups = $this->admin_model->getSurveyQuestionOfferedRatingGroups();
-
-        foreach($survey_question_sections as $survey_question_section){
-          $section = array(
-            "section_name" => $survey_question_section->name,
-          );
-
-          $is_section_have_ratings = false;
-
-          foreach($survey_question_offered_rating_groups as $survey_question_offered_rating_group){
-            $avarage_object = $this->admin_model->getCustomerFeedBackAveragePerRatingsGroups($survey_question_section->id, $survey_question_offered_rating_group->id, $store_id, $start, $end);
-
-            if($avarage_object){
-              $is_section_have_ratings = true;
-
-              $section_constructor = array(
-                "name" => $survey_question_offered_rating_group->name,
-              );
-
-              $section_constructor['lowest_rate'] = $avarage_object->lowest_rate; 
-              $section_constructor['highest_rate'] = $avarage_object->highest_rate; 
-              $section_constructor['avg'] = $avarage_object->avg; 
-
-              $section['averages'][] = $section_constructor;
-            }
-
-          }
-
-          if($is_section_have_ratings){
-            $survey_question_section_questions = $this->admin_model->getSurveyQuestionSectionQuestions($survey_question_section->id);
-            
-            foreach($survey_question_section_questions as $survey_question_section_question){
-              $question = array(
-                "question_name" => $survey_question_section_question->question_name,
-              );
-              
-              $is_question_have_ratings = false;
-
-              foreach($survey_question_offered_rating_groups as $survey_question_offered_rating_group){
-                $avarage_object = $this->admin_model->getCustomerFeedBackAveragePerRatingsGroupsQuestion($survey_question_section_question->id, $survey_question_offered_rating_group->id, $store_id, $start, $end);
-
-                if($avarage_object){
-                  $is_question_have_ratings = true;
-
-                  $question_constructor = array(
-                    "name" => $survey_question_offered_rating_group->name,
-                  );
-
-                  $question_constructor['lowest_rate'] = $avarage_object->lowest_rate; 
-                  $question_constructor['highest_rate'] = $avarage_object->highest_rate; 
-                  $question_constructor['avg'] = $avarage_object->avg; 
-
-                  $question['averages'][] = $question_constructor;
-                }
-
-              }
-              
-              if($is_question_have_ratings){
-                $section['questions'][] = $question;
-              }
-
-            }
-
-            $data[] = $section;
-          }
-        }
-
-        $response = array(
-          "data" => $data,
-          "message" => "Successfully get feature products",
-        );
-        
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-  }
-
-  public function snackshop_featured_products(){
-    
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-
-        $store_id_array = array();
-        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-
-        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $data = array();
-        }else{
-          $data = $this->admin_model->getDashboardShopFeaturedProducts($store_id_array);
-        }
-
-        
-        $response = array(
-          "data" => $data,
-          "message" => "Successfully get feature products",
-        );
-        
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-  }
-
-  public function snackshop_users_total(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-
-        $store_id_array = array();
-        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-
-        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $data = array(
-            array(
-              "name" => "Facebook",
-              "value" => 0,
-            ),
-            array(
-              "name" => "Mobile",
-              "value" => 0,
-            ),
-          );
-        }else{
-          $total_fb_users = $this->admin_model->getDashboardShopFbUsersCount($store_id_array);
-          $total_mobile_users = $this->admin_model->getDashboardShopMobileUsersCount($store_id_array);
-          
-          $data = array(
-            array(
-              "name" => "Facebook",
-              "value" => $total_fb_users,
-            ),
-            array(
-              "name" => "Mobile",
-              "value" => $total_mobile_users,
-            ),
-          );
-        }
-
-
-
-        $response = array(
-          "message" => "Successfully get users percentage",
-          "data" => $data,
-        );
-        
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-
-  }
-
-  public function snackshop_initial_checkout_logs(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-
-        $store_id_array = array();
-        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-
-        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $total_initial_checkouts = 0;
-        }else{
-          $total_initial_checkouts = $this->admin_model->getDashboardShopInitialCheckoutsCount($store_id_array);
-        }
-
-
-        $response = array(
-          "data" => $total_initial_checkouts,
-          "message" => "Successfully get snackshop total initial checkout",
-        );
-        
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-  }
-
-  public function snackshop_product_view_logs(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-
-        $store_id_array = array();
-        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-
-        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $total_product_views = 0;
-        }else{
-          $total_product_views = $this->admin_model->getDashboardShopProductViewsCount($store_id_array);
-        }
-
-
-        $response = array(
-          "data" => $total_product_views,
-          "message" => "Successfully get snackshop total product views",
-        );
-        
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-  }
-
-
-  public function snackshop_add_to_cart_logs(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-
-        $store_id_array = array();
-        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-
-        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $total_add_to_carts = 0;
-        }else{
-          $total_add_to_carts = $this->admin_model->getDashboardShopAddToCartsCount($store_id_array);
-        }
-
-
-        $response = array(
-          "data" => $total_add_to_carts,
-          "message" => "Successfully get snackshop total add to cart",
-        );
-        
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-  }
-
-  public function snackshop_dashboard_completed_transaction_total(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-
-        $store_id_array = array();
-        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-
-        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $total_completed_transactions = 0;
-        }else{
-          $total_completed_transactions = $this->admin_model->getDashboardShopCompletedTransactionCount($store_id_array);
-        }
-
-
-        $response = array(
-          "data" => $total_completed_transactions,
-          "message" => "Successfully get snackshop completed transaction total",
-        );
-        
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-  }
-  public function snackshop_dashboard_transaction_total(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-
-        $store_id_array = array();
-        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-
-        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $total_transactions = 0;
-        }else{
-          $total_transactions = $this->admin_model->getDashboardShopTransactionsCount($store_id_array);
-        }
-
-
-        $response = array(
-          "data" => $total_transactions,
-          "message" => "Successfully get snackshop transaction total",
-        );
-        
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-  }
-
-  public function snackshop_dashboard_sales_history(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-        $store_id_array = array();
-        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-
-        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $another_filter = array();
-        }else{
-          $start_date = date('Y-m-d', strtotime('-1 week'));
-
-          $snackshop_sales = $this->admin_model->getSnackshopSales($start_date, $store_id_array);
-
-          usort($snackshop_sales, function ($a, $b) {
-              return strtotime($a->dateadded) - strtotime($b->dateadded);
-          });
-
-
-          $filtered = array();
-          
-          foreach($snackshop_sales as $snackshop_sales_key => $sales){
-            $is_exist = false;
-
-            foreach($filtered as $filtered_key => $filter){
-              if(date('Y-m-d', strtotime($filter->dateadded)) === date('Y-m-d', strtotime($sales->dateadded))){
-                $filtered[$filtered_key]->purchase_amount += (int) $sales->purchase_amount;
-                if(isset($filtered[$filtered_key]->quantity)){
-                  $filtered[$filtered_key]->quantity += 1;
-                }else{
-                  $filtered[$filtered_key]->quantity = 1;
-                }
-                $is_exist = true;
-                unset($snackshop_sales[$snackshop_sales_key]);  
-              }
-            }
-
-            if(!$is_exist){
-              $sales->dateadded = date('Y-m-d', strtotime($sales->dateadded));
-              $sales->purchase_amount = (int)$sales->purchase_amount;
-              if(isset($sales->quantity)){
-                $sales->quantity += 1;
-              }else{
-                $sales->quantity = 1;
-              }
-              $filtered[] = $sales;
-              unset($snackshop_sales[$snackshop_sales_key]);
-            }
-
-          }
-          $another_filter = array();
-          
-          foreach($filtered as $sales){
-
-            while($start_date < date('Y-m-d', strtotime($sales->dateadded))){
-              $another_filter[] = array(
-                'dateadded' => $start_date,
-                'purchase_amount' => 0,
-                'quantity' => 0,
-              );
-              
-              $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-            }
-            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-            
-            $another_filter[] = $sales;
-          }  
-        }
-
-        if(empty($another_filter)){
-          while($start_date < date('Y-m-d')){
-            $another_filter[] = array(
-              'dateadded' => $start_date,
-              'purchase_amount' => 0,
-              'quantity' => 0,
-            );
-            
-            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-          }
-        }
-
-        $response = array(
-          "message" => "Successfully get snackshop sales",
-          "data" => $another_filter,
-        );
-        
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-  }
-  
-  public function catering_dashboard_sales_history(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-        $store_id_array = array();
-        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-
-        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $another_filter = array();
-        }else{
-          $start_date = date('Y-m-d', strtotime('-1 week'));
-
-          $catering_sales = $this->admin_model->getCateringSales($start_date, $store_id_array);
-
-          usort($catering_sales, function ($a, $b) {
-              return strtotime($a->dateadded) - strtotime($b->dateadded);
-          });
-
-
-          $filtered = array();
-          
-          foreach($catering_sales as $catering_sales_key => $sales){
-            $is_exist = false;
-
-            foreach($filtered as $filtered_key => $filter){
-              if(date('Y-m-d', strtotime($filter->dateadded)) === date('Y-m-d', strtotime($sales->dateadded))){
-                $filtered[$filtered_key]->purchase_amount += (int) $sales->purchase_amount;
-                if(isset($filtered[$filtered_key]->quantity)){
-                  $filtered[$filtered_key]->quantity += 1;
-                }else{
-                  $filtered[$filtered_key]->quantity = 1;
-                }
-                $is_exist = true;
-                unset($catering_sales[$catering_sales_key]);  
-              }
-            }
-
-            if(!$is_exist){
-              $sales->dateadded = date('Y-m-d', strtotime($sales->dateadded));
-              $sales->purchase_amount = (int)$sales->purchase_amount;
-              if(isset($sales->quantity)){
-                $sales->quantity += 1;
-              }else{
-                $sales->quantity = 1;
-              }
-              $filtered[] = $sales;
-              unset($catering_sales[$catering_sales_key]);
-            }
-
-          }
-          $another_filter = array();
-          
-          foreach($filtered as $sales){
-
-            while($start_date < date('Y-m-d', strtotime($sales->dateadded))){
-              $another_filter[] = array(
-                'dateadded' => $start_date,
-                'purchase_amount' => 0,
-                'quantity' => 0,
-              );
-              
-              $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-            }
-            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-            
-            $another_filter[] = $sales;
-          }  
-        }
-
-        if(empty($another_filter)){
-          while($start_date < date('Y-m-d')){
-            $another_filter[] = array(
-              'dateadded' => $start_date,
-              'purchase_amount' => 0,
-              'quantity' => 0,
-            );
-            
-            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-          }
-        }
-
-        $response = array(
-          "message" => "Successfully get catering sales",
-          "data" => $another_filter,
-        );
-        
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-  }
-  
-  public function popclub_dashboard_sales_history(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-        $store_id_array = array();
-        $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
-        foreach ($store_id as $value) $store_id_array[] = $value->store_id;
-
-        if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
-          $another_filter = array();
-        }else{
-          $start_date = date('Y-m-d', strtotime('-1 week'));
-
-          $popclub_sales = $this->admin_model->getPopClubSales($start_date, $store_id_array);
-
-          usort($popclub_sales, function ($a, $b) {
-              return strtotime($a->dateadded) - strtotime($b->dateadded);
-          });
-
-
-          $filtered = array();
-          
-          foreach($popclub_sales as $popclub_sales_key => $sales){
-            $is_exist = false;
-
-            foreach($filtered as $filtered_key => $filter){
-              if(date('Y-m-d', strtotime($filter->dateadded)) === date('Y-m-d', strtotime($sales->dateadded))){
-                $filtered[$filtered_key]->purchase_amount += (int) $sales->purchase_amount;
-                if(isset($filtered[$filtered_key]->quantity)){
-                  $filtered[$filtered_key]->quantity += 1;
-                }else{
-                  $filtered[$filtered_key]->quantity = 1;
-                }
-                $is_exist = true;
-                unset($popclub_sales[$popclub_sales_key]);  
-              }
-            }
-
-            if(!$is_exist){
-              $sales->dateadded = date('Y-m-d', strtotime($sales->dateadded));
-              $sales->purchase_amount = (int)$sales->purchase_amount;
-              if(isset($sales->quantity)){
-                $sales->quantity += 1;
-              }else{
-                $sales->quantity = 1;
-              }
-              $filtered[] = $sales;
-              unset($popclub_sales[$popclub_sales_key]);
-            }
-
-          }
-          $another_filter = array();
-          
-          foreach($filtered as $sales){
-
-            while($start_date < date('Y-m-d', strtotime($sales->dateadded))){
-              $another_filter[] = array(
-                'dateadded' => $start_date,
-                'purchase_amount' => 0,
-                'quantity' => 0,
-              );
-              
-              $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-            }
-            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-            
-            $another_filter[] = $sales;
-          }  
-        }
-
-        if(empty($another_filter)){
-          while($start_date < date('Y-m-d')){
-            $another_filter[] = array(
-              'dateadded' => $start_date,
-              'purchase_amount' => 0,
-              'quantity' => 0,
-            );
-            
-            $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
-          }
-        }
-
-        $response = array(
-          "message" => "Successfully get popclub sales",
-          "data" => $another_filter,
-        );
-        
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-  }
-  
-  public function influencer_cashout_change_status(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'POST':
-				$_POST =  json_decode(file_get_contents("php://input"), true);
-        
-        $influencer_cashout_id = $this->input->post('influencerCashoutId');
-        $status = $this->input->post('status');
-
-        $influencer_cashout = $this->admin_model->getInfluencerCashoutById($influencer_cashout_id);
-
-        $this->admin_model->changeStatusInfluencerCashout($influencer_cashout_id, $status);
-
-        $message = '';
-
-        switch($status){
-          case 2: 
-            $updated_payable = $influencer_cashout->payable - $influencer_cashout->cashout;
-            $this->admin_model->updateInfluencerPayable($influencer_cashout->influencer_id, $updated_payable);
-            $message = 'Your current cashout has been approved.';
-            break;
-        }
-
-        $real_time_notification = array(
-            "fb_user_id" => $influencer_cashout->fb_user_id,
-            "mobile_user_id" => $influencer_cashout->mobile_user_id,
-            "message" => $message,
-        );
-
-        notify('user-influencer','influencer-cashout-update', $real_time_notification);
-
-        $response = array(
-          "message" => 'Successfully update influencer status',
-        );
-        header('content-type: application/json');
-        echo json_encode($response);
-        return;
-    }
-  }
-
-  public function influencer_cashout($influencer_cashout_id){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET': 
-        $influencer_cashout = $this->admin_model->getInfluencerCashoutById($influencer_cashout_id);
-
-        $response = array(
-          "message" => 'Successfully fetch influencer cashout',
-          "data" => $influencer_cashout,
-        );
-  
-        header('content-type: application/json');
-        echo json_encode($response);
-        return;
-    }
-  }
-
-  public function influencer_cashouts(){
-		switch($this->input->server('REQUEST_METHOD')){
-		  case 'GET':
-			$per_page = $this->input->get('per_page') ?? 25;
-			$page_no = $this->input->get('page_no') ?? 0;
-			$status = $this->input->get('status') ?? null;
-			$order = $this->input->get('order') ?? 'desc';
-			$order_by = $this->input->get('order_by') ?? 'dateadded';
-			$search = $this->input->get('search');
-	
-			if($page_no != 0){
-			  $page_no = ($page_no - 1) * $per_page;
-			}
-			
-			$influencer_cashouts_count = $this->admin_model->getInfluencerCashoutsCount($status, $search);
-      $influencer_cashouts = $this->admin_model->getInfluencerCashouts($page_no, $per_page, $status, $order_by, $order, $search);
-	
-			$pagination = array(
-			  "total_rows" => $influencer_cashouts_count,
-			  "per_page" => $per_page,
-			);
-	
-			$response = array(
-			  "message" => 'Successfully fetch user influencers cashouts',
-			  "data" => array(
-          "pagination" => $pagination,
-          "influencer_cashouts" => $influencer_cashouts
-			  ),
-			);
-	  
-			header('content-type: application/json');
-			echo json_encode($response);
-			return;
-		}
-  }
-
-  public function influencer(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'POST':
-				$_POST =  json_decode(file_get_contents("php://input"), true);
-
-        $influencerPost = json_decode($this->input->post('influencer'), true);
-        $referral_code = substr(md5(uniqid(mt_rand(), true)), 0, 6);
-
-        $influencer = $this->admin_model->getInfluencerById($influencerPost['id']);
-
-        $data = array(
-          "influencer_id" => $influencer->id,
-          'referral_code' => $referral_code,
-          "customer_discount" => $this->input->post('customerDiscountPercentage'),
-          'influencer_discount' => $this->input->post('influencerDiscountPercentage'),
-        );
-        
-
-        $this->admin_model->insertInfluencerPromo($data);
-
-                
-        $notification_event_data = array(
-          "notification_event_type_id" => 4,
-          "text" => 'A new promo has arrive, endorse now!'
-        );
-
-      
-        $notification_message_data = array(
-          "title" => "A new promo has arrive, endorse now!",
-          "body" => "You can now endorse this promo to your followers. Just input the referral code ( <b>" . $referral_code . "</b> ) in checkout!.",
-          "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
-          "closing_salutation" => "Best wishes,",
-          "message_from" => "Taters Enterprises Inc.",
-          "contact_number" => "(+64) 977-275-5595",
-          "email" => "tei.csr@tatersgroup.com",
-        );
-                    
-        $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
-
-        $notification_event_data['notification_message_id'] = $notification_message_id;
-
-        $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
-                        
-        //mobile or fb             
-        $notifications_data = array(
-            "fb_user_to_notify" => $influencer->fb_user_id,
-            "mobile_user_to_notify" => $influencer->mobile_user_id,
-            "fb_user_who_fired_event" => $influencer->fb_user_id,
-            "mobile_user_who_fired_event" => $influencer->mobile_user_id,
-            'notification_event_id' => $notification_event_id,
-            "dateadded" => date('Y-m-d H:i:s'),
-        );
-        
-        $this->notification_model->insertNotification($notifications_data); 
-
-        $real_time_notification = array(
-          "fb_user_id" => $influencer->fb_user_id,
-          "mobile_user_id" => $influencer->mobile_user_id,
-          "message" => "A new promo has arrive, endorse now!",
-        );
-
-        notify('user-inbox','inbox-influencer-promo', $real_time_notification);
-
-
-        $response = array(
-          "message" => 'Successfully create influencer promo',
-        );
-
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-
-    }
-  }
-
-  public function influencers(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-        $influencers = $this->admin_model->getSettingInfluencers();
-
-        $response = array(
-          "message" => 'Successfully fetch influencers',
-          "data" => $influencers,
-        );
-
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-
-    }
-  }
-  
-  public function influencer_promos(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET':
-        $per_page = $this->input->get('per_page') ?? 25;
-        $page_no = $this->input->get('page_no') ?? 0;
-        $order = $this->input->get('order') ?? 'desc';
-        $order_by = $this->input->get('order_by') ?? 'dateadded';
-        $search = $this->input->get('search');
-    
-        if($page_no != 0){
-          $page_no = ($page_no - 1) * $per_page;
-        }
-        
-        $influencer_promos_count = $this->admin_model->getInfluencerPromosCount($search);
-        $influencer_promos = $this->admin_model->getInfluencerPromos($page_no, $per_page, $order_by, $order, $search);
-    
-        $pagination = array(
-          "total_rows" => $influencer_promos_count,
-          "per_page" => $per_page,
-        );
-    
-        $response = array(
-          "message" => 'Successfully fetch catering packages',
-          "data" => array(
-            "pagination" => $pagination,
-            "influencer_promos" => $influencer_promos
-          ),
-        );
-
-        header('content-type: application/json');
-        echo json_encode($response);
-        break;
-    }
-  }
 
   public function partner_company_employee_id_number(){
     
@@ -844,7 +50,7 @@ class Admin extends CI_Controller{
 
         $deal_id = $this->input->post('id');
         $ext = '';
-        
+
         $deal = $this->admin_model->getPopclubDeal($deal_id);
 
         if(isset($_FILES['image500x500']['tmp_name']) && is_uploaded_file($_FILES['image500x500']['tmp_name'])){
@@ -1106,88 +312,7 @@ class Admin extends CI_Controller{
     }
   }
 
-  public function influencer_change_status(){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'POST':
-				$_POST =  json_decode(file_get_contents("php://input"), true);
-        
-        $influencer_id = $this->input->post('influencerUserId');
-        $status = $this->input->post('status');
-
-        $influencer = $this->admin_model->getInfluencerById($influencer_id);
-
-        $this->admin_model->changeStatusInfluencer($influencer_id, $status);
-
-        $real_time_notification = array(
-            "fb_user_id" => $influencer->fb_user_id,
-            "mobile_user_id" => $influencer->mobile_user_id,
-            "status" => $status,
-        );
-
-        notify('user-influencer','influencer-update', $real_time_notification);
-
-
-        $response = array(
-          "message" => 'Successfully update influencer status',
-        );
-        header('content-type: application/json');
-        echo json_encode($response);
-        return;
-    }
-  }
-
-  public function influencer_application($influencer_user_id){
-    switch($this->input->server('REQUEST_METHOD')){
-      case 'GET': 
-        $influencer = $this->admin_model->getInfluencerApplication($influencer_user_id);
-
-        $response = array(
-          "message" => 'Successfully fetch influencer application',
-          "data" => $influencer,
-        );
   
-        header('content-type: application/json');
-        echo json_encode($response);
-        return;
-    }
-  }
-
-  public function influencer_applications(){
-		switch($this->input->server('REQUEST_METHOD')){
-		  case 'GET':
-			$per_page = $this->input->get('per_page') ?? 25;
-			$page_no = $this->input->get('page_no') ?? 0;
-			$status = $this->input->get('status') ?? null;
-			$order = $this->input->get('order') ?? 'desc';
-			$order_by = $this->input->get('order_by') ?? 'dateadded';
-			$search = $this->input->get('search');
-	
-			if($page_no != 0){
-			  $page_no = ($page_no - 1) * $per_page;
-			}
-			
-			$influencer_applications_count = $this->admin_model->getInfluencerApplicationsCount($status, $search);
-      $influencer_applications = $this->admin_model->getInfluencerApplications($page_no, $per_page, $status, $order_by, $order, $search);
-	
-			$pagination = array(
-			  "total_rows" => $influencer_applications_count,
-			  "per_page" => $per_page,
-			);
-	
-			$response = array(
-			  "message" => 'Successfully fetch user influencers Applications',
-			  "data" => array(
-          "pagination" => $pagination,
-          "influencer_applications" => $influencer_applications
-			  ),
-			);
-	  
-			header('content-type: application/json');
-			echo json_encode($response);
-			return;
-		}
-  }
-
   public function setting_popclub_deal(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -1310,10 +435,8 @@ class Admin extends CI_Controller{
               "original_price" => $this->input->post('originalPrice') ? $this->input->post('originalPrice') : null,
               "promo_price" => $this->input->post('promoPrice') ? $this->input->post('promoPrice') : null,
               "promo_discount_percentage" => $this->input->post('promoDiscountPercentage') ? $this->input->post('promoDiscountPercentage') : null,
-              "subtotal_promo_discount" => $this->input->post('subTotalPromoDiscount') ? $this->input->post('subTotalPromoDiscount') : null,
               "minimum_purchase" => $this->input->post('minimumPurchase') ? $this->input->post('minimumPurchase') : null,
               "is_free_delivery" => json_decode($this->input->post('isFreeDelivery'))? 1 : 0,
-              "influencer_discount" => $this->input->post('influencerDiscount'),
               "is_partner_company" => json_decode($this->input->post('isPartnerCompany'))? 1 : 0,
               "description" => $this->input->post('description'),
               "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
@@ -1428,76 +551,10 @@ class Admin extends CI_Controller{
             if(!empty($deals_region_da_logs)){
               $this->admin_model->insertDealRegionDaLogs($deals_region_da_logs); 
             }
-
-            $influencer_discount = $this->input->post('influencerDiscount');
-
-            if($influencer_discount){
-              $influencers = $this->admin_model->getInfluencersId();
-
-              foreach($influencers as $influencer){
-                $referral_code = substr(md5(uniqid(mt_rand(), true)), 0, 6);
-
-                $influencer_deal = array(
-                  "deal_id" => $deal_id,
-                  "influencer_id" => $influencer->id,
-                  "referral_code" => $referral_code
-                );
-
-                $this->admin_model->insertInfluencerDeal($influencer_deal);
-                
-                $notification_event_data = array(
-                  "notification_event_type_id" => 4,
-                  "text" => 'A new deal has arrive to endorse now to get discount!'
-                );
-
-              
-                $notification_message_data = array(
-                  "title" => "A new deal to endorse!",
-                  "body" => "You can now endorse this deal to your followers. Just click the <b>Popclub Deal Link</b> below and copy the url link.",
-                  "closing" => "Don't hesitate to reach out if you have any more questions, comments, or concerns.",
-                  "closing_salutation" => "Best wishes,",
-                  "message_from" => "Taters Enterprises Inc.",
-                  "contact_number" => "(+64) 977-275-5595",
-                  "email" => "tei.csr@tatersgroup.com",
-                  "internal_link_title" => "Popclub Deal Link",
-                  "internal_link_url" => "/popclub/deal/".$this->input->post('urlId') . '?referral-code=' . $referral_code,
-                );
-                            
-                $notification_message_id = $this->notification_model->insertNotificationMessageAndGetId($notification_message_data);
-
-                $notification_event_data['notification_message_id'] = $notification_message_id;
-
-                $notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
-                                
-                //mobile or fb             
-                $notifications_data = array(
-                    "fb_user_to_notify" => $influencer->fb_user_id,
-                    "mobile_user_to_notify" => $influencer->mobile_user_id,
-                    "fb_user_who_fired_event" => $influencer->fb_user_id,
-                    "mobile_user_who_fired_event" => $influencer->mobile_user_id,
-                    'notification_event_id' => $notification_event_id,
-                    "dateadded" => date('Y-m-d H:i:s'),
-                );
-                
-                $this->notification_model->insertNotification($notifications_data); 
-                
-                
-                $real_time_notification = array(
-                  "fb_user_id" => $influencer->fb_user_id,
-                  "mobile_user_id" => $influencer->mobile_user_id,
-                  "message" => "A new deal has arrive to endorse now to get discount!",
-                );
-
-                notify('user-inbox','inbox-influencer-promo', $real_time_notification);
-
-              }
-
-              
-
-            }
           }
 
           $response = array(
+            "POST" => $included_products,
             "message" =>  'Successfully add product'
           );
           header('content-type: application/json');
@@ -1600,6 +657,7 @@ class Admin extends CI_Controller{
 
   }
   
+
   public function setting_popclub_deals(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -1635,7 +693,6 @@ class Admin extends CI_Controller{
         break;
     }
   }
-
   public function setting_copy_catering_package(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST':
@@ -1994,6 +1051,7 @@ class Admin extends CI_Controller{
 
   }
 
+  
   public function setting_catering_package(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
@@ -2608,7 +1666,7 @@ class Admin extends CI_Controller{
         $locales = $this->admin_model->getLocales();
         
         $response = array(
-          "message" => "Successfully get locales",
+          "message" => "Succesfully get locales",
           "data" => $locales,
         );
         
@@ -2625,7 +1683,7 @@ class Admin extends CI_Controller{
         $region_store_combinations = $this->admin_model->getRegionStoreCombinations();
         
         $response = array(
-          "message" => "Successfully get region store region combinations",
+          "message" => "Succesfully get region store region combinations",
           "data" => $region_store_combinations,
         );
         
@@ -2642,12 +1700,247 @@ class Admin extends CI_Controller{
         $store_menus = $this->admin_model->getStoreMenus();
         
         $response = array(
-          "message" => "Successfully get store menus",
+          "message" => "Succesfully get store menus",
           "data" => $store_menus,
         );
         
         header('content-type: application/json');
         echo json_encode($response);
+        break;
+    }
+  }
+
+  public function total_sales($services){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+          switch($services){
+            case 'snackshop':
+              $store_id_array = array();
+              $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+              foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+              
+              if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+                $snackshop_total_completed_transaction = 0;
+                $snackshop_total_purchase_amount = array((object)array( "purchase_amount" => 0));
+              }else{
+                $snackshop_total_completed_transaction = $this->admin_model->getSnackshopCompletedTransactionCount($store_id_array);
+                $snackshop_total_purchase_amount = $this->admin_model->getSnackshopTotalCompletedPurchaseAmount($store_id_array);
+              }
+              
+              $response = array(
+                "message" => "Succesfully get snackshop total sales",
+                "data" => array(
+                  "total_completed_transaction" => $snackshop_total_completed_transaction,
+                  "total_purchase_amount" => (int) $snackshop_total_purchase_amount[0]->purchase_amount,
+                ),
+              );
+              
+              header('content-type: application/json');
+              echo json_encode($response);
+              break;
+              
+            case 'catering':
+
+              $store_id_array = array();
+              $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+              foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+              
+              if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+                $catering_total_completed_transaction = 0;
+                $catering_total_purchase_amount = array((object)array( "purchase_amount" => 0));
+              }else{
+                $catering_total_completed_transaction = $this->admin_model->getCateringCompletedTransactionCount($store_id_array);
+                $catering_total_purchase_amount = $this->admin_model->getCateringTotalCompletedPurchaseAmount($store_id_array);
+              }
+              
+              $response = array(
+                "message" => "Succesfully get catering total sales",
+                "data" => array(
+                  "total_completed_transaction" => $catering_total_completed_transaction,
+                  "total_purchase_amount" => (int) $catering_total_purchase_amount[0]->purchase_amount,
+                ),
+              );
+              
+              header('content-type: application/json');
+              echo json_encode($response);
+              break;
+              
+            case 'popclub':
+              
+              $store_id_array = array();
+              $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+              foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+              
+              if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+                $popclub_total_completed_transaction = 0;
+                $popclub_total_purchase_amount = array((object)array( "purchase_amount" => 0));
+              }else{
+                $popclub_total_completed_transaction = $this->admin_model->getPopClubCompletedTransactionCount($store_id_array);
+                $popclub_total_purchase_amount = $this->admin_model->getPopClubTotalCompletedPurchaseAmount($store_id_array);
+              }
+
+              
+              $response = array(
+                "message" => "Succesfully get popclub total sales",
+                "data" => array(
+                  "total_completed_transaction" => $popclub_total_completed_transaction,
+                  "total_purchase_amount" => (int) $popclub_total_purchase_amount[0]->purchase_amount,
+                ),
+              );
+              
+              header('content-type: application/json');
+              echo json_encode($response);
+              break;
+              
+            case 'overall':
+
+              $store_id_array = array();
+              $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+              foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+              
+              if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+                $overall_total_completed_transaction = 0;
+                $overall_total_purchase_amount = 0;
+                
+              }else{
+                $snackshop_total_completed_transaction = $this->admin_model->getSnackshopCompletedTransactionCount($store_id_array);
+                $snackshop_total_purchase_amount = $this->admin_model->getSnackshopTotalCompletedPurchaseAmount($store_id_array);
+                
+                $catering_total_completed_transaction = $this->admin_model->getCateringCompletedTransactionCount($store_id_array);
+                $catering_total_purchase_amount = $this->admin_model->getCateringTotalCompletedPurchaseAmount($store_id_array);
+                
+                $popclub_total_completed_transaction = $this->admin_model->getPopClubCompletedTransactionCount($store_id_array);
+                $popclub_total_purchase_amount = $this->admin_model->getPopClubTotalCompletedPurchaseAmount($store_id_array);
+  
+                $overall_total_completed_transaction =
+                  $snackshop_total_completed_transaction +
+                  $catering_total_completed_transaction +
+                  $popclub_total_completed_transaction ;
+  
+                $overall_total_purchase_amount = 
+                  $snackshop_total_purchase_amount[0]->purchase_amount +
+                  $catering_total_purchase_amount[0]->purchase_amount +
+                  $popclub_total_purchase_amount[0]->purchase_amount;
+                
+              }
+              
+              $response = array(
+                "message" => "Succesfully get overall total sales",
+                "data" => array(
+                  "total_completed_transaction" => $overall_total_completed_transaction,
+                  "total_purchase_amount" => (int) $overall_total_purchase_amount,
+                ),
+              );
+              
+              header('content-type: application/json');
+              echo json_encode($response);
+              break;
+          }
+
+          break;
+    }
+
+  }
+
+  public function sales($services){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+          switch($services){
+            case 'overall':
+
+              $store_id_array = array();
+              $store_id = $this->user_model->get_store_group_order($this->ion_auth->user()->row()->id);
+              foreach ($store_id as $value) $store_id_array[] = $value->store_id;
+      
+              if(empty($store_id_array) && !$this->ion_auth->in_group(1) && !$this->ion_auth->in_group(10)){
+                $another_filter = array();
+              }else{
+                $start_date = date('Y-m-d', strtotime('-1 month'));
+
+                $snackshop_sales = $this->admin_model->getSnackshopSales($start_date, $store_id_array);
+                $catering_sales = $this->admin_model->getCateringSales($start_date, $store_id_array);
+                $popclub_sales = $this->admin_model->getPopClubSales($start_date, $store_id_array);
+
+                $overall_sales = array_merge($snackshop_sales, $catering_sales, $popclub_sales);
+
+                usort($overall_sales, function ($a, $b) {
+                    return strtotime($a->dateadded) - strtotime($b->dateadded);
+                });
+
+
+                $filtered = array();
+                
+                foreach($overall_sales as $overall_sales_key => $sales){
+                  $is_exist = false;
+
+                  foreach($filtered as $filtered_key => $filter){
+                    if(date('Y-m-d', strtotime($filter->dateadded)) === date('Y-m-d', strtotime($sales->dateadded))){
+                      $filtered[$filtered_key]->purchase_amount += (int) $sales->purchase_amount;
+                      if(isset($filtered[$filtered_key]->quantity)){
+                        $filtered[$filtered_key]->quantity += 1;
+                      }else{
+                        $filtered[$filtered_key]->quantity = 1;
+                      }
+                      $is_exist = true;
+                      unset($overall_sales[$overall_sales_key]);  
+                    }
+                  }
+
+                  if(!$is_exist){
+                    $sales->dateadded = date('Y-m-d', strtotime($sales->dateadded));
+                    $sales->purchase_amount = (int)$sales->purchase_amount;
+                    if(isset($sales->quantity)){
+                      $sales->quantity += 1;
+                    }else{
+                      $sales->quantity = 1;
+                    }
+                    $filtered[] = $sales;
+                    unset($overall_sales[$overall_sales_key]);
+                  }
+
+                }
+                $another_filter = array();
+                
+                foreach($filtered as $sales){
+
+                  while($start_date < date('Y-m-d', strtotime($sales->dateadded))){
+                    $another_filter[] = array(
+                      'dateadded' => $start_date,
+                      'purchase_amount' => 0,
+                      'quantity' => 0,
+                    );
+                    
+                    $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+                  }
+                  $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+                  
+                  $another_filter[] = $sales;
+                }  
+              }
+
+              if(empty($another_filter)){
+                while($start_date < date('Y-m-d')){
+                  $another_filter[] = array(
+                    'dateadded' => $start_date,
+                    'purchase_amount' => 0,
+                    'quantity' => 0,
+                  );
+                  
+                  $start_date = date('Y-m-d', strtotime($start_date . ' +1 day'));
+                }
+              }
+
+
+              
+              $response = array(
+                "message" => "Succesfully get snackshop sales",
+                "data" => $another_filter,
+              );
+              
+              header('content-type: application/json');
+              echo json_encode($response);
+              break;
+          }
         break;
     }
   }
@@ -2691,7 +1984,7 @@ class Admin extends CI_Controller{
 				}
 
         $response = array(
-          "message" => "Successfully get package flavor!",
+          "message" => "Succesfully get package flavor!",
           "data" => array_values($package_flavor),
         );
         
@@ -2700,7 +1993,6 @@ class Admin extends CI_Controller{
         break;
     }
   }
-
   public function setting_delete_shop_product(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'DELETE':
@@ -3153,7 +2445,7 @@ class Admin extends CI_Controller{
 
         
         $response = array(
-          "message" => "Successfully update remarks!"
+          "message" => "Succesfully update remarks!"
         );
         
         header('content-type: application/json');
@@ -3389,7 +2681,7 @@ class Admin extends CI_Controller{
           $survey = $this->admin_model->getSurvey($survey_id);
           $response = array(
             "data" => $survey,
-            "message" => "Successfully fetch survey verification"
+            "message" => "Succesfully fetch survey verification"
           );
 
           header('content-type: application/json');
@@ -3989,6 +3281,7 @@ class Admin extends CI_Controller{
         break;
     }
   }
+  
 
   public function notification_seen($notification_id){
 		switch($this->input->server('REQUEST_METHOD')){
@@ -3997,7 +3290,7 @@ class Admin extends CI_Controller{
         $this->notification_model->seenNotification($notification_id, $date_now);
         
         $response = array(
-          "message" => "Successfully seen notification"
+          "message" => "Succesfully seen notification"
         );
         
         header('content-type: application/json');
@@ -4045,18 +3338,8 @@ class Admin extends CI_Controller{
                 "unseen_notifications" => $this->notification_model->getNotifications($user_id, 6, true, 'admin'),
                 'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 6, 'admin'),
               ),
-              "influencer_application" => array(
-                'notifications'=> $this->notification_model->getNotifications($user_id, 7, false, 'admin'),
-                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 7, true, 'admin'),
-                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 7, 'admin'),
-              ),
-              "influencer_cashout" => array(
-                'notifications'=> $this->notification_model->getNotifications($user_id, 8, false, 'admin'),
-                "unseen_notifications" => $this->notification_model->getNotifications($user_id, 8, true, 'admin'),
-                'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 8, 'admin'),
-              ),
             ),
-            "message" => "Successfully fetch notification"
+            "message" => "Succesfully fetch notification"
         );
         
         header('content-type: application/json');
@@ -4118,6 +3401,7 @@ class Admin extends CI_Controller{
         break;
     }
   }
+  
   
   public function store(){
     switch($this->input->server('REQUEST_METHOD')){
@@ -4795,17 +4079,12 @@ class Admin extends CI_Controller{
       case 'POST': 
         $_POST = json_decode(file_get_contents("php://input"), true);
         $trans_id = (int) $this->input->post('transactionId');
-
-
-        $transaction = $this->admin_model->getTransactionById($trans_id);
-
-
-        $transaction_hash = $transaction->hash_key;
+        $transaction_hash = $this->input->post('transactionHash');
         $user_id = $this->session->admin['user_id'];
         $status = $this->input->post('status');
         $fetch_data = $this->admin_model->update_shop_status($trans_id, $status);
-        $fb_user_id = $transaction->fb_user_id;
-        $mobile_user_id = $transaction->mobile_user_id;
+        $fb_user_id = $this->input->post('fbUserId');
+        $mobile_user_id = $this->input->post('mobileUserId');
 
         $update_on_click = $this->admin_model->update_shop_on_click($trans_id, $_POST['status']);
         if ($status == 3) $generate_invoice = $this->admin_model->generate_shop_invoice_num($trans_id);
@@ -4857,13 +4136,6 @@ class Admin extends CI_Controller{
             );
             
             $this->notification_model->insertNotification($notifications_data); 
-            
-            if($transaction->influencer_id){
-              $influencer_discount = $transaction->influencer_discount;
-              $influencer_profile = $this->admin_model->getInfluencerProfile($transaction->influencer_id);
-              $this->admin_model->updateInfluencerProfilePayable($transaction->influencer_id, $influencer_profile->payable + $influencer_discount);
-            }
-
           }
           
           $real_time_notification = array(
@@ -4873,6 +4145,7 @@ class Admin extends CI_Controller{
           );
 
           notify('user-snackshop','snackshop-order-update', $real_time_notification);
+
 
           header('content-type: application/json');
           echo json_encode(array( "message" => 'Successfully update status!'));
@@ -4958,6 +4231,7 @@ class Admin extends CI_Controller{
     }
   }
 
+
   public function product_categories(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET': 
@@ -5017,17 +4291,10 @@ class Admin extends CI_Controller{
       case 'GET': 
 
         $groups =  $this->admin_model->getGroups();
-        $stock_order = $this->stock_ordering_model->getUserGroup();
-
-        $group_data = array(
-          "shop" => $groups,
-          "stock_order" => $stock_order,
-        );
-
 
         $response = array(
           "message" => 'Successfully fetch snackshop user',
-          "data" => $group_data,
+          "data" => $groups,
         );
 
         header('content-type: application/json');
@@ -5042,7 +4309,6 @@ class Admin extends CI_Controller{
 
         $user =  $this->admin_model->getUser($user_id);
         $user->groups = $this->admin_model->getUserGroups($user->id);
-        $user->stockOrderGroup = $this->stock_ordering_model->getUserGroups($user->id);
 
         $response = array(
           "message" => 'Successfully fetch snackshop user',
@@ -5073,8 +4339,6 @@ class Admin extends CI_Controller{
 
         foreach($users as $user){
           $user->groups = $this->admin_model->getUserGroups($user->id);
-          $user->stockOrderGroup = $this->stock_ordering_model->getUserGroups($user->id);
-
         }
 
         $pagination = array(
@@ -5276,17 +4540,7 @@ class Admin extends CI_Controller{
         $discount_users_id = $this->input->post('discountUserId');
         $status = $this->input->post('status');
 
-        $discount = $this->admin_model->getDiscountUserById($discount_users_id);
-
         $this->admin_model->changeStatusUserDiscount($discount_users_id, $status);
-
-        $real_time_notification = array(
-            "fb_user_id" => $discount->fb_user_id,
-            "mobile_user_id" => $discount->mobile_user_id,
-            "status" => $status,
-        );
-
-        notify('user-discount','discount-update', $real_time_notification);
 
         $response = array(
           "message" => 'Successfully update user discount status',
@@ -5458,13 +4712,11 @@ class Admin extends CI_Controller{
             "is_admin" => $this->ion_auth->in_group(1),
             "is_csr_admin" => $this->ion_auth->in_group(10),
             "is_catering_admin" => $this->ion_auth->in_group(14),
-            "is_audit_admin" => $this->ion_auth->in_group(15),
           )
         );
 
         $data["admin"]['user_details'] = $this->admin_model->getUser($this->session->admin['user_id']);
         $data["admin"]['user_details']->groups = $this->admin_model->getUserGroups($this->session->admin['user_id']);
-        $data["admin"]['user_details']->sos_groups = $this->stock_ordering_model->getUserGroups($this->session->admin['user_id']);
 
         if($this->ion_auth->in_group(1) || $this->ion_auth->in_group(10)){
           $data["admin"]['user_details']->stores = $this->user_model->get_all_store();
@@ -5500,17 +4752,14 @@ class Admin extends CI_Controller{
 
         }
 
-          $response = array(
-            "message" => 'Successfully fetch admin session',
-            "data" => $data,
-          );
+        $response = array(
+          "message" => 'Successfully fetch admin session',
+          "data" => $data,
+        );
   
-          header('content-type: application/json');
-          echo json_encode($response);
-          return;
-
-
-       break;
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
     }
   }
   
@@ -5631,8 +4880,10 @@ class Admin extends CI_Controller{
 
     return $status;
   }
+
   
-  public function payment(){
+  public function payment()
+  {
     switch($this->input->server('REQUEST_METHOD')){
       case 'POST': 
 
@@ -5660,7 +4911,7 @@ class Admin extends CI_Controller{
             $this->admin_model->uploadPayment($trans_id, $data, $file_name);
 
             header('content-type: application/json');
-            echo json_encode(array( "message" => 'Successfully upload payment'));
+            echo json_encode(array( "message" => 'Succesfully upload payment'));
           }
 
         break;

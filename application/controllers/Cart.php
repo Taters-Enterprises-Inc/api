@@ -10,10 +10,8 @@ class Cart extends CI_Controller {
 	public function __construct(){
 		parent::__construct();
 		$this->load->model('shop_model');
-		$this->load->model('catering_model');
-		$this->load->model('logs_model');
-
         $this->load->library('images');
+		$this->load->model('catering_model');
 	}
     
 	public function shop(){
@@ -125,14 +123,6 @@ class Cart extends CI_Controller {
 
                 // will be remove on January 2023
                 temporary_giftcard_promo_this_is_a_rush_solution_will_be_remove_soon();
-
-                $this->logs_model->insertSnackshopAddToCartLogs(
-                    $this->session->cache_data['store_id'],
-                    $prod_id,
-                    $this->input->post('prod_size') !== ""  ? $this->input->post('prod_size'): null,
-                    $this->session->userData['fb_user_id'] ?? null,
-                    $this->session->userData['mobile_user_id'] ?? null,
-                );
 
 				$response = array(
 					'message' => 'Successfully add to cart item'

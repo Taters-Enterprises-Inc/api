@@ -167,32 +167,15 @@ class Auth extends CI_Controller{
 
 					// Only allow updating groups if user is admin
 					if ($this->ion_auth->is_admin()) {
-						/*
-
-						Updated parameter for remove_from_group to determine 
-						if the group is from shop or stock ordering this process
-						also applies to add_to_group. 
-						1 ===== shop and 2 ===== stock order
-						*/
 						// Update the groups user belongs to
+						$this->ion_auth->remove_from_group('', $id);
 
-						$this->ion_auth->remove_from_group('', $id, 1);
 						$groupData = $this->input->post('groups');
 						if (isset($groupData) && !empty($groupData)) {
 							foreach ($groupData as $grp) {
-								$this->ion_auth->add_to_group($grp, $id, 1);
+								$this->ion_auth->add_to_group($grp, $id);
 							}
 						}
-
-						$this->ion_auth->remove_from_group('', $id, 2);
-						$stockOrderData = $this->input->post('stock_order_group');
-						if (isset($stockOrderData) && !empty($stockOrderData)) {
-							foreach ($stockOrderData as $grp) {
-								$this->ion_auth->add_to_group($grp, $id, 2);
-							}
-						}
-
-
 					}
 
 					// check to see if we are updating the user

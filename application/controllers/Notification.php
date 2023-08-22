@@ -59,7 +59,7 @@ class Notification extends CI_Controller {
 							'unseen_notifications_count' => $this->notification_model->getUnseenNotificationsCount($user_id, 6, $type),
 						),
 					),
-					"message" => "Successfully fetch notification"
+					"message" => "Succesfully fetch notification"
 				);
 				
 				header('content-type: application/json');
@@ -76,7 +76,7 @@ class Notification extends CI_Controller {
 				$this->notification_model->seenNotification($notification_id, $date_now);
 				
 				$response = array(
-					"message" => "Successfully seen notification"
+					"message" => "Succesfully seen notification"
 				);
 				
 				header('content-type: application/json');

@@ -17,479 +17,12 @@ class Profile extends CI_Controller {
 		$this->load->model('user_model');
 		$this->load->model('contact_model');
 		$this->load->model('discount_model');
-		$this->load->model('influencer_model');
 		$this->load->model('notification_model');
-		$this->load->model('inbox_model');
 
 		$this->load->library('form_validation');
 		$this->form_validation->set_error_delimiters('', '');
 		$this->ion_auth->set_message_delimiters('', '');
 		$this->ion_auth->set_error_delimiters('', '');
-	}
-	
-	public function influencer_cashouts(){
-		switch($this->input->server('REQUEST_METHOD')){
-			case 'GET':
-				$per_page = $this->input->get('per_page') ?? 25;
-				$page_no = $this->input->get('page_no') ?? 0;
-				$order = $this->input->get('order') ?? 'desc';
-				$order_by = $this->input->get('order_by') ?? 'dateadded';
-				$search = $this->input->get('search');
-				
-				if($page_no != 0){
-					$page_no = ($page_no - 1) * $per_page;
-				}
-		
-				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
-					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
-
-				if(!isset($logon_type)){
-
-					$response = array(
-						'message' => 'Error user not found',
-					);
-
-					header('content-type: application/json');
-					echo json_encode($response);
-					break;
-				}
-
-				switch($logon_type){
-					case 'facebook':
-						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-						$influencer = $this->influencer_model->getInfluencer($get_fb_user_details->id, null);
-
-						$cashouts_count = $this->influencer_model->getInfluencerCashoutsCount($influencer->id, $search);
-						$cashouts = $this->influencer_model->getInfluencerCashouts($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
-
-
-						$pagination = array(
-							"total_rows" => $cashouts_count,
-							"per_page" => $per_page,
-						);		
-		
-						$response = array(
-							'message' => 'Successfully fetch history of inbox',
-							"data" => array(
-							  "pagination" => $pagination,
-							  "cashouts" => $cashouts,
-							),
-						);
-		
-						header('content-type: application/json');
-						echo json_encode($response);
-						break;
-					case 'mobile':
-						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
-						$influencer = $this->influencer_model->getInfluencer(null, $get_mobile_user_details->id);
-
-						$referees_count = $this->influencer_model->getInfluencerCashoutsCount($influencer->id, $search);
-						$referees = $this->influencer_model->getInfluencerCashouts($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
-						
-						$pagination = array(
-							"total_rows" => $referees_count,
-							"per_page" => $per_page,
-						);		
-		
-						$response = array(
-							'message' => 'Successfully fetch history of inbox',
-							"data" => array(
-							  "pagination" => $pagination,
-							  "referees" => $referees,
-							),
-						);
-		
-						header('content-type: application/json');
-						echo json_encode($response);
-						break;
-				}
-				break;
-		}
-	}
-
-
-	public function influencer_cashout(){
-		switch($this->input->server('REQUEST_METHOD')){
-			case 'POST':
-				$_POST =  json_decode(file_get_contents("php://input"), true);
-
-				$data = array(
-					'influencer_id' => $this->input->post('influencerId'),
-					'cashout' => $this->input->post('cashout'),
-					'influencer_cashout_status_id ' => 1,
-				);
-
-				$influencer_cashout_id = $this->influencer_model->cashout($data);
-
-				
-				$message = $this->session->userData['first_name'] . " " . $this->session->userData['last_name']  ." cashout!";
-                        
-				$notification_event_data = array(
-					"notification_event_type_id" => 8,
-					"influencer_cashout_id" => $influencer_cashout_id,
-					"text" => $message
-				);
-				
-				$notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
-
-				//admin
-				$admin_users = $this->user_model->getUsersByGroupId(1);
-				foreach($admin_users as $user){
-					$notifications_data = array(
-						"user_to_notify" => $user->user_id,
-						"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
-						"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
-						'notification_event_id' => $notification_event_id,
-						"dateadded" => date('Y-m-d H:i:s'),
-					);
-					$this->notification_model->insertNotification($notifications_data);   
-				}
-				
-				//csr admin
-				$csr_admin_users = $this->user_model->getUsersByGroupId(10);
-				foreach($csr_admin_users as $user){
-					$notifications_data = array(
-						"user_to_notify" => $user->user_id,
-						"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
-						"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
-						'notification_event_id' => $notification_event_id,
-						"dateadded" => date('Y-m-d H:i:s'),
-					);
-					$this->notification_model->insertNotification($notifications_data);   
-				}
-
-				$realtime_notification = array(
-					"message" => $message,
-				);
-
-				notify('admin-influencer','influencer-cashout', $realtime_notification);
-
-				$response = array(
-					'message' => 'Successfully cashout',
-				);
-
-				header('content-type: application/json');
-				echo json_encode($response);
-				break;
-
-		}
-
-	}
-
-	public function influencer_upload_contract(){
-		switch($this->input->server('REQUEST_METHOD')){
-			case 'POST':
-				if (is_uploaded_file($_FILES['uploaded_file']['tmp_name'])) {
-		
-					$config['upload_path'] = './assets/upload/influencer_upload_contract'; 
-		
-					if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
-		
-					$config['allowed_types']    = 'pdf|doc|gif|jpg|jpeg|png';   
-					$config['max_size']         = 2000; 
-					$config['max_width']        = 0;
-					$config['max_height']       = 0;
-					$config['encrypt_name']     = TRUE; 
-		
-					$this->load->library('upload', $config);
-		
-					if (!$this->upload->do_upload('uploaded_file')) { 
-						$error = $this->upload->display_errors();
-						$this->output->set_status_header('401');
-						echo json_encode(array( "message" => $error));
-					} else {
-						$data = $this->upload->data(); 
-		
-						$influencer = $this->influencer_model->getInfluencer(
-							$this->session->userData['fb_user_id'] ?? null,
-							$this->session->userData['mobile_user_id'] ?? null
-						);
-		
-						$this->influencer_model->uploadContract(
-							$data,
-							$influencer->id,
-						);	
-		
-						
-						$real_time_notification = array(
-							"message" => $this->session->userData['first_name'] . " " . $this->session->userData['last_name'] ." Upload Influencer Contract!"
-						);
-		
-						notify('admin-influencer','influencer-application-with-id', $real_time_notification);
-		
-						header('content-type: application/json');
-						echo json_encode(array( "message" => 'Successfully upload contract'));
-					}
-				} else {
-					$this->output->set_status_header('401');
-					echo json_encode(array( "message" => 'Failed upload contract check your file'));
-				}
-				break;
-
-		}
-	}
-	
-	public function influencer_referee(){
-		switch($this->input->server('REQUEST_METHOD')){
-			case 'GET':
-				$per_page = $this->input->get('per_page') ?? 25;
-				$page_no = $this->input->get('page_no') ?? 0;
-				$order = $this->input->get('order') ?? 'desc';
-				$order_by = $this->input->get('order_by') ?? 'dateadded';
-				$search = $this->input->get('search');
-				
-				if($page_no != 0){
-					$page_no = ($page_no - 1) * $per_page;
-				}
-		
-				$logon_type = isset($_SESSION['userData']['oauth_uid']) ? 'facebook' :
-					(isset($_SESSION['userData']['mobile_user_id']) ? 'mobile' : null);
-
-				if(!isset($logon_type)){
-
-					$response = array(
-						'message' => 'Error user not found',
-					);
-
-					header('content-type: application/json');
-					echo json_encode($response);
-					break;
-				}
-
-				switch($logon_type){
-					case 'facebook':
-						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-						$influencer = $this->influencer_model->getInfluencer($get_fb_user_details->id, null);
-
-						$referees_count = $this->influencer_model->getInfluencerRefereesCount($influencer->id, $search);
-						$referees = $this->influencer_model->getInfluencerReferees($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
-
-
-						$pagination = array(
-							"total_rows" => $referees_count,
-							"per_page" => $per_page,
-						);		
-		
-						$response = array(
-							'message' => 'Successfully fetch history of inbox',
-							"data" => array(
-							  "pagination" => $pagination,
-							  "referees" => $referees,
-							),
-						);
-		
-						header('content-type: application/json');
-						echo json_encode($response);
-						break;
-					case 'mobile':
-						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
-						$influencer = $this->influencer_model->getInfluencer(null, $get_mobile_user_details->id);
-
-						$referees_count = $this->influencer_model->getInfluencerRefereesCount($influencer->id, $search);
-						$referees = $this->influencer_model->getInfluencerReferees($influencer->id, $page_no, $per_page, $order_by,  $order, $search);
-						
-						$pagination = array(
-							"total_rows" => $referees_count,
-							"per_page" => $per_page,
-						);		
-		
-						$response = array(
-							'message' => 'Successfully fetch history of inbox',
-							"data" => array(
-							  "pagination" => $pagination,
-							  "referees" => $referees,
-							),
-						);
-		
-						header('content-type: application/json');
-						echo json_encode($response);
-						break;
-				}
-				break;
-		}
-	}
-	
-	public function update_influencer(){
-		switch($this->input->server('REQUEST_METHOD')){
-			case 'POST':
-				$config['upload_path'] = './assets/upload/influencer'; 
-				
-				if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
-				
-				$config['allowed_types']    = 'gif|png|jpg|jpeg'; 
-				$config['max_size']         = 2000;
-				$config['max_width']        = 0;
-				$config['max_height']       = 0;
-				$config['encrypt_name']     = TRUE;
-
-				$this->load->library('upload', $config);
-
-				
-				$user_discount_data = array(
-					'first_name' => $_POST['firstName'],
-					'middle_name' => $_POST['middleName'],	
-					'last_name' => $_POST['lastName'],
-					'birthday' => $_POST['birthday'],
-					'id_number' => $_POST['idNumber'],
-					'dateadded' => date('Y-m-d H:i:s'),
-					'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
-					'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
-					'status' => 1
-				);
-
-				$old_influencer = $this->influencer_model->getInfluencerById($_POST['id']);
-
-
-				if($this->upload->do_upload('idFront')){
-					$id_front_data = $this->upload->data();
-					unlink(  FCPATH . "assets/upload/influencer/" . $old_influencer->id_front);
-					$influencer_data['id_front'] = $id_front_data['file_name'];
-				}
-				
-				if($this->upload->do_upload('idBack')){
-					$id_back_data = $this->upload->data();
-					unlink(  FCPATH . "assets/upload/influencer/" . $old_influencer->id_back);
-					$influencer_data['id_back'] = $id_back_data['file_name'];
-				}
-					
-				$this->discount_model->updateDiscountUser($_POST['id'], $influencer_data);
-
-				$response = array(
-					"message" => 'Edit application successful'
-				);
-				header('content-type: application/json');
-				echo json_encode($response);
-				break;
-		}
-	}
-
-	public function influencer(){
-		switch($this->input->server('REQUEST_METHOD')){
-			case 'GET':
-				$influencer = $this->influencer_model->getInfluencer(
-					$this->session->userData['fb_user_id'] ?? null,
-					$this->session->userData['mobile_user_id'] ?? null
-				);
-
-				$response = array(
-					"message" => 'Successfully fetch influencer',
-					"data" => $influencer,
-				);
-				header('content-type: application/json');
-				echo json_encode($response);
-				break;
-			case 'POST':
-				$birthday = new DateTime($_POST['birthday']);
-				$currentYear = new DateTime();
-				
-				if(
-					is_uploaded_file($_FILES['idFront']['tmp_name']) &&
-					is_uploaded_file($_FILES['idBack']['tmp_name'])
-				){
-					$config['upload_path'] = './assets/upload/influencer'; 
-					
-					if(!is_dir($config['upload_path'])) mkdir($config['upload_path'], 0777, TRUE);
-					
-					$config['allowed_types']    = 'gif|png|jpg|jpeg'; 
-					$config['max_size']         = 2000;
-					$config['max_width']        = 0;
-					$config['max_height']       = 0;
-					$config['encrypt_name']     = TRUE;
-
-					$this->load->library('upload', $config);
-
-					$id_front_data = null;
-					$id_back_data = null;
-
-					if($this->upload->do_upload('idFront')){
-						$id_front_data = $this->upload->data();
-					}
-					
-					if($this->upload->do_upload('idBack')){
-						$id_back_data = $this->upload->data();
-					}
-
-						
-					$influencer_data = array(
-						'first_name' => $_POST['firstName'],
-						'middle_name' => $_POST['middleName'],	
-						'last_name' => $_POST['lastName'],
-						'birthday' => $_POST['birthday'],
-						'id_number' => $_POST['idNumber'],
-						'id_front' => $id_front_data['file_name'],
-						'id_back' => $id_back_data['file_name'],
-						'dateadded' => date('Y-m-d H:i:s'),
-						'fb_user_id' => $this->session->userData['fb_user_id'] ?? null,
-						'mobile_user_id' => $this->session->userData['mobile_user_id'] ?? null,
-						'payment_selected' => $_POST['paymentSelected'],
-						'account_number' => $_POST['accountNumber'],
-						'account_name' => $_POST['accountName'],
-						'status' => 1
-					);
-
-					$influencer_id = $this->influencer_model->insertInfluencer($influencer_data);
-
-					$influencer_profile = array(
-						"influencer_id" => $influencer_id,
-					);
-
-					$this->influencer_model->insertInfluencerProfile($influencer_profile);
-
-					
-					$message = $_POST['firstName'] . " " . $_POST['lastName'] ." applied for influencer!";
-                        
-					$notification_event_data = array(
-						"notification_event_type_id" => 7,
-						"influencer_id" => $influencer_id,
-						"text" => $message
-					);
-					
-					$notification_event_id = $this->notification_model->insertAndGetNotificationEvent($notification_event_data);
-
-					//admin
-					$admin_users = $this->user_model->getUsersByGroupId(1);
-					foreach($admin_users as $user){
-						$notifications_data = array(
-							"user_to_notify" => $user->user_id,
-							"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
-							"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
-							'notification_event_id' => $notification_event_id,
-							"dateadded" => date('Y-m-d H:i:s'),
-						);
-						$this->notification_model->insertNotification($notifications_data);   
-					}
-					
-					//csr admin
-					$csr_admin_users = $this->user_model->getUsersByGroupId(10);
-					foreach($csr_admin_users as $user){
-						$notifications_data = array(
-							"user_to_notify" => $user->user_id,
-							"fb_user_who_fired_event" => $this->session->userData['fb_user_id'] ?? null,
-							"mobile_user_who_fired_event" => $this->session->userData['mobile_user_id'] ?? null,
-							'notification_event_id' => $notification_event_id,
-							"dateadded" => date('Y-m-d H:i:s'),
-						);
-						$this->notification_model->insertNotification($notifications_data);   
-					}
-
-					$realtime_notification = array(
-						"message" => $message,
-					);
-
-					notify('admin-influencer','influencer-application', $realtime_notification);
-
-					$response = array(
-						"message" => 'Application for influencer is successful!'
-					);
-					header('content-type: application/json');
-					echo json_encode($response);
-				}else{
-					$this->output->set_status_header('401');
-					echo json_encode(array( "message" => 'Application for influencer failed.'));
-				}
-				break;
-		}
-		
 	}
 	
 	public function inbox(){
@@ -522,8 +55,8 @@ class Profile extends CI_Controller {
 				switch($logon_type){
 					case 'facebook':
 						$get_fb_user_details = $this->user_model->get_fb_user_details($_SESSION['userData']['oauth_uid']);
-						$inbox_count = $this->inbox_model->getUserInboxHistoryCount('facebook',$get_fb_user_details->id, $search);
-						$inbox = $this->inbox_model->getUserInboxHistory('facebook',$get_fb_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						$inbox_count = $this->shop_model->getUserInboxHistoryCount('facebook',$get_fb_user_details->id, $search);
+						$inbox = $this->shop_model->getUserInboxHistory('facebook',$get_fb_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
 						
 
 						$pagination = array(
@@ -532,7 +65,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Successfully fetch history of inbox',
+							'message' => 'Succesfully fetch history of inbox',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "inbox" => $inbox
@@ -544,8 +77,8 @@ class Profile extends CI_Controller {
 						break;
 					case 'mobile':
 						$get_mobile_user_details = $this->user_model->get_mobile_user_details($_SESSION['userData']['mobile_user_id']);
-						$inbox_count = $this->inbox_model->getUserInboxHistoryCount('mobile',$get_mobile_user_details->id, $search);
-						$inbox = $this->inbox_model->getUserInboxHistory('mobile',$get_mobile_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
+						$inbox_count = $this->shop_model->getUserInboxHistoryCount('mobile',$get_mobile_user_details->id, $search);
+						$inbox = $this->shop_model->getUserInboxHistory('mobile',$get_mobile_user_details->id, $page_no, $per_page, $order_by,  $order, $search);
 						
 						$pagination = array(
 							"total_rows" => $inbox_count,
@@ -553,7 +86,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Successfully fetch history of inbox',
+							'message' => 'Succesfully fetch history of inbox',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "inbox" => $inbox,
@@ -699,7 +232,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Successfully fetch history of orders',
+							'message' => 'Succesfully fetch history of orders',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "orders" => $snackshop_orders
@@ -720,7 +253,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Successfully fetch history of orders',
+							'message' => 'Succesfully fetch history of orders',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "orders" => $snackshop_orders,
@@ -777,7 +310,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Successfully fetch history of bookings',
+							'message' => 'Succesfully fetch history of bookings',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "bookings" => $catering_bookings
@@ -798,7 +331,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Successfully fetch history of bookings',
+							'message' => 'Succesfully fetch history of bookings',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "bookings" => $catering_bookings
@@ -855,7 +388,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Successfully fetch history of orders',
+							'message' => 'Succesfully fetch history of orders',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "redeems" => $popclub_redeems
@@ -877,7 +410,7 @@ class Profile extends CI_Controller {
 						);		
 		
 						$response = array(
-							'message' => 'Successfully fetch history of orders',
+							'message' => 'Succesfully fetch history of orders',
 							"data" => array(
 							  "pagination" => $pagination,
 							  "redeems" => $popclub_redeems
@@ -1077,5 +610,4 @@ class Profile extends CI_Controller {
 		}
 		
 	}
-	
 }

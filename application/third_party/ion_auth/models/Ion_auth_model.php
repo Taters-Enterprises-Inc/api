@@ -205,20 +205,16 @@ class Ion_auth_model extends CI_Model
 
 		// initialize the database
 		$group_name = $this->config->item('database_group_name', 'ion_auth');
-
 		if (empty($group_name)) 
 		{
 			// By default, use CI's db that should be already loaded
 			$CI =& get_instance();
 			$this->db = $CI->db;
-			// $this->db = $this->load->database($sos_group_name, TRUE, TRUE);
-
 		}
 		else
 		{
 			// For specific group name, open a new specific connection
 			$this->db = $this->load->database($group_name, TRUE, TRUE);
-
 		}   
 
 		// initialize db tables data
@@ -881,7 +877,7 @@ class Ion_auth_model extends CI_Model
 			// add to groups
 			foreach ($groups as $group)
 			{
-				$this->add_to_group($group, $id, 1);
+				$this->add_to_group($group, $id);
 			}
 		}
 
@@ -986,120 +982,6 @@ class Ion_auth_model extends CI_Model
 
 		return FALSE;
 	}
-
-	/*
-	------------------------------------------------------------------
-	|
-	|			Login For Internal Audit Portal
-	|
-	------------------------------------------------------------------
-	*/
-
-	public function audit_login($identity, $password, $remember=FALSE)
-	{
-		$this->trigger_events('pre_login');
-
-		if (empty($identity) || empty($password))
-		{
-			$this->set_error('login_unsuccessful');
-			return FALSE;
-		}
-
-		$this->trigger_events('extra_where');
-
-		$query = $this->db->select($this->identity_column . ', 
-									email, 
-									id, 
-									password, 
-									active, 
-									last_login')
-						  ->where($this->identity_column, $identity)
-						  ->or_where('email', $identity)
-						  ->limit(1)
-						  ->order_by('id', 'desc')
-						  ->get($this->tables['users']);
-
-		if ($this->is_max_login_attempts_exceeded($identity))
-		{
-			// Hash something anyway, just to take up time
-			$this->hash_password($password);
-
-			$this->trigger_events('post_login_unsuccessful');
-			$this->set_error('login_timeout');
-
-			return FALSE;
-		}
-
-		if ($query->num_rows() === 1)
-		{
-			$user = $query->row();
-
-			if ($this->verify_password($password, $user->password, $identity))
-			{
-				if ($user->active == 0)
-				{
-					$this->trigger_events('post_login_unsuccessful');
-					$this->set_error('login_unsuccessful_not_active');
-
-					return FALSE;
-				}
-
-				//Based on group in the database
-			
-				$user_group = $this->get_users_groups($user->id)->result();
-			
-
-				if(!preg_match("/audit/i", $user_group[0]->name) || $user_group[0]->id != 15){
-					$this->trigger_events('post_login_unsuccessful');
-					$this->set_error('Login_unsuccessful_Restricted_Access');
-					return FALSE;
-				}
-
-				$this->set_session($user);
-
-				$this->update_last_login($user->id);
-
-				$this->clear_login_attempts($identity);
-				$this->clear_forgotten_password_code($identity);
-
-				if ($this->config->item('remember_users', 'ion_auth'))
-				{
-					if ($remember)
-					{
-						$this->remember_user($identity);
-					}
-					else
-					{
-						$this->clear_remember_code($identity);
-					}
-				}
-				
-				// Rehash if needed
-				$this->rehash_password_if_needed($user->password, $identity, $password);
-
-				// Regenerate the session (for security purpose: to avoid session fixation)
-				$this->session->sess_regenerate(FALSE);
-
-				$this->trigger_events(['post_login', 'post_login_successful']);
-				$this->set_message('login_successful');
-
-				return TRUE;
-			}
-		}
-
-		// Hash something anyway, just to take up time
-		$this->hash_password($password);
-
-		$this->increase_login_attempts($identity);
-
-		$this->trigger_events('post_login_unsuccessful');
-		$this->set_error('login_unsuccessful');
-
-		return FALSE;
-	}
-
-
-
 
 	/**
 	 * Verifies if the session should be rechecked according to the configuration item recheck_timer. If it does, then
@@ -1722,7 +1604,7 @@ class Ion_auth_model extends CI_Model
 	 * @return int
 	 * @author Ben Edmunds
 	 */
-	public function add_to_group($group_ids, $user_id = FALSE, $group_type)
+	public function add_to_group($group_ids, $user_id = FALSE)
 	{
 		$this->trigger_events('add_to_group');
 
@@ -1737,59 +1619,30 @@ class Ion_auth_model extends CI_Model
 		$return = 0;
 
 		// Then insert each into the database
-		switch($group_type){
-			case 1:
-				foreach ($group_ids as $group_id)
+		foreach ($group_ids as $group_id)
+		{
+			// Cast to float to support bigint data type
+			if ($this->db->insert($this->tables['users_groups'],
+								  [ $this->join['groups'] => (float)$group_id,
+									$this->join['users']  => (float)$user_id  ]))
+			{
+				if (isset($this->_cache_groups[$group_id]))
 				{
-					// Cast to float to support bigint data type
-					if ($this->db->insert($this->tables['users_groups'],
-										[ $this->join['groups'] => (float)$group_id,
-											$this->join['users']  => (float)$user_id  ]))
-					{
-						if (isset($this->_cache_groups[$group_id]))
-						{
-							$group_name = $this->_cache_groups[$group_id];
-						}
-						else
-						{
-							$group = $this->group($group_id)->result();
-							$group_name = $group[0]->name;
-							$this->_cache_groups[$group_id] = $group_name;
-						}
-						$this->_cache_user_in_group[$user_id][$group_id] = $group_name;
-
-						// Return the number of groups added
-						$return++;
-					}
+					$group_name = $this->_cache_groups[$group_id];
 				}
-			break;
-
-			case 2:
-				foreach ($group_ids as $group_id)
+				else
 				{
-					// Cast to float to support bigint data type
-					if ($this->db->insert($this->tables['tab_combination'],
-										[ $this->join['order_status_id'] => (float)$group_id,
-											$this->join['users']  => (float)$user_id  ]))
-					{
-						if (isset($this->_cache_groups[$group_id]))
-						{
-							$group_name = $this->_cache_groups[$group_id];
-						}
-						else
-						{
-							$group = $this->group($group_id)->result();
-							$group_name = $group[0]->name;
-							$this->_cache_groups[$group_id] = $group_name;
-						}
-						$this->_cache_user_in_group[$user_id][$group_id] = $group_name;
-
-						// Return the number of groups added
-						$return++;
-					}
+					$group = $this->group($group_id)->result();
+					$group_name = $group[0]->name;
+					$this->_cache_groups[$group_id] = $group_name;
 				}
-			break;
+				$this->_cache_user_in_group[$user_id][$group_id] = $group_name;
+
+				// Return the number of groups added
+				$return++;
+			}
 		}
+
 		return $return;
 	}
 
@@ -1802,7 +1655,7 @@ class Ion_auth_model extends CI_Model
 	 * @return bool
 	 * @author Ben Edmunds
 	 */
-	public function remove_from_group($group_ids = FALSE, $user_id = FALSE, $group_type)
+	public function remove_from_group($group_ids = FALSE, $user_id = FALSE)
 	{
 		$this->trigger_events('remove_from_group');
 
@@ -1820,60 +1673,28 @@ class Ion_auth_model extends CI_Model
 				$group_ids = [$group_ids];
 			}
 
-			switch($group_type) {
-			
-				case 1:	
-					foreach ($group_ids as $group_id)
-					{
-						// Cast to float to support bigint data type
-						$this->db->delete(
-							$this->tables['users_groups'],
-							[$this->join['groups'] => (float)$group_id, $this->join['users'] => (float)$user_id]
-						);
-						if (isset($this->_cache_user_in_group[$user_id]) && isset($this->_cache_user_in_group[$user_id][$group_id]))
-						{
-							unset($this->_cache_user_in_group[$user_id][$group_id]);
-						}
-					}
-					break;
-				
-				case 2: 
-					foreach ($group_ids as $group_id)
-					{
-						// Cast to float to support bigint data type
-						$this->db->delete(
-							$this->tables['tab_combination'],
-							[$this->join['order_status_id'] => (float)$group_id, $this->join['users'] => (float)$user_id]
-						);
-						if (isset($this->_cache_user_in_group[$user_id]) && isset($this->_cache_user_in_group[$user_id][$group_id]))
-						{
-							unset($this->_cache_user_in_group[$user_id][$group_id]);
-						}
-					}
-					break;
+			foreach ($group_ids as $group_id)
+			{
+				// Cast to float to support bigint data type
+				$this->db->delete(
+					$this->tables['users_groups'],
+					[$this->join['groups'] => (float)$group_id, $this->join['users'] => (float)$user_id]
+				);
+				if (isset($this->_cache_user_in_group[$user_id]) && isset($this->_cache_user_in_group[$user_id][$group_id]))
+				{
+					unset($this->_cache_user_in_group[$user_id][$group_id]);
+				}
 			}
+
 			$return = TRUE;
 		}
 		// otherwise remove user from all groups
 		else
 		{
 			// Cast to float to support bigint data type
-			switch($group_type) {
-
-				case 1: 
-					if ($return = $this->db->delete($this->tables['users_groups'], [$this->join['users'] => (float)$user_id]))
-					{
-						$this->_cache_user_in_group[$user_id] = [];
-					}
-
-					break;
-				case 2: 
-					if ($return = $this->db->delete($this->tables['tab_combination'], [$this->join['users'] => (float)$user_id]))
-					{
-						$this->_cache_user_in_group[$user_id] = [];
-					}
-
-					break;
+			if ($return = $this->db->delete($this->tables['users_groups'], [$this->join['users'] => (float)$user_id]))
+			{
+				$this->_cache_user_in_group[$user_id] = [];
 			}
 		}
 		return $return;
@@ -2035,9 +1856,7 @@ class Ion_auth_model extends CI_Model
 		$this->db->trans_begin();
 
 		// remove user from groups
-		$this->remove_from_group(NULL, $id, 1);
-		$this->remove_from_group(NULL, $id, 2);
-
+		$this->remove_from_group(NULL, $id);
 
 		// delete user from users table should be placed after remove from group
 		$this->db->delete($this->tables['users'], ['id' => $id]);

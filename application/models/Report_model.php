@@ -6,7 +6,6 @@ class Report_model extends CI_Model{
     {
 		$this->db =  $this->load->database('default', TRUE, TRUE);
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
-        $this->stock_ordering_db = $this->load->database('stock-ordering', TRUE, TRUE);
     }
     
     public function getReportTransaction($startDate, $endDate, $store){
@@ -281,55 +280,5 @@ class Report_model extends CI_Model{
 
         return $customer_survey_responses;
 
-    }
-
-    public function getUserStoreIds($user_id){
-        $this->db->select('store_id');
-        $this->db->from('users_store_groups');
-        $this->db->where('user_id', $user_id);
-
-        $query = $this->db->get();
-        $store_ids = $query->result_array();
-        
-        $store_ids_array = array();
-        foreach ($store_ids as $store) {
-            $store_ids_array[] = $store["store_id"];
-        }
-
-        return $store_ids_array;
-    }
-
-    public function getOrderIds($store_ids, $start_date, $end_date){
-        $this->stock_ordering_db->select('id');
-        $this->stock_ordering_db->from('order_information_tb');
-        $this->stock_ordering_db->where_in('store_id', $store_ids);
-        $this->stock_ordering_db->where("order_placement_date BETWEEN '$start_date' AND '$end_date'");
-
-        $query = $this->stock_ordering_db->get();
-        $order_ids = $query->result_array();
-        
-        $order_ids_array = array();
-        foreach ($order_ids as $order) {
-            $order_ids_array[] = $order["id"];
-        }
-
-        return $order_ids_array;
-    }
-
-    public function getMostOrderedProduct($order_ids){
-
-        $implode_order_ids = implode(',', $order_ids);
-        // echo "\n" . $implode_arr . "\n" . "\n";
-
-        $query = $this->stock_ordering_db->query("SELECT product_tb.product_name AS `Product Name`,
-                                  (SELECT category_tb.category_name FROM category_tb
-                                   WHERE category_tb.category_id = product_tb.category_id) as `Product Category`,
-                                  (SELECT COUNT(order_item_tb.order_qty) FROM order_item_tb
-                                   WHERE order_item_tb.product_id = product_tb.product_id
-                                   AND order_item_tb.order_information_id IN ($implode_order_ids)) as `Total QTY`
-                                   FROM product_tb
-                                   ORDER BY `Total QTY` DESC");
-        
-        return $query->result_array();
     }
 }

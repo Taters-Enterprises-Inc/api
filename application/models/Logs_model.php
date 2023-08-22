@@ -9,65 +9,6 @@ class Logs_model extends CI_Model {
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
-    public function insertSnackshopInitialCheckoutLogs(
-        $store_id,
-        $subtotal,
-        $discount,
-        $delivery_fee,
-        $fb_user_id,
-        $mobile_user_id
-    ){
-
-        $data = array(
-            "store_id" => $store_id,
-            "subtotal" => $subtotal,
-            "discount" => $discount,
-            "delivery_fee" => $delivery_fee,
-            "fb_user_id" => $fb_user_id,
-            "mobile_user_id" => $mobile_user_id,
-        );
-        
-        $this->db->insert('snackshop_initial_checkout_logs', $data);
-    }
-    
-    public function insertSnackshopProductViewLogs(
-        $store_id,
-        $product_id,
-        $product_variant_option_id,
-        $fb_user_id,
-        $mobile_user_id
-    ){
-
-        $data = array(
-            "store_id" => $store_id,
-            "product_id" => $product_id,
-            "product_variant_option_id" => $product_variant_option_id,
-            "fb_user_id" => $fb_user_id,
-            "mobile_user_id" => $mobile_user_id,
-        );
-        
-        $this->db->insert('snackshop_product_view_logs', $data);
-    }
-
-    public function insertSnackshopAddToCartLogs(
-        $store_id,
-        $product_id,
-        $product_variant_option_id,
-        $fb_user_id,
-        $mobile_user_id
-    ){
-
-        $data = array(
-            "store_id" => $store_id,
-            "product_id" => $product_id,
-            "product_variant_option_id" => $product_variant_option_id,
-            "fb_user_id" => $fb_user_id,
-            "mobile_user_id" => $mobile_user_id,
-        );
-        
-        $this->db->insert('snackshop_add_to_cart_logs', $data);
-    }
-
     public function getCustomerSurveyResponseLogs($customer_survey_response_id){
         $this->bsc_db->select('
             A.id,
@@ -103,7 +44,8 @@ class Logs_model extends CI_Model {
     }
     
 
-    public function insertCateringTransactionLogs($user_id , $action, $reference_id, $details = ''){   
+    public function insertCateringTransactionLogs($user_id , $action, $reference_id, $details = '')
+    {   
 		$values = array(
             'user_id'       => $user_id,
             'action'        => $action,
@@ -115,7 +57,8 @@ class Logs_model extends CI_Model {
         $this->db->insert('catering_transaction_logs_tb', $values);
     }
 
-    public function insertTransactionLogs($user_id , $action, $reference_id, $details = ''){   
+    public function insertTransactionLogs($user_id , $action, $reference_id, $details = '')
+    {   
 		$values = array(
             'user_id'       => $user_id,
             'action'        => $action,
@@ -144,7 +87,6 @@ class Logs_model extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
-
     public function getTransactionLogs($reference_id){
         $this->db->select('
             A.id, 
