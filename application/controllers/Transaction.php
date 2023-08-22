@@ -21,6 +21,7 @@ class Transaction extends CI_Controller {
         $this->load->model('store_model');
         $this->load->model('user_model');
         $this->load->model('discount_model');
+        $this->load->model('influencer_model');
 	}
     
     public function catering(){
@@ -222,7 +223,7 @@ class Transaction extends CI_Controller {
                             "data" => array(
                                 "hash" => $hash_key,
                             ),
-                            "message" => "Succesfully checkout order"
+                            "message" => "Successfully checkout order"
                         );
                         
                         header('content-type: application/json');
@@ -323,6 +324,8 @@ class Transaction extends CI_Controller {
                     $distance_rate_price = (empty($this->session->distance_rate_price)) ? 0 : $this->session->distance_rate_price;
                     $discount_value = "";
 
+                    $influencer_discount_value = null;
+
 					if(isset($_SESSION['redeem_data'])){
                         if(
                             isset($_SESSION['redeem_data']['minimum_purchase']) && 
@@ -354,6 +357,14 @@ class Transaction extends CI_Controller {
 
                     $payops = $post['payops'];
 
+                    $referral_code = $post['referralCode'];
+
+                    $influencer_promo = $this->shop_model->getInfluencerPromoByReferralCode($referral_code);
+
+                    if($influencer_promo){
+                        $discount_value = $comp_total *  (float) $influencer_promo->customer_discount;
+                        $influencer_discount_value =  $comp_total *  (float) $influencer_promo->influencer_discount;
+                    }
                     
                     $cod_fee = "0";
                     if( $payops == '3'){
@@ -396,6 +407,8 @@ class Transaction extends CI_Controller {
                         'payops'            => $payops,
                         'discount'          => $discount_value,
                         'discount_user_id'  => $discount_user_id,
+                        'influencer_discount' => $influencer_discount_value ?? "",
+                        'influencer_promo_id' => $influencer_promo->id ?? "",
                         'giftcard_discount' => "",
                         'giftcard_number'   => "",
                         'custom_message'    => '',
@@ -510,10 +523,11 @@ class Transaction extends CI_Controller {
                         
 
                         if(isset($_SESSION['redeem_data'])){
+                            $deal_id = $_SESSION['redeem_data']['deal_id'];
 
                             $order_data_deal = array(
                                 'transaction_id'  => $query_transaction_result['id'],
-                                'deal_id'         => $_SESSION['redeem_data']['deal_id'],
+                                'deal_id'         => $deal_id,
                                 'price'			  => $_SESSION['redeem_data']['deal_promo_price'],
                                 'product_price'   => $_SESSION['redeem_data']['deal_promo_price'],
                                 'remarks'		  => $_SESSION['redeem_data']['deal_remarks'],
@@ -525,12 +539,9 @@ class Transaction extends CI_Controller {
 
                             $today = date("Y-m-d H:i:s");
                             $this->deals_model->complete_redeem_deal($_SESSION['redeem_data']['id'], $today);
-                        }
-                        
-                        if(isset($_SESSION['redeem_data'])){
                             $this->session->unset_userdata('redeem_data');
                         }
-
+                        
                         $message = $post['firstName'] . " " . $post['lastName'] ." ordered on snackshop!";
                         
                         $notification_event_data = array(
@@ -604,7 +615,7 @@ class Transaction extends CI_Controller {
                             "data" => array(
                                 "hash" => $hash_key,
                             ),
-                            "message" => "Succesfully checkout order"
+                            "message" => "Successfully checkout order"
                         );
                         
                         header('content-type: application/json');
