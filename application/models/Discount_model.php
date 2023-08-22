@@ -62,9 +62,9 @@ class Discount_model extends CI_Model {
         $this->db->join('discount B','B.id = discount_id');
         
         if(isset($fb_user_id)){
-            $this->db->where('fb_user_id', $fb_user_id);
+            $this->db->where('A.fb_user_id', $fb_user_id);
         }elseif(isset($mobile_user_id)){
-            $this->db->where('mobile_user_id', $mobile_user_id);
+            $this->db->where('A.mobile_user_id', $mobile_user_id);
         }
 
         $query = $this->db->get();

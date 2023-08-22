@@ -30,7 +30,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  | Default is empty: uses default group defined in CI's configuration
  | (see application/config/database.php, $active_group variable)
  */
+$dotenv = Dotenv\Dotenv::createImmutable(FCPATH);
+$dotenv->load();
+
 $config['database_group_name'] = '';
+$config['sos_database_group_name'] = $_ENV['STOCK_ORDERING_DATABASE_NAME'];
 
 /*
 | -------------------------------------------------------------------------
@@ -43,6 +47,9 @@ $config['tables']['groups']          = 'groups';
 $config['tables']['users_groups']    = 'users_groups';
 $config['tables']['login_attempts']  = 'login_attempts';
 
+$config['tables']['order_status'] = $config['sos_database_group_name'].'.order_status';
+$config['tables']['tab_combination'] = $config['sos_database_group_name'].'.user_tab_combination';
+
 /*
  | Users table column and Group table column you want to join WITH.
  |
@@ -51,6 +58,10 @@ $config['tables']['login_attempts']  = 'login_attempts';
  */
 $config['join']['users']  = 'user_id';
 $config['join']['groups'] = 'group_id';
+
+//----------------------------------------
+
+$config['join']['order_status_id'] = 'order_status_id';
 
 /*
  | -------------------------------------------------------------------------

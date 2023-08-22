@@ -2,11 +2,14 @@
 	"cSpell.words": [
 		"asdoc",
 		"BASEPATH",
+		"cashout",
+		"cashouts",
 		"dateadded",
 		"dateupdated",
 		"firstname",
 		"geolocator",
 		"giftcard",
+		"Influencers",
 		"lastname",
 		"newteishop",
 		"payops",
@@ -14,9 +17,10 @@
 		"Pmix",
 		"popclub",
 		"POPTASTIC",
+		"Potrait",
 		"skus",
 		"snackshop",
-		"Succesfully",
+		"Successfully",
 		"superpop",
 		"userdata"
 	]
