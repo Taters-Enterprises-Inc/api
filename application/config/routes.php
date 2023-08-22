@@ -136,20 +136,15 @@ $route['stock/ordered/products'] = 'Stock_Ordering/getProductData';
 $route['stock/order/delivery-receive-approval'] = 'Stock_Ordering/delivery_receive_approval';
 $route['stock/cancelled'] = 'Stock_Ordering/cancelled_order'; 
 $route['stock/get-window-time'] = 'Stock_Ordering/getWindowTime'; 
-
-
+$route['stock/change-password/(:any)'] = 'auth/change_password/$1';
 $route['stock/get-product-list'] = 'Stock_Ordering/get_product_list';
 $route['stock/get-product-info'] = 'Stock_Ordering/get_product_info';
 $route['stock/get-product-availability'] = 'Stock_Ordering/get_product_availability';
 $route['stock/add-product-availability'] = 'Stock_Ordering/add_product_availability';
-
 $route['stock/generate-si-pdf/(:any)'] = 'download/theoretical_sales_invoice/$1';
 $route['stock/ordered/download_file_information/(:any)'] = 'download/stock_order_download_uploaded_file_information/$1';
-
 $route['stock/most-ordered-product/(:any)/(:any)'] = 'Stock_Ordering/most_ordered_product/$1/$2';
-
 $route['stock/import-view'] = 'Stock_Ordering/import_view';
-
 $route['stock/generate-multim-si-pdf/(:any)'] = 'download/multim_sales_invoice/$1';
 
 
