@@ -22,6 +22,8 @@ class Auth extends CI_Controller{
         $this->ion_auth->set_error_delimiters('', '');
 
         $this->lang->load('auth');
+
+        $this->load->model('stock_ordering_model');
     }
 	
 	public function create_group(){
@@ -120,6 +122,94 @@ class Auth extends CI_Controller{
                 break;
         }
     }
+
+	public function change_password($id){
+		switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+				$_POST =  json_decode(file_get_contents("php://input"), true);
+		        $this->data['title'] = $this->lang->line('change_password_heading');
+
+				$user = $this->ion_auth->user($id)->row();
+				$password = $this->input->post('param');
+
+				// $password_matches = $this->ion_auth_model->change_password($user->id, $password['currentPassword'], $password['newPassword']);
+
+				// print_r($password_matches);
+				// // print_r($user->id);
+				// print_r($password['newPassword']);
+				// // var_dump($_POST);
+
+
+				if ($password['newPassword']) {
+					$this->form_validation->set_rules('newPassword', $this->lang->line('change_password_validation_password_label'), 'min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[confirmPassword]');
+					$this->form_validation->set_rules('confirmPassword', $this->lang->line('change_password_validation_password_confirm_label'));
+				}    
+
+				$user_id = $user->id;
+				$new_password = $this->ion_auth->hash_password($password['newPassword']);
+
+				$user_information = array(
+					'password' => $new_password
+				);
+
+				$change_password = $this->stock_ordering_model->updatePassword($user_id, $user_information);
+
+				if (!$change_password) {
+					header('content-type: application/json');
+					echo json_encode(array("message" => "The password has been successfully changed!"));
+					return;
+				} else {
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode(array("message" => "There's an error in changing the password!"));
+					return;
+				}            
+
+		        /*if ($this->form_validation->run() === TRUE) {
+                    
+					$password_matches = $this->ion_auth_model->change_password($user->id, $password['currentPassword'], $password['newPassword']);
+
+					if ($password_matches) {
+						
+						header('content-type: application/json');
+						echo json_encode(array("message" =>  $this->ion_auth->messages()));
+						return;
+					} else {
+
+						$this->output->set_status_header('401');
+						header('content-type: application/json');
+						echo json_encode(array("message" => validation_errors()));
+						return;
+					}
+
+                }else{ 
+					$this->data['message'] = (validation_errors() ? validation_errors() : ($this->ion_auth->errors() ? $this->ion_auth->errors() : $this->session->flashdata('message')));
+					
+					$this->data['currentPassword'] = [
+						'name' => 'currentPassword',
+						'id'   => 'currentPassword',
+						'type' => 'password'
+					];
+					$this->data['newPassword'] = [
+						'name' => 'newPassword',
+						'id'   => 'newPassword',
+						'type' => 'password'
+					];
+					$this->data['confirmPassword'] = [
+						'name' => 'confirmPassword',
+						'id'   => 'confirmPassword',
+						'type' => 'password'
+					];
+
+                    $this->output->set_status_header(401);
+                    header('content-type: application/json');
+					echo json_encode(array("message" => validation_errors()));
+                    return;
+                }*/
+
+                break;
+        }
+	}
 	
 	public function edit_user($id){
         switch($this->input->server('REQUEST_METHOD')){

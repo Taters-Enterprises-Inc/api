@@ -156,6 +156,13 @@ class Stock_ordering extends CI_Controller
                 $message = "No Product/s data";
             }
 
+            $real_time_notification = array(
+                "store_id" => $store_id,
+                "message" => ""
+            );
+            
+            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+
             $response = array(
                 "message" => $message,
               );
@@ -232,7 +239,6 @@ class Stock_ordering extends CI_Controller
                 for($i=0; $i < 10; $i++){
                     $getOrdersBadgeCount[$i] += $this->stock_ordering_model->getOrdersCount("", $i + 1, $user_store_id);
                 }
-                
 
                 $pagination = array(
                     "total_rows" => $getOrdersCount,
@@ -312,6 +318,13 @@ class Stock_ordering extends CI_Controller
                 $message = "No data!";
             }
 
+            $real_time_notification = array(
+                "store_id" => $store_id,
+                "message" => ""
+            );
+            
+            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+
             $response = array(
                 "message" => $message,
               );
@@ -378,6 +391,14 @@ class Stock_ordering extends CI_Controller
             }else {
                 $message = "No data!";
             }
+
+
+            $real_time_notification = array(
+                "store_id" => $store_id,
+                "message" => ""
+            );
+            
+            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
 
 
             $response = array(
@@ -482,6 +503,14 @@ class Stock_ordering extends CI_Controller
             }else {
                 $message = "No data!";
             }
+
+
+            $real_time_notification = array(
+                "store_id" => $store_id,
+                "message" => ""
+            );
+            
+            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
             
             $response = array(
                 "message" => $message,
@@ -613,6 +642,14 @@ class Stock_ordering extends CI_Controller
                 $message = "No data!";
             }
 
+
+            $real_time_notification = array(
+                "store_id" => $store_id,
+                "message" => ""
+            );
+            
+            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+
             $response = array(
                 "message" => $message,
               );
@@ -710,6 +747,13 @@ class Stock_ordering extends CI_Controller
 
             }
 
+            $real_time_notification = array(
+                "store_id" => $store_id,
+                "message" => ""
+            );
+            
+            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+
             $response = array(
                 "message" => "Success!",
             );
@@ -728,6 +772,13 @@ class Stock_ordering extends CI_Controller
 
 
             $order_msi = $this->stock_ordering_model->getOrderMSI();
+
+            $real_time_notification = array(
+                "store_id" => $store_id,
+                "message" => ""
+            );
+            
+            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
 
               $response = array(
                 "message" => 'Successfully fetch',
@@ -822,6 +873,12 @@ class Stock_ordering extends CI_Controller
 
             $this->transaction_log($order_information_OrderId, 8, date('Y-m-d H:i:s'));
 
+            $real_time_notification = array(
+                "store_id" => $store_id,
+                "message" => ""
+            );
+            
+            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
 
             $response = array(
                 "message" => $message,
@@ -880,6 +937,13 @@ class Stock_ordering extends CI_Controller
 
             }
 
+            $real_time_notification = array(
+                "store_id" => $store_id,
+                "message" => ""
+            );
+            
+            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+
             $response = array(
                 "message" => $message,
             );
@@ -935,6 +999,14 @@ class Stock_ordering extends CI_Controller
                 }else{
                     $message = "There's an error!";
                 }
+
+
+                $real_time_notification = array(
+                    "store_id" => $store_id,
+                    "message" => ""
+                );
+                
+                notify('admin-stock-ordering','stockorder-process', $real_time_notification);
 
 
                 $response = array(

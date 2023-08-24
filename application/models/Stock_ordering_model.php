@@ -486,7 +486,7 @@ class Stock_ordering_model extends CI_Model {
         
         $this->db->select("
             B.id,
-            B.short_name as name,
+            B.short_name,
             B.description,
         ");
 
@@ -671,6 +671,11 @@ class Stock_ordering_model extends CI_Model {
 
         $query = $this->db->get();
         return $query->row();
+    }
+
+    public function updatePassword($id, $data){
+        $this->newteishop->where('id', $id);
+        $this->newteishop->update('users', $data);
     }
 
     
