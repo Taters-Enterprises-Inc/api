@@ -486,7 +486,7 @@ class Stock_ordering_model extends CI_Model {
         
         $this->db->select("
             B.id,
-            B.short_name as name,
+            B.short_name,
             B.description,
         ");
 
