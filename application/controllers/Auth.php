@@ -22,6 +22,8 @@ class Auth extends CI_Controller{
         $this->ion_auth->set_error_delimiters('', '');
 
         $this->lang->load('auth');
+
+        $this->load->model('stock_ordering_model');
     }
 	
 	public function create_group(){
@@ -141,9 +143,29 @@ class Auth extends CI_Controller{
 				if ($password['newPassword']) {
 					$this->form_validation->set_rules('newPassword', $this->lang->line('change_password_validation_password_label'), 'min_length[' . $this->config->item('min_password_length', 'ion_auth') . ']|matches[confirmPassword]');
 					$this->form_validation->set_rules('confirmPassword', $this->lang->line('change_password_validation_password_confirm_label'));
-				}                
+				}    
 
-		        if ($this->form_validation->run() === TRUE) {
+				$user_id = $user->id;
+				$new_password = $this->ion_auth->hash_password($password['newPassword']);
+
+				$user_information = array(
+					'password' => $new_password
+				);
+
+				$change_password = $this->stock_ordering_model->updatePassword($user_id, $user_information);
+
+				if (!$change_password) {
+					header('content-type: application/json');
+					echo json_encode(array("message" => "The password has been successfully changed!"));
+					return;
+				} else {
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode(array("message" => "There's an error in changing the password!"));
+					return;
+				}            
+
+		        /*if ($this->form_validation->run() === TRUE) {
                     
 					$password_matches = $this->ion_auth_model->change_password($user->id, $password['currentPassword'], $password['newPassword']);
 
@@ -183,7 +205,7 @@ class Auth extends CI_Controller{
                     header('content-type: application/json');
 					echo json_encode(array("message" => validation_errors()));
                     return;
-                }
+                }*/
 
                 break;
         }
