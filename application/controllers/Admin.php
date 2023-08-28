@@ -25,6 +25,7 @@ class Admin extends CI_Controller{
 		$this->load->model('deals_model');
     $this->load->model('stock_ordering_model');
 
+
 	}
 
   public function customer_feedback_ratings(){
@@ -5448,6 +5449,9 @@ class Admin extends CI_Controller{
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
 
+
+        $this->verify_user_session();
+
         $data = array(
           "admin" => array(
             "identity" => $this->session->admin['identity'],
@@ -5459,6 +5463,7 @@ class Admin extends CI_Controller{
             "is_csr_admin" => $this->ion_auth->in_group(10),
             "is_catering_admin" => $this->ion_auth->in_group(14),
             "is_audit_admin" => $this->ion_auth->in_group(15),
+            "session_id" => $this->session->admin['session_id'],
           )
         );
 
@@ -5513,6 +5518,29 @@ class Admin extends CI_Controller{
        break;
     }
   }
+
+  public function verify_user_session(){
+		$current_session_id = $this->session->admin['session_id'];
+		$id = $this->session->admin['user_id'];
+		
+		$this->db->select('session_id');
+		$this->db->from('users');
+		$this->db->where('id', $id);
+
+		$query = $this->db->get();
+		$stored_session_id = $query->row();
+  
+		if($current_session_id != $stored_session_id->session_id){
+			$this->ion_auth->logout();
+
+      header('content-type: application/json');
+    echo json_encode(array("message" => 'New session has logged-in'));
+    return;
+		}
+
+		
+
+	}
   
   // TO BE IMPROVED ( V2 Backend )
   public function print_asdoc($id, $isCatering){

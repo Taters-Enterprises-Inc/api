@@ -853,7 +853,7 @@ class Ion_auth_model extends CI_Model
 			'email' => $email,
 			'ip_address' => $ip_address,
 			'created_on' => time(),
-			'active' => ($manual_activation === FALSE ? 1 : 0)
+			'active' => ($manual_activation === FALSE ? 1 : 0),
 		];
 
 		// filter out any data passed that doesnt have a matching column in the users table
@@ -945,6 +945,7 @@ class Ion_auth_model extends CI_Model
 				}
 
 				$this->set_session($user);
+				$this->update_session_id();
 
 				$this->update_last_login($user->id);
 
@@ -985,6 +986,38 @@ class Ion_auth_model extends CI_Model
 		$this->set_error('login_unsuccessful');
 
 		return FALSE;
+	}
+
+	public function update_session_id(){
+		// $session_id = session_create_id();
+
+		// $data = array(
+		// 	'currentsessionid' => $session_id
+			
+		//  );
+		
+		// $this->db->where('id', $this->ion_auth->user()->row()->id);
+		// $this->db->update('users', $data);	
+		
+		// $this->db->delete('users', array('session_id' => $this->ion_auth->user()->row()->session_id)); 
+    
+
+		$session_id = session_create_id();
+		$data = array(
+			'session_id' => $session_id,
+			);
+
+		$this->db->where('id', $this->ion_auth->user()->row()->id);
+		$this->db->update('users', $data);
+
+		$this->trigger_events('pre_set_session');
+
+		$_SESSION['admin']['session_id'] = $session_id;
+		
+		$this->trigger_events('post_set_session');
+
+		return TRUE;
+		
 	}
 
 	/*
@@ -2979,6 +3012,27 @@ class Ion_auth_model extends CI_Model
 			// Password mismatch, we cannot migrate...
 			$this->trigger_events(['post_sha1_password_migration', 'post_sha1_password_migration_unsuccessful']);
 			return FALSE;
+		}
+	}
+
+
+	  public function verify_user_session(){
+		$current_session_id = $this->session->admin['session_id'];
+		$id = $this->session->admin['user_id'];
+		
+		$this->db->select('session_id');
+		$this->db->from('users');
+		$this->db->where('id', $id);
+
+		$query = $this->db->get();
+		$stored_session_id = $query->row();
+  
+		if($current_session_id != $stored_session_id->session_id){
+			$this->ion_auth->logout();
+
+      header('content-type: application/json');
+      echo json_encode(array("message" => 'New session has logged-in'));
+      return;
 		}
 	}
 	
