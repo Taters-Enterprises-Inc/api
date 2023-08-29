@@ -444,6 +444,17 @@ class Stock_ordering_model extends CI_Model {
         return $query->row();
     }
 
+    public function getStoreIdByUserId($user_id){
+        $this->newteishop->select('A.store_id');
+        $this->newteishop->from('store_tb A');
+        $this->newteishop->join('users_store_groups B', 'B.store_id = A.store_id', 'left');
+        $this->newteishop->join('users C', 'C.id = B.user_id', 'left');
+        $this->newteishop->where('C.id', $user_id);
+
+        $query = $this->newteishop->get();
+        return $query->result();
+    }
+
     public function getProductMultiplier($store_id, $category_id){
         $this->db->select('product_multiplier');
         $this->db->from('product_cost_per_store_tb');

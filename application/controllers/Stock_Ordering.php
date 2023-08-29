@@ -770,15 +770,8 @@ class Stock_ordering extends CI_Controller
 
         case 'GET': 
 
-
+            $user_id = $this->session->admin['user_id'];
             $order_msi = $this->stock_ordering_model->getOrderMSI();
-
-            $real_time_notification = array(
-                "store_id" => $store_id,
-                "message" => ""
-            );
-            
-            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
 
               $response = array(
                 "message" => 'Successfully fetch',
@@ -873,8 +866,10 @@ class Stock_ordering extends CI_Controller
 
             $this->transaction_log($order_information_OrderId, 8, date('Y-m-d H:i:s'));
 
+            $store = $this->stock_ordering_model->getStoreIdByUserId($user_id);
+
             $real_time_notification = array(
-                "store_id" => $store_id,
+                "store_id" => $store,
                 "message" => ""
             );
             
@@ -1389,5 +1384,6 @@ class Stock_ordering extends CI_Controller
 
         return $message;
     }
+
 	
 }
