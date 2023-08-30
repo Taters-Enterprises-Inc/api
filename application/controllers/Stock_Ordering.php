@@ -769,9 +769,10 @@ class Stock_ordering extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
 
         case 'GET': 
-
+            $search = $this->input->get('invoiceSearch');
+            
             $user_id = $this->session->admin['user_id'];
-            $order_msi = $this->stock_ordering_model->getOrderMSI();
+            $order_msi = $this->stock_ordering_model->getOrderMSI($search);
 
               $response = array(
                 "message" => 'Successfully fetch',
