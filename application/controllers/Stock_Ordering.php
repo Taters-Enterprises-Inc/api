@@ -448,7 +448,12 @@ class Stock_ordering extends CI_Controller
               return;
             }
             
-            $this->import_si($order_information_id, $path);
+            $import_si = $this->import_si($order_information_id, $path);
+            if ($import_si) {
+                $this->output->set_status_header('401');
+                echo json_encode(array( "message" => $import_si));
+                return;
+            }
 
             $order_information = array(
                 'delivery_receipt' => $delivery_receipt_image_name,
