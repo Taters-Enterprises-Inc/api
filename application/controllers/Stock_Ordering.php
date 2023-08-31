@@ -1294,7 +1294,6 @@ class Stock_ordering extends CI_Controller
 
             if ($countforA > 0) {
                 return "There's an error in Column A. Import of the file will be aborted.";
-                die();
             }
 
             $countforB = 0;
@@ -1309,7 +1308,6 @@ class Stock_ordering extends CI_Controller
 
             if ($countforB > 1) {
                 return "There's an error in Column B. Import of the file will be aborted.";
-                die();
             }
 
             $countforC = 0;
@@ -1324,7 +1322,6 @@ class Stock_ordering extends CI_Controller
 
             if ($countforC > 1) {
                 return "There's an error in Column C. Import of the file will be aborted.";
-                die();
             }
 
             $countforD = 0;
@@ -1339,7 +1336,6 @@ class Stock_ordering extends CI_Controller
 
             if ($countforD > 1) {
                 return "There's an error in Column D. Import of the file will be aborted.";
-                die();
             }
 
             $countforE = 0;
@@ -1354,7 +1350,6 @@ class Stock_ordering extends CI_Controller
 
             if ($countforE > 1) {
                 return "There's an error in Column E. Import of the file will be aborted.";
-                die();
             }
 
             $countforF = 0;
@@ -1369,7 +1364,6 @@ class Stock_ordering extends CI_Controller
 
             if ($countforF > 1) {
                 return "There's an error in Column F. Import of the file will be aborted.";
-                die();
             }
 
             $countforG = 0;
@@ -1384,7 +1378,6 @@ class Stock_ordering extends CI_Controller
 
             if ($countforG > 2) {
                 return "There's an error in Column G. Import of the file will be aborted.";
-                die();
             }
 
             $countforH = 0;
@@ -1399,7 +1392,6 @@ class Stock_ordering extends CI_Controller
 
             if ($countforH > 2) {
                 return "There's an error in Column H. Import of the file will be aborted.";
-                die();
             }
 
             $countforI = 0;
@@ -1414,7 +1406,6 @@ class Stock_ordering extends CI_Controller
 
             if ($countforI > 0) {
                 return "There's an error in Column I. Import of the file will be aborted.";
-                die();
             }
 
             $countforJ = 0;
@@ -1429,7 +1420,6 @@ class Stock_ordering extends CI_Controller
 
             if ($countforJ > 1) {
                 return "There's an error in Column J. Import of the file will be aborted.";
-                die();
             }
 
             foreach($object->getWorksheetIterator() as $worksheet) {
