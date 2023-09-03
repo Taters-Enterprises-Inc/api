@@ -12,6 +12,12 @@ class Admin extends CI_Controller{
 		parent::__construct();
 
     if ($this->ion_auth->logged_in() === false){
+
+            
+
+      // $this->output->set_status_header('401');
+      // echo json_encode(array( "message" => "No user session"));
+        
       exit();
     }
 
@@ -5448,9 +5454,8 @@ class Admin extends CI_Controller{
   public function session(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
-
-
-        $this->verify_user_session();
+        
+      notify('admin-session','admin-login-session', $this->verify_user_session());
 
         $data = array(
           "admin" => array(
@@ -5522,24 +5527,16 @@ class Admin extends CI_Controller{
   public function verify_user_session(){
 		$current_session_id = $this->session->admin['session_id'];
 		$id = $this->session->admin['user_id'];
-		
-		$this->db->select('session_id');
-		$this->db->from('users');
-		$this->db->where('id', $id);
 
-		$query = $this->db->get();
-		$stored_session_id = $query->row();
+		$stored_session_id = $this->admin_model->getStoredSessionId($id);
   
-		if($current_session_id != $stored_session_id->session_id){
+    
+		if($current_session_id && $current_session_id != $stored_session_id->session_id){
 			$this->ion_auth->logout();
-
-      header('content-type: application/json');
-    echo json_encode(array("message" => 'New session has logged-in'));
-    return;
 		}
 
 		
-
+    return $stored_session_id->session_id;
 	}
   
   // TO BE IMPROVED ( V2 Backend )
