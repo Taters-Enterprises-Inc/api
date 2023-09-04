@@ -695,5 +695,24 @@ class Stock_ordering_model extends CI_Model {
     }
 
     
+    public function filename_factory_prefix($order_id, $si_type){
+
+        $this->db->select('c.company_code, B.category_name')
+                 ->from('order_information_tb A')
+                 ->join('category_tb B', 'B.category_id = A.order_type_id', 'left')
+                 ->join($this->newteishop->database.'.store_tb C', 'C.store_id = A.store_id', 'left')
+                 ->where('A.id', $order_id);
+
+        $query = $this->db->get();
+        $prefix = $query->row();
+
+
+
+        $filename_prefix = trim($prefix->company_code).'_'.$prefix->category_name;
+
+        $filename_prefix = $si_type ? strtoupper($si_type).'-SI_'.$filename_prefix : $filename_prefix;
+
+        return $filename_prefix;
+    }
 
 }

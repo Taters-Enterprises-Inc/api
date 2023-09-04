@@ -412,6 +412,8 @@ class Stock_ordering extends CI_Controller
         }
     }
 
+    
+
     public function dispatch_order(){
         switch($this->input->server('REQUEST_METHOD')){
 
@@ -433,11 +435,14 @@ class Stock_ordering extends CI_Controller
             $get_commited_date =  date('Y-m-d H:i:s', strtotime($get_commited_date->commited_delivery_date));
             $dispatch_date = substr_replace($get_commited_date, $dispatch_date, 11, 8);
 
+
+            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
+
             //****** 
             $delivery_receipt_image_name = clean_str_for_img($this->input->post('deliveryReceipt'). '-' . time());
             $deliveryReceipt = explode(".", $_FILES['deliveryReceipt']['name']);
             $ext = end($deliveryReceipt);
-            $delivery_receipt_image_name = $delivery_receipt_image_name . '.' . $ext;
+            $delivery_receipt_image_name = $file_name_prefix . $delivery_receipt_image_name . '.' . $ext;
             $path = './assets/uploads/screenshots/'.$delivery_receipt_image_name;
 
             $deliveryReceipt_error = upload('deliveryReceipt','./assets/uploads/screenshots/', $delivery_receipt_image_name, $ext );
@@ -539,17 +544,18 @@ class Stock_ordering extends CI_Controller
             $status = 5;
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
+
+
+            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
+
             $updated_delivery_receipt_image_name = clean_str_for_img($this->input->post('updatedDeliveryReceipt'). '-' . time());
 
             $updatedDeliveryReceipt = explode(".", $_FILES['updatedDeliveryReceipt']['name']);
             $ext = end($updatedDeliveryReceipt);
-            $updated_delivery_receipt_image_name = $updated_delivery_receipt_image_name . '.' . $ext;
+            $updated_delivery_receipt_image_name = $file_name_prefix . $updated_delivery_receipt_image_name . '.' . $ext;
 
             $updatedDeliveryReceipt_error = upload('updatedDeliveryReceipt','./assets/uploads/screenshots/',$updated_delivery_receipt_image_name, $ext );
-
-            // $updated_delivery_receipt_image_name = clean_str_for_img($this->input->post('updatedDeliveryReceipt'). '-' . time() ) . '.jpg';
-            // $updatedDeliveryReceipt_error = upload('updatedDeliveryReceipt','./assets/uploads/screenshots/',$updated_delivery_receipt_image_name, 'jpg');
-            
+ 
             if($updatedDeliveryReceipt_error){
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => $updatedDeliveryReceipt_error));
@@ -684,11 +690,14 @@ class Stock_ordering extends CI_Controller
             $uploadedRegionReceipt_image_name = null;
             // Updated Sales Invoice
             if(isset($_FILES['uploadedGoodsReceipt'])){
-                $uploadedGoodsReceipt_image_name = clean_str_for_img($this->input->post('uploadedGoodsReceipt'). '-g-' . time());
+
+                $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'goods');
+                
+                $uploadedGoodsReceipt_image_name = clean_str_for_img($this->input->post('uploadedGoodsReceipt'). '-' . time());
 
                 $uploadedGoodsReceipt = explode(".", $_FILES['uploadedGoodsReceipt']['name']);
                 $ext = end($uploadedGoodsReceipt);
-                $uploadedGoodsReceipt_image_name = $uploadedGoodsReceipt_image_name . '.' . $ext;
+                $uploadedGoodsReceipt_image_name = $file_name_prefix . $uploadedGoodsReceipt_image_name . '.' . $ext;
 
                 $uploadedGoodsReceipt_error = upload('uploadedGoodsReceipt','./assets/uploads/screenshots/',$uploadedGoodsReceipt_image_name, $ext );
 
@@ -700,11 +709,14 @@ class Stock_ordering extends CI_Controller
             }
 
             if(isset($_FILES['uploadedRegionReceipt'])){
-                $uploadedRegionReceipt_image_name = clean_str_for_img($this->input->post('uploadedRegionReceipt'). '-r-' . time());
+
+                $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'region');
+
+                $uploadedRegionReceipt_image_name = clean_str_for_img($this->input->post('uploadedRegionReceipt'). '-' . time());
 
                 $uploadedRegionReceipt = explode(".", $_FILES['uploadedRegionReceipt']['name']);
                 $ext = end($uploadedRegionReceipt);
-                $uploadedRegionReceipt_image_name = $uploadedRegionReceipt_image_name . '.' . $ext;
+                $uploadedRegionReceipt_image_name = $file_name_prefix . $uploadedRegionReceipt_image_name . '.' . $ext;
 
                 $uploadedRegionReceipt_error = upload('uploadedRegionReceipt','./assets/uploads/screenshots/',$uploadedRegionReceipt_image_name, $ext );
 
@@ -818,11 +830,12 @@ class Stock_ordering extends CI_Controller
             
             $order_information_OrderId = $order_information_data[0]['order_id'];
 
+            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
             $payment_detail_image_name = clean_str_for_img($this->input->post('paymentFile'). '-' . time());
 
             $payment_detail_image = explode(".", $_FILES['paymentFile']['name']);
             $ext = end($payment_detail_image);
-            $payment_detail_image_name = $payment_detail_image_name . '.' . $ext;
+            $payment_detail_image_name = $file_name_prefix . $payment_detail_image_name . '.' . $ext;
             $path = './assets/uploads/screenshots/'.$payment_detail_image_name;
 
             $payment_detail_image_name_error = upload('paymentFile','./assets/uploads/screenshots/',$payment_detail_image_name, $ext );
@@ -1532,5 +1545,4 @@ class Stock_ordering extends CI_Controller
         return $message;
     }
 
-	
 }
