@@ -11,15 +11,15 @@ class Admin extends CI_Controller{
 	public function __construct(){
 		parent::__construct();
 
-    if ($this->ion_auth->logged_in() === false){
+    // if ($this->ion_auth->logged_in() === false){
 
-            
+      notify('admin-session','no-admin-session', $this->ion_auth->logged_in() === false);
 
       // $this->output->set_status_header('401');
       // echo json_encode(array( "message" => "No user session"));
         
-      exit();
-    }
+    //   exit();
+    // }
 
 		$this->load->helper('url');
 		$this->load->model('admin_model');
@@ -5234,7 +5234,7 @@ class Admin extends CI_Controller{
         $response = array(
           "message" => 'Successfully fetch snackshop bookings',
           "data" => array(
-            "pagination" => $pagination,
+            "pagination" => $pagination,      
             "bookings" => $bookings
           ),
         );
