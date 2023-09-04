@@ -453,7 +453,12 @@ class Stock_ordering extends CI_Controller
               return;
             }
             
-            $this->import_si($order_information_id, $path);
+            $import_si = $this->import_si($order_information_id, $path);
+            if ($import_si) {
+                $this->output->set_status_header('401');
+                echo json_encode(array( "message" => $import_si));
+                return;
+            }
 
             $order_information = array(
                 'delivery_receipt' => $delivery_receipt_image_name,
@@ -1293,6 +1298,147 @@ class Stock_ordering extends CI_Controller
 
         if (isset($path)) {
             $object = PHPExcel_IOFactory::load($path);
+
+            $worksheet = $object->getActiveSheet();
+            $countforA = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnA = $worksheet->getCell('A' . $row->getRowIndex())->getValue();
+
+                if ($columnA != null || $columnA != '') {
+                    $countforA = $countforA + 1;
+                }
+            }
+
+            if ($countforA > 0) {
+                return "There's an error in Column A. Import of the file will be aborted.";
+            }
+
+            $countforB = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnB = $worksheet->getCell('B' . $row->getRowIndex())->getValue();
+
+                if ($columnB === null || $columnB === '') {
+                    $countforB = $countforB + 1;
+                }
+            }
+
+            if ($countforB > 1) {
+                return "There's an error in Column B. Import of the file will be aborted.";
+            }
+
+            $countforC = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnC = $worksheet->getCell('C' . $row->getRowIndex())->getValue();
+
+                if ($columnC === null || $columnC === '') {
+                    $countforC = $countforC + 1;
+                }
+            }
+
+            if ($countforC > 1) {
+                return "There's an error in Column C. Import of the file will be aborted.";
+            }
+
+            $countforD = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnD = $worksheet->getCell('D' . $row->getRowIndex())->getValue();
+
+                if ($columnD === null || $columnD === '') {
+                    $countforD = $countforD + 1;
+                }
+            }
+
+            if ($countforD > 1) {
+                return "There's an error in Column D. Import of the file will be aborted.";
+            }
+
+            $countforE = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnE = $worksheet->getCell('E' . $row->getRowIndex())->getValue();
+
+                if ($columnE === null || $columnE === '') {
+                    $countforE = $countforE + 1;
+                }
+            }
+
+            if ($countforE > 1) {
+                return "There's an error in Column E. Import of the file will be aborted.";
+            }
+
+            $countforF = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnF = $worksheet->getCell('F' . $row->getRowIndex())->getValue();
+
+                if ($columnF === null || $columnF === '') {
+                    $countforF = $countforF + 1;
+                }
+            }
+
+            if ($countforF > 1) {
+                return "There's an error in Column F. Import of the file will be aborted.";
+            }
+
+            $countforG = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnG = $worksheet->getCell('G' . $row->getRowIndex())->getValue();
+
+                if ($columnG === null || $columnG === '') {
+                    $countforG = $countforG + 1;
+                }
+            }
+
+            if ($countforG > 2) {
+                return "There's an error in Column G. Import of the file will be aborted.";
+            }
+
+            $countforH = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnH = $worksheet->getCell('H' . $row->getRowIndex())->getValue();
+
+                if ($columnH === null || $columnH === '') {
+                    $countforH = $countforF + 1;
+                }
+            }
+
+            if ($countforH > 2) {
+                return "There's an error in Column H. Import of the file will be aborted.";
+            }
+
+            $countforI = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnI = $worksheet->getCell('I' . $row->getRowIndex())->getValue();
+
+                if ($columnI === null || $columnI === '') {
+                    $countforI = $countforI + 1;
+                }
+            }
+
+            if ($countforI > 0) {
+                return "There's an error in Column I. Import of the file will be aborted.";
+            }
+
+            $countforJ = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnJ = $worksheet->getCell('J' . $row->getRowIndex())->getValue();
+
+                if ($columnJ === null || $columnJ === '') {
+                    $countforJ = $countforJ + 1;
+                }
+            }
+
+            if ($countforJ > 1) {
+                return "There's an error in Column J. Import of the file will be aborted.";
+            }
 
             foreach($object->getWorksheetIterator() as $worksheet) {
                 $highestRow     =    $worksheet->getHighestRow();
