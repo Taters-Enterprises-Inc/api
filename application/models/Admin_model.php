@@ -3634,6 +3634,12 @@ class Admin_model extends CI_Model
 		$this->db->where('id', $id);
 
 		$query = $this->db->get();
-		return $query->row();
+		$row = $query->row();
+
+        if ($row !== null) {
+            return $row->session_id;
+        } else {
+            return ""; 
+        }
     }
 }
