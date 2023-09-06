@@ -12,8 +12,8 @@ class Admin extends CI_Controller{
 		parent::__construct();
 
     if ($this->ion_auth->logged_in() === false){
-      $this->output->set_status_header('401');
-      echo json_encode(array( "message" => "No user session"));
+      // $this->output->set_status_header('401');
+      // echo json_encode(array( "message" => "No user session"));
         
       exit();
     }

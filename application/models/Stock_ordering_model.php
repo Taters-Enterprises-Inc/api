@@ -714,5 +714,4 @@ class Stock_ordering_model extends CI_Model {
 
         return $filename_prefix;
     }
-
 }
