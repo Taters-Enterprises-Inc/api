@@ -156,12 +156,8 @@ class Stock_ordering extends CI_Controller
                 $message = "No Product/s data";
             }
 
-            $real_time_notification = array(
-                "store_id" => $store_id,
-                "message" => ""
-            );
-            
-            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+
+            $this->realtime_badge();
 
             $response = array(
                 "message" => $message,
@@ -318,12 +314,7 @@ class Stock_ordering extends CI_Controller
                 $message = "No data!";
             }
 
-            $real_time_notification = array(
-                "store_id" => $store_id,
-                "message" => ""
-            );
-            
-            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+            $this->realtime_badge();
 
             $response = array(
                 "message" => $message,
@@ -393,12 +384,7 @@ class Stock_ordering extends CI_Controller
             }
 
 
-            $real_time_notification = array(
-                "store_id" => $store_id,
-                "message" => ""
-            );
-            
-            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+            $this->realtime_badge();
 
 
             $response = array(
@@ -411,6 +397,8 @@ class Stock_ordering extends CI_Controller
             break;
         }
     }
+
+    
 
     public function dispatch_order(){
         switch($this->input->server('REQUEST_METHOD')){
@@ -433,11 +421,14 @@ class Stock_ordering extends CI_Controller
             $get_commited_date =  date('Y-m-d H:i:s', strtotime($get_commited_date->commited_delivery_date));
             $dispatch_date = substr_replace($get_commited_date, $dispatch_date, 11, 8);
 
+
+            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
+
             //****** 
             $delivery_receipt_image_name = clean_str_for_img($this->input->post('deliveryReceipt'). '-' . time());
             $deliveryReceipt = explode(".", $_FILES['deliveryReceipt']['name']);
             $ext = end($deliveryReceipt);
-            $delivery_receipt_image_name = $delivery_receipt_image_name . '.' . $ext;
+            $delivery_receipt_image_name = $file_name_prefix . $delivery_receipt_image_name . '.' . $ext;
             $path = './assets/uploads/screenshots/'.$delivery_receipt_image_name;
 
             $deliveryReceipt_error = upload('deliveryReceipt','./assets/uploads/screenshots/', $delivery_receipt_image_name, $ext );
@@ -448,7 +439,12 @@ class Stock_ordering extends CI_Controller
               return;
             }
             
-            $this->import_si($order_information_id, $path);
+            $import_si = $this->import_si($order_information_id, $path);
+            if ($import_si) {
+                $this->output->set_status_header('401');
+                echo json_encode(array( "message" => $import_si));
+                return;
+            }
 
             $order_information = array(
                 'delivery_receipt' => $delivery_receipt_image_name,
@@ -505,12 +501,8 @@ class Stock_ordering extends CI_Controller
             }
 
 
-            $real_time_notification = array(
-                "store_id" => $store_id,
-                "message" => ""
-            );
-            
-            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+
+            $this->realtime_badge();
             
             $response = array(
                 "message" => $message,
@@ -534,17 +526,18 @@ class Stock_ordering extends CI_Controller
             $status = 5;
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
+
+
+            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
+
             $updated_delivery_receipt_image_name = clean_str_for_img($this->input->post('updatedDeliveryReceipt'). '-' . time());
 
             $updatedDeliveryReceipt = explode(".", $_FILES['updatedDeliveryReceipt']['name']);
             $ext = end($updatedDeliveryReceipt);
-            $updated_delivery_receipt_image_name = $updated_delivery_receipt_image_name . '.' . $ext;
+            $updated_delivery_receipt_image_name = $file_name_prefix . $updated_delivery_receipt_image_name . '.' . $ext;
 
             $updatedDeliveryReceipt_error = upload('updatedDeliveryReceipt','./assets/uploads/screenshots/',$updated_delivery_receipt_image_name, $ext );
-
-            // $updated_delivery_receipt_image_name = clean_str_for_img($this->input->post('updatedDeliveryReceipt'). '-' . time() ) . '.jpg';
-            // $updatedDeliveryReceipt_error = upload('updatedDeliveryReceipt','./assets/uploads/screenshots/',$updated_delivery_receipt_image_name, 'jpg');
-            
+ 
             if($updatedDeliveryReceipt_error){
               $this->output->set_status_header('401');
               echo json_encode(array( "message" => $updatedDeliveryReceipt_error));
@@ -643,12 +636,7 @@ class Stock_ordering extends CI_Controller
             }
 
 
-            $real_time_notification = array(
-                "store_id" => $store_id,
-                "message" => ""
-            );
-            
-            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+            $this->realtime_badge();
 
             $response = array(
                 "message" => $message,
@@ -679,11 +667,14 @@ class Stock_ordering extends CI_Controller
             $uploadedRegionReceipt_image_name = null;
             // Updated Sales Invoice
             if(isset($_FILES['uploadedGoodsReceipt'])){
-                $uploadedGoodsReceipt_image_name = clean_str_for_img($this->input->post('uploadedGoodsReceipt'). '-g-' . time());
+
+                $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'goods');
+                
+                $uploadedGoodsReceipt_image_name = clean_str_for_img($this->input->post('uploadedGoodsReceipt'). '-' . time());
 
                 $uploadedGoodsReceipt = explode(".", $_FILES['uploadedGoodsReceipt']['name']);
                 $ext = end($uploadedGoodsReceipt);
-                $uploadedGoodsReceipt_image_name = $uploadedGoodsReceipt_image_name . '.' . $ext;
+                $uploadedGoodsReceipt_image_name = $file_name_prefix . $uploadedGoodsReceipt_image_name . '.' . $ext;
 
                 $uploadedGoodsReceipt_error = upload('uploadedGoodsReceipt','./assets/uploads/screenshots/',$uploadedGoodsReceipt_image_name, $ext );
 
@@ -695,11 +686,14 @@ class Stock_ordering extends CI_Controller
             }
 
             if(isset($_FILES['uploadedRegionReceipt'])){
-                $uploadedRegionReceipt_image_name = clean_str_for_img($this->input->post('uploadedRegionReceipt'). '-r-' . time());
+
+                $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'region');
+
+                $uploadedRegionReceipt_image_name = clean_str_for_img($this->input->post('uploadedRegionReceipt'). '-' . time());
 
                 $uploadedRegionReceipt = explode(".", $_FILES['uploadedRegionReceipt']['name']);
                 $ext = end($uploadedRegionReceipt);
-                $uploadedRegionReceipt_image_name = $uploadedRegionReceipt_image_name . '.' . $ext;
+                $uploadedRegionReceipt_image_name = $file_name_prefix . $uploadedRegionReceipt_image_name . '.' . $ext;
 
                 $uploadedRegionReceipt_error = upload('uploadedRegionReceipt','./assets/uploads/screenshots/',$uploadedRegionReceipt_image_name, $ext );
 
@@ -747,12 +741,7 @@ class Stock_ordering extends CI_Controller
 
             }
 
-            $real_time_notification = array(
-                "store_id" => $store_id,
-                "message" => ""
-            );
-            
-            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+            $this->realtime_badge();
 
             $response = array(
                 "message" => "Success!",
@@ -769,16 +758,10 @@ class Stock_ordering extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
 
         case 'GET': 
-
-
-            $order_msi = $this->stock_ordering_model->getOrderMSI();
-
-            $real_time_notification = array(
-                "store_id" => $store_id,
-                "message" => ""
-            );
+            $search = $this->input->get('invoiceSearch');
             
-            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+            $user_id = $this->session->admin['user_id'];
+            $order_msi = $this->stock_ordering_model->getOrderMSI($search);
 
               $response = array(
                 "message" => 'Successfully fetch',
@@ -819,11 +802,12 @@ class Stock_ordering extends CI_Controller
             
             $order_information_OrderId = $order_information_data[0]['order_id'];
 
+            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
             $payment_detail_image_name = clean_str_for_img($this->input->post('paymentFile'). '-' . time());
 
             $payment_detail_image = explode(".", $_FILES['paymentFile']['name']);
             $ext = end($payment_detail_image);
-            $payment_detail_image_name = $payment_detail_image_name . '.' . $ext;
+            $payment_detail_image_name = $file_name_prefix . $payment_detail_image_name . '.' . $ext;
             $path = './assets/uploads/screenshots/'.$payment_detail_image_name;
 
             $payment_detail_image_name_error = upload('paymentFile','./assets/uploads/screenshots/',$payment_detail_image_name, $ext );
@@ -873,12 +857,7 @@ class Stock_ordering extends CI_Controller
 
             $this->transaction_log($order_information_OrderId, 8, date('Y-m-d H:i:s'));
 
-            $real_time_notification = array(
-                "store_id" => $store_id,
-                "message" => ""
-            );
-            
-            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+            $this->realtime_badge();
 
             $response = array(
                 "message" => $message,
@@ -937,12 +916,7 @@ class Stock_ordering extends CI_Controller
 
             }
 
-            $real_time_notification = array(
-                "store_id" => $store_id,
-                "message" => ""
-            );
-            
-            notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+            $this->realtime_badge();
 
             $response = array(
                 "message" => $message,
@@ -1001,12 +975,7 @@ class Stock_ordering extends CI_Controller
                 }
 
 
-                $real_time_notification = array(
-                    "store_id" => $store_id,
-                    "message" => ""
-                );
-                
-                notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+                $this->realtime_badge();
 
 
                 $response = array(
@@ -1285,6 +1254,147 @@ class Stock_ordering extends CI_Controller
         if (isset($path)) {
             $object = PHPExcel_IOFactory::load($path);
 
+            $worksheet = $object->getActiveSheet();
+            $countforA = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnA = $worksheet->getCell('A' . $row->getRowIndex())->getValue();
+
+                if ($columnA != null || $columnA != '') {
+                    $countforA = $countforA + 1;
+                }
+            }
+
+            if ($countforA > 0) {
+                return "There's an error in Column A. Import of the file will be aborted.";
+            }
+
+            $countforB = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnB = $worksheet->getCell('B' . $row->getRowIndex())->getValue();
+
+                if ($columnB === null || $columnB === '') {
+                    $countforB = $countforB + 1;
+                }
+            }
+
+            if ($countforB > 1) {
+                return "There's an error in Column B. Import of the file will be aborted.";
+            }
+
+            $countforC = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnC = $worksheet->getCell('C' . $row->getRowIndex())->getValue();
+
+                if ($columnC === null || $columnC === '') {
+                    $countforC = $countforC + 1;
+                }
+            }
+
+            if ($countforC > 1) {
+                return "There's an error in Column C. Import of the file will be aborted.";
+            }
+
+            $countforD = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnD = $worksheet->getCell('D' . $row->getRowIndex())->getValue();
+
+                if ($columnD === null || $columnD === '') {
+                    $countforD = $countforD + 1;
+                }
+            }
+
+            if ($countforD > 1) {
+                return "There's an error in Column D. Import of the file will be aborted.";
+            }
+
+            $countforE = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnE = $worksheet->getCell('E' . $row->getRowIndex())->getValue();
+
+                if ($columnE === null || $columnE === '') {
+                    $countforE = $countforE + 1;
+                }
+            }
+
+            if ($countforE > 1) {
+                return "There's an error in Column E. Import of the file will be aborted.";
+            }
+
+            $countforF = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnF = $worksheet->getCell('F' . $row->getRowIndex())->getValue();
+
+                if ($columnF === null || $columnF === '') {
+                    $countforF = $countforF + 1;
+                }
+            }
+
+            if ($countforF > 1) {
+                return "There's an error in Column F. Import of the file will be aborted.";
+            }
+
+            $countforG = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnG = $worksheet->getCell('G' . $row->getRowIndex())->getValue();
+
+                if ($columnG === null || $columnG === '') {
+                    $countforG = $countforG + 1;
+                }
+            }
+
+            if ($countforG > 2) {
+                return "There's an error in Column G. Import of the file will be aborted.";
+            }
+
+            $countforH = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnH = $worksheet->getCell('H' . $row->getRowIndex())->getValue();
+
+                if ($columnH === null || $columnH === '') {
+                    $countforH = $countforF + 1;
+                }
+            }
+
+            if ($countforH > 2) {
+                return "There's an error in Column H. Import of the file will be aborted.";
+            }
+
+            $countforI = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnI = $worksheet->getCell('I' . $row->getRowIndex())->getValue();
+
+                if ($columnI === null || $columnI === '') {
+                    $countforI = $countforI + 1;
+                }
+            }
+
+            if ($countforI > 0) {
+                return "There's an error in Column I. Import of the file will be aborted.";
+            }
+
+            $countforJ = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnJ = $worksheet->getCell('J' . $row->getRowIndex())->getValue();
+
+                if ($columnJ === null || $columnJ === '') {
+                    $countforJ = $countforJ + 1;
+                }
+            }
+
+            if ($countforJ > 1) {
+                return "There's an error in Column J. Import of the file will be aborted.";
+            }
+
             foreach($object->getWorksheetIterator() as $worksheet) {
                 $highestRow     =    $worksheet->getHighestRow();
                 $highestColumn  =    $worksheet->getHighestColumn();
@@ -1319,10 +1429,11 @@ class Stock_ordering extends CI_Controller
             $import = $this->stock_ordering_model->insertSiTb($data);
 
             if (!$import) {
-                $message = "Success";
+                $message = "";
             } else {
                 $message = "Failed!";
             }
+
         }
 
         return $message;
@@ -1389,5 +1500,19 @@ class Stock_ordering extends CI_Controller
 
         return $message;
     }
-	
+
+
+    public function realtime_badge(){
+        $user_id = $this->session->admin['user_id'];
+
+        $store = $this->stock_ordering_model->getStoreIdByUserId($user_id);
+
+        $real_time_notification = array(
+            "store_id" => $store,
+            "message" => ""
+        );
+        
+        notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+    }
+
 }

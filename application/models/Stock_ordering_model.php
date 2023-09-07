@@ -444,6 +444,17 @@ class Stock_ordering_model extends CI_Model {
         return $query->row();
     }
 
+    public function getStoreIdByUserId($user_id){
+        $this->newteishop->select('A.store_id');
+        $this->newteishop->from('store_tb A');
+        $this->newteishop->join('users_store_groups B', 'B.store_id = A.store_id', 'left');
+        $this->newteishop->join('users C', 'C.id = B.user_id', 'left');
+        $this->newteishop->where('C.id', $user_id);
+
+        $query = $this->newteishop->get();
+        return $query->result();
+    }
+
     public function getProductMultiplier($store_id, $category_id){
         $this->db->select('product_multiplier');
         $this->db->from('product_cost_per_store_tb');
@@ -631,7 +642,7 @@ class Stock_ordering_model extends CI_Model {
         $this->db->insert_batch('multim_si_tb', $data);
     }
 
-    public function getOrderMSI(){
+    public function getOrderMSI($search){
         $this->db->select('
             A.si,
             A.order_id,
@@ -645,6 +656,11 @@ class Stock_ordering_model extends CI_Model {
         $this->db->join('order_information_tb B', 'B.id = A.order_id', 'inner');
         $this->db->where('B.payment_status_id', 1); // Payment Status 1 for unpaid
         $this->db->where('B.status_id', 7);
+
+        if($search){
+            $this->db->where('A.si', $search);
+        }
+
         $this->db->group_by('A.si');
 
         $query = $this->db->get();
@@ -679,5 +695,23 @@ class Stock_ordering_model extends CI_Model {
     }
 
     
+    public function filename_factory_prefix($order_id, $si_type){
 
+        $this->db->select('C.company_code, B.category_name')
+                 ->from('order_information_tb A')
+                 ->join('category_tb B', 'B.category_id = A.order_type_id', 'left')
+                 ->join($this->newteishop->database.'.store_tb C', 'C.store_id = A.store_id', 'left')
+                 ->where('A.id', $order_id);
+
+        $query = $this->db->get();
+        $prefix = $query->row();
+
+
+
+        $filename_prefix = trim($prefix->company_code).'_'.$prefix->category_name;
+
+        $filename_prefix = $si_type ? strtoupper($si_type).'-SI_'.$filename_prefix : $filename_prefix;
+
+        return $filename_prefix;
+    }
 }

@@ -3627,4 +3627,19 @@ class Admin_model extends CI_Model
         $query = $this->db->get();
         return $query->row()->all_count;
     }
+
+    public function getStoredSessionId($id){
+        $this->db->select('session_id');
+		$this->db->from('users');
+		$this->db->where('id', $id);
+
+		$query = $this->db->get();
+		$row = $query->row();
+
+        if ($row !== null) {
+            return $row->session_id;
+        } else {
+            return ""; 
+        }
+    }
 }

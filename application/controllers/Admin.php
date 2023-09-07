@@ -12,6 +12,9 @@ class Admin extends CI_Controller{
 		parent::__construct();
 
     if ($this->ion_auth->logged_in() === false){
+      
+      //notify('admin-session','admin-no-session', true);
+      // $this->output->set_status_header('401');        
       exit();
     }
 
@@ -24,6 +27,7 @@ class Admin extends CI_Controller{
 		$this->load->model('report_model');
 		$this->load->model('deals_model');
     $this->load->model('stock_ordering_model');
+
 
 	}
 
@@ -5227,7 +5231,7 @@ class Admin extends CI_Controller{
         $response = array(
           "message" => 'Successfully fetch snackshop bookings',
           "data" => array(
-            "pagination" => $pagination,
+            "pagination" => $pagination,      
             "bookings" => $bookings
           ),
         );
@@ -5447,7 +5451,11 @@ class Admin extends CI_Controller{
   public function session(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':
-
+        
+      $verify_session_data = $this->verify_user_session();
+      notify('admin-session','admin-login-session', $verify_session_data);
+          
+      
         $data = array(
           "admin" => array(
             "identity" => $this->session->admin['identity'],
@@ -5459,46 +5467,55 @@ class Admin extends CI_Controller{
             "is_csr_admin" => $this->ion_auth->in_group(10),
             "is_catering_admin" => $this->ion_auth->in_group(14),
             "is_audit_admin" => $this->ion_auth->in_group(15),
+            "session_id" => $this->session->admin['session_id'],
           )
         );
 
         $data["admin"]['user_details'] = $this->admin_model->getUser($this->session->admin['user_id']);
-        $data["admin"]['user_details']->groups = $this->admin_model->getUserGroups($this->session->admin['user_id']);
-        $data["admin"]['user_details']->sos_groups = $this->stock_ordering_model->getUserGroups($this->session->admin['user_id']);
 
-        if($this->ion_auth->in_group(1) || $this->ion_auth->in_group(10)){
-          $data["admin"]['user_details']->stores = $this->user_model->get_all_store();
+        if($data["admin"]['user_details']){
+          $data["admin"]['user_details']->groups = $this->admin_model->getUserGroups($this->session->admin['user_id']);
+          $data["admin"]['user_details']->sos_groups = $this->stock_ordering_model->getUserGroups($this->session->admin['user_id']);
+          
 
-          $data["admin"]['is_snackshop_available'] = true;
-          $data["admin"]['is_catering_available'] = true;
-          $data["admin"]['is_popclub_store_visit_available'] = true;
-          $data["admin"]['is_popclub_snacks_delivered_available'] = true;
-        }else{
-          $stores = $this->user_model->get_store_group_order($this->session->admin['user_id']);
-
-          $data["admin"]['user_details']->stores = $stores;
-
-          $data["admin"]['is_snackshop_available'] = false;
-          $data["admin"]['is_catering_available'] = false;
-          $data["admin"]['is_popclub_store_visit_available'] = false;
-          $data["admin"]['is_popclub_snacks_delivered_available'] = false;
-
-          foreach($stores as $store){
-            if($store->status){
-              $data["admin"]['is_snackshop_available'] = true;
+          if($this->ion_auth->in_group(1) || $this->ion_auth->in_group(10)){
+            $data["admin"]['user_details']->stores = $this->user_model->get_all_store();
+  
+            $data["admin"]['is_snackshop_available'] = true;
+            $data["admin"]['is_catering_available'] = true;
+            $data["admin"]['is_popclub_store_visit_available'] = true;
+            $data["admin"]['is_popclub_snacks_delivered_available'] = true;
+          }else{
+            $stores = $this->user_model->get_store_group_order($this->session->admin['user_id']);
+  
+            $data["admin"]['user_details']->stores = $stores;
+  
+            $data["admin"]['is_snackshop_available'] = false;
+            $data["admin"]['is_catering_available'] = false;
+            $data["admin"]['is_popclub_store_visit_available'] = false;
+            $data["admin"]['is_popclub_snacks_delivered_available'] = false;
+  
+            foreach($stores as $store){
+              if($store->status){
+                $data["admin"]['is_snackshop_available'] = true;
+              }
+              if($store->catering_status){
+                $data["admin"]['is_catering_available'] = true;
+              }
+              if($store->popclub_walk_in_status){
+                $data["admin"]['is_popclub_store_visit_available'] = true;
+              }
+              if($store->popclub_online_delivery_status){
+                $data["admin"]['is_popclub_snacks_delivered_available'] = true;
+              }
             }
-            if($store->catering_status){
-              $data["admin"]['is_catering_available'] = true;
-            }
-            if($store->popclub_walk_in_status){
-              $data["admin"]['is_popclub_store_visit_available'] = true;
-            }
-            if($store->popclub_online_delivery_status){
-              $data["admin"]['is_popclub_snacks_delivered_available'] = true;
-            }
+  
           }
-
+        
+        
+        
         }
+        
 
           $response = array(
             "message" => 'Successfully fetch admin session',
@@ -5513,6 +5530,30 @@ class Admin extends CI_Controller{
        break;
     }
   }
+
+  public function verify_user_session(){
+		$current_session_id = $this->session->admin['session_id'];
+		$id = $this->ion_auth->get_user_id();
+    $trigger = false;
+
+
+		$stored_session_id = $this->admin_model->getStoredSessionId($id);
+  
+    
+		if($current_session_id && $current_session_id !== $stored_session_id || $id === null){
+			// $this->ion_auth->logout();
+      $trigger = true;
+		}
+
+		$data = array(
+      'current_session_id' => $current_session_id,
+      'stored_session_id' => $stored_session_id,
+      'user_id' => $id,
+      'logout' => $trigger,
+    );
+
+    return $data;
+	}
   
   // TO BE IMPROVED ( V2 Backend )
   public function print_asdoc($id, $isCatering){

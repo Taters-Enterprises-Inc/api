@@ -202,6 +202,8 @@ class Ion_auth_model extends CI_Model
 		$this->config->load('ion_auth', TRUE);
 		$this->load->helper('cookie', 'date');
 		$this->lang->load('ion_auth');
+		$this->load->model('admin_model');
+
 
 		// initialize the database
 		$group_name = $this->config->item('database_group_name', 'ion_auth');
@@ -853,7 +855,7 @@ class Ion_auth_model extends CI_Model
 			'email' => $email,
 			'ip_address' => $ip_address,
 			'created_on' => time(),
-			'active' => ($manual_activation === FALSE ? 1 : 0)
+			'active' => ($manual_activation === FALSE ? 1 : 0),
 		];
 
 		// filter out any data passed that doesnt have a matching column in the users table
@@ -900,12 +902,18 @@ class Ion_auth_model extends CI_Model
 	 * @return    bool
 	 * @author    Mathew
 	 */
+
+
 	public function login($identity, $password, $remember=FALSE)
 	{
 		$this->trigger_events('pre_login');
 
-		if (empty($identity) || empty($password))
-		{
+		// $logout_other_session = $this->verify_user_session();
+		// if($logout_other_session){
+		// 	$this->ion_auth->logout();
+		// }
+
+		if (empty($identity) || empty($password)){
 			$this->set_error('login_unsuccessful');
 			return FALSE;
 		}
@@ -945,6 +953,7 @@ class Ion_auth_model extends CI_Model
 				}
 
 				$this->set_session($user);
+				$this->update_session_id();
 
 				$this->update_last_login($user->id);
 
@@ -985,6 +994,28 @@ class Ion_auth_model extends CI_Model
 		$this->set_error('login_unsuccessful');
 
 		return FALSE;
+	}
+
+	public function update_session_id(){
+
+		$session_id = session_create_id();
+		$data = array(
+			'session_id' => $session_id,
+			);
+
+		$this->db->where('id', $this->ion_auth->user()->row()->id);
+		$this->db->update('users', $data);
+
+		$this->trigger_events('pre_set_session');
+
+		$session_id = $this->admin_model->getStoredSessionId($this->ion_auth->user()->row()->id);
+
+		$_SESSION['admin']['session_id'] = $session_id;
+		
+		$this->trigger_events('post_set_session');
+
+		return TRUE;
+		
 	}
 
 	/*
@@ -2980,6 +3011,20 @@ class Ion_auth_model extends CI_Model
 			$this->trigger_events(['post_sha1_password_migration', 'post_sha1_password_migration_unsuccessful']);
 			return FALSE;
 		}
+	}
+
+
+	  public function verify_user_session(){
+		$current_session_id = $this->session->admin['session_id'];
+		$id = $this->session->admin['user_id'];
+		
+		$stored_session_id = $this->admin_model->getStoredSessionId($id);
+  
+		if($current_session_id != $stored_session_id){
+			return true;
+		}
+
+		return false;
 	}
 	
 }

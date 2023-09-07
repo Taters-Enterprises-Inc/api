@@ -474,11 +474,14 @@ class Auth extends CI_Controller{
 	}
     
 	public function logout(){
+
 		$this->data['title'] = "Logout";
 		$this->ion_auth->logout();
-        
+	
+
         header('content-type: application/json');
         echo json_encode(array("message" => 'Successfully logout user'));
         return;
 	}
+
 }
