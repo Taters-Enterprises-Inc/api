@@ -13,8 +13,7 @@ class Admin extends CI_Controller{
 
     if ($this->ion_auth->logged_in() === false){
       
-        notify('admin-session','admin-no-session', true);
-      
+      //notify('admin-session','admin-no-session', true);
       // $this->output->set_status_header('401');        
       exit();
     }
