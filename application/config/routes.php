@@ -136,7 +136,6 @@ $route['stock/ordered/products'] = 'Stock_Ordering/getProductData';
 $route['stock/order/delivery-receive-approval'] = 'Stock_Ordering/delivery_receive_approval';
 $route['stock/cancelled'] = 'Stock_Ordering/cancelled_order'; 
 $route['stock/get-window-time'] = 'Stock_Ordering/getWindowTime'; 
-$route['stock/change-password/(:any)'] = 'auth/change_password/$1';
 $route['stock/get-product-list'] = 'Stock_Ordering/get_product_list';
 $route['stock/get-product-info'] = 'Stock_Ordering/get_product_info';
 $route['stock/get-product-availability'] = 'Stock_Ordering/get_product_availability';
@@ -155,6 +154,8 @@ $route['auth/logout'] = 'auth/logout';
 $route['auth/create-user'] = 'auth/create_user';
 $route['auth/edit-user/(:any)'] = 'auth/edit_user/$1';
 $route['auth/create-group'] = 'auth/create_group';
+$route['auth/change-password'] = 'auth/change_password';
+
 
 $route['admin/stores'] = 'admin/stores';
 $route['admin/stores/popclub'] = 'admin/popclub_stores';

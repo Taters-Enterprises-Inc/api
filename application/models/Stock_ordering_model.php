@@ -688,12 +688,6 @@ class Stock_ordering_model extends CI_Model {
         $query = $this->db->get();
         return $query->row();
     }
-
-    public function updatePassword($id, $data){
-        $this->newteishop->where('id', $id);
-        $this->newteishop->update('users', $data);
-    }
-
     
     public function filename_factory_prefix($order_id, $si_type){
 
