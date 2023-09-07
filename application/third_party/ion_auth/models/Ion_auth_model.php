@@ -997,18 +997,6 @@ class Ion_auth_model extends CI_Model
 	}
 
 	public function update_session_id(){
-		// $session_id = session_create_id();
-
-		// $data = array(
-		// 	'currentsessionid' => $session_id
-			
-		//  );
-		
-		// $this->db->where('id', $this->ion_auth->user()->row()->id);
-		// $this->db->update('users', $data);	
-		
-		// $this->db->delete('users', array('session_id' => $this->ion_auth->user()->row()->session_id)); 
-    
 
 		$session_id = session_create_id();
 		$data = array(
@@ -1019,6 +1007,8 @@ class Ion_auth_model extends CI_Model
 		$this->db->update('users', $data);
 
 		$this->trigger_events('pre_set_session');
+
+		$session_id = $this->admin_model->getStoredSessionId($this->ion_auth->user()->row()->id);
 
 		$_SESSION['admin']['session_id'] = $session_id;
 		
