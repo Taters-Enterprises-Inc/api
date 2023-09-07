@@ -202,6 +202,8 @@ class Ion_auth_model extends CI_Model
 		$this->config->load('ion_auth', TRUE);
 		$this->load->helper('cookie', 'date');
 		$this->lang->load('ion_auth');
+		$this->load->model('admin_model');
+
 
 		// initialize the database
 		$group_name = $this->config->item('database_group_name', 'ion_auth');
@@ -900,12 +902,18 @@ class Ion_auth_model extends CI_Model
 	 * @return    bool
 	 * @author    Mathew
 	 */
+
+
 	public function login($identity, $password, $remember=FALSE)
 	{
 		$this->trigger_events('pre_login');
 
-		if (empty($identity) || empty($password))
-		{
+		// $logout_other_session = $this->verify_user_session();
+		// if($logout_other_session){
+		// 	$this->ion_auth->logout();
+		// }
+
+		if (empty($identity) || empty($password)){
 			$this->set_error('login_unsuccessful');
 			return FALSE;
 		}
@@ -3020,20 +3028,13 @@ class Ion_auth_model extends CI_Model
 		$current_session_id = $this->session->admin['session_id'];
 		$id = $this->session->admin['user_id'];
 		
-		$this->db->select('session_id');
-		$this->db->from('users');
-		$this->db->where('id', $id);
-
-		$query = $this->db->get();
-		$stored_session_id = $query->row();
+		$stored_session_id = $this->admin_model->getStoredSessionId($id);
   
-		if($current_session_id != $stored_session_id->session_id){
-			$this->ion_auth->logout();
-
-      header('content-type: application/json');
-      echo json_encode(array("message" => 'New session has logged-in'));
-      return;
+		if($current_session_id != $stored_session_id){
+			return true;
 		}
+
+		return false;
 	}
 	
 }
