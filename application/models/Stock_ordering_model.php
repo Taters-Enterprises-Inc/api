@@ -355,50 +355,25 @@ class Stock_ordering_model extends CI_Model {
     public function updateOrderInfo($id, $data){
         $this->db->where('id', $id);
         $this->db->update('order_information_tb', $data);
+
     }
 
-     public function updateOrderItem($id ,$id_product, $data){
+    public function updateOrderItem($id ,$id_product, $data){
         $this->db->where('order_information_id', $id);
         $this->db->where('product_id', $id_product);
         $this->db->update('order_item_tb', $data);
+
     }
 
-    public function reviewOrder($id, $data){
-        $this->db->where('id', $id);
-        $this->db->update('order_information_tb', $data);
+    public function insertRemarks($data){
+        $this->db->trans_start();
+		$this->db->insert('remarks', $data);
+        $this->db->trans_complete();
     }
 
-    public function confirmOrder($id, $data){
-        $this->db->where('id', $id);
-        $this->db->update('order_information_tb', $data);
-    }
-
-    public function dispatchOrder($id, $data){
-        $this->db->where('id', $id);
-        $this->db->update('order_information_tb', $data);
-    }
-
-    public function orderEnRoute($id, $data){
-        $this->db->where('id', $id);
-        $this->db->update('order_information_tb', $data);
-    }
-
-    public function updateActualDeliveryDate($id, $data){
-        $this->db->where('id', $id);
-        $this->db->update('order_information_tb', $data);
-    }
-
-    public function updateDeliveredQty($id,$id_product, $data){
-        $this->db->where('order_information_id', $id);
-        $this->db->where('product_id', $id_product);
-        $this->db->update('order_item_tb', $data);
-    }
-
-    public function updateDispatchedQty($id,$id_product, $data){
-        $this->db->where('order_information_id', $id);
-        $this->db->where('product_id', $id_product);
-        $this->db->update('order_item_tb', $data);
-    }
+    //-----Flag for remove-----
+ 
+    //========================
 
     public function insertBllingInfo($data){
         $this->db->insert('billing_information_tb', $data);
@@ -413,11 +388,6 @@ class Stock_ordering_model extends CI_Model {
 
     public function uploadPaymentDetailImage($id, $data){
         $this->db->where_in('id', $id);
-        $this->db->update('order_information_tb', $data);
-    }
-
-    public function confirmPayment($id, $data){
-        $this->db->where('id', $id);
         $this->db->update('order_information_tb', $data);
     }
 
@@ -463,12 +433,6 @@ class Stock_ordering_model extends CI_Model {
         
         $query = $this->db->get();
         return $query->row();
-    }
-
-    public function insertRemarks($data){
-        $this->db->trans_start();
-		$this->db->insert('remarks', $data);
-        $this->db->trans_complete();
     }
 
     public function getUserGroup(){
