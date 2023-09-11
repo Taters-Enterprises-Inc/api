@@ -33,10 +33,6 @@ class Stock_ordering_model extends CI_Model {
     }
 
     public function getProduct($category, $store_id){
-        // $this->db->select('p.product_id, p.product_name, p.uom, p.category_id, pc.cost');
-        // $this->db->from('product_tb p');
-        // $this->db->join('product_cost_tb pc', 'p.product_id = pc.product_id', 'left');
-        // $this->db->where('p.category_id', $category);
 
         $this->db->select('B.product_id, B.product_name, B.uom, B.category_id, B.cost');
         $this->db->from('product_availability_tb A');
@@ -47,67 +43,8 @@ class Stock_ordering_model extends CI_Model {
         $query = $this->db->get();
         $result = $query->result_array();
 
-
-        // $data = array(
-        //     array("frozen" => array()),
-        //     array("dry" => array())
-        // );
-
-        // foreach ($result as $row) {
-        //     $product = array(
-        //         'productId' => $row['product_id'],
-        //         'productName' => $row['product_name'],
-        //         'uom' => $row['uom'],
-        //         'cost' => $row['cost']
-        //     );
-
-        //     if ($row["category_id"] == 1) {
-        //         array_push($data[0]["frozen"], $product);
-        //     } elseif ($row["category_id"] == 2) {
-        //         array_push($data[1]["dry"], $product);
-        //     }
-        // }
-
         return $result;
     }
-
-
-    /*public function getProduct($category, $store_id){
-        // $this->db->select('p.product_id, p.product_name, p.uom, p.category_id, pc.cost');
-        // $this->db->from('product_tb p');
-        // $this->db->join('product_cost_tb pc', 'p.product_id = pc.product_id', 'left');
-        // $this->db->where('p.category_id', $category);
-
-        $this->db->select('product_id, product_name, uom, category_id, cost');
-        $this->db->from('product_tb');
-        $this->db->where('category_id', $category);
-
-        $query = $this->db->get();
-        $result = $query->result_array();
-
-
-        // $data = array(
-        //     array("frozen" => array()),
-        //     array("dry" => array())
-        // );
-
-        // foreach ($result as $row) {
-        //     $product = array(
-        //         'productId' => $row['product_id'],
-        //         'productName' => $row['product_name'],
-        //         'uom' => $row['uom'],
-        //         'cost' => $row['cost']
-        //     );
-
-        //     if ($row["category_id"] == 1) {
-        //         array_push($data[0]["frozen"], $product);
-        //     } elseif ($row["category_id"] == 2) {
-        //         array_push($data[1]["dry"], $product);
-        //     }
-        // }
-
-        return $result;
-    }*/
 
     public function getSchedule($category,$store_id){
 
@@ -372,25 +309,8 @@ class Stock_ordering_model extends CI_Model {
     }
 
     //-----Flag for remove-----
- 
+
     //========================
-
-    public function insertBllingInfo($data){
-        $this->db->insert('billing_information_tb', $data);
-        $insert_id = $this->db->insert_id();
-        return $insert_id;
-    }
-
-    public function updateBillingInformationId($id, $data){
-        $this->db->where('id', $id);
-        $this->db->update('order_information_tb', $data);
-    }
-
-    public function uploadPaymentDetailImage($id, $data){
-        $this->db->where_in('id', $id);
-        $this->db->update('order_information_tb', $data);
-    }
-
     public function cancelledOrder($id, $data){
         $this->db->where('id', $id);
         $this->db->update('order_information_tb', $data);

@@ -205,7 +205,7 @@ class Stock_ordering extends CI_Controller
             case 'GET':
 
                 
-                $currentTab = $this->input->get('current_tab') + 1;
+                $currentTab = $this->input->get('tab') + 1;
 
                 $per_page = $this->input->get('per_page') ?? 25;
                 $page_no = $this->input->get('page_no') ?? 0;
@@ -666,7 +666,7 @@ class Stock_ordering extends CI_Controller
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
-            $insertError = $this->stock_ordering_model->updateBillingInformationId($order_information_id, $order_information_data);
+            $insertError = $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information_data);
             $this->transaction_log($order_information_id, 7, date('Y-m-d H:i:s'));
 
             if(isset($insertError)){
@@ -676,30 +676,11 @@ class Stock_ordering extends CI_Controller
             }
 
             
-            if (isset($remarks) && !empty($remarks)) {
-                    
-                $remarks_information = array(
-                    'order_information_id' => $order_information_id,
-                    'order_status_id' => $status,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-
-                $insertError = $this->stock_ordering_model->insertRemarks($remarks_information);
-
-                if(isset($insertError)){
-                    $this->output->set_status_header('401');
-                    echo json_encode(array( "message" => "Error Inserting"));
-                    return;
-                }
-
-            }
-
+            $this->insert_remarks($remarks, $status, $order_information_id);
             $this->realtime_badge();
 
             $response = array(
-                "message" => "Success!",
+                "message" => "Order sucessfully confirmed",
             );
 
             header('content-type: application/json');
@@ -757,7 +738,7 @@ class Stock_ordering extends CI_Controller
             
             $order_information_OrderId = $order_information_data[0]['order_id'];
 
-            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
+            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_OrderId,'');
             $payment_detail_image_name = clean_str_for_img($this->input->post('paymentFile'). '-' . time());
 
             $payment_detail_image = explode(".", $_FILES['paymentFile']['name']);
@@ -786,36 +767,17 @@ class Stock_ordering extends CI_Controller
                 "status_id"   => $status,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
+            
+            $this->stock_ordering_model->updateOrderInfo($order_information_OrderId, $order_information);
 
-            $upload_payment_img = $this->stock_ordering_model->uploadPaymentDetailImage($order_information_OrderId, $order_information);
-
-            if (!$upload_payment_img) {
-                $message = "Success!";
-            } else {
-                $message = "There's an error!";
-            }
-
-
-            if (isset($remarks) && !empty($remarks)) {
-
-                $remarks_information = array(
-                    'order_information_id' => $order_information_OrderId,
-                    'order_status_id' => $status,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-                $this->stock_ordering_model->insertRemarks($remarks_information);
-                
-                $message = "Success!";
-            }
+            $this->insert_remarks($remarks, $status, $order_information_OrderId);
 
             $this->transaction_log($order_information_OrderId, 8, date('Y-m-d H:i:s'));
 
             $this->realtime_badge();
 
             $response = array(
-                "message" => $message,
+                "message" => 'Sucessfully updated the order',
             );
 
             header('content-type: application/json');
@@ -845,33 +807,13 @@ class Stock_ordering extends CI_Controller
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
-            $payment_confirmation_date = $this->stock_ordering_model->confirmPayment($order_information_id, $order_information);
+            $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+            
             $this->transaction_log($order_information_id, 9, date('Y-m-d H:i:s'));
-
-            if (!$payment_confirmation_date) {
-                $message = "Success!";
-            } else {
-                $message = "There's an error!";
-            }
-
-
-            if (isset($remarks) && !empty($remarks)) {
-                    
-                $remarks_information = array(
-                    'order_information_id' => $order_information_id,
-                    'order_status_id' => $status,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-
-                $this->stock_ordering_model->insertRemarks($remarks_information);
-
-                $message = "Success!";
-
-            }
-
+            $this->insert_remarks($remarks, $status, $order_information_id);
             $this->realtime_badge();
+
+            $message = $status === '9' ? "Order has been completed" : "Order return to finance";
 
             $response = array(
                 "message" => $message,
@@ -880,6 +822,36 @@ class Stock_ordering extends CI_Controller
             header('content-type: application/json');
             echo json_encode($response);
 
+            break;
+        }
+    }
+
+
+    public function cancelled_order(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+
+            $order_information_id = $this->input->post('id');
+            $remarks = $this->input->post('remarks');
+            $user_id = $this->session->admin['user_id'];
+
+            $order_information = array(
+                'status_id' => 10,
+            );
+
+            $this->stock_ordering_model->cancelledOrder($order_information_id, $order_information);
+
+            $this->transaction_log($order_information_id, 10, date('Y-m-d H:i:s'));
+            $this->insert_remarks($remarks, 10, $order_information_id);
+            $this->realtime_badge();
+
+            $response = array(
+                "message" => 'Successfully cancelled order',
+            );
+            header('content-type: application/json');
+            echo json_encode($response);
             break;
         }
     }
@@ -1075,65 +1047,6 @@ class Stock_ordering extends CI_Controller
         $file_name = "Most Ordered Product as of";
 
         $this->generate_report($file_name, $most_ordered_product);
-    }
-
-
-
-    public function cancelled_order(){
-        switch($this->input->server('REQUEST_METHOD')){
-            case 'POST':
-            $_POST =  json_decode(file_get_contents("php://input"), true);
-
-
-            $order_information_id = $this->input->post('id');
-            $remarks = $this->input->post('remarks');
-            $user_id = $this->session->admin['user_id'];
-
-            $order_information = array(
-                'status_id' => 10,
-            );
-
-            $cancelled = $this->stock_ordering_model->cancelledOrder($order_information_id, $order_information);
-            
-            if (!$cancelled) {
-                $message = "Success!";
-            } else {
-                $message = "There's an error!";
-            }
-
-
-            if (isset($remarks) && !empty($remarks)) {
-                    
-                $remarks_information = array(
-                    'order_information_id' => $order_information_id,
-                    'order_status_id' => 10,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-
-                $this->stock_ordering_model->insertRemarks($remarks_information);
-
-                $message = "Remarks Success!";
-
-            }
-
-            $data = array(
-                "message" => $message,
-            );
-
-            $response = array(
-                "message" => 'Successfully cancelled order',
-                "data"    => $data, 
-
-            );
-            
-            header('content-type: application/json');
-            echo json_encode($response);
-            break;
-
-            
-        }
     }
 
     public function import_view(){
