@@ -205,7 +205,7 @@ class Stock_ordering extends CI_Controller
             case 'GET':
 
                 
-                $currentTab = $this->input->get('current_tab') + 1;
+                $currentTab = $this->input->get('tab') + 1;
 
                 $per_page = $this->input->get('per_page') ?? 25;
                 $page_no = $this->input->get('page_no') ?? 0;
@@ -267,34 +267,7 @@ class Stock_ordering extends CI_Controller
             $order_information_id = $this->input->post('id');
             $commited_delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('commitedDelivery')));
             $product_data = $this->input->post('product_data');
-
-            $order_information = array(
-                'commited_delivery_date' => $commited_delivery_date,
-                'status_id' => 2,
-                'last_updated' => date('Y-m-d H:i:s'),
-            );
-
-            $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
-            $this->transaction_log($order_information_id, 2, date('Y-m-d H:i:s'));
-
-
             $remarks = $this->input->post('remarks');
-            $user_id = $this->session->admin['user_id'];
-
-            if (isset($remarks) && !empty($remarks)) {
-
-                $remarks_information = array(
-                    'order_information_id' => $order_information_id,
-                    'order_status_id' => 2,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-
-                $this->stock_ordering_model->insertRemarks($remarks_information);
-
-            }
-
 
             if(isset($product_data)){
                 foreach($product_data as $product){
@@ -305,23 +278,36 @@ class Stock_ordering extends CI_Controller
                     );
                     
                     $this->stock_ordering_model->updateOrderItem($order_information_id, $product_id, $order_item_data);
-                
+                    
+                    
                 }
 
-                $message = 'Success!';
-
             }else {
-                $message = "No data!";
+                $this->output->set_status_header('400');
+                echo json_encode(array( "message" => 'Encountered a problem while processing your changes. Try again after a minutes'));
+                return;
             }
+
+            $order_information = array(
+                'commited_delivery_date' => $commited_delivery_date,
+                'status_id' => 2,
+                'last_updated' => date('Y-m-d H:i:s'),
+            );
+
+            $updateOrderInformation = $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+
+            $this->insert_remarks($remarks, 2, $order_information_id);
+
+            $this->transaction_log($order_information_id, 2, date('Y-m-d H:i:s'));
 
             $this->realtime_badge();
 
             $response = array(
-                "message" => $message,
+                "message" => 'Sucessfully updated the order',
               );
         
-              header('content-type: application/json');
-              echo json_encode($response);
+            header('content-type: application/json');
+            echo json_encode($response);
 
             break;
         }
@@ -337,58 +323,36 @@ class Stock_ordering extends CI_Controller
             $reviewed_date = date('Y-m-d H:i:s');
             $status = $this->input->post('status');
 
+            $product_data = $this->input->post('product_data');
+            if(isset($product_data) && $status === '1'){
+                foreach($product_data as $product){
+                    $product_id = $product['productId'];
+
+                    $order_item_data = array(
+                        "commited_qty"   => null
+                    );
+                    
+                    $this->stock_ordering_model->updateOrderItem($order_information_id, $product_id, $order_item_data);
+
+                }
+
+            }
+
             $order_information = array(
                 'reviewed_date' => $reviewed_date,
                 'status_id' => $status,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
-
-            $this->stock_ordering_model->reviewOrder($order_information_id, $order_information);
-            $this->transaction_log($order_information_id, 3, date('Y-m-d H:i:s'));
+            $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
 
             $remarks = $this->input->post('remarks');
-            $user_id = $this->session->admin['user_id'];
-
-            if (isset($remarks) && !empty($remarks)) {
-
-                $remarks_information = array(
-                    'order_information_id' => $order_information_id,
-                    'order_status_id' => 3,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-
-                $this->stock_ordering_model->insertRemarks($remarks_information);
-            }
-
-
-            $product_data = $this->input->post('product_data');
-
-            if(isset($product_data)){
-                foreach($product_data as $product){
-                    $product_id = $product['productId'];
-
-                    $order_item_data = array(
-                        "commited_qty"   => $product['commitedQuantity']
-                    );
-                    
-                    $this->stock_ordering_model->updateOrderItem($order_information_id, $product_id, $order_item_data);
-                
-                }
-
-                $message = 'Success!';
-
-            }else {
-                $message = "No data!";
-            }
-
+            $this->insert_remarks($remarks, $status, $order_information_id);
 
             $this->realtime_badge();
-
+            $this->transaction_log($order_information_id, 3, date('Y-m-d H:i:s'));
 
             $response = array(
-                "message" => $message,
+                "message" => 'Sucessfully updated the order',
             );
 
             header('content-type: application/json');
@@ -414,17 +378,8 @@ class Stock_ordering extends CI_Controller
             
             $status = 4;            
 
-            
-            // Update Dispatch date time 
-            $dispatch_date = DateTime::createFromFormat('h:i:s a', $dispatch_date)->format('H:i:s');
-            $get_commited_date = $this->stock_ordering_model->getCommitedDate($order_information_id);
-            $get_commited_date =  date('Y-m-d H:i:s', strtotime($get_commited_date->commited_delivery_date));
-            $dispatch_date = substr_replace($get_commited_date, $dispatch_date, 11, 8);
-
-
             $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
 
-            //****** 
             $delivery_receipt_image_name = clean_str_for_img($this->input->post('deliveryReceipt'). '-' . time());
             $deliveryReceipt = explode(".", $_FILES['deliveryReceipt']['name']);
             $ext = end($deliveryReceipt);
@@ -440,11 +395,17 @@ class Stock_ordering extends CI_Controller
             }
             
             $import_si = $this->import_si($order_information_id, $path);
+
             if ($import_si) {
                 $this->output->set_status_header('401');
                 echo json_encode(array( "message" => $import_si));
                 return;
             }
+
+            $dispatch_date = DateTime::createFromFormat('h:i:s a', $dispatch_date)->format('H:i:s');
+            $get_commited_date = $this->stock_ordering_model->getCommitedDate($order_information_id);
+            $get_commited_date =  date('Y-m-d H:i:s', strtotime($get_commited_date->commited_delivery_date));
+            $dispatch_date = substr_replace($get_commited_date, $dispatch_date, 11, 8);
 
             $order_information = array(
                 'delivery_receipt' => $delivery_receipt_image_name,
@@ -454,30 +415,9 @@ class Stock_ordering extends CI_Controller
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
-            $dispatch_order = $this->stock_ordering_model->dispatchOrder($order_information_id, $order_information);
-            $this->transaction_log($order_information_id, 4, date('Y-m-d H:i:s'));
-
-            
-
-            if (isset($remarks) && !empty($remarks)) {
-                    
-                $remarks_information = array(
-                    'order_information_id' => $order_information_id,
-                    'order_status_id' => $status,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-
-                $this->stock_ordering_model->insertRemarks($remarks_information);
-
-                $message = "Success!";
-
-            }
-
             $productData = array();
             $index = 0;
-            $hasData = false;
+            
 
             while ($this->input->post('product_data_'.$index.'_id')) {
                 $dispatchedQuantity = $this->input->post('product_data_'.$index.'_dispatchedQuantity');
@@ -487,25 +427,21 @@ class Stock_ordering extends CI_Controller
                     'dispatched_qty' => $dispatchedQuantity,
                 );
 
-                $this->stock_ordering_model->updateDispatchedQty($order_information_id, $productId, $dispatched_qty_data);
+                $this->stock_ordering_model->updateOrderItem($order_information_id, $productId, $dispatched_qty_data);
 
                 $index++;
-                $hasData = true;
                 
             }
 
-            if($hasData){
-                $message = "success!";
-            }else {
-                $message = "No data!";
-            }
+            $dispatch_order = $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
 
-
+            $this->insert_remarks($remarks, $status, $order_information_id);
+            $this->transaction_log($order_information_id, 4, date('Y-m-d H:i:s'));
 
             $this->realtime_badge();
             
             $response = array(
-                "message" => $message,
+                "message" => 'Sucessfully updated the order',
             );
 
             header('content-type: application/json');
@@ -527,7 +463,6 @@ class Stock_ordering extends CI_Controller
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
 
-
             $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
 
             $updated_delivery_receipt_image_name = clean_str_for_img($this->input->post('updatedDeliveryReceipt'). '-' . time());
@@ -544,35 +479,8 @@ class Stock_ordering extends CI_Controller
               return;
             }
 
-            $order_information = array(
-                'updated_delivery_receipt' => $updated_delivery_receipt_image_name,
-                'actual_delivery_date' => $actual_delivery_date,
-                'status_id' => $status,
-                'last_updated' => date('Y-m-d H:i:s'),
-            );
-
-            $this->stock_ordering_model->updateActualDeliveryDate($order_information_id, $order_information);
-            $this->transaction_log($order_information_id, 5, date('Y-m-d H:i:s'));
-
-            if (isset($remarks) && !empty($remarks)) {
-                    
-                $remarks_information = array(
-                    'order_information_id' => $order_information_id,
-                    'order_status_id' => $status,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-
-                $this->stock_ordering_model->insertRemarks($remarks_information);
-
-                $message = "Success!";
-
-            }
-
             $productData = array();
             $index = 0;
-            $hasData = false;
             while ($this->input->post('product_data_'.$index.'_id')) {
                 $deliveryQuantity = $this->input->post('product_data_'.$index.'_deliveryQuantity');
                 $productId = $this->input->post('product_data_'.$index.'_productId');
@@ -597,12 +505,24 @@ class Stock_ordering extends CI_Controller
                     'total_cost' => $product_cost * $multiplier * $deliveryQuantity
                 );
 
-                $this->stock_ordering_model->updateDeliveredQty($order_information_id, $productId, $delivered_qty_data);
+                $this->stock_ordering_model->updateOrderItem($order_information_id, $productId, $delivered_qty_data);
 
                 $index++;
-                $hasData = true;
                 
             }
+
+            $order_information = array(
+                'updated_delivery_receipt' => $updated_delivery_receipt_image_name,
+                'actual_delivery_date' => $actual_delivery_date,
+                'status_id' => $status,
+                'last_updated' => date('Y-m-d H:i:s'),
+            );
+
+            $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+
+            $this->insert_remarks($remarks, $status, $order_information_id);
+            $this->transaction_log($order_information_id, 5, date('Y-m-d H:i:s'));
+
 
             $sum_for_sipdf = $this->stock_ordering_model->getSumForSiPdf($order_information_id);
             $sum_of_dqty = $sum_for_sipdf->sum_dqty;
@@ -629,17 +549,11 @@ class Stock_ordering extends CI_Controller
             
             $this->stock_ordering_model->updateforSI($order_information_id, $order_information_v1);
 
-            if($hasData){
-                $message = "success!";
-            }else {
-                $message = "No data!";
-            }
-
 
             $this->realtime_badge();
 
             $response = array(
-                "message" => $message,
+                "message" => 'Sucessfully updated the order',
               );
         
               header('content-type: application/json');
@@ -647,6 +561,47 @@ class Stock_ordering extends CI_Controller
 
             break;
         }
+    }
+
+
+    public function delivery_receive_approval(){
+
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST': 
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+                
+                $order_information_id = $this->input->post('id');
+                $status = $this->input->post('status');
+                $remarks = $this->input->post('remarks');
+                $user_id = $this->session->admin['user_id'];
+                
+
+                $order_information = array(
+                    'status_id' => $status,
+                    'last_updated' => date('Y-m-d H:i:s'),
+                );
+
+                $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+                $this->transaction_log($order_information_id, $status, date('Y-m-d H:i:s'));
+
+                $this->insert_remarks($remarks, $status, $order_information_id);
+                
+                $this->realtime_badge();
+
+                $message = $status == 4 ? "Sucessfully Rejected" : "Order Approved";
+
+                $response = array(
+                    "message" => $message,
+                );
+    
+                header('content-type: application/json');
+                echo json_encode($response);
+
+                break;
+            }
+
+
+            
     }
 
     public function update_billing(){
@@ -711,7 +666,7 @@ class Stock_ordering extends CI_Controller
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
-            $insertError = $this->stock_ordering_model->updateBillingInformationId($order_information_id, $order_information_data);
+            $insertError = $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information_data);
             $this->transaction_log($order_information_id, 7, date('Y-m-d H:i:s'));
 
             if(isset($insertError)){
@@ -721,30 +676,11 @@ class Stock_ordering extends CI_Controller
             }
 
             
-            if (isset($remarks) && !empty($remarks)) {
-                    
-                $remarks_information = array(
-                    'order_information_id' => $order_information_id,
-                    'order_status_id' => $status,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-
-                $insertError = $this->stock_ordering_model->insertRemarks($remarks_information);
-
-                if(isset($insertError)){
-                    $this->output->set_status_header('401');
-                    echo json_encode(array( "message" => "Error Inserting"));
-                    return;
-                }
-
-            }
-
+            $this->insert_remarks($remarks, $status, $order_information_id);
             $this->realtime_badge();
 
             $response = array(
-                "message" => "Success!",
+                "message" => "Order sucessfully confirmed",
             );
 
             header('content-type: application/json');
@@ -802,7 +738,7 @@ class Stock_ordering extends CI_Controller
             
             $order_information_OrderId = $order_information_data[0]['order_id'];
 
-            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
+            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_OrderId,'');
             $payment_detail_image_name = clean_str_for_img($this->input->post('paymentFile'). '-' . time());
 
             $payment_detail_image = explode(".", $_FILES['paymentFile']['name']);
@@ -831,36 +767,17 @@ class Stock_ordering extends CI_Controller
                 "status_id"   => $status,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
+            
+            $this->stock_ordering_model->updateOrderInfo($order_information_OrderId, $order_information);
 
-            $upload_payment_img = $this->stock_ordering_model->uploadPaymentDetailImage($order_information_OrderId, $order_information);
-
-            if (!$upload_payment_img) {
-                $message = "Success!";
-            } else {
-                $message = "There's an error!";
-            }
-
-
-            if (isset($remarks) && !empty($remarks)) {
-
-                $remarks_information = array(
-                    'order_information_id' => $order_information_OrderId,
-                    'order_status_id' => $status,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-                $this->stock_ordering_model->insertRemarks($remarks_information);
-                
-                $message = "Success!";
-            }
+            $this->insert_remarks($remarks, $status, $order_information_OrderId);
 
             $this->transaction_log($order_information_OrderId, 8, date('Y-m-d H:i:s'));
 
             $this->realtime_badge();
 
             $response = array(
-                "message" => $message,
+                "message" => 'Sucessfully updated the order',
             );
 
             header('content-type: application/json');
@@ -890,33 +807,13 @@ class Stock_ordering extends CI_Controller
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
-            $payment_confirmation_date = $this->stock_ordering_model->confirmPayment($order_information_id, $order_information);
+            $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+            
             $this->transaction_log($order_information_id, 9, date('Y-m-d H:i:s'));
-
-            if (!$payment_confirmation_date) {
-                $message = "Success!";
-            } else {
-                $message = "There's an error!";
-            }
-
-
-            if (isset($remarks) && !empty($remarks)) {
-                    
-                $remarks_information = array(
-                    'order_information_id' => $order_information_id,
-                    'order_status_id' => $status,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-
-                $this->stock_ordering_model->insertRemarks($remarks_information);
-
-                $message = "Success!";
-
-            }
-
+            $this->insert_remarks($remarks, $status, $order_information_id);
             $this->realtime_badge();
+
+            $message = $status === '9' ? "Order has been completed" : "Order return to finance";
 
             $response = array(
                 "message" => $message,
@@ -929,69 +826,35 @@ class Stock_ordering extends CI_Controller
         }
     }
 
-    public function delivery_receive_approval(){
 
+    public function cancelled_order(){
         switch($this->input->server('REQUEST_METHOD')){
-            case 'POST': 
-                $_POST =  json_decode(file_get_contents("php://input"), true);
-                
-                $order_information_id = $this->input->post('id');
-                $status = $this->input->post('status');
-                $remarks = $this->input->post('remarks');
-                $user_id = $this->session->admin['user_id'];
-                
-                if(isset($status) && isset($order_information_id)){
-
-                    $order_information = array(
-                        'status_id' => $status,
-                        'last_updated' => date('Y-m-d H:i:s'),
-                    );
-
-                    $this->stock_ordering_model->confirmPayment($order_information_id, $order_information);
-                    $this->transaction_log($order_information_id, $status, date('Y-m-d H:i:s'));
+            case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
 
 
-                    if (isset($remarks) && !empty($remarks)) {
-                    
-                        $remarks_information = array(
-                            'order_information_id' => $order_information_id,
-                            'order_status_id' => $status,
-                            'remarks' => $remarks,
-                            'user_id' => $user_id,
-                            'date'    => date('Y-m-d H:i:s'),
-                        );
-    
-                        $this->stock_ordering_model->insertRemarks($remarks_information);
-    
-                        $message = "Success!";
-    
-                    }
+            $order_information_id = $this->input->post('id');
+            $remarks = $this->input->post('remarks');
+            $user_id = $this->session->admin['user_id'];
 
+            $order_information = array(
+                'status_id' => 10,
+            );
 
-                    $message = "Success!";
+            $this->stock_ordering_model->cancelledOrder($order_information_id, $order_information);
 
-                }else{
-                    $message = "There's an error!";
-                }
+            $this->transaction_log($order_information_id, 10, date('Y-m-d H:i:s'));
+            $this->insert_remarks($remarks, 10, $order_information_id);
+            $this->realtime_badge();
 
-
-                $this->realtime_badge();
-
-
-                $response = array(
-                    "message" => $message,
-                );
-    
-                header('content-type: application/json');
-                echo json_encode($response);
-
-                break;
-            }
-
-
-            
+            $response = array(
+                "message" => 'Successfully cancelled order',
+            );
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
     }
-
 
     public function transaction_log($order_id, $process_id, $t_date){
         $transaction_log_info = array(
@@ -1186,65 +1049,6 @@ class Stock_ordering extends CI_Controller
         $this->generate_report($file_name, $most_ordered_product);
     }
 
-
-
-    public function cancelled_order(){
-        switch($this->input->server('REQUEST_METHOD')){
-            case 'POST':
-            $_POST =  json_decode(file_get_contents("php://input"), true);
-
-
-            $order_information_id = $this->input->post('id');
-            $remarks = $this->input->post('remarks');
-            $user_id = $this->session->admin['user_id'];
-
-            $order_information = array(
-                'status_id' => 10,
-            );
-
-            $cancelled = $this->stock_ordering_model->cancelledOrder($order_information_id, $order_information);
-            
-            if (!$cancelled) {
-                $message = "Success!";
-            } else {
-                $message = "There's an error!";
-            }
-
-
-            if (isset($remarks) && !empty($remarks)) {
-                    
-                $remarks_information = array(
-                    'order_information_id' => $order_information_id,
-                    'order_status_id' => 10,
-                    'remarks' => $remarks,
-                    'user_id' => $user_id,
-                    'date'    => date('Y-m-d H:i:s'),
-                );
-
-                $this->stock_ordering_model->insertRemarks($remarks_information);
-
-                $message = "Remarks Success!";
-
-            }
-
-            $data = array(
-                "message" => $message,
-            );
-
-            $response = array(
-                "message" => 'Successfully cancelled order',
-                "data"    => $data, 
-
-            );
-            
-            header('content-type: application/json');
-            echo json_encode($response);
-            break;
-
-            
-        }
-    }
-
     public function import_view(){
         $this->load->view('stock_ordering/import_view');
     }
@@ -1430,7 +1234,7 @@ class Stock_ordering extends CI_Controller
 
             if (!$import) {
                 $message = "";
-            } else {
+            }else{
                 $message = "Failed!";
             }
 
@@ -1513,6 +1317,26 @@ class Stock_ordering extends CI_Controller
         );
         
         notify('admin-stock-ordering','stockorder-process', $real_time_notification);
+    }
+
+    public function insert_remarks($remarks, $order_status_id, $order_information_id){
+
+        $user_id = $this->session->admin['user_id'];
+
+        if (isset($remarks) && !empty($remarks)) {
+
+            $remarks_information = array(
+                'order_information_id' => $order_information_id,
+                'order_status_id' => $order_status_id,
+                'remarks' => $remarks,
+                'user_id' => $user_id,
+                'date'    => date('Y-m-d H:i:s'),
+            );
+
+           $this->stock_ordering_model->insertRemarks($remarks_information);
+
+        }
+
     }
 
 }
