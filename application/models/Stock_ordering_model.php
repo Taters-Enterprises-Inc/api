@@ -82,7 +82,7 @@ class Stock_ordering_model extends CI_Model {
     public function insertNewOrdersProducts($data){
         $this->db->trans_start();
 		$this->db->insert('order_item_tb', $data);
-        $this->db->trans_complete();
+        $this->db->trans_complete();    
 	}
 
     public function getOrderData($id){
@@ -108,6 +108,8 @@ class Stock_ordering_model extends CI_Model {
             A.payment_detail_image,
             G.label as transport_route,
             H.region_id,
+            I.region_name,
+            A.status_id,
         ');
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
@@ -117,6 +119,8 @@ class Stock_ordering_model extends CI_Model {
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
         $this->db->join('transportation_tb G', 'G.id = A.transportation_id', 'left');
         $this->db->join('store_region_combination H', "H.store_id = B.store_id", 'left');
+        $this->db->join('region_tb I', "I.id = H.region_id", "left");
+
 
         $this->db->where('A.id', $id);
 
