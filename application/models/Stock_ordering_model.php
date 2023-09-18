@@ -141,9 +141,23 @@ class Stock_ordering_model extends CI_Model {
       
         $orders->remarks = $remarks;
 
+        $this->db->select('
+            A.datetime,
+            B.first_name,
+            B.last_name,
+            C.name
+        ');
+        $this->db->from('tracking_logs A');
+        $this->db->join($this->newteishop->database.'.users B', 'B.id = A.user_id', 'left');
+        $this->db->join('tracking_type C', 'C.id = A.tracking_type_id', 'left');
+        $this->db->where('A.order_id', $orders->id);
+        $tracking_query = $this->db->get();
+        $tracking = $tracking_query->result();
+      
+        $orders->tracking = $tracking;
+
 
         return $orders;
-
     }
 
     public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status, $store_id){
@@ -312,13 +326,15 @@ class Stock_ordering_model extends CI_Model {
         $this->db->trans_complete();
     }
 
+    public function insertTracking($data){
+        $this->db->trans_start();
+		$this->db->insert('tracking_logs', $data);
+        $this->db->trans_complete();
+    }
+
     //-----Flag for remove-----
 
     //========================
-    public function cancelledOrder($id, $data){
-        $this->db->where('id', $id);
-        $this->db->update('order_information_tb', $data);
-    }
 
     public function getProductCost($product_id){
         $this->db->select('cost');
