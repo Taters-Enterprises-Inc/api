@@ -818,11 +818,12 @@ class Stock_ordering extends CI_Controller
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
             $status = $this->input->post('status');
+          
 
             $order_information = array(
                 'payment_confirmation_date' => $payment_confirmation_date,
                 'status_id' => $status,
-                'payment_status_id' => 2,
+                'payment_status_id' => $status === '9' ? 2 : 1,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
