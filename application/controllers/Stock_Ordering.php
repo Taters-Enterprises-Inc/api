@@ -864,7 +864,7 @@ class Stock_ordering extends CI_Controller
 
             $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
 
-            $this->insert_tracking_log(13, $order_information);
+            $this->insert_tracking_log(13, $order_information_id);
 
             $this->transaction_log($order_information_id, 10, date('Y-m-d H:i:s'));
             $this->insert_remarks($remarks, 10, $order_information_id);
