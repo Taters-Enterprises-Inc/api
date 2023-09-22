@@ -82,7 +82,7 @@ class Stock_ordering_model extends CI_Model {
     public function insertNewOrdersProducts($data){
         $this->db->trans_start();
 		$this->db->insert('order_item_tb', $data);
-        $this->db->trans_complete();
+        $this->db->trans_complete();    
 	}
 
     public function getOrderData($id){
@@ -108,6 +108,8 @@ class Stock_ordering_model extends CI_Model {
             A.payment_detail_image,
             G.label as transport_route,
             H.region_id,
+            I.region_name,
+            A.status_id,
         ');
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
@@ -117,6 +119,8 @@ class Stock_ordering_model extends CI_Model {
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
         $this->db->join('transportation_tb G', 'G.id = A.transportation_id', 'left');
         $this->db->join('store_region_combination H', "H.store_id = B.store_id", 'left');
+        $this->db->join('region_tb I', "I.id = H.region_id", "left");
+
 
         $this->db->where('A.id', $id);
 
@@ -137,9 +141,23 @@ class Stock_ordering_model extends CI_Model {
       
         $orders->remarks = $remarks;
 
+        $this->db->select('
+            A.datetime,
+            B.first_name,
+            B.last_name,
+            C.name
+        ');
+        $this->db->from('tracking_logs A');
+        $this->db->join($this->newteishop->database.'.users B', 'B.id = A.user_id', 'left');
+        $this->db->join('tracking_type C', 'C.id = A.tracking_type_id', 'left');
+        $this->db->where('A.order_id', $orders->id);
+        $tracking_query = $this->db->get();
+        $tracking = $tracking_query->result();
+      
+        $orders->tracking = $tracking;
+
 
         return $orders;
-
     }
 
     public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status, $store_id){
@@ -308,13 +326,15 @@ class Stock_ordering_model extends CI_Model {
         $this->db->trans_complete();
     }
 
+    public function insertTracking($data){
+        $this->db->trans_start();
+		$this->db->insert('tracking_logs', $data);
+        $this->db->trans_complete();
+    }
+
     //-----Flag for remove-----
 
     //========================
-    public function cancelledOrder($id, $data){
-        $this->db->where('id', $id);
-        $this->db->update('order_information_tb', $data);
-    }
 
     public function getProductCost($product_id){
         $this->db->select('cost');

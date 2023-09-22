@@ -120,6 +120,8 @@ class Stock_ordering extends CI_Controller
             );
 
             $new_order_id = $this->stock_ordering_model->insertNewOrders($order_information);
+            
+            $this->insert_tracking_log(1, $new_order_id);
 
             $this->transaction_log($new_order_id, 1, date('Y-m-d H:i:s'));
 
@@ -296,8 +298,10 @@ class Stock_ordering extends CI_Controller
 
             $updateOrderInformation = $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
 
-            $this->insert_remarks($remarks, 2, $order_information_id);
+            $this->insert_tracking_log(2, $order_information_id);
 
+            $this->insert_remarks($remarks, 2, $order_information_id);
+            
             $this->transaction_log($order_information_id, 2, date('Y-m-d H:i:s'));
 
             $this->realtime_badge();
@@ -344,6 +348,9 @@ class Stock_ordering extends CI_Controller
                 'last_updated' => date('Y-m-d H:i:s'),
             );
             $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+
+            $this->insert_tracking_log($status == '1' ? 3 : 4, $order_information_id);
+
 
             $remarks = $this->input->post('remarks');
             $this->insert_remarks($remarks, $status, $order_information_id);
@@ -435,6 +442,8 @@ class Stock_ordering extends CI_Controller
 
             $dispatch_order = $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
 
+            $this->insert_tracking_log(5, $order_information_id);
+
             $this->insert_remarks($remarks, $status, $order_information_id);
             $this->transaction_log($order_information_id, 4, date('Y-m-d H:i:s'));
 
@@ -519,6 +528,8 @@ class Stock_ordering extends CI_Controller
             );
 
             $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+            
+            $this->insert_tracking_log(6, $order_information_id);
 
             $this->insert_remarks($remarks, $status, $order_information_id);
             $this->transaction_log($order_information_id, 5, date('Y-m-d H:i:s'));
@@ -582,6 +593,9 @@ class Stock_ordering extends CI_Controller
                 );
 
                 $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+
+                $this->insert_tracking_log($status == '4' ? 7 : 8, $order_information_id);
+
                 $this->transaction_log($order_information_id, $status, date('Y-m-d H:i:s'));
 
                 $this->insert_remarks($remarks, $status, $order_information_id);
@@ -667,6 +681,9 @@ class Stock_ordering extends CI_Controller
             );
 
             $insertError = $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information_data);
+            
+            $this->insert_tracking_log(9, $order_information_id);
+
             $this->transaction_log($order_information_id, 7, date('Y-m-d H:i:s'));
 
             if(isset($insertError)){
@@ -769,6 +786,8 @@ class Stock_ordering extends CI_Controller
             );
             
             $this->stock_ordering_model->updateOrderInfo($order_information_OrderId, $order_information);
+           
+            $this->insert_tracking_log(10, $order_information_OrderId);
 
             $this->insert_remarks($remarks, $status, $order_information_OrderId);
 
@@ -799,15 +818,18 @@ class Stock_ordering extends CI_Controller
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
             $status = $this->input->post('status');
+          
 
             $order_information = array(
                 'payment_confirmation_date' => $payment_confirmation_date,
                 'status_id' => $status,
-                'payment_status_id' => 2,
+                'payment_status_id' => $status === '9' ? 2 : 1,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
             $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+
+            $this->insert_tracking_log($status === '9' ? 12 : 11, $order_information_id);
             
             $this->transaction_log($order_information_id, 9, date('Y-m-d H:i:s'));
             $this->insert_remarks($remarks, $status, $order_information_id);
@@ -841,7 +863,9 @@ class Stock_ordering extends CI_Controller
                 'status_id' => 10,
             );
 
-            $this->stock_ordering_model->cancelledOrder($order_information_id, $order_information);
+            $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+
+            $this->insert_tracking_log(13, $order_information_id);
 
             $this->transaction_log($order_information_id, 10, date('Y-m-d H:i:s'));
             $this->insert_remarks($remarks, 10, $order_information_id);
@@ -1336,6 +1360,21 @@ class Stock_ordering extends CI_Controller
            $this->stock_ordering_model->insertRemarks($remarks_information);
 
         }
+
+    }
+
+    public function insert_tracking_log($tracking_type_id, $order_information_id){
+
+        $user_id = $this->session->admin['user_id'];
+
+        $remarks_information = array(
+            'order_id' => $order_information_id,
+            'tracking_type_id' => $tracking_type_id,
+            'datetime'    => date('Y-m-d H:i:s'),
+            'user_id' => $user_id,
+        );
+
+        $this->stock_ordering_model->insertTracking($remarks_information);
 
     }
 
