@@ -448,7 +448,8 @@ class Stock_ordering_model extends CI_Model {
             A.total_cost,
             A.order_information_id,
             A.dispatched_qty,
-            A.product_rate
+            A.product_rate,
+            B.cost
         ');
 
         $this->db->from('order_item_tb A');
