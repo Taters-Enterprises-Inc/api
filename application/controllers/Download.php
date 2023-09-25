@@ -294,6 +294,31 @@ class Download extends CI_Controller {
         }
     }
 
+    public function export_order($order_id){
+    	switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+            // $order_id = $this->input->get('orderId');
+            // $order_id = 1;
+
+            $store = $this->stock_ordering_model->getStoreDetailsForPdf($order_id);
+            $products = $this->stock_ordering_model->getProductDataForPdf($order_id);
+            $si_details = $this->stock_ordering_model->getSiOtherDetails($order_id);
+
+            $data['products'] = $products;
+            $data['store_details'] = $store;
+            $data['si_details'] = $si_details;
+
+            $file_name = 'Export Order';
+
+            $this->load->library('pdf');
+            $this->pdf->legalPotrait('stock_ordering/export_order_download', $data);
+            $this->pdf->render();
+            $this->pdf->stream($file_name);
+    
+            break;
+        }
+    }
+
     public function multim_sales_invoice($order_id){
     	switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
