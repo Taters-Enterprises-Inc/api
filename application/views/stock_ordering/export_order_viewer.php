@@ -68,43 +68,40 @@
 	</table>
 </section>
 
-<section id="contract_paper" style="margin-bottom: 10px;">
-	<table style="width:100%">
-		<tr>
-			<th style="text-align: left">TIN:</th>
-		</tr>
-	</table>
-</section>
-
-<section id="contract_paper" style="margin-bottom: 50px;">
-	<table style="width:100%">
-		<tr>
-			<th style="text-align: left">BUSINESS STYLE:</th>
-		</tr>
-	</table>
-</section>
 
 <section id="contract_paper" style="margin-bottom: 10px;">
 	<table style="width:100%">
 		<tr style="background-color: black; color: white;">
+			<th style="text-align: left">PRODUCT ID</th>
 			<th style="text-align: left">ITEM NAME</th>
 			<th style="text-align: left">UOM</th>
 			<th style="text-align: left">QUANTITY</th>
-			<th style="text-align: left">RATE</th>
 			<th style="text-align: left">AMOUNT</th>
 		</tr>
+
 		<?php
+
+		$totalCost = 0; 
+
 		foreach ($products as $product) {
 			?>
 			<tr>
+				<td><?php echo $product['product_id']; ?></td>
 				<td><?php echo $product['product_name']; ?></td>
 				<td><?php echo $product['uom']; ?></td>
-				<td><?php echo $product['delivered_qty']; ?></td>
-				<td><?php echo number_format($product['product_rate']); ?></td>
-				<td><?php echo number_format($product['total_cost']); ?></td>
+				<td><?php echo $product['order_qty']; ?></td>
+				<td><?php echo number_format($product['cost']); ?></td>
 			</tr>
-			<?php
+
+		<?php
+
+			$totalCost += $product['cost'];
+
 		}
 		?>
+		<tr >
+			<td colspan="4" style="background-color: black; text-align: left; color: white">Total</td>
+			<td style="text-align: left"><?php echo number_format($totalCost); ?></td>
+		</tr>
 	</table>
 </section>
