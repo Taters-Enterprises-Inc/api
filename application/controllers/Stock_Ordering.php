@@ -57,6 +57,37 @@ class Stock_ordering extends CI_Controller
         }
     }
 
+    public function get_schedule(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+                $user_id = $this->session->admin['user_id'];
+
+                $store = $this->stock_ordering_model->getStoreIdByUserId(1);
+
+
+                $store_id = [];
+                    foreach ($store as $item) {
+                        $store_id[] = $item->store_id;
+                    }
+
+                
+                $delivery = $this->stock_ordering_model->get_delivery_schedule($store_id);
+
+                $response = array(
+                    "message" => 'Successfully fetch delivery schedule',
+                    "data"    => $delivery, 
+
+                );
+
+                
+
+                header('content-type: application/json');
+                echo json_encode($response);
+            break;
+        }
+    }
+
+
     
     public function products(){
         switch($this->input->server('REQUEST_METHOD')){
@@ -71,14 +102,10 @@ class Stock_ordering extends CI_Controller
 
 
                 $products = $this->stock_ordering_model->getProduct($category, $store_info->store_id);
-                if($category){
-                    $schedule = $this->stock_ordering_model->getSchedule($category, $store_info->store_id);
-                }
+              
 
                 $data = array(
-                    "products" => $products,
-                    "schedule" => $schedule ?? null,
-                    
+                    "products" => $products, 
                 );
                 
                 $response = array(
@@ -1378,4 +1405,5 @@ class Stock_ordering extends CI_Controller
 
     }
 
+  
 }
