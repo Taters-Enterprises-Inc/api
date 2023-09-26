@@ -355,6 +355,14 @@ class Stock_ordering_model extends CI_Model {
     }
 
     public function getStoreIdByUserId($user_id){
+
+        if($user_id === 1 || $user_id === '1' ){
+            $this->newteishop->select('store_id');
+            $this->newteishop->from('store_tb');
+            $query = $this->newteishop->get();
+            return $query->result();
+        }
+
         $this->newteishop->select('A.store_id');
         $this->newteishop->from('store_tb A');
         $this->newteishop->join('users_store_groups B', 'B.store_id = A.store_id', 'left');
@@ -612,5 +620,14 @@ class Stock_ordering_model extends CI_Model {
         $filename_prefix = $si_type ? strtoupper($si_type).'-SI_'.$filename_prefix : $filename_prefix;
 
         return $filename_prefix;
+    }
+
+    public function get_delivery_schedule( $store_id){
+
+        $this->db->select('*');
+        $this->db->from('store_schedule');
+        $this->db->where_in('store_id', $store_id);
+        $query = $this->db->get();
+        return $query->result();
     }
 }
