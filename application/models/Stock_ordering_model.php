@@ -433,10 +433,14 @@ class Stock_ordering_model extends CI_Model {
             A.store_id,
             B.name,
             B.address,
-            A.ship_to_address
+            A.ship_to_address,
+            A.id,
+            A.requested_delivery_date,
+            C.remarks
         ');
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
+        $this->db->join('remarks C', 'C.order_information_id = A.id', 'left');
         $this->db->where('A.id', $order_id);
 
         $query = $this->db->get();
