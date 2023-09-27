@@ -62,8 +62,9 @@ class Stock_ordering extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
                 $user_id = $this->session->admin['user_id'];
+                $isAdmin = $this->ion_auth->is_admin();
 
-                $store = $this->stock_ordering_model->getStoreIdByUserId(1);
+                $store = $this->stock_ordering_model->getStoreIdByUserId($user_id, $isAdmin);
 
 
                 $store_id = [];
@@ -1375,8 +1376,9 @@ class Stock_ordering extends CI_Controller
 
     public function realtime_badge(){
         $user_id = $this->session->admin['user_id'];
+        $isAdmin = $this->ion_auth->is_admin();
 
-        $store = $this->stock_ordering_model->getStoreIdByUserId($user_id);
+        $store = $this->stock_ordering_model->getStoreIdByUserId($user_id, $isAdmin);
 
         $real_time_notification = array(
             "store_id" => $store,
