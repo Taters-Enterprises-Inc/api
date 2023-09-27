@@ -149,7 +149,7 @@
 		}
 		?>
 		<tr >
-			<td colspan="4" style="background-color: black; text-align: left; color: white">Total</td>
+			<td colspan="3" style="background-color: black; text-align: left; color: white">Total</td>
 			<td style="text-align: left"><?php echo number_format($totalCost); ?></td>
 		</tr>
 	</table>
