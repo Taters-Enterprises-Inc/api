@@ -232,9 +232,9 @@ class Stock_ordering_model extends CI_Model {
         
     }
 
-    public function getStore($user_id){
+    public function getStore($user_id, $isAdmin){
 
-        if($user_id == 1){
+        if($isAdmin){
             $this->newteishop->select('store_id, name');
             $this->newteishop->from('store_tb');
             $this->newteishop->where('branch_status', 1);
@@ -354,9 +354,9 @@ class Stock_ordering_model extends CI_Model {
         return $query->row();
     }
 
-    public function getStoreIdByUserId($user_id){
+    public function getStoreIdByUserId($user_id, $isAdmin){
 
-        if($user_id === 1 || $user_id === '1' ){
+        if($isAdmin){
             $this->newteishop->select('store_id');
             $this->newteishop->from('store_tb');
             $query = $this->newteishop->get();
