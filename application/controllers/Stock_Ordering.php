@@ -1110,12 +1110,26 @@ class Stock_ordering extends CI_Controller
             $object = PHPExcel_IOFactory::load($path);
 
             $worksheet = $object->getActiveSheet();
-            $countforA = 0;
+            /*countforA = 0;
 
             foreach ($worksheet->getRowIterator() as $row) {
                 $columnA = $worksheet->getCell('A' . $row->getRowIndex())->getValue();
 
                 if ($columnA != null || $columnA != '') {
+                    $countforA = $countforA + 1;
+                }
+            }
+
+            if ($countforA > 0) {
+                return "There's an error in Column A. Import of the file will be aborted.";
+            }*/
+
+            $countforA = 0;
+
+            foreach ($worksheet->getRowIterator() as $row) {
+                $columnA = $worksheet->getCell('A' . $row->getRowIndex())->getValue();
+
+                if ($columnA === null || $columnA === '') {
                     $countforA = $countforA + 1;
                 }
             }
@@ -1134,7 +1148,7 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            if ($countforB > 1) {
+            if ($countforB > 0) {
                 return "There's an error in Column B. Import of the file will be aborted.";
             }
 
@@ -1148,7 +1162,7 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            if ($countforC > 1) {
+            if ($countforC > 0) {
                 return "There's an error in Column C. Import of the file will be aborted.";
             }
 
@@ -1162,7 +1176,7 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            if ($countforD > 1) {
+            if ($countforD > 0) {
                 return "There's an error in Column D. Import of the file will be aborted.";
             }
 
@@ -1190,7 +1204,7 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            if ($countforF > 1) {
+            if ($countforF > 0) {
                 return "There's an error in Column F. Import of the file will be aborted.";
             }
 
@@ -1204,7 +1218,7 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            if ($countforG > 2) {
+            if ($countforG > 0) {
                 return "There's an error in Column G. Import of the file will be aborted.";
             }
 
@@ -1218,11 +1232,11 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            if ($countforH > 2) {
+            if ($countforH > 0) {
                 return "There's an error in Column H. Import of the file will be aborted.";
             }
 
-            $countforI = 0;
+            /*$countforI = 0;
 
             foreach ($worksheet->getRowIterator() as $row) {
                 $columnI = $worksheet->getCell('I' . $row->getRowIndex())->getValue();
@@ -1246,23 +1260,23 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            if ($countforJ > 1) {
+            if ($countforJ > 0) {
                 return "There's an error in Column J. Import of the file will be aborted.";
-            }
+            }*/
 
             foreach($object->getWorksheetIterator() as $worksheet) {
                 $highestRow     =    $worksheet->getHighestRow();
                 $highestColumn  =    $worksheet->getHighestColumn();
 
-                for ($row=3; $row<=$highestRow; $row++) { 
-                    $requested_date      = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
-                    $si                  = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
-                    $store               = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
-                    $multim_product_code = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
-                    $multim_product_name = $worksheet->getCellByColumnAndRow(6, $row)->getValue();
-                    $uom                 = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
-                    $quantity            = $worksheet->getCellByColumnAndRow(8, $row)->getValue();
-                    $total               = $worksheet->getCellByColumnAndRow(9, $row)->getValue();
+                for ($row=2; $row<=$highestRow; $row++) { 
+                    $requested_date      = $worksheet->getCellByColumnAndRow(0, $row)->getValue();
+                    $si                  = $worksheet->getCellByColumnAndRow(1, $row)->getValue();
+                    $store               = $worksheet->getCellByColumnAndRow(2, $row)->getValue();
+                    $multim_product_code = $worksheet->getCellByColumnAndRow(3, $row)->getValue();
+                    $multim_product_name = $worksheet->getCellByColumnAndRow(4, $row)->getValue();
+                    $quantity            = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
+                    //$uom                 = $worksheet->getCellByColumnAndRow(5, $row)->getValue();
+                    $total               = $worksheet->getCellByColumnAndRow(7, $row)->getValue();
 
                     // "quantity" => (preg_match('/(\d+\.\d+)\s+(.+)/', $unit_of_measure, $matches)) ? $matches[1] : "",
                     // "uom" => (preg_match('/(\d+\.\d+)\s+(.+)/', $unit_of_measure, $matches)) ? $matches[2] : "",
@@ -1274,7 +1288,7 @@ class Stock_ordering extends CI_Controller
                         "store" => $store,
                         "multim_product_code" => $multim_product_code,
                         "multim_product_name" => $multim_product_name,
-                        "uom" => $uom,
+                        //"uom" => $uom,
                         "quantity" => $quantity,
                         "total" => (preg_match('/[\d,]+(?:\.\d+)?/', $total, $matches)) ? clean_str_for_decimal($matches[0]) : ""
                     );

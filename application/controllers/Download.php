@@ -303,10 +303,12 @@ class Download extends CI_Controller {
             $store = $this->stock_ordering_model->getStoreDetailsForPdf($order_id);
             $products = $this->stock_ordering_model->getProductDataForPdf($order_id);
             $si_details = $this->stock_ordering_model->getSiOtherDetails($order_id);
+            $remark_details = $this->stock_ordering_model->getRemarkDetailsForPdf($order_id);
 
             $data['products'] = $products;
             $data['store_details'] = $store;
             $data['si_details'] = $si_details;
+            $data['remarks'] = $remark_details;
 
             $file_name = 'Export Order';
 
