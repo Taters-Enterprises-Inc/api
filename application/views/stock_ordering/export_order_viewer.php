@@ -53,6 +53,33 @@
 	<div id="title_wrapper" style="margin-bottom: 30px;">
 		<img src="assets/images/shared/logo/contract_logo.png" width="250">
 	</div>
+</section>
+
+<section id="contract_paper" style="margin-bottom: 10px;">
+	<table style="width:100%">
+		<tr>
+			<th style="text-align: right">Requested Delivery Date: <span class="custom-span"><?php echo $store_details->requested_delivery_date; ?></span></th>
+		</tr>
+	</table>
+</section>
+
+<section id="contract_paper" style="margin-bottom: 10px;">
+	<table style="width:100%">
+		<tr>
+			<th>&nbsp;</th>
+		</tr>
+	</table>
+</section>
+
+<section id="contract_paper" style="margin-bottom: 10px;">
+	<table style="width:100%">
+		<tr>
+			<th style="text-align: left">Order ID: <span class="custom-span"><?php echo $store_details->id; ?></span></th>
+		</tr>
+	</table>
+</section>
+
+<section id="contract_paper" style="margin-bottom: 10px;">
 	<table style="width:100%">
 		<tr>
 			<th style="text-align: left">SOLD TO: <span class="custom-span"><?php echo $store_details->name; ?></span></th>
@@ -68,6 +95,30 @@
 	</table>
 </section>
 
+<section id="contract_paper" style="margin-bottom: 20px;">
+	<table style="width:100%">
+		<tr>
+			<th style="text-align: left">REMARKS:</th>
+			<th>&nbsp;</th>
+			<th>&nbsp;</th>
+		</tr>
+
+		<?php
+
+		foreach ($remarks as $remark) {
+			?>
+			<tr>
+				<td><?php echo $remark['remarks']; ?></td>
+				<td><?php echo $remark['first_name'] . " " . $remark['last_name']; ?></td>
+				<td><?php echo $remark['date']; ?></td>
+			</tr>
+			<?php
+		}
+		?>
+
+	</table>
+</section>
+
 
 <section id="contract_paper" style="margin-bottom: 10px;">
 	<table style="width:100%">
@@ -76,7 +127,6 @@
 			<th style="text-align: left">ITEM NAME</th>
 			<th style="text-align: left">UOM</th>
 			<th style="text-align: left">QUANTITY</th>
-			<th style="text-align: left">AMOUNT</th>
 		</tr>
 
 		<?php
@@ -90,7 +140,6 @@
 				<td><?php echo $product['product_name']; ?></td>
 				<td><?php echo $product['uom']; ?></td>
 				<td><?php echo $product['order_qty']; ?></td>
-				<td><?php echo number_format($product['cost']); ?></td>
 			</tr>
 
 		<?php
