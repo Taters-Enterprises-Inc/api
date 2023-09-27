@@ -127,7 +127,6 @@
 			<th style="text-align: left">ITEM NAME</th>
 			<th style="text-align: left">UOM</th>
 			<th style="text-align: left">QUANTITY</th>
-			<th style="text-align: left">AMOUNT</th>
 		</tr>
 
 		<?php
@@ -141,7 +140,6 @@
 				<td><?php echo $product['product_name']; ?></td>
 				<td><?php echo $product['uom']; ?></td>
 				<td><?php echo $product['order_qty']; ?></td>
-				<td><?php echo number_format($product['cost']); ?></td>
 			</tr>
 
 		<?php
