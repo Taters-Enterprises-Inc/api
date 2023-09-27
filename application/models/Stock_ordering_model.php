@@ -435,12 +435,10 @@ class Stock_ordering_model extends CI_Model {
             B.address,
             A.ship_to_address,
             A.id,
-            A.requested_delivery_date,
-            C.remarks
+            A.requested_delivery_date
         ');
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
-        $this->db->join('remarks C', 'C.order_information_id = A.id', 'left');
         $this->db->where('A.id', $order_id);
 
         $query = $this->db->get();
@@ -470,6 +468,21 @@ class Stock_ordering_model extends CI_Model {
 
         $product_query = $this->db->get();
         return $product_query->result_array();
+    }
+
+    public function getRemarkDetailsForPdf($order_id){
+        $this->db->select('
+            A.remarks,
+            A.date,
+            B.first_name,
+            B.last_name
+        ');
+        $this->db->from('remarks A');
+        $this->db->join($this->newteishop->database.'.users B', 'B.id = A.user_id', 'left');
+        $this->db->where('A.order_information_id', $order_id);
+
+        $query = $this->db->get();
+        return $query->result_array();
     }
 
     public function getSumForSiPdf($order_id){
