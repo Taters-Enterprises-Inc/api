@@ -53,6 +53,33 @@
 	<div id="title_wrapper" style="margin-bottom: 30px;">
 		<img src="assets/images/shared/logo/contract_logo.png" width="250">
 	</div>
+</section>
+
+<section id="contract_paper" style="margin-bottom: 10px;">
+	<table style="width:100%">
+		<tr>
+			<th style="text-align: right">Requested Delivery Date: <span class="custom-span"><?php echo $store_details->requested_delivery_date; ?></span></th>
+		</tr>
+	</table>
+</section>
+
+<section id="contract_paper" style="margin-bottom: 10px;">
+	<table style="width:100%">
+		<tr>
+			<th>&nbsp;</th>
+		</tr>
+	</table>
+</section>
+
+<section id="contract_paper" style="margin-bottom: 10px;">
+	<table style="width:100%">
+		<tr>
+			<th style="text-align: left">Order ID: <span class="custom-span"><?php echo $store_details->id; ?></span></th>
+		</tr>
+	</table>
+</section>
+
+<section id="contract_paper" style="margin-bottom: 10px;">
 	<table style="width:100%">
 		<tr>
 			<th style="text-align: left">SOLD TO: <span class="custom-span"><?php echo $store_details->name; ?></span></th>
@@ -64,6 +91,14 @@
 	<table style="width:100%">
 		<tr>
 			<th style="text-align: left">ADDRESS: <span class="custom-span"><?php echo $store_details->address; ?></span></th>
+		</tr>
+	</table>
+</section>
+
+<section id="contract_paper" style="margin-bottom: 20px;">
+	<table style="width:100%">
+		<tr>
+			<th style="text-align: left">REMARKS: <span class="custom-span"><?php echo $store_details->remarks; ?></span></th>
 		</tr>
 	</table>
 </section>
