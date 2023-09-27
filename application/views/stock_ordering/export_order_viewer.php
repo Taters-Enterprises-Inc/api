@@ -98,8 +98,24 @@
 <section id="contract_paper" style="margin-bottom: 20px;">
 	<table style="width:100%">
 		<tr>
-			<th style="text-align: left">REMARKS: <span class="custom-span"><?php echo $store_details->remarks; ?></span></th>
+			<th style="text-align: left">REMARKS:</th>
+			<th>&nbsp;</th>
+			<th>&nbsp;</th>
 		</tr>
+
+		<?php
+
+		foreach ($remarks as $remark) {
+			?>
+			<tr>
+				<td><?php echo $remark['remarks']; ?></td>
+				<td><?php echo $remark['first_name'] . " " . $remark['last_name']; ?></td>
+				<td><?php echo $remark['date']; ?></td>
+			</tr>
+			<?php
+		}
+		?>
+
 	</table>
 </section>
 
