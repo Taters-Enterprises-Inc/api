@@ -30,9 +30,10 @@ class Stock_ordering extends CI_Controller
 
                 $store_id = $this->input->get('store_id');
                 $user_id = $this->session->admin['user_id'];
+                $is_Admin = $this->ion_auth->is_admin();
 
 
-                $store = $this->stock_ordering_model->getStore($user_id);
+                $store = $this->stock_ordering_model->getStore($user_id, $is_Admin);
                 $ship_to_address = $this->stock_ordering_model->getShipToAddress($store_id);
                 $window_time = $this->stock_ordering_model->getWindowTime($store_id);
                 
@@ -243,10 +244,11 @@ class Stock_ordering extends CI_Controller
                 $search = $this->input->get('search');
 
                 $user_id = $this->session->admin['user_id'];
+                $isAdmin = $this->ion_auth->is_admin();
 
                 $user_store_id = array();
 
-                $store_id = $this->stock_ordering_model->getStore($user_id);
+                $store_id = $this->stock_ordering_model->getStore($user_id, $isAdmin);
 
                 foreach ($store_id as $id) {
                     $user_store_id[] = $id['store_id'];
