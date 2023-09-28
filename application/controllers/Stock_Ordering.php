@@ -135,6 +135,7 @@ class Stock_ordering extends CI_Controller
             $orderPlacementDate = date('Y-m-d H:i:s');
             $ship_to_address = $this->input->post('selectedAddress');
             $remarks = $this->input->post('remarks');
+            $logistic_type = $this->input->post('logisticType');
             $user_id = $this->session->admin['user_id'];
 
             $order_information = array(
@@ -145,6 +146,7 @@ class Stock_ordering extends CI_Controller
                 'order_placement_date' => $orderPlacementDate,
                 'status_id' => 1, //For process id since its new order it is 0.
                 'payment_status_id' => 1,
+                'logistic_type_id' => $logistic_type,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
