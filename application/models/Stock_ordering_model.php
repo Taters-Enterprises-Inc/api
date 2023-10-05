@@ -91,6 +91,7 @@ class Stock_ordering_model extends CI_Model {
             B.store_id,
             A.id,
             A.ship_to_address,
+            E.category_id,
             E.category_name,
             A.order_placement_date,
             A.requested_delivery_date,
@@ -330,7 +331,19 @@ class Stock_ordering_model extends CI_Model {
         $this->db->where('order_information_id', $id);
         $this->db->where('product_id', $id_product);
         $this->db->update('order_item_tb', $data);
+    }
 
+    public function insertNewOrderitem($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('order_item_tb', $data);
+        $this->db->trans_complete();
+
+
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function insertRemarks($data){

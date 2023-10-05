@@ -349,6 +349,53 @@ class Stock_ordering extends CI_Controller
         }
     }
 
+    public function update_order_items(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+            case 'POST':
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+
+                $productData = array();
+
+                if (empty($_POST)) {
+
+                    $this->output->set_status_header('400');
+                    echo json_encode(array( "message" => "No input was provided in the submission."));
+                    return;
+                }
+
+                foreach ($_POST as $product) {
+                    $productData[] = array(
+                        'order_information_id' => $product['order_information_id'],
+                        'product_id' => $product['productId'],
+                        'order_qty' => $product['orderQty'],
+                    );
+                }
+
+                $insertOrderItemError = $this->stock_ordering_model->insertNewOrderitem($productData);
+
+                if($insertOrderItemError){
+                    $this->output->set_status_header('500');
+                    echo json_encode(array( "message" => "Sorry, we encountered an issue while updating."));
+                    return;
+                }
+
+                $this->insert_tracking_log(14, $order_information_id);
+                $this->transaction_log($order_information_id, 2, date('Y-m-d H:i:s'));
+
+                $response = array(
+                    "message" => 'Sucessfully edited the order item',
+                  );
+            
+                header('content-type: application/json');
+                echo json_encode($response);
+
+
+                break;
+        }
+    }
+
+
     public function review_order(){
         switch($this->input->server('REQUEST_METHOD')){
 
@@ -1425,5 +1472,6 @@ class Stock_ordering extends CI_Controller
 
     }
 
+   
   
 }
