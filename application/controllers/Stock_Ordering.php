@@ -308,7 +308,9 @@ class Stock_ordering extends CI_Controller
                     $product_id = $product['productId'];
 
                     $order_item_data = array(
-                        "commited_qty"   => $product['commitedQuantity']
+                        "commited_qty"   => $product['commitedQuantity'],
+                        "out_of_stock"   => $product['out_of_stock']
+
                     );
                     
                     $this->stock_ordering_model->updateOrderItem($order_information_id, $product_id, $order_item_data);

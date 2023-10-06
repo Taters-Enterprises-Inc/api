@@ -20,7 +20,8 @@ class Stock_ordering_model extends CI_Model {
             A.delivered_qty,
             A.total_cost,
             A.order_information_id,
-            A.dispatched_qty
+            A.dispatched_qty,
+            A.out_of_stock
         ');
 
         //to be implemented cost and current stock
