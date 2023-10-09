@@ -135,6 +135,7 @@ class Stock_ordering extends CI_Controller
             $orderPlacementDate = date('Y-m-d H:i:s');
             $ship_to_address = $this->input->post('selectedAddress');
             $remarks = $this->input->post('remarks');
+            $logistic_type = $this->input->post('logisticType');
             $user_id = $this->session->admin['user_id'];
 
             $order_information = array(
@@ -145,6 +146,7 @@ class Stock_ordering extends CI_Controller
                 'order_placement_date' => $orderPlacementDate,
                 'status_id' => 1, //For process id since its new order it is 0.
                 'payment_status_id' => 1,
+                'logistic_type_id' => $logistic_type,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
@@ -306,7 +308,9 @@ class Stock_ordering extends CI_Controller
                     $product_id = $product['productId'];
 
                     $order_item_data = array(
-                        "commited_qty"   => $product['commitedQuantity']
+                        "commited_qty"   => $product['commitedQuantity'],
+                        "out_of_stock"   => $product['out_of_stock']
+
                     );
                     
                     $this->stock_ordering_model->updateOrderItem($order_information_id, $product_id, $order_item_data);
@@ -346,6 +350,53 @@ class Stock_ordering extends CI_Controller
             break;
         }
     }
+
+    public function update_order_items(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+            case 'POST':
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+
+                $productData = array();
+
+                if (empty($_POST)) {
+
+                    $this->output->set_status_header('400');
+                    echo json_encode(array( "message" => "No input was provided in the submission."));
+                    return;
+                }
+
+                foreach ($_POST as $product) {
+                    $productData[] = array(
+                        'order_information_id' => $product['order_information_id'],
+                        'product_id' => $product['productId'],
+                        'order_qty' => $product['orderQty'],
+                    );
+                }
+
+                $insertOrderItemError = $this->stock_ordering_model->insertNewOrderitem($productData);
+
+                if($insertOrderItemError){
+                    $this->output->set_status_header('500');
+                    echo json_encode(array( "message" => "Sorry, we encountered an issue while updating."));
+                    return;
+                }
+
+                $this->insert_tracking_log(14, $order_information_id);
+                $this->transaction_log($order_information_id, 2, date('Y-m-d H:i:s'));
+
+                $response = array(
+                    "message" => 'Sucessfully edited the order item',
+                  );
+            
+                header('content-type: application/json');
+                echo json_encode($response);
+
+
+                break;
+        }
+    }
+
 
     public function review_order(){
         switch($this->input->server('REQUEST_METHOD')){
@@ -1423,5 +1474,6 @@ class Stock_ordering extends CI_Controller
 
     }
 
+   
   
 }

@@ -20,7 +20,8 @@ class Stock_ordering_model extends CI_Model {
             A.delivered_qty,
             A.total_cost,
             A.order_information_id,
-            A.dispatched_qty
+            A.dispatched_qty,
+            A.out_of_stock
         ');
 
         //to be implemented cost and current stock
@@ -91,6 +92,7 @@ class Stock_ordering_model extends CI_Model {
             B.store_id,
             A.id,
             A.ship_to_address,
+            E.category_id,
             E.category_name,
             A.order_placement_date,
             A.requested_delivery_date,
@@ -110,6 +112,9 @@ class Stock_ordering_model extends CI_Model {
             H.region_id,
             I.region_name,
             A.status_id,
+            J.id as logistic_id,
+            J.type as logistic_type, 
+
         ');
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
@@ -120,6 +125,8 @@ class Stock_ordering_model extends CI_Model {
         $this->db->join('transportation_tb G', 'G.id = A.transportation_id', 'left');
         $this->db->join('store_region_combination H', "H.store_id = B.store_id", 'left');
         $this->db->join('region_tb I', "I.id = H.region_id", "left");
+        $this->db->join('logistic_type J', 'J.id = A.logistic_type_id', 'left');
+
 
 
         $this->db->where('A.id', $id);
@@ -174,7 +181,10 @@ class Stock_ordering_model extends CI_Model {
             C.description,
             D.billing_id,
             D.billing_amount,
-            F.short_name
+            F.short_name,
+            G.id as logistic_id,
+            G.type as logistic_type, 
+
         ');
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
@@ -182,9 +192,12 @@ class Stock_ordering_model extends CI_Model {
         $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
+        $this->db->join('logistic_type G', 'G.id = A.logistic_type_id', 'left');
+
         if($store_id){
             $this->db->where_in('A.store_id', $store_id);
         }
+
         $this->db->where('A.status_id', $status);
 
         if($search){
@@ -213,6 +226,8 @@ class Stock_ordering_model extends CI_Model {
         $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
+        $this->db->join('logistic_type G', 'G.id = A.logistic_type_id', 'left');
+
         if($store_id){
             $this->db->where_in('A.store_id', $store_id);
         }
@@ -317,7 +332,19 @@ class Stock_ordering_model extends CI_Model {
         $this->db->where('order_information_id', $id);
         $this->db->where('product_id', $id_product);
         $this->db->update('order_item_tb', $data);
+    }
 
+    public function insertNewOrderitem($data){
+        $this->db->trans_start();
+		$this->db->insert_batch('order_item_tb', $data);
+        $this->db->trans_complete();
+
+
+        if ($this->db->affected_rows() > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function insertRemarks($data){
