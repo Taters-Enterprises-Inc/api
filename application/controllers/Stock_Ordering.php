@@ -366,6 +366,8 @@ class Stock_ordering extends CI_Controller
                     return;
                 }
 
+                $order_information_id = $_POST[0]['order_information_id'];
+
                 foreach ($_POST as $product) {
                     $productData[] = array(
                         'order_information_id' => $product['order_information_id'],
