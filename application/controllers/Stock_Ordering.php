@@ -468,6 +468,16 @@ class Stock_ordering extends CI_Controller
             
             $status = 4;            
 
+            //validate time first
+            $validateTime = DateTime::createFromFormat('h:i:s a', $dispatch_date);
+
+            if (!($validateTime && $validateTime->format('h:i:s a') == $dispatch_date)) {
+                $this->output->set_status_header('400');
+                echo json_encode(array( "message" => 'Invalid Time Format. Please   use the format hh:mm AM/PM'));
+                return;
+            }
+
+
             $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
 
             $delivery_receipt_image_name = clean_str_for_img($this->input->post('deliveryReceipt'). '-' . time());
