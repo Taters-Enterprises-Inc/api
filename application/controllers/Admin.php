@@ -1317,7 +1317,7 @@ class Admin extends CI_Controller{
               "subtotal_promo_discount" => $this->input->post('subTotalPromoDiscount') ? $this->input->post('subTotalPromoDiscount') : null,
               "minimum_purchase" => $this->input->post('minimumPurchase') ? $this->input->post('minimumPurchase') : null,
               "is_free_delivery" => json_decode($this->input->post('isFreeDelivery'))? 1 : 0,
-              "influencer_discount" => $this->input->post('influencerDiscount'),
+              "influencer_discount" => $this->input->post('influencerDiscount') ?$this->input->post('influencerDiscount') : null ,
               "is_partner_company" => json_decode($this->input->post('isPartnerCompany'))? 1 : 0,
               "description" => $this->input->post('description'),
               "seconds_before_expiration" => $this->input->post('secondsBeforeExpiration'),
