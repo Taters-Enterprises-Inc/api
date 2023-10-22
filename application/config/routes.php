@@ -148,7 +148,6 @@ $route['stock/generate-multim-si-pdf/(:any)'] = 'download/multim_sales_invoice/$
 $route['stock/export-order-pdf/(:any)'] = 'download/export_order/$1';
 $route['stock/schedule/delivery'] = 'Stock_Ordering/get_schedule';
 $route['stock/update/order-items'] = 'Stock_Ordering/update_order_items';
-$route['stock/get/overdue-task'] = 'Stock_Ordering/getOverdueTask';
 
 
 //Admin

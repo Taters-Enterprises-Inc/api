@@ -366,8 +366,6 @@ class Stock_ordering extends CI_Controller
                     return;
                 }
 
-                $order_information_id = $_POST[0]['order_information_id'];
-
                 foreach ($_POST as $product) {
                     $productData[] = array(
                         'order_information_id' => $product['order_information_id'],
@@ -467,16 +465,6 @@ class Stock_ordering extends CI_Controller
             $user_id = $this->session->admin['user_id'];
             
             $status = 4;            
-
-            //validate time first
-            $validateTime = DateTime::createFromFormat('h:i:s a', $dispatch_date);
-
-            if (!($validateTime && $validateTime->format('h:i:s a') == $dispatch_date)) {
-                $this->output->set_status_header('400');
-                echo json_encode(array( "message" => 'Invalid Time Format. Please   use the format hh:mm AM/PM'));
-                return;
-            }
-
 
             $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
 
@@ -1484,31 +1472,6 @@ class Stock_ordering extends CI_Controller
 
         $this->stock_ordering_model->insertTracking($remarks_information);
 
-    }
-
-    public function getOverdueTask(){
-        switch($this->input->server('REQUEST_METHOD')){
-            case 'GET':
-                $user_id = $this->session->admin['user_id'];
-                $isAdmin = $this->ion_auth->is_admin();
-                $store = $this->stock_ordering_model->getStoreIdByUserId($user_id, $isAdmin);
-
-                $store_id = [];
-                    foreach ($store as $item) {
-                        $store_id[] = $item->store_id;
-                    }
-                    
-                $data = $this->stock_ordering_model->getOverdueTasks($store_id, $user_id);
-
-                $response = array(
-                    "message" => 'Successfully fetch Overdue Task',
-                    "data"    => $data, 
-                );
-
-                header('content-type: application/json');
-                echo json_encode($response);
-            break;
-        }
     }
 
    
