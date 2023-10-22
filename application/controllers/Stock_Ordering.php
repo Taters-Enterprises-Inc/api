@@ -1486,6 +1486,31 @@ class Stock_ordering extends CI_Controller
 
     }
 
+    public function getOverdueTask(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+                $user_id = $this->session->admin['user_id'];
+                $isAdmin = $this->ion_auth->is_admin();
+                $store = $this->stock_ordering_model->getStoreIdByUserId($user_id, $isAdmin);
+
+                $store_id = [];
+                    foreach ($store as $item) {
+                        $store_id[] = $item->store_id;
+                    }
+                    
+                $data = $this->stock_ordering_model->getOverdueTasks($store_id, $user_id);
+
+                $response = array(
+                    "message" => 'Successfully fetch Overdue Task',
+                    "data"    => $data, 
+                );
+
+                header('content-type: application/json');
+                echo json_encode($response);
+            break;
+        }
+    }
+
    
   
 }

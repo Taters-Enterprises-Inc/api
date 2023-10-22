@@ -674,4 +674,30 @@ class Stock_ordering_model extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+
+    public function getOverdueTasks($store_id, $user_id){
+        $this->db->select('
+            A.id,
+            B.id as order_id,
+            A.process_id,
+            A.last_processed_date,
+            A.datetime_executed,
+
+            C.first_name,
+            C.last_name,
+
+            D.name,
+        ');
+        $this->db->from('alert_tb A');
+        $this->db->join('order_information_tb B', 'B.id = A.id', 'left');
+        $this->db->join($this->newteishop->database.'.users C', 'C.id = A.user_id', 'left');
+        $this->db->join($this->newteishop->database.'.store_tb D', 'D.store_id = A.store_id', 'left');
+
+
+        $this->db->where_in('A.store_id', $store_id);
+        $this->db->where('A.user_id', $user_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
 }
