@@ -149,6 +149,9 @@ $route['stock/export-order-pdf/(:any)'] = 'download/export_order/$1';
 $route['stock/schedule/delivery'] = 'Stock_Ordering/get_schedule';
 $route['stock/update/order-items'] = 'Stock_Ordering/update_order_items';
 
+//HR Appraisal
+$route['appraisal/performance-criteria'] = 'Hr_Appraisal/performance_criteria';
+
 
 //Admin
 $route['auth/login'] = 'auth/login';
