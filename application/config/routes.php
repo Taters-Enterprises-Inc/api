@@ -151,6 +151,7 @@ $route['stock/update/order-items'] = 'Stock_Ordering/update_order_items';
 
 //HR Appraisal
 $route['appraisal/performance-criteria'] = 'Hr_Appraisal/performance_criteria';
+$route['appraisal/rating-scale'] = 'Hr_Appraisal/rating_scale';
 
 
 //Admin

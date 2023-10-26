@@ -14,4 +14,12 @@ class Hr_appraisal_model extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+
+    public function getRatingScale(){
+        $this->db->select('name, description');
+        $this->db->from('rating_scale');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
 }

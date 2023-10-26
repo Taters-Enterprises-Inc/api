@@ -44,4 +44,25 @@ class Hr_appraisal extends CI_Controller
             break;
         }
     }
+
+    public function rating_scale(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $rating_scale = $this->hr_appraisal_model->getRatingScale();
+
+            $data = array(
+                "rating_scale" => $rating_scale, 
+            );
+
+            $response = array(
+                "message" => '',
+                "data"    => $data,
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
+    }
 }
