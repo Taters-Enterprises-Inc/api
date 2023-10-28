@@ -38,4 +38,12 @@ class Hr_appraisal_model extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+
+    public function getFunctionalCompetencyAndPunctualityGrade(){
+        $this->db->select('*');
+        $this->db->from('functional_competency_and_punctuality_grade');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
 }

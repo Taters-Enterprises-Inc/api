@@ -107,4 +107,25 @@ class Hr_appraisal extends CI_Controller
             break;
         }
     }
+
+    public function functional_competency_and_punctuality_grade(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $functional_competency_and_punctuality_grade = $this->hr_appraisal_model->getFunctionalCompetencyAndPunctualityGrade();
+
+            $data = array(
+                "functional_competency_and_punctuality_grade" => $functional_competency_and_punctuality_grade, 
+            );
+
+            $response = array(
+                "message" => '',
+                "data"    => $data,
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
+    }
 }
