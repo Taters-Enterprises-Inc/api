@@ -65,4 +65,25 @@ class Hr_appraisal extends CI_Controller
             break;
         }
     }
+
+    public function kra_kpi_grade(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $kra_kpi_grade = $this->hr_appraisal_model->getKraKpiGrade();
+
+            $data = array(
+                "kra_kpi_grade" => $kra_kpi_grade, 
+            );
+
+            $response = array(
+                "message" => '',
+                "data"    => $data,
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
+    }
 }
