@@ -153,6 +153,7 @@ $route['stock/update/order-items'] = 'Stock_Ordering/update_order_items';
 $route['appraisal/performance-criteria'] = 'Hr_Appraisal/performance_criteria';
 $route['appraisal/rating-scale'] = 'Hr_Appraisal/rating_scale';
 $route['appraisal/kra-kpi-grade'] = 'Hr_Appraisal/kra_kpi_grade';
+$route['appraisal/core-competency-grade'] = 'Hr_Appraisal/core_competency_grade';
 
 
 //Admin

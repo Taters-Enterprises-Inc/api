@@ -30,4 +30,12 @@ class Hr_appraisal_model extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+
+    public function getCoreCompetencyGrade(){
+        $this->db->select('*');
+        $this->db->from('core_competency_grade');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
 }

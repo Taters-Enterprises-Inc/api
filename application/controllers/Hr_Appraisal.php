@@ -86,4 +86,25 @@ class Hr_appraisal extends CI_Controller
             break;
         }
     }
+
+    public function core_competency_grade(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $core_competency_grade = $this->hr_appraisal_model->getCoreCompetencyGrade();
+
+            $data = array(
+                "core_competency_grade" => $core_competency_grade, 
+            );
+
+            $response = array(
+                "message" => '',
+                "data"    => $data,
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
+    }
 }
