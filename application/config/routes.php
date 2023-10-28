@@ -155,6 +155,7 @@ $route['appraisal/rating-scale'] = 'Hr_Appraisal/rating_scale';
 $route['appraisal/kra-kpi-grade'] = 'Hr_Appraisal/kra_kpi_grade';
 $route['appraisal/core-competency-grade'] = 'Hr_Appraisal/core_competency_grade';
 $route['appraisal/functional-competency-and-punctuality-grade'] = 'Hr_Appraisal/functional_competency_and_punctuality_grade';
+$route['appraisal/attendance-and-punctuality'] = 'Hr_Appraisal/attendance_and_punctuality';
 
 //Admin
 $route['auth/login'] = 'auth/login';

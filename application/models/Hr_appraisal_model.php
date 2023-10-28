@@ -46,4 +46,12 @@ class Hr_appraisal_model extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+
+    public function getAttendanceAndPunctuality(){
+        $this->db->select('name, absences, tardiness');
+        $this->db->from('attendance_and_punctuality');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
 }

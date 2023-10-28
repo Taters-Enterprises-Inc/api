@@ -128,4 +128,25 @@ class Hr_appraisal extends CI_Controller
             break;
         }
     }
+
+    public function attendance_and_punctuality(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $attendance_and_punctuality = $this->hr_appraisal_model->getAttendanceAndPunctuality();
+
+            $data = array(
+                "attendance_and_punctuality" => $attendance_and_punctuality, 
+            );
+
+            $response = array(
+                "message" => '',
+                "data"    => $data,
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
+    }
 }
