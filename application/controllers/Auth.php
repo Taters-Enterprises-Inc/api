@@ -214,7 +214,11 @@ class Auth extends CI_Controller{
 						Updated parameter for remove_from_group to determine 
 						if the group is from shop or stock ordering this process
 						also applies to add_to_group. 
-						1 ===== shop and 2 ===== stock order
+
+						1 ===== shop
+						2 ===== stock order 
+						3 ===== sales
+
 						*/
 						// Update the groups user belongs to
 
@@ -231,6 +235,14 @@ class Auth extends CI_Controller{
 						if (isset($stockOrderData) && !empty($stockOrderData)) {
 							foreach ($stockOrderData as $grp) {
 								$this->ion_auth->add_to_group($grp, $id, 2);
+							}
+						}
+
+						$this->ion_auth->remove_from_group('', $id, 3);
+						$salesData = $this->input->post('sales_group');
+						if (isset($salesData) && !empty($salesData)) {
+							foreach ($salesData as $grp) {
+								$this->ion_auth->add_to_group($grp, $id, 3);
 							}
 						}
 

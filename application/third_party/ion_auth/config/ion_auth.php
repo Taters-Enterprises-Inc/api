@@ -35,6 +35,8 @@ $dotenv->load();
 
 $config['database_group_name'] = '';
 $config['sos_database_group_name'] = $_ENV['STOCK_ORDERING_DATABASE_NAME'];
+$config['sales_database_group_name'] = $_ENV['SALES_DATABASE_NAME'];
+
 
 /*
 | -------------------------------------------------------------------------
@@ -50,6 +52,9 @@ $config['tables']['login_attempts']  = 'login_attempts';
 $config['tables']['order_status'] = $config['sos_database_group_name'].'.order_status';
 $config['tables']['tab_combination'] = $config['sos_database_group_name'].'.user_tab_combination';
 
+$config['tables']['sales_user_group'] = $config['sales_database_group_name'].'.user_groups';
+$config['tables']['sales_user_combination'] = $config['sales_database_group_name'].'.user_group_combination';
+
 /*
  | Users table column and Group table column you want to join WITH.
  |
@@ -62,6 +67,7 @@ $config['join']['groups'] = 'group_id';
 //----------------------------------------
 
 $config['join']['order_status_id'] = 'order_status_id';
+
 
 /*
  | -------------------------------------------------------------------------
