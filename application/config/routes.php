@@ -149,13 +149,28 @@ $route['stock/export-order-pdf/(:any)'] = 'download/export_order/$1';
 $route['stock/schedule/delivery'] = 'Stock_Ordering/get_schedule';
 $route['stock/update/order-items'] = 'Stock_Ordering/update_order_items';
 
+//HR
+$route['auth-hr/login'] = 'auth_hr/login';
+$route['auth-hr/logout'] = 'auth_hr/logout';
+$route['auth-hr/create-user'] = 'auth_hr/create_user';
+$route['auth-hr/edit-user'] = 'auth_hr/edit_user';
+$route['auth-hr/create-group'] = 'auth_hr/create_group';
+
+$route['hr/session'] = 'hr/session';
+$route['hr/action-items'] = 'hr/action_items';
+
 //HR Appraisal
-$route['appraisal/performance-criteria'] = 'Hr_Appraisal/performance_criteria';
-$route['appraisal/rating-scale'] = 'Hr_Appraisal/rating_scale';
-$route['appraisal/kra-kpi-grade'] = 'Hr_Appraisal/kra_kpi_grade';
-$route['appraisal/core-competency-grade'] = 'Hr_Appraisal/core_competency_grade';
-$route['appraisal/functional-competency-and-punctuality-grade'] = 'Hr_Appraisal/functional_competency_and_punctuality_grade';
-$route['appraisal/attendance-and-punctuality'] = 'Hr_Appraisal/attendance_and_punctuality';
+$route['hr/appraisal/performance-criteria'] = 'hr/performance_criteria';
+$route['hr/appraisal/rating-scale'] = 'hr/rating_scale';
+$route['hr/appraisal/kra-kpi-grade'] = 'hr/kra_kpi_grade';
+$route['hr/appraisal/core-competency-grade'] = 'hr/core_competency_grade';
+$route['hr/appraisal/functional-competency-and-punctuality-grade'] = 'hr/functional_competency_and_punctuality_grade';
+$route['hr/appraisal/attendance-and-punctuality'] = 'hr/attendance_and_punctuality';
+$route['hr/appraisal/submit'] = 'hr/submit_hr_appraisal';
+$route['hr/appraisal/kra-or-kpi'] = 'hr/kra_or_kpi';
+
+$route['hr/direct-report-staff/action-items'] = 'hr/direct_report_staff_action_items';
+$route['hr/direct-report-staff/kras/(:any)'] = 'hr/direct_report_staff_kras/$1';
 
 //Admin
 $route['auth/login'] = 'auth/login';

@@ -97,12 +97,12 @@ $db['stock-ordering'] = array(
 	'save_queries' => TRUE
 );
 
-$db['hr-appraisal'] = array(
+$db['hr'] = array(
 	'dsn'	=> '',
 	'hostname' => 'localhost',
 	'username' => $_ENV['DATABASE_USERNAME'],
 	'password' => $_ENV['DATABASE_PASSWORD'],
-	'database' => $_ENV['HR_APPRAISAL_DATABASE_NAME'],
+	'database' => $_ENV['HR_DATABASE_NAME'],
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
