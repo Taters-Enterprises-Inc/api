@@ -147,7 +147,7 @@ class Hr extends CI_Controller
                 $kras = $this->hr_model->getKras($user_id);
                 
                 $response = array(
-                    "message" => 'Successfully submit kra or kpi',
+                    "message" => 'Successfully fetch kra or kpi',
                     "data" => array(
                         "kras" =>$kras
                     ),
@@ -207,7 +207,7 @@ class Hr extends CI_Controller
                 $this->hr_model->insertKraOrKpi($appraisal_kras_or_kpi_array);
                 
                 $response = array(
-                    "message" => 'Successfully submit kra or kpi',
+                    "message" => 'Successfully save kra or kpi',
                 );
                 
                 header('content-type: application/json');
