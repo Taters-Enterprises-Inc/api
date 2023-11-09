@@ -12,6 +12,7 @@ class Bsc extends CI_Controller
 		parent::__construct();
 
 		if ($this->bsc_auth->logged_in() === false){
+		  $this->output->set_status_header('401');     
 		  exit();
 		}
 
@@ -177,7 +178,7 @@ class Bsc extends CI_Controller
 					"user_id" => $this->session->bsc['user_id'],
 					"old_last_login" => $this->session->bsc['old_last_login'],
 					"last_check" => $this->session->bsc['last_check'],
-					"is_bsc" => $this->bsc_auth->in_group(1),
+					"is_admin" => $this->bsc_auth->in_group(1),
 					"user_status_id" => $user_profile->user_status_id,
 				)
 			);
