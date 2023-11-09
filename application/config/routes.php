@@ -172,6 +172,8 @@ $route['hr/appraisal/kra-or-kpi'] = 'hr/kra_or_kpi';
 $route['hr/direct-report-staff/action-items'] = 'hr/direct_report_staff_action_items';
 $route['hr/direct-report-staff/kras/(:any)'] = 'hr/direct_report_staff_kras/$1';
 
+$route['hr/appraisal/getter/(:any)'] = 'hr/getter/$1';
+
 //Admin
 $route['auth/login'] = 'auth/login';
 $route['auth/logout'] = 'auth/logout';

@@ -147,7 +147,7 @@ class Hr extends CI_Controller
                 $kras = $this->hr_model->getKras($user_id);
                 
                 $response = array(
-                    "message" => 'Successfully submit kra or kpi',
+                    "message" => 'Successfully fetch kra or kpi',
                     "data" => array(
                         "kras" =>$kras
                     ),
@@ -207,7 +207,7 @@ class Hr extends CI_Controller
                 $this->hr_model->insertKraOrKpi($appraisal_kras_or_kpi_array);
                 
                 $response = array(
-                    "message" => 'Successfully submit kra or kpi',
+                    "message" => 'Successfully save kra or kpi',
                 );
                 
                 header('content-type: application/json');
@@ -477,4 +477,45 @@ class Hr extends CI_Controller
 			return;
 		}
 	}
+
+    public function getter($user_id){
+        /*$kra_kpi_grade = $this->hr_model->getterKraKpiGrade($user_id);
+        $core_competency_grade = $this->hr_model->getterCoreCompetencyGrade($user_id);
+        $functional_competency_and_punctuality_grade = $this->hr_model->getterFunctionalCompetencyAndPunctualityGrade($user_id);
+        $comments = $this->hr_model->getterComments($user_id);
+        
+        $data = array(
+            "kra_kpi_grade" => $kra_kpi_grade,
+            "core_competency_grade" => $core_competency_grade,
+            "functional_competency_and_punctuality_grade" => $functional_competency_and_punctuality_grade,
+            "comments" => $comments,
+        );
+        print_r($data);
+        exit();*/
+        
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $kra_kpi_grade = $this->hr_model->getterKraKpiGrade($user_id);
+            $core_competency_grade = $this->hr_model->getterCoreCompetencyGrade($user_id);
+            $functional_competency_and_punctuality_grade = $this->hr_model->getterFunctionalCompetencyAndPunctualityGrade($user_id);
+            $comments = $this->hr_model->getterComments($user_id);
+
+            $data = array(
+                "kra_kpi_grade" => $kra_kpi_grade,
+                "core_competency_grade" => $core_competency_grade,
+                "functional_competency_and_punctuality_grade" => $functional_competency_and_punctuality_grade,
+                "comments" => $comments,
+            );
+
+            $response = array(
+                "message" => '',
+                "data"    => $data,
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
+    }
 }
