@@ -4,7 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $dotenv = Dotenv\Dotenv::createImmutable(FCPATH);
 $dotenv->load();
 
-$config['database_group_name'] = 'hr';
+$config['users_table_db'] = '';
+$config['hr_users_profile_table_db'] = 'hr';
 
 $config['tables']['users']           = 'users';
 $config['tables']['groups']          = 'groups';

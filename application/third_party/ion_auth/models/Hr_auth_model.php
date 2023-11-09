@@ -55,17 +55,21 @@ class Hr_auth_model extends CI_Model
 		$this->lang->load('ion_auth');
 		
 		// initialize the database
-		$group_name = $this->config->item('database_group_name', 'hr_auth');
-		if (empty($group_name)) 
+		$users_table_db_name = $this->config->item('users_table_db', 'hr_auth');
+		$hr_users_profile_table_db_name = $this->config->item('hr_users_profile_table_db', 'hr_auth');
+
+		if (empty($users_table_db) && empty($hr_users_profile_table_db_name)) 
 		{
 			// By default, use CI's db that should be already loaded
 			$CI =& get_instance();
-			$this->db = $CI->db;
+			$this->usersTableDB = $CI->db;
+			$this->hrUsersProfileTableDB = $CI->hrDB;
 		}
 		else
 		{
 			// For specific group name, open a new specific connection
-			$this->db = $this->load->database($group_name, TRUE, TRUE);
+			$this->usersTableDB = $this->load->database($users_table_db_name, TRUE, TRUE);
+			$this->hrUsersProfileTableDB = $this->load->database($hr_users_profile_table_db_name, TRUE, TRUE);
 		}   
 
 		$this->tables = $this->config->item('tables', 'hr_auth');
@@ -105,11 +109,6 @@ class Hr_auth_model extends CI_Model
 		$this->_ion_hooks = new stdClass;
 
 		$this->trigger_events('model_constructor');
-	}
-
-	public function db()
-	{
-		return $this->db;
 	}
 
 	public function hash_password($password, $identity = NULL)
@@ -221,9 +220,9 @@ class Hr_auth_model extends CI_Model
 			];
 
 			$this->trigger_events('extra_where');
-			$this->db->update($this->tables['users'], $data, ['id' => $id]);
+			$this->usersTableDB->update($this->tables['users'], $data, ['id' => $id]);
 
-			if ($this->db->affected_rows() === 1)
+			if ($this->usersTableDB->affected_rows() === 1)
 			{
 				$this->trigger_events(['post_activate', 'post_activate_successful']);
 				$this->set_message('activate_successful');
@@ -257,9 +256,9 @@ class Hr_auth_model extends CI_Model
 		];
 
 		$this->trigger_events('extra_where');
-		$this->db->update($this->tables['users'], $data, ['id' => $id]);
+		$this->usersTableDB->update($this->tables['users'], $data, ['id' => $id]);
 
-		$return = $this->db->affected_rows() == 1;
+		$return = $this->usersTableDB->affected_rows() == 1;
 		if ($return)
 		{
 			$this->set_message('deactivate_successful');
@@ -292,7 +291,7 @@ class Hr_auth_model extends CI_Model
 			'forgotten_password_time' => NULL
 		];
 
-		$this->db->update($this->tables['users'], $data, [$this->identity_column => $identity]);
+		$this->usersTableDB->update($this->tables['users'], $data, [$this->identity_column => $identity]);
 
 		return TRUE;
 	}
@@ -316,7 +315,7 @@ class Hr_auth_model extends CI_Model
 			'remember_code' => NULL
 		];
 
-		$this->db->update($this->tables['users'], $data, [$this->identity_column => $identity]);
+		$this->usersTableDB->update($this->tables['users'], $data, [$this->identity_column => $identity]);
 
 		return TRUE;
 	}
@@ -370,7 +369,7 @@ class Hr_auth_model extends CI_Model
 
 		$this->trigger_events('extra_where');
 
-		$query = $this->db->select('id, password')
+		$query = $this->usersTableDB->select('id, password')
 		                  ->where($this->identity_column, $identity)
 		                  ->limit(1)
 		                  ->order_by('id', 'desc')
@@ -426,7 +425,7 @@ class Hr_auth_model extends CI_Model
 
 		$this->trigger_events('extra_where');
 
-		return $this->db->where('username', $username)
+		return $this->usersTableDB->where('username', $username)
 						->limit(1)
 						->count_all_results($this->tables['users']) > 0;
 	}
@@ -450,7 +449,7 @@ class Hr_auth_model extends CI_Model
 
 		$this->trigger_events('extra_where');
 
-		return $this->db->where('email', $email)
+		return $this->usersTableDB->where('email', $email)
 						->limit(1)
 						->count_all_results($this->tables['users']) > 0;
 	}
@@ -472,7 +471,7 @@ class Hr_auth_model extends CI_Model
 			return FALSE;
 		}
 
-		return $this->db->where($this->identity_column, $identity)
+		return $this->usersTableDB->where($this->identity_column, $identity)
 						->limit(1)
 						->count_all_results($this->tables['users']) > 0;
 	}
@@ -491,7 +490,7 @@ class Hr_auth_model extends CI_Model
 			return FALSE;
 		}
 
-		$query = $this->db->select('id')
+		$query = $this->usersTableDB->select('id')
 						  ->where($this->identity_column, $identity)
 						  ->limit(1)
 						  ->get($this->tables['users']);
@@ -533,9 +532,9 @@ class Hr_auth_model extends CI_Model
 		];
 
 		$this->trigger_events('extra_where');
-		$this->db->update($this->tables['users'], $update, [$this->identity_column => $identity]);
+		$this->usersTableDB->update($this->tables['users'], $update, [$this->identity_column => $identity]);
 
-		if ($this->db->affected_rows() === 1)
+		if ($this->usersTableDB->affected_rows() === 1)
 		{
 			$this->trigger_events(['post_forgotten_password', 'post_forgotten_password_successful']);
 			return $token->user_code;
@@ -608,7 +607,7 @@ class Hr_auth_model extends CI_Model
 		}
 
 		// check if the default set in config exists in database
-		$query = $this->db->get_where($this->tables['groups'], ['name' => $this->config->item('default_group', 'hr_auth')], 1)->row();
+		$query = $this->hrUsersProfileTableDB->get_where($this->tables['groups'], ['name' => $this->config->item('default_group', 'hr_auth')], 1)->row();
 		if (!isset($query->id) && empty($groups))
 		{
 			$this->set_error('account_creation_invalid_default_group');
@@ -646,9 +645,9 @@ class Hr_auth_model extends CI_Model
 
 		$this->trigger_events('extra_set');
 
-		$this->db->insert($this->tables['users'], $user_data);
+		$this->usersTableDB->insert($this->tables['users'], $user_data);
 
-		$id = $this->db->insert_id($this->tables['users'] . '_id_seq');
+		$id = $this->usersTableDB->insert_id($this->tables['users'] . '_id_seq');
 
 		if(!$id) {
 			return FALSE;
@@ -696,7 +695,7 @@ class Hr_auth_model extends CI_Model
 
 		$this->trigger_events('extra_where');
 
-		$query = $this->db->select($this->identity_column . ', email, id, password, active, last_login')
+		$query = $this->usersTableDB->select($this->identity_column . ', email, id, password, active, last_login')
 						  ->where($this->identity_column, $identity)
 						  ->or_where('email', $identity)
 						  ->limit(1)
@@ -790,7 +789,7 @@ class Hr_auth_model extends CI_Model
 			$last_login = $this->session->hr['last_check'];
 			if ($last_login + $recheck < time())
 			{
-				$query = $this->db->select('id')
+				$query = $this->usersTableDB->select('id')
 								  ->where([
 									  $this->identity_column => $this->session->hr['identity'],
 									  'active' => '1'
@@ -860,18 +859,18 @@ class Hr_auth_model extends CI_Model
 	{
 		if ($this->config->item('track_login_attempts', 'hr_auth'))
 		{
-			$this->db->select('1', FALSE);
-			$this->db->where('login', $identity);
+			$this->hrUsersProfileTableDB->select('1', FALSE);
+			$this->hrUsersProfileTableDB->where('login', $identity);
 			if ($this->config->item('track_login_ip_address', 'hr_auth'))
 			{
 				if (!isset($ip_address))
 				{
 					$ip_address = $this->input->ip_address();
 				}
-				$this->db->where('ip_address', $ip_address);
+				$this->hrUsersProfileTableDB->where('ip_address', $ip_address);
 			}
-			$this->db->where('time >', time() - $this->config->item('lockout_time', 'hr_auth'), FALSE);
-			$qres = $this->db->get($this->tables['login_attempts']);
+			$this->hrUsersProfileTableDB->where('time >', time() - $this->config->item('lockout_time', 'hr_auth'), FALSE);
+			$qres = $this->hrUsersProfileTableDB->get($this->tables['login_attempts']);
 			return $qres->num_rows();
 		}
 		return 0;
@@ -892,18 +891,18 @@ class Hr_auth_model extends CI_Model
 	{
 		if ($this->config->item('track_login_attempts', 'hr_auth'))
 		{
-			$this->db->select('time');
-			$this->db->where('login', $identity);
+			$this->hrUsersProfileTableDB->select('time');
+			$this->hrUsersProfileTableDB->where('login', $identity);
 			if ($this->config->item('track_login_ip_address', 'hr_auth'))
 			{
 				if (!isset($ip_address))
 				{
 					$ip_address = $this->input->ip_address();
 				}
-				$this->db->where('ip_address', $ip_address);
+				$this->hrUsersProfileTableDB->where('ip_address', $ip_address);
 			}
-			$this->db->order_by('id', 'desc');
-			$qres = $this->db->get($this->tables['login_attempts'], 1);
+			$this->hrUsersProfileTableDB->order_by('id', 'desc');
+			$qres = $this->hrUsersProfileTableDB->get($this->tables['login_attempts'], 1);
 
 			if ($qres->num_rows() > 0)
 			{
@@ -925,10 +924,10 @@ class Hr_auth_model extends CI_Model
 	{
 		if ($this->config->item('track_login_attempts', 'hr_auth') && $this->config->item('track_login_ip_address', 'hr_auth'))
 		{
-			$this->db->select('ip_address');
-			$this->db->where('login', $identity);
-			$this->db->order_by('id', 'desc');
-			$qres = $this->db->get($this->tables['login_attempts'], 1);
+			$this->hrUsersProfileTableDB->select('ip_address');
+			$this->hrUsersProfileTableDB->where('login', $identity);
+			$this->hrUsersProfileTableDB->order_by('id', 'desc');
+			$qres = $this->hrUsersProfileTableDB->get($this->tables['login_attempts'], 1);
 
 			if ($qres->num_rows() > 0)
 			{
@@ -957,7 +956,7 @@ class Hr_auth_model extends CI_Model
 			{
 				$data['ip_address'] = $this->input->ip_address();
 			}
-			return $this->db->insert($this->tables['login_attempts'], $data);
+			return $this->hrUsersProfileTableDB->insert($this->tables['login_attempts'], $data);
 		}
 		return FALSE;
 	}
@@ -984,19 +983,19 @@ class Hr_auth_model extends CI_Model
 			// Make sure $old_attempts_expire_period is at least equals to lockout_time
 			$old_attempts_expire_period = max($old_attempts_expire_period, $this->config->item('lockout_time', 'hr_auth'));
 
-			$this->db->where('login', $identity);
+			$this->hrUsersProfileTableDB->where('login', $identity);
 			if ($this->config->item('track_login_ip_address', 'hr_auth'))
 			{
 				if (!isset($ip_address))
 				{
 					$ip_address = $this->input->ip_address();
 				}
-				$this->db->where('ip_address', $ip_address);
+				$this->hrUsersProfileTableDB->where('ip_address', $ip_address);
 			}
 			// Purge obsolete login attempts
-			$this->db->or_where('time <', time() - $old_attempts_expire_period, FALSE);
+			$this->hrUsersProfileTableDB->or_where('time <', time() - $old_attempts_expire_period, FALSE);
 
-			return $this->db->delete($this->tables['login_attempts']);
+			return $this->hrUsersProfileTableDB->delete($this->tables['login_attempts']);
 		}
 		return FALSE;
 	}
@@ -1173,7 +1172,7 @@ class Hr_auth_model extends CI_Model
 		{
 			foreach ($this->_ion_select as $select)
 			{
-				$this->db->select($select);
+				$this->usersTableDB->select($select);
 			}
 
 			$this->_ion_select = [];
@@ -1181,7 +1180,7 @@ class Hr_auth_model extends CI_Model
 		else
 		{
 			// default selects
-			$this->db->select([
+			$this->usersTableDB->select([
 			    $this->tables['users'].'.*',
 			    $this->tables['users'].'.id as id',
 			    $this->tables['users'].'.id as user_id'
@@ -1200,10 +1199,10 @@ class Hr_auth_model extends CI_Model
 			// join and then run a where_in against the group ids
 			if (isset($groups) && !empty($groups))
 			{
-				$this->db->distinct();
-				$this->db->join(
-				    $this->tables['users_groups'],
-				    $this->tables['users_groups'].'.'.$this->join['users'].'='.$this->tables['users'].'.id',
+				$this->usersTableDB->distinct();
+				$this->usersTableDB->join(
+				    $this->hrUsersProfileTableDB->database. $this->tables['users_groups'],
+				    $this->hrUsersProfileTableDB->database. $this->tables['users_groups'].'.'.$this->join['users'].'='.$this->tables['users'].'.id',
 				    'inner'
 				);
 			}
@@ -1220,12 +1219,12 @@ class Hr_auth_model extends CI_Model
 			// if group name was used we do one more join with groups
 			if(!empty($group_names))
 			{
-				$this->db->join($this->tables['groups'], $this->tables['users_groups'] . '.' . $this->join['groups'] . ' = ' . $this->tables['groups'] . '.id', 'inner');
-				$this->db->where_in($this->tables['groups'] . '.name', $group_names);
+				$this->usersTableDB->join ($this->hrUsersProfileTableDB->database. $this->tables['groups'], $this->hrUsersProfileTableDB->database. $this->tables['users_groups'] . '.' . $this->join['groups'] . ' = ' . $this->hrUsersProfileTableDB->database. $this->tables['groups'] . '.id', 'inner');
+				$this->usersTableDB->where_in($this->hrUsersProfileTableDB->database. $this->tables['groups'] . '.name', $group_names);
 			}
 			if(!empty($group_ids))
 			{
-				$this->db->{$or_where_in}($this->tables['users_groups'].'.'.$this->join['groups'], $group_ids);
+				$this->usersTableDB->{$or_where_in}($this->hrUsersProfileTableDB->database. $this->tables['users_groups'].'.'.$this->join['groups'], $group_ids);
 			}
 		}
 
@@ -1236,7 +1235,7 @@ class Hr_auth_model extends CI_Model
 		{
 			foreach ($this->_ion_where as $where)
 			{
-				$this->db->where($where);
+				$this->usersTableDB->where($where);
 			}
 
 			$this->_ion_where = [];
@@ -1246,7 +1245,7 @@ class Hr_auth_model extends CI_Model
 		{
 			foreach ($this->_ion_like as $like)
 			{
-				$this->db->or_like($like['like'], $like['value'], $like['position']);
+				$this->usersTableDB->or_like($like['like'], $like['value'], $like['position']);
 			}
 
 			$this->_ion_like = [];
@@ -1254,14 +1253,14 @@ class Hr_auth_model extends CI_Model
 
 		if (isset($this->_ion_limit) && isset($this->_ion_offset))
 		{
-			$this->db->limit($this->_ion_limit, $this->_ion_offset);
+			$this->usersTableDB->limit($this->_ion_limit, $this->_ion_offset);
 
 			$this->_ion_limit  = NULL;
 			$this->_ion_offset = NULL;
 		}
 		else if (isset($this->_ion_limit))
 		{
-			$this->db->limit($this->_ion_limit);
+			$this->usersTableDB->limit($this->_ion_limit);
 
 			$this->_ion_limit  = NULL;
 		}
@@ -1269,13 +1268,13 @@ class Hr_auth_model extends CI_Model
 		// set the order
 		if (isset($this->_ion_order_by) && isset($this->_ion_order))
 		{
-			$this->db->order_by($this->_ion_order_by, $this->_ion_order);
+			$this->usersTableDB->order_by($this->_ion_order_by, $this->_ion_order);
 
 			$this->_ion_order    = NULL;
 			$this->_ion_order_by = NULL;
 		}
 
-		$this->response = $this->db->get($this->tables['users']);
+		$this->response = $this->usersTableDB->get($this->tables['users']);
 
 		return $this;
 	}
@@ -1319,7 +1318,7 @@ class Hr_auth_model extends CI_Model
 		// if no id was passed use the current users id
 		$id || $id = $this->session->hr['user_id'];
 
-		return $this->db->select($this->tables['users_groups'].'.'.$this->join['groups'].' as id, '.$this->tables['groups'].'.name, '.$this->tables['groups'].'.description')
+		return $this->hrUsersProfileTableDB->select($this->tables['users_groups'].'.'.$this->join['groups'].' as id, '.$this->tables['groups'].'.name, '.$this->tables['groups'].'.description')
 		                ->where($this->tables['users_groups'].'.'.$this->join['users'], $id)
 		                ->join($this->tables['groups'], $this->tables['users_groups'].'.'.$this->join['groups'].'='.$this->tables['groups'].'.id')
 		                ->get($this->tables['users_groups']);
@@ -1410,7 +1409,7 @@ class Hr_auth_model extends CI_Model
 		foreach ($group_ids as $group_id)
 		{
 			// Cast to float to support bigint data type
-			if ($this->db->insert($this->tables['users_groups'],
+			if ($this->hrUsersProfileTableDB->insert($this->tables['users_groups'],
 								  [ $this->join['groups'] => (float)$group_id,
 									$this->join['users']  => (float)$user_id  ]))
 			{
@@ -1464,7 +1463,7 @@ class Hr_auth_model extends CI_Model
 			foreach ($group_ids as $group_id)
 			{
 				// Cast to float to support bigint data type
-				$this->db->delete(
+				$this->hrUsersProfileTableDB->delete(
 					$this->tables['users_groups'],
 					[$this->join['groups'] => (float)$group_id, $this->join['users'] => (float)$user_id]
 				);
@@ -1480,7 +1479,7 @@ class Hr_auth_model extends CI_Model
 		else
 		{
 			// Cast to float to support bigint data type
-			if ($return = $this->db->delete($this->tables['users_groups'], [$this->join['users'] => (float)$user_id]))
+			if ($return = $this->hrUsersProfileTableDB->delete($this->tables['users_groups'], [$this->join['users'] => (float)$user_id]))
 			{
 				$this->_cache_user_in_group[$user_id] = [];
 			}
@@ -1503,21 +1502,21 @@ class Hr_auth_model extends CI_Model
 		{
 			foreach ($this->_ion_where as $where)
 			{
-				$this->db->where($where);
+				$this->hrUsersProfileTableDB->where($where);
 			}
 			$this->_ion_where = [];
 		}
 
 		if (isset($this->_ion_limit) && isset($this->_ion_offset))
 		{
-			$this->db->limit($this->_ion_limit, $this->_ion_offset);
+			$this->hrUsersProfileTableDB->limit($this->_ion_limit, $this->_ion_offset);
 
 			$this->_ion_limit  = NULL;
 			$this->_ion_offset = NULL;
 		}
 		else if (isset($this->_ion_limit))
 		{
-			$this->db->limit($this->_ion_limit);
+			$this->hrUsersProfileTableDB->limit($this->_ion_limit);
 
 			$this->_ion_limit  = NULL;
 		}
@@ -1525,10 +1524,10 @@ class Hr_auth_model extends CI_Model
 		// set the order
 		if (isset($this->_ion_order_by) && isset($this->_ion_order))
 		{
-			$this->db->order_by($this->_ion_order_by, $this->_ion_order);
+			$this->hrUsersProfileTableDB->order_by($this->_ion_order_by, $this->_ion_order);
 		}
 
-		$this->response = $this->db->get($this->tables['groups']);
+		$this->response = $this->hrUsersProfileTableDB->get($this->tables['groups']);
 
 		return $this;
 	}
@@ -1569,11 +1568,11 @@ class Hr_auth_model extends CI_Model
 	{
 		$this->trigger_events('pre_update_user');
 
-		$this->db->trans_begin();
+		$this->usersTableDB->trans_begin();
 
 		if (array_key_exists($this->identity_column, $data) && $this->identity_check($data[$this->identity_column]) && $user->{$this->identity_column} !== $data[$this->identity_column])
 		{
-			$this->db->trans_rollback();
+			$this->usersTableDB->trans_rollback();
 			$this->set_error('account_creation_duplicate_identity');
 
 			$this->trigger_events(['post_update_user', 'post_update_user_unsuccessful']);
@@ -1595,7 +1594,7 @@ class Hr_auth_model extends CI_Model
 					$data['password'] = $this->hash_password($data['password'], $user->{$this->identity_column});
 					if ($data['password'] === FALSE)
 					{
-						$this->db->trans_rollback();
+						$this->usersTableDB->trans_rollback();
 						$this->trigger_events(['post_update_user', 'post_update_user_unsuccessful']);
 						$this->set_error('update_unsuccessful');
 
@@ -1611,18 +1610,18 @@ class Hr_auth_model extends CI_Model
 		}
 
 		$this->trigger_events('extra_where');
-		$this->db->update($this->tables['users'], $data, ['id' => $id]);
+		$this->usersTableDB->update($this->tables['users'], $data, ['id' => $id]);
 
-		if ($this->db->trans_status() === FALSE)
+		if ($this->usersTableDB->trans_status() === FALSE)
 		{
-			$this->db->trans_rollback();
+			$this->usersTableDB->trans_rollback();
 
 			$this->trigger_events(['post_update_user', 'post_update_user_unsuccessful']);
 			$this->set_error('update_unsuccessful');
 			return FALSE;
 		}
 
-		$this->db->trans_commit();
+		$this->usersTableDB->trans_commit();
 
 		$this->trigger_events(['post_update_user', 'post_update_user_successful']);
 		$this->set_message('update_successful');
@@ -1641,23 +1640,23 @@ class Hr_auth_model extends CI_Model
 	{
 		$this->trigger_events('pre_delete_user');
 
-		$this->db->trans_begin();
+		$this->usersTableDB->trans_begin();
 
 		// remove user from groups
 		$this->remove_from_group(NULL, $id);
 
 		// delete user from users table should be placed after remove from group
-		$this->db->delete($this->tables['users'], ['id' => $id]);
+		$this->usersTableDB->delete($this->tables['users'], ['id' => $id]);
 
-		if ($this->db->trans_status() === FALSE)
+		if ($this->usersTableDB->trans_status() === FALSE)
 		{
-			$this->db->trans_rollback();
+			$this->usersTableDB->trans_rollback();
 			$this->trigger_events(['post_delete_user', 'post_delete_user_unsuccessful']);
 			$this->set_error('delete_unsuccessful');
 			return FALSE;
 		}
 
-		$this->db->trans_commit();
+		$this->usersTableDB->trans_commit();
 
 		$this->trigger_events(['post_delete_user', 'post_delete_user_successful']);
 		$this->set_message('delete_successful');
@@ -1680,9 +1679,9 @@ class Hr_auth_model extends CI_Model
 
 		$this->trigger_events('extra_where');
 
-		$this->db->update($this->tables['users'], ['last_login' => time()], ['id' => $id]);
+		$this->usersTableDB->update($this->tables['users'], ['last_login' => time()], ['id' => $id]);
 
-		return $this->db->affected_rows() == 1;
+		return $this->usersTableDB->affected_rows() == 1;
 	}
 
 	/**
@@ -1771,12 +1770,12 @@ class Hr_auth_model extends CI_Model
 
 		if ($token->validator_hashed)
 		{
-			$this->db->update($this->tables['users'],
+			$this->usersTableDB->update($this->tables['users'],
 								[ 'remember_selector' => $token->selector,
 								  'remember_code' => $token->validator_hashed ],
 								[ $this->identity_column => $identity ]);
 
-			if ($this->db->affected_rows() > -1)
+			if ($this->usersTableDB->affected_rows() > -1)
 			{
 				// if the user_expire is set to zero we'll set the expiration two years from now.
 				if($this->config->item('user_expire', 'hr_auth') === 0)
@@ -1829,7 +1828,7 @@ class Hr_auth_model extends CI_Model
 
 		// get the user with the selector
 		$this->trigger_events('extra_where');
-		$query = $this->db->select($this->identity_column . ', id, email, remember_code, last_login')
+		$query = $this->usersTableDB->select($this->identity_column . ', id, email, remember_code, last_login')
 						  ->where('remember_selector', $token->selector)
 						  ->where('active', 1)
 						  ->limit(1)
@@ -1891,7 +1890,7 @@ class Hr_auth_model extends CI_Model
 		}
 
 		// bail if the group name already exists
-		$existing_group = $this->db->get_where($this->tables['groups'], ['name' => $group_name])->num_rows();
+		$existing_group = $this->hrUsersProfileTableDB->get_where($this->tables['groups'], ['name' => $group_name])->num_rows();
 		if($existing_group !== 0)
 		{
 			$this->set_error('group_already_exists');
@@ -1907,8 +1906,8 @@ class Hr_auth_model extends CI_Model
 		$this->trigger_events('extra_group_set');
 
 		// insert the new group
-		$this->db->insert($this->tables['groups'], $data);
-		$group_id = $this->db->insert_id($this->tables['groups'] . '_id_seq');
+		$this->hrUsersProfileTableDB->insert($this->tables['groups'], $data);
+		$group_id = $this->hrUsersProfileTableDB->insert_id($this->tables['groups'] . '_id_seq');
 
 		// report success
 		$this->set_message('group_creation_successful');
@@ -1940,7 +1939,7 @@ class Hr_auth_model extends CI_Model
 			// we are changing the name, so do some checks
 
 			// bail if the group name already exists
-			$existing_group = $this->db->get_where($this->tables['groups'], ['name' => $group_name])->row();
+			$existing_group = $this->hrUsersProfileTableDB->get_where($this->tables['groups'], ['name' => $group_name])->row();
 			if (isset($existing_group->id) && $existing_group->id != $group_id)
 			{
 				$this->set_error('group_already_exists');
@@ -1951,7 +1950,7 @@ class Hr_auth_model extends CI_Model
 		}
 
 		// restrict change of name of the admin group
-		$group = $this->db->get_where($this->tables['groups'], ['id' => $group_id])->row();
+		$group = $this->hrUsersProfileTableDB->get_where($this->tables['groups'], ['id' => $group_id])->row();
 		if ($this->config->item('admin_group', 'hr_auth') === $group->name && $group_name !== $group->name)
 		{
 			$this->set_error('group_name_admin_not_alter');
@@ -1965,7 +1964,7 @@ class Hr_auth_model extends CI_Model
 			$data = array_merge($this->_filter_data($this->tables['groups'], $additional_data), $data);
 		}
 
-		$this->db->update($this->tables['groups'], $data, ['id' => $group_id]);
+		$this->hrUsersProfileTableDB->update($this->tables['groups'], $data, ['id' => $group_id]);
 
 		$this->set_message('group_update_successful');
 
@@ -1997,22 +1996,22 @@ class Hr_auth_model extends CI_Model
 
 		$this->trigger_events('pre_delete_group');
 
-		$this->db->trans_begin();
+		$this->hrUsersProfileTableDB->trans_begin();
 
 		// remove all users from this group
-		$this->db->delete($this->tables['users_groups'], [$this->join['groups'] => $group_id]);
+		$this->hrUsersProfileTableDB->delete($this->tables['users_groups'], [$this->join['groups'] => $group_id]);
 		// remove the group itself
-		$this->db->delete($this->tables['groups'], ['id' => $group_id]);
+		$this->hrUsersProfileTableDB->delete($this->tables['groups'], ['id' => $group_id]);
 
-		if ($this->db->trans_status() === FALSE)
+		if ($this->hrUsersProfileTableDB->trans_status() === FALSE)
 		{
-			$this->db->trans_rollback();
+			$this->hrUsersProfileTableDB->trans_rollback();
 			$this->trigger_events(['post_delete_group', 'post_delete_group_unsuccessful']);
 			$this->set_error('group_delete_unsuccessful');
 			return FALSE;
 		}
 
-		$this->db->trans_commit();
+		$this->hrUsersProfileTableDB->trans_commit();
 
 		$this->trigger_events(['post_delete_group', 'post_delete_group_successful']);
 		$this->set_message('group_delete_successful');
@@ -2324,9 +2323,9 @@ class Hr_auth_model extends CI_Model
 
 		$this->trigger_events('extra_where');
 
-		$this->db->update($this->tables['users'], $data, [$this->identity_column => $identity]);
+		$this->usersTableDB->update($this->tables['users'], $data, [$this->identity_column => $identity]);
 
-		return $this->db->affected_rows() == 1;
+		return $this->usersTableDB->affected_rows() == 1;
 	}
 
 	/**
@@ -2338,7 +2337,7 @@ class Hr_auth_model extends CI_Model
 	protected function _filter_data($table, $data)
 	{
 		$filtered_data = [];
-		$columns = $this->db->list_fields($table);
+		$columns = $this->usersTableDB->list_fields($table);
 
 		if (is_array($data))
 		{
@@ -2533,7 +2532,7 @@ class Hr_auth_model extends CI_Model
 		if ($this->config->item('store_salt', 'hr_auth'))
 		{
 			// Salt is store at the side, retrieve it
-			$query = $this->db->select('salt')
+			$query = $this->usersTableDB->select('salt')
 							  ->where($this->identity_column, $identity)
 							  ->limit(1)
 							  ->get($this->tables['users']);
