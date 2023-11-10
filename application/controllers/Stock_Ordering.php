@@ -358,6 +358,7 @@ class Stock_ordering extends CI_Controller
                 $_POST =  json_decode(file_get_contents("php://input"), true);
 
                 $productData = array();
+                $order_information_id = $_POST[0]['order_information_id'];
 
                 if (empty($_POST)) {
 
