@@ -21,7 +21,7 @@ class Sales_model extends CI_Model{
       return $query->result();
   }
 
-      public function getUserGroups($user_id){
+    public function getUserGroups($user_id){
 
         if($user_id == 1) {
             $this->db->select('*');
@@ -45,5 +45,74 @@ class Sales_model extends CI_Model{
         $query = $this->db->get();
         return $query->result();
     }
+
     
+    public function form_data(){
+
+        $this->db->select("
+            A.id,
+            A.field_name,
+            A.description,
+            A.section,
+            A.status,
+            A.is_dropdown,
+            A.payment_sub_section,
+
+            B.section_name,
+
+            C.sub_section_name,
+
+        ");
+        $this->db->from('field_availability A');        
+        $this->db->join('field_section B', 'B.id = A.section', 'left');
+        $this->db->join('payments_sub_section C', 'C.id = A.payment_sub_section', 'left');
+        $this->db->where('A.status', '1');
+        
+
+        $query = $this->db->get();
+        $fields = $query->result();
+
+        $this->db->select('section_name');
+        $this->db->from('field_section');
+        $section_query = $this->db->get();
+        $sections = $section_query->result();
+
+        $this->db->select('id, sub_section_name');
+        $this->db->from('payments_sub_section');
+        $sub_section_query = $this->db->get();
+        $sub_sections = $sub_section_query->result();
+
+        $index = 0;
+        foreach($sections as $section){
+                
+            $subIndex=0;
+
+                foreach ($sub_sections as $sub_section) {
+                    $matching_queries = array();
+
+                    foreach ($fields as $field) {
+                        if($section->section_name == $field->section_name){
+                            if ($sub_section->id == $field->payment_sub_section) {
+                                $matching_queries[] = $field;
+                            }
+                        
+                        }
+                    }
+                    $join_data[$index]['field'][$subIndex]['sub_section'] = $sub_section->sub_section_name;
+                    $join_data[$index]['field'][$subIndex]['field_data'] =  $matching_queries;
+                    $subIndex++;
+                }
+                
+            $join_data[$index]['section'] = $section->section_name;
+            $index++;
+
+
+        }
+
+       
+        
+        return $join_data;
+
+
+    }
 }

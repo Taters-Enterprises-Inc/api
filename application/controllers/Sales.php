@@ -11,9 +11,32 @@ class Sales extends CI_Controller {
 
 	public function __construct(){
 		parent::__construct();
-		$this->load->model('shop_model');
+		$this->load->model('sales_model');
 	
 	}
 	
-	
+	public function get_fields(){
+		switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+                $form_data = $this->sales_model->form_data();
+
+
+				
+                $response = array(
+                    "message" => 'Successfully fetch field data',
+                    "data" => array(
+                     'field_data' => $form_data,
+                    ),
+                    );
+            
+                    header('content-type: application/json');
+                    echo json_encode($response);
+                    return;
+            break;
+
+		}
+	}
+
+
 }
