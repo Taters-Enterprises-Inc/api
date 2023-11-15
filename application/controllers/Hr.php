@@ -222,6 +222,7 @@ class Hr extends CI_Controller
             $_POST = json_decode(file_get_contents("php://input"), true);
 
             $generated_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
+            $user_id = $this->session->hr['user_id'];
 
             $kra_kpi_grade = $this->input->post('kra_kpi_grade');
             $core_competency_grade = $this->input->post('core_competency_grade');
@@ -230,7 +231,7 @@ class Hr extends CI_Controller
             $comments = $this->input->post('comments');
 
             $appraisal_response = array(
-                "user_id " => $this->session->hr['user_id'],
+                "user_id " => $user_id,
                 'status' => 0,
                 'hash' => $generated_hash,
             );
@@ -251,7 +252,7 @@ class Hr extends CI_Controller
                     "appraisal_response_kra_or_kpi_grade_id" => $appraisal_response_kra_or_kpi_grade_id,
                     'kra_kpi_grade_id' => $val['id'],
                     'key_result_areas_or_key_performance_indicators' => $val['key_result_areas_or_key_performance_indiciators'],
-                    'result_achieved_or_not_achieved' => $val['result_achieved_or_not_achieved'],
+                    'result_achieved_or_not_achieved' => isset($val['result_achieved_or_not_achieved']) ? $val['result_achieved_or_not_achieved'] : "",
                     'rating' => $val['rating'],
                 );
 
@@ -270,7 +271,7 @@ class Hr extends CI_Controller
                     "appraisal_response_core_competency_grade_id" => $appraisal_response_core_competency_grade_id,
                     'core_competency_grade_id' => $val['id'],
                     'rating' => $val['rating'],
-                    'critical_incidents_or_comments' => $val['critical_incidents_or_comments'],
+                    'critical_incidents_or_comments' => isset($val['critical_incidents_or_comments']) ? $val['critical_incidents_or_comments'] : "",
                 );
 
                 $this->hr_model->insertAppraisalCoreCompetencyGradeAnswers($appraisal_response_core_competency_grade_answer);
@@ -291,7 +292,7 @@ class Hr extends CI_Controller
                     "appraisal_response_functional_competency_and_punctuality_grade_i" => $appraisal_response_functional_competency_and_punctuality_grade_id,
                     'functional_competency_and_punctuality_grade_id' => $val['id'],
                     'rating' => $val['rating'],
-                    'critical_incidents_or_comments' => $val['critical_incidents_or_comments'],
+                    'critical_incidents_or_comments' => isset($val['critical_incidents_or_comments']) ? $val['critical_incidents_or_comments'] : "",
                 );
 
                 $this->hr_model->insertAppraisalFunctionalGradeAnswers($appraisal_functional_competency_and_punctuality_grade_answer);
@@ -299,13 +300,20 @@ class Hr extends CI_Controller
 
             $appraisal_response_comments = array(
                 "appraisal_response_id" => $appraisal_response_id,
-                "key_strengths" =>$comments['key_strengths'],
-                "areas_for_development" =>$comments['areas_for_development'],
-                "major_development_plans_for_next_year" =>$comments['major_development_plans_for_next_year'],
-                "comments_on_your_overall_performance_and_development_plan" =>$comments['comments_on_your_overall_performance_and_development_plan'],
+                "key_strengths" =>isset($comments['key_strengths']) ? $comments['key_strengths'] : "",
+                "areas_for_development" =>isset($comments['areas_for_development']) ? $comments['areas_for_development'] : "",
+                "major_development_plans_for_next_year" =>isset($comments['major_development_plans_for_next_year']) ? $comments['major_development_plans_for_next_year'] : "",
+                "comments_on_your_overall_performance_and_development_plan" =>isset($comments['comments_on_your_overall_performance_and_development_plan']) ? $comments['comments_on_your_overall_performance_and_development_plan'] : "",
             );
 
             $this->hr_model->insertAppraisalComments($appraisal_response_comments);
+
+            
+            $action_item = $this->hr_model->getActionItemSubmitKra($user_id);
+
+            if(isset($action_item)){
+                $this->hr_model->updateActionItemStatus($action_item->id, 2);
+            }
 
 
             $response = array(
@@ -364,8 +372,36 @@ class Hr extends CI_Controller
     public function kra_kpi_grade(){
         switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
+            $user_id = $this->session->hr['user_id'];
 
             $kra_kpi_grade = $this->hr_model->getKraKpiGrade();
+
+            $kras = $this->hr_model->getKras($user_id);
+
+            $kras_with_answer = $this->hr_model->getterKraKpiGrade($user_id);
+
+            $index = 0;
+
+            foreach($kras as $val){
+                $kra_kpi_grade[$index]->key_result_areas_or_key_performance_indiciators = $val->details;
+
+                if($index == 2){
+                    break;
+                }
+                $index++;
+            }
+
+            $index = 0;
+            foreach($kras_with_answer as $val){
+                $kra_kpi_grade[$index]->key_result_areas_or_key_performance_indiciators = $val->key_result_areas_or_key_performance_indicators;
+                $kra_kpi_grade[$index]->result_achieved_or_not_achieved = $val->result_achieved_or_not_achieved;
+                $kra_kpi_grade[$index]->rating = $val->rating;
+                if($index == 2){
+                    break;
+                }
+                $index++;
+            }
+
 
             $data = array(
                 "kra_kpi_grade" => $kra_kpi_grade, 
@@ -386,7 +422,21 @@ class Hr extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
 
+            $user_id = $this->session->hr['user_id'];
             $core_competency_grade = $this->hr_model->getCoreCompetencyGrade();
+            $core_compe_with_answer = $this->hr_model->getterCoreCompetencyGrade($user_id);
+
+            $index = 0;
+
+            foreach($core_compe_with_answer as $val){
+                $core_competency_grade[$index]->critical_incidents_or_comments = $val->critical_incidents_or_comments;
+                $core_competency_grade[$index]->rating = $val->rating;
+                if($index == 6){
+                    break;
+                }
+                $index++;
+            }
+
 
             $data = array(
                 "core_competency_grade" => $core_competency_grade, 
@@ -407,10 +457,77 @@ class Hr extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
 
+
+            $user_id = $this->session->hr['user_id'];
             $functional_competency_and_punctuality_grade = $this->hr_model->getFunctionalCompetencyAndPunctualityGrade();
+            $func_compe_with_answer = $this->hr_model->getterFunctionalCompetencyAndPunctualityGrade($user_id);
+
+            $index = 0;
+
+            foreach($func_compe_with_answer as $val){
+                $functional_competency_and_punctuality_grade[$index]->critical_incidents_or_comments = $val->critical_incidents_or_comments;
+                $functional_competency_and_punctuality_grade[$index]->rating = $val->rating;
+                if($index == 7){
+                    break;
+                }
+                $index++;
+            }
+            
+            $attendance_and_punctuality_with_answer = $this->hr_model->getterAttendanceAndPunctualityGrade($user_id);
+
+
 
             $data = array(
                 "functional_competency_and_punctuality_grade" => $functional_competency_and_punctuality_grade, 
+                "attendance_and_punctuality_grade" => $attendance_and_punctuality_with_answer,
+            );
+
+            $response = array(
+                "message" => '',
+                "data"    => $data,
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
+    }
+
+    public function comments(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $user_id = $this->session->hr['user_id'];
+            
+            $comments = $this->hr_model->getterComments($user_id);
+
+
+            $data = array(
+                "comments" => $comments, 
+            );
+
+            $response = array(
+                "message" => '',
+                "data"    => $data,
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
+    }
+
+    public function appraisal_response(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+            $user_id = $this->session->hr['user_id'];
+            
+            $appraisal_response = $this->hr_model->getAppraisalResponse($user_id);
+
+
+            $data = array(
+                "appraisal_response" => $appraisal_response, 
             );
 
             $response = array(

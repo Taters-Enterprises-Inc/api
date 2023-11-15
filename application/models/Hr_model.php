@@ -106,6 +106,22 @@ class Hr_model extends CI_Model {
         $this->db->update('appraisal_kras_or_kpi', $data);
     }
 
+    public function getActionItemSubmitKra($user_id){
+        $this->db->select('A.id, C.name as module, B.name as item, D.name as status, A.status as status_id, A.item_id');
+
+        $this->db->from('action_items A');
+		$this->db->join('items B', 'B.id = A.item_id');
+		$this->db->join('modules C', 'C.id = A.module_id');
+		$this->db->join('action_item_status D', 'D.id = A.status');
+
+		$this->db->where('A.user_id', $user_id);
+		$this->db->where('A.item_id', 3);
+		$this->db->where('A.status', 1);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
     public function getActionItems($user_id){
         $this->db->select('A.id, C.name as module, B.name as item, D.name as status, A.status as status_id, A.item_id');
 
@@ -290,6 +306,8 @@ class Hr_model extends CI_Model {
         $this->db->join('kra_kpi_grade D', 'A.kra_kpi_grade_id = D.id', 'left');
         $this->db->where('C.user_id', $user_id);
 
+        $this->db->order_by('C.dateadded', 'DESC');
+
         $query = $this->db->get();
         return $query->result();
     }
@@ -318,14 +336,37 @@ class Hr_model extends CI_Model {
         return $query->result();
     }
 
+    public function getterAttendanceAndPunctualityGrade($user_id){
+        $this->db->select('B.absences, B.tardiness');
+        $this->db->from('appraisal_responses A');
+        $this->db->join('appraisal_response_functional_competency_grades B', 'B.appraisal_response_id = A.id', 'left');
+        $this->db->where('A.user_id', $user_id);
+
+        $this->db->order_by('A.dateadded', 'DESC');
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
     public function getterComments($user_id){
         $this->db->select('A.key_strengths, A.areas_for_development, A.major_development_plans_for_next_year, A.comments_on_your_overall_performance_and_development_plan');
         $this->db->from('appraisal_response_comments A');
         $this->db->join('appraisal_responses B', 'A.appraisal_response_id = B.id', 'left');
         $this->db->where('B.user_id', $user_id);
 
+        $this->db->order_by('B.dateadded', 'DESC');
+        
         $query = $this->db->get();
-        return $query->result();
+        return $query->row();
+    }
+
+    public function getAppraisalResponse($user_id){
+        $this->db->select('id');
+        $this->db->from('appraisal_responses');
+        $this->db->where('user_id', $user_id);
+        
+        $query = $this->db->get();
+        return $query->row();
     }
 
 

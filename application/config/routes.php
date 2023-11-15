@@ -168,6 +168,8 @@ $route['hr/appraisal/functional-competency-and-punctuality-grade'] = 'hr/functio
 $route['hr/appraisal/attendance-and-punctuality'] = 'hr/attendance_and_punctuality';
 $route['hr/appraisal/submit'] = 'hr/submit_hr_appraisal';
 $route['hr/appraisal/kra-or-kpi'] = 'hr/kra_or_kpi';
+$route['hr/appraisal/comments'] = 'hr/comments';
+$route['hr/appraisal/response'] = 'hr/appraisal_response';
 
 $route['hr/direct-report-staff/action-items'] = 'hr/direct_report_staff_action_items';
 $route['hr/direct-report-staff/kras/(:any)'] = 'hr/direct_report_staff_kras/$1';
