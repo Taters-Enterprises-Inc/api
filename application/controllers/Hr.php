@@ -315,15 +315,20 @@ class Hr extends CI_Controller
                 $this->hr_model->updateActionItemStatus($action_item->id, 2);
                 $user_details = $this->hr_model->getUser($user_id);
 
-                $new_action_item = array(
-                    'user_id' => $user_details->direct_user_id,
-                    'module_id' => 1,
-                    'item_id' => 4,
-                    'status' => 1,
-                    'dateupdated' => date('Y-m-d H:i:s',time() + 1)
-                );
+                $direct_user_latest_action_item_for_approve_assessment = $this->hr_model->getDirectUserLatestActionItem($user_details->direct_user_id, 4);
 
-                $this->hr_model->insertActionItem($new_action_item);
+                if(empty($direct_user_latest_action_item_for_approve_assessment)){
+
+                    $new_action_item = array(
+                        'user_id' => $user_details->direct_user_id,
+                        'module_id' => 1,
+                        'item_id' => 4,
+                        'status' => 1,
+                        'dateupdated' => date('Y-m-d H:i:s',time() + 1)
+                    );
+    
+                    $this->hr_model->insertActionItem($new_action_item);
+                }
             }
 
             
