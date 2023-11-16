@@ -12,21 +12,30 @@ class Sales extends CI_Controller {
 	public function __construct(){
 		parent::__construct();
 		$this->load->model('sales_model');
-	
+        $this->load->model('admin_model');
+
 	}
 	
 	public function get_fields(){
 		switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
+                $user_id = $this->session->admin['user_id'];
+                $isAdmin = $this->ion_auth->is_admin();
 
                 $form_data = $this->sales_model->form_data();
+                $discountType = $this->sales_model->discount_type();
+
+                $storesIdByUserId = $this->admin_model->stores_by_user_id($user_id, $isAdmin);
+
+                $stores = $this->admin_model->getStoreName($storesIdByUserId);
 
 
-				
                 $response = array(
                     "message" => 'Successfully fetch field data',
                     "data" => array(
                      'field_data' => $form_data,
+                     'discount_type' => $discountType,
+                     'list_of_stores' => $stores,
                     ),
                     );
             

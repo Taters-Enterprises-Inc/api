@@ -57,6 +57,9 @@ class Sales_model extends CI_Model{
             A.status,
             A.is_dropdown,
             A.payment_sub_section,
+            A.name,
+            A.is_required,
+            A.is_date_field,
 
             B.section_name,
 
@@ -115,4 +118,15 @@ class Sales_model extends CI_Model{
 
 
     }
+
+    public function discount_type(){
+        $this->db->select('name');
+        $this->db->from('discount_type');
+        $query = $this->db->get();
+        return $query->result();
+
+    }
+
+
+   
 }
