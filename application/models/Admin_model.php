@@ -3665,7 +3665,7 @@ class Admin_model extends CI_Model
         $this->db->join('users C', 'C.id = B.user_id', 'left');
         $this->db->where('C.id', $user_id);
 
-        $query = $this->newteishop->get();
+        $query = $this->db->get();
         $store = $query->result();
 
 

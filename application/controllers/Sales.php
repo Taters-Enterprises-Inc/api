@@ -16,7 +16,7 @@ class Sales extends CI_Controller {
 
 	}
 	
-	public function get_fields(){
+	public function field(){
 		switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
                 $user_id = $this->session->admin['user_id'];
@@ -43,6 +43,14 @@ class Sales extends CI_Controller {
                     echo json_encode($response);
                     return;
             break;
+
+            
+            case 'POST':
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+    
+                    var_dump($_POST);
+    
+                break;
 
 		}
 	}

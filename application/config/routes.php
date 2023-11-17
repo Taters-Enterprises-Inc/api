@@ -151,7 +151,7 @@ $route['stock/update/order-items'] = 'Stock_Ordering/update_order_items';
 
 
 //Sales
-$route['sales/fields'] = 'Sales/get_fields';
+$route['sales/fields'] = 'Sales/field';
 
 
 //HR
