@@ -19,7 +19,7 @@ class Sales_model extends CI_Model{
       
       $query = $this->db->get();
       return $query->result();
-  }
+    }
 
     public function getUserGroups($user_id){
 
