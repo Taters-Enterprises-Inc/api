@@ -127,6 +127,8 @@ class Stock_ordering extends CI_Controller
 
         case 'POST':
             $_POST =  json_decode(file_get_contents("php://input"), true);
+            var_dump("Hello world!");
+            var_dump($_POST);
 
             $store_id = $this->input->post('selectedStoreId');
             $delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('deliveryScheduleData')));;

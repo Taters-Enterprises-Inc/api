@@ -127,6 +127,19 @@ class Sales_model extends CI_Model{
 
     }
 
+    // Insert into the form_information table and returns id
+    public function insertSalesInformation($data) {
+        $this->db->trans_start();
+        $this->db->insert('form_information', $data);
+        $info_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return $info_id;
+    }
 
-   
+    // Insert into appropriate table
+    public function insertSalesData($table, $data) {
+        $this->db->trans_start();
+        $this->db->insert($table, $data);
+        $this->db->trans_complete();
+    }
 }
