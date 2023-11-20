@@ -152,6 +152,9 @@ $route['stock/update/order-items'] = 'Stock_Ordering/update_order_items';
 
 //Sales
 $route['sales/fields'] = 'Sales/field';
+$route['sales/save_form'] = 'Sales/save_form';
+$route['sales/tc_task'] = 'Sales/tc_task';
+$route['sales/manager_task'] = 'Sales/manager_task';
 
 
 //HR

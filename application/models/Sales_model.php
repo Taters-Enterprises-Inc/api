@@ -142,4 +142,60 @@ class Sales_model extends CI_Model{
         $this->db->insert($table, $data);
         $this->db->trans_complete();
     }
-}
+
+    public function updateForm($table, $id, $data){
+        $this->db->where('id', $id);
+        $this->db->update($table, $data);
+    }
+
+
+    public function tc_task(){
+        $this->db->select('
+            B.store,
+            B.entry_date,
+            B.shift,
+            B.cashier_name,
+
+            C.grade
+        ');
+        $this->db->from('form_information A');
+        $this->db->join('form_general_information B', 'B.form_information_id = A.id', 'left');
+        $this->db->join('form_tc_grade C', 'C.id = A.tc_grade', 'left');
+        $this->db->where('A.tc_grade', '3');
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function manager_task(){
+        $this->db->select('
+            B.store,
+            B.entry_date,
+            B.shift,
+            B.cashier_name,
+
+            C.grade
+        ');
+        $this->db->from('form_information A');
+        $this->db->join('form_general_information B', 'B.form_information_id = A.id', 'left');
+        $this->db->join('form_manager_grade C', 'C.id = A.manager_grade', 'left');
+        $this->db->where('A.manager_grade', '3');
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function get_saved_form($user_id){
+        $this->db->select('
+            A.id,
+            B.store,
+            B.entry_date,
+            B.shift
+        ');
+        $this->db->from('form_information A');
+        $this->db->join('form_general_information B', 'B.form_information_id = A.id', 'left');
+        $this->db->where('A.save_status', '1');
+        $this->db->where('A.user_id', $user_id);
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+}   
