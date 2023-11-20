@@ -151,6 +151,7 @@ class Sales_model extends CI_Model{
 
     public function tc_task(){
         $this->db->select('
+            A.id,
             B.store,
             B.entry_date,
             B.shift,
@@ -168,6 +169,7 @@ class Sales_model extends CI_Model{
 
     public function manager_task(){
         $this->db->select('
+            A.id,
             B.store,
             B.entry_date,
             B.shift,

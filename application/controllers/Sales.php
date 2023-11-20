@@ -60,12 +60,14 @@ class Sales extends CI_Controller {
             //THIS IS FOR SUBMITTING THE FORM WITHOUT BEING ON SAVED STATE
             case 'POST': 
                 $_POST =  json_decode(file_get_contents("php://input"), true);
+
+                $save_satatus = $this->input->post('saveStatus');
     
                 // Data to insert into form_information
                 $sales_information = array(
                     'user_id' => $this->session->admin['user_id'],
-                    'save_status' => 0,
-                    'tc_grade' => 3,
+                    'save_status' => $save_satatus,
+                    'tc_grade' => $save_satatus ? 0 : 3,
                     'manager_grade' => 0
                 );
                 
@@ -73,28 +75,40 @@ class Sales extends CI_Controller {
                 $sales_id = $this->sales_model->insertSalesInformation($sales_information);
                 
                 // Prepare and insert data for form_general_information
-                $general_information = $this->newInputData(array('entry_date', 'store', 'shift', 'cashier_name', 'email', 'declared_cash', 'calculated_cash', 'transaction_date', 'cash_deposit', 'other_deposit'), $this->input->post('General Information'), $sales_id);
-                $this->sales_model->insertSalesData('form_general_information', $general_information);
+                if(isset($this->input->post('formState')['General Information'])){
+                    $general_information = $this->newInputData(array('entry_date', 'store', 'shift', 'cashier_name', 'email', 'declared_cash', 'calculated_cash', 'transaction_date', 'cash_deposit', 'other_deposit'), $this->input->post('formState')['General Information'], $sales_id);
+                    $this->sales_model->insertSalesData('form_general_information', $general_information);
+                }
 
                 // Prepare and insert data for form_payment_method
-                $payment_method = $this->newInputData(array('id', 'form_information_id', 'credit_card_sales', 'credit_card_change', 'cr_memo', 'gcash', 'paymaya', 'shopeepay', 'gc', 'century_shopaholic_vouchers', 'metrodeal', 'grab', 'foodpandaAR', 'lazada', 'shopee', 'booky', 'foodtrip', 'parahero', 'eatigo', 'madison', 'zalora', 'metromart', 'rare_food_shop', 'pickaroo', 'honestbee', 'sharetreats', 'vip', 'vip_sold', 'marketingAR', 'sm_online', 'other_sm_events'), $this->input->post('Payment Method'), $sales_id);
-                $this->sales_model->insertSalesData('form_payment_method', $payment_method);
+                if(isset($this->input->post('formState')['Payment Method'])){
+                    $payment_method = $this->newInputData(array('id', 'form_information_id', 'credit_card_sales', 'credit_card_change', 'cr_memo', 'gcash', 'paymaya', 'shopeepay', 'gc', 'century_shopaholic_vouchers', 'metrodeal', 'grab', 'foodpandaAR', 'lazada', 'shopee', 'booky', 'foodtrip', 'parahero', 'eatigo', 'madison', 'zalora', 'metromart', 'rare_food_shop', 'pickaroo', 'honestbee', 'sharetreats', 'vip', 'vip_sold', 'marketingAR', 'sm_online', 'other_sm_events'), $this->input->post('formState')['Payment Method'], $sales_id);
+                    $this->sales_model->insertSalesData('form_payment_method', $payment_method);
+                }
 
                 // Prepare and insert data for form_special_sales
-                $special_sales = $this->newInputData(array('id', 'form_information_id', 'bulk_whole_sale', 'others', 'catering', 'offsite_selling', 'reseller', 'snackshop', 'cart_sales', 'delivery_fee', 'consignment'), $this->input->post('Special Sales'), $sales_id);
-                $this->sales_model->insertSalesData('form_special_sales', $special_sales);
+                if(isset($this->input->post('formState')['Special Sales'])){
+                    $special_sales = $this->newInputData(array('id', 'form_information_id', 'bulk_whole_sale', 'others', 'catering', 'offsite_selling', 'reseller', 'snackshop', 'cart_sales', 'delivery_fee', 'consignment'), $this->input->post('formState')['Special Sales'], $sales_id);
+                    $this->sales_model->insertSalesData('form_special_sales', $special_sales);
+                }
 
                 // Prepare and insert data for form_discount
-                $discount_type = $this->newInputData(array('id', 'form_information_id', 'discount_id'), $this->input->post('Discount Type'), $sales_id);
-                $this->sales_model->insertSalesData('form_discount', $discount_type);
+                if(isset($this->input->post('formState')['Discount'])){
+                    $discount_type = $this->newInputData(array('id', 'form_information_id', 'discount_id'), $this->input->post('formState')['Discount Type'], $sales_id);
+                    $this->sales_model->insertSalesData('form_discount', $discount_type);
+                }
 
                 // Prepare and insert data for form_transactions
-                $transactions = $this->newInputData(array('id', 'form_information_id', 'transaction_count', 'originating_store', 'terminal_id', 'voids', 'serial_number'), $this->input->post('Transactions'), $sales_id);
-                $this->sales_model->insertSalesData('form_transactions', $transactions);
+                if(isset($this->input->post('formState')['Transactions'])){
+                    $transactions = $this->newInputData(array('id', 'form_information_id', 'transaction_count', 'originating_store', 'terminal_id', 'voids', 'serial_number'), $this->input->post('formState')['Transactions'], $sales_id);
+                    $this->sales_model->insertSalesData('form_transactions', $transactions);
+                }
 
                 // Prepare and insert data for form_transactions
-                $itemized_sales = $this->newInputData(array('id', 'form_information_id', 'offsite_selling', 'catering', 'delivery'), $this->input->post('Itemized Sales'), $sales_id);
-                $this->sales_model->insertSalesData('form_itemized_sales', $itemized_sales);
+                if(isset($this->input->post('formState')['Itemized Sales'])){
+                    $itemized_sales = $this->newInputData(array('id', 'form_information_id', 'offsite_selling', 'catering', 'delivery'), $this->input->post('formState')['Itemized sales'], $sales_id);
+                    $this->sales_model->insertSalesData('form_itemized_sales', $itemized_sales);
+                }
 
 
                 $response = array(
@@ -133,56 +147,6 @@ class Sales extends CI_Controller {
                     return;
             break;
             
-            //SUBMITTING THE FORM ON SAVED STATE
-            case 'POST':
-                $_POST =  json_decode(file_get_contents("php://input"), true);
-    
-                // Data to insert into form_information
-                $sales_information = array(
-                    'user_id' => $this->session->admin['user_id'],
-                    'save_status' => 1, //saved state
-                    'tc_grade' => 0, //needs to be finished by cashier
-                    'manager_grade' => 0
-                );
-                
-                // Insert into form_information, save return id for later
-                $sales_id = $this->sales_model->insertSalesInformation($sales_information);
-                
-                // Prepare and insert data for form_general_information
-                $general_information = $this->newInputData(array('entry_date', 'store', 'shift', 'cashier_name', 'email', 'declared_cash', 'calculated_cash', 'transaction_date', 'cash_deposit', 'other_deposit'), $this->input->post('General Information'), $sales_id);
-                $this->sales_model->insertSalesData('form_general_information', $general_information);
-
-                // Prepare and insert data for form_payment_method
-                $payment_method = $this->newInputData(array('id', 'form_information_id', 'credit_card_sales', 'credit_card_change', 'cr_memo', 'gcash', 'paymaya', 'shopeepay', 'gc', 'century_shopaholic_vouchers', 'metrodeal', 'grab', 'foodpandaAR', 'lazada', 'shopee', 'booky', 'foodtrip', 'parahero', 'eatigo', 'madison', 'zalora', 'metromart', 'rare_food_shop', 'pickaroo', 'honestbee', 'sharetreats', 'vip', 'vip_sold', 'marketingAR', 'sm_online', 'other_sm_events'), $this->input->post('Payment Method'), $sales_id);
-                $this->sales_model->insertSalesData('form_payment_method', $payment_method);
-
-                // Prepare and insert data for form_special_sales
-                $special_sales = $this->newInputData(array('id', 'form_information_id', 'bulk_whole_sale', 'others', 'catering', 'offsite_selling', 'reseller', 'snackshop', 'cart_sales', 'delivery_fee', 'consignment'), $this->input->post('Special Sales'), $sales_id);
-                $this->sales_model->insertSalesData('form_special_sales', $special_sales);
-
-                // Prepare and insert data for form_discount
-                $discount_type = $this->newInputData(array('id', 'form_information_id', 'discount_id'), $this->input->post('Discount Type'), $sales_id);
-                $this->sales_model->insertSalesData('form_discount', $discount_type);
-
-                // Prepare and insert data for form_transactions
-                $transactions = $this->newInputData(array('id', 'form_information_id', 'transaction_count', 'originating_store', 'terminal_id', 'voids', 'serial_number'), $this->input->post('Transactions'), $sales_id);
-                $this->sales_model->insertSalesData('form_transactions', $transactions);
-
-                // Prepare and insert data for form_transactions
-                $itemized_sales = $this->newInputData(array('id', 'form_information_id', 'offsite_selling', 'catering', 'delivery'), $this->input->post('Itemized Sales'), $sales_id);
-                $this->sales_model->insertSalesData('form_itemized_sales', $itemized_sales);
-
-
-                $response = array(
-                    "message" => 'Successfully saved form!',
-                    );
-            
-                    header('content-type: application/json');
-                    echo json_encode($response);
-                    return;
-
-                break;
-            
             case 'PATCH': 
 
                 $data =  json_decode(file_get_contents("php://input"), true);
@@ -200,19 +164,19 @@ class Sales extends CI_Controller {
                 $this->sales_model->updateForm('form_general_information', $sales_id, $general_information);
 
                 $payment_method = $this->newInputData(array('id', 'form_information_id', 'credit_card_sales', 'credit_card_change', 'cr_memo', 'gcash', 'paymaya', 'shopeepay', 'gc', 'century_shopaholic_vouchers', 'metrodeal', 'grab', 'foodpandaAR', 'lazada', 'shopee', 'booky', 'foodtrip', 'parahero', 'eatigo', 'madison', 'zalora', 'metromart', 'rare_food_shop', 'pickaroo', 'honestbee', 'sharetreats', 'vip', 'vip_sold', 'marketingAR', 'sm_online', 'other_sm_events'), $this->input->post('Payment Method'), $sales_id);
-                $this->sales_model->insertSalesData('form_payment_method',$sales_id, $payment_method);
+                $this->sales_model->updateForm('form_payment_method',$sales_id, $payment_method);
 
                 $special_sales = $this->newInputData(array('id', 'form_information_id', 'bulk_whole_sale', 'others', 'catering', 'offsite_selling', 'reseller', 'snackshop', 'cart_sales', 'delivery_fee', 'consignment'), $this->input->post('Special Sales'), $sales_id);
-                $this->sales_model->insertSalesData('form_special_sales',$sales_id, $special_sales);
+                $this->sales_model->updateForm('form_special_sales',$sales_id, $special_sales);
 
                 $discount_type = $this->newInputData(array('id', 'form_information_id', 'discount_id'), $this->input->post('Discount Type'), $sales_id);
-                $this->sales_model->insertSalesData('form_discount',$sales_id, $discount_type);
+                $this->sales_model->updateForm('form_discount',$sales_id, $discount_type);
 
                 $transactions = $this->newInputData(array('id', 'form_information_id', 'transaction_count', 'originating_store', 'terminal_id', 'voids', 'serial_number'), $this->input->post('Transactions'), $sales_id);
-                $this->sales_model->insertSalesData('form_transactions', $sales_id,$transactions);
+                $this->sales_model->updateForm('form_transactions', $sales_id,$transactions);
 
                 $itemized_sales = $this->newInputData(array('id', 'form_information_id', 'offsite_selling', 'catering', 'delivery'), $this->input->post('Itemized Sales'), $sales_id);
-                $this->sales_model->insertSalesData('form_itemized_sales',$sales_id, $itemized_sales);
+                $this->sales_model->updateForm('form_itemized_sales',$sales_id, $itemized_sales);
 
 
                 $response = array(
@@ -272,6 +236,33 @@ class Sales extends CI_Controller {
             break;
         }
     }
+
+    public function cashier_saved_forms(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+                $user_id = $this->session->admin['user_id'];
+                $isAdmin = $this->ion_auth->is_admin();
+
+                $saved_forms =  $this->sales_model->get_saved_form($user_id);
+
+                $response = array(
+                    "message" => 'Successfully fetch all saved forms',
+                    "data" => array(
+                     'saved_forms' => $saved_forms,
+                    ),
+                    );
+            
+                    header('content-type: application/json');
+                    echo json_encode($response);
+                    return;
+            break;
+        }
+
+    }
+
+
+    
 
    
 
