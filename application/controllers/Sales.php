@@ -212,6 +212,21 @@ class Sales extends CI_Controller {
                     echo json_encode($response);
                     return;
             break;
+
+            case 'POST': 
+                $_POST =  json_decode(file_get_contents("php://input"), true); 
+
+                var_dump($_POST);
+
+                $response = array(
+                    "message" => 'Form successfully submitted!',
+                    );
+            
+                    header('content-type: application/json');
+                    echo json_encode($response);
+                    return;
+
+                break;
         }
     }
 
@@ -260,11 +275,5 @@ class Sales extends CI_Controller {
         }
 
     }
-
-
-    
-
-   
-
 
 }
