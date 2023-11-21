@@ -35,15 +35,21 @@ class Sales extends CI_Controller {
                 $_GET =  json_decode(file_get_contents("php://input"), true);
                 $form_id = $this->input->get('form_id')["value"];
 
-                // Fetch form data
-                $form_data = $this->sales_model->selectFormsData($form_id);
-                
-                $response = array(
-                    "message" => "Successfully fetched data!",
-                    "data" => array(
-                        "data" => $form_data,
-                    )
-                );
+                // Populates response array only if no form_id is provided
+                if (isset($form_id)) {
+                    // Fetch form data
+                    $form_data = $this->sales_model->selectFormsData($form_id);
+                    
+                    $response = array(
+                        "message" => "Successfully fetched data!",
+                        "data" => array(
+                            "data" => $form_data,
+                        )
+                    );
+                }
+                else {
+                    $response = array("message" => "Missing form_id.", "data" => array());
+                }
 
                 header('content-type: application/json');
                 echo json_encode($response);

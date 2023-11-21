@@ -147,11 +147,7 @@ class Sales_model extends CI_Model{
     public function selectFormsData($form_id) {
         $this->db->select('*');
         $this->db->from('form_general_information');
-
-        // If form ID is null or None the API will fetch all rows
-        if (isset($form_id)) {
-            $this->db->where('form_general_information.form_information_id', $form_id);
-        }
+        $this->db->where('form_general_information.form_information_id', $form_id);
 
         // Join to every other table by form_information_id
         $tables = array('form_payment_method', 'form_special_sales', 'form_discount', 'form_transactions', 'form_itemized_sales');
