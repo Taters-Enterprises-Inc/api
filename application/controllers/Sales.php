@@ -16,7 +16,7 @@ class Sales extends CI_Controller {
 
 	}
 
-    // Construct data array
+    // Construct data array (utility function for POST)
     function newInputData($keys, $data, $sales_id) {
         $result = array();
         $result['form_information_id'] = $sales_id;
@@ -27,7 +27,35 @@ class Sales extends CI_Controller {
         }
         return $result;
     }
-	
+
+    // Get form data from all tables
+    public function data() {
+		switch($this->input->server('REQUEST_METHOD')) {
+            case 'GET':
+                $_GET =  json_decode(file_get_contents("php://input"), true);
+                $form_id = $this->input->get('form_id')["value"];
+
+                // Populates response array only if no form_id is provided
+                if (isset($form_id)) {
+                    // Fetch form data
+                    $form_data = $this->sales_model->selectFormsData($form_id);
+                    
+                    $response = array(
+                        "message" => "Successfully fetched data!",
+                        "data" => array(
+                            "data" => $form_data,
+                        )
+                    );
+                }
+                else {
+                    $response = array("message" => "Missing form_id.", "data" => array());
+                }
+
+                header('content-type: application/json');
+                echo json_encode($response);
+        }
+    }
+
 	public function field(){
 		switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
@@ -61,13 +89,13 @@ class Sales extends CI_Controller {
             case 'POST': 
                 $_POST =  json_decode(file_get_contents("php://input"), true);
 
-                $save_satatus = $this->input->post('saveStatus');
+                $save_status = $this->input->post('saveStatus');
     
                 // Data to insert into form_information
                 $sales_information = array(
                     'user_id' => $this->session->admin['user_id'],
-                    'save_status' => $save_satatus,
-                    'tc_grade' => $save_satatus ? 0 : 3,
+                    'save_status' => $save_status,
+                    'tc_grade' => $save_status ? 0 : 3,
                     'manager_grade' => 0
                 );
                 
@@ -113,11 +141,11 @@ class Sales extends CI_Controller {
 
                 $response = array(
                     "message" => 'Form successfully submitted!',
-                    );
+                );
             
-                    header('content-type: application/json');
-                    echo json_encode($response);
-                    return;
+                header('content-type: application/json');
+                echo json_encode($response);
+                return;
 
                 break;
 

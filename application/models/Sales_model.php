@@ -143,11 +143,24 @@ class Sales_model extends CI_Model{
         $this->db->trans_complete();
     }
 
+    // Select all from all form tables given form id
+    public function selectFormsData($form_id) {
+        $this->db->select('*');
+        $this->db->from('form_general_information');
+        $this->db->where('form_general_information.form_information_id', $form_id);
+
+        // Join to every other table by form_information_id
+        $tables = array('form_payment_method', 'form_special_sales', 'form_discount', 'form_transactions', 'form_itemized_sales');
+        foreach ($tables as $table) {
+            $this->db->join($table, $table.'.form_information_id = form_general_information.form_information_id', 'left');
+        }
+        return $this->db->get()->result();
+    }
+
     public function updateForm($table, $id, $data){
         $this->db->where('id', $id);
         $this->db->update($table, $data);
     }
-
 
     public function tc_task(){
         $this->db->select('
