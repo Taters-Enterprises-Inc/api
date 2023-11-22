@@ -156,6 +156,7 @@ $route['sales/save-form'] = 'Sales/save_form';
 $route['sales/tc-task'] = 'Sales/tc_task';
 $route['sales/manager-task'] = 'Sales/manager_task';
 $route['sales/saved-forms'] = 'Sales/cashier_saved_forms';
+$route['sales/form-data'] = 'Sales/form_data';
 
 
 //HR

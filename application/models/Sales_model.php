@@ -145,16 +145,32 @@ class Sales_model extends CI_Model{
 
     // Select all from all form tables given form id
     public function selectFormsData($form_id) {
-        $this->db->select('*');
-        $this->db->from('form_general_information');
-        $this->db->where('form_general_information.form_information_id', $form_id);
 
-        // Join to every other table by form_information_id
-        $tables = array('form_payment_method', 'form_special_sales', 'form_discount', 'form_transactions', 'form_itemized_sales');
+
+    
+        $this->db->select('section_name');
+        $this->db->from('field_section');
+        $section_query = $this->db->get();
+        $sections = $section_query->result();
+
+
+        $tables = array('form_general_information', 'form_payment_method', 'form_special_sales', 'form_discount', 'form_transactions', 'form_itemized_sales');
+
+        $join_data = array();
+        $index = 0;
         foreach ($tables as $table) {
-            $this->db->join($table, $table.'.form_information_id = form_general_information.form_information_id', 'left');
+            $this->db->select('*');
+            $this->db->from($table);
+            $this->db->where('form_information_id', $form_id);
+
+            $join_data[$index]['fieldData'] = $this->db->get()->row();
+            $join_data[$index]['section'] = $sections[$index];
+            $index++;
         }
-        return $this->db->get()->result();
+
+
+        return $join_data;
+
     }
 
     public function updateForm($table, $id, $data){

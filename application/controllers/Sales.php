@@ -29,11 +29,11 @@ class Sales extends CI_Controller {
     }
 
     // Get form data from all tables
-    public function data() {
+    public function form_data() {
 		switch($this->input->server('REQUEST_METHOD')) {
             case 'GET':
-                $_GET =  json_decode(file_get_contents("php://input"), true);
-                $form_id = $this->input->get('form_id')["value"];
+
+                $form_id = $this->input->get('id');
 
                 // Populates response array only if no form_id is provided
                 if (isset($form_id)) {
@@ -42,9 +42,8 @@ class Sales extends CI_Controller {
                     
                     $response = array(
                         "message" => "Successfully fetched data!",
-                        "data" => array(
-                            "data" => $form_data,
-                        )
+                        "data" => $form_data,
+                        
                     );
                 }
                 else {
@@ -122,7 +121,7 @@ class Sales extends CI_Controller {
 
                 // Prepare and insert data for form_discount
                 if(isset($this->input->post('formState')['Discount'])){
-                    $discount_type = $this->newInputData(array('id', 'form_information_id', 'discount_id'), $this->input->post('formState')['Discount Type'], $sales_id);
+                    $discount_type = $this->newInputData(array('id', 'form_information_id', 'discount_id'), $this->input->post('formState')['Discount'], $sales_id);
                     $this->sales_model->insertSalesData('form_discount', $discount_type);
                 }
 
