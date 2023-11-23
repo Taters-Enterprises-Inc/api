@@ -120,7 +120,7 @@ class Sales_model extends CI_Model{
     }
 
     public function discount_type(){
-        $this->db->select('name');
+        $this->db->select('id, name');
         $this->db->from('discount_type');
         $query = $this->db->get();
         return $query->result();
