@@ -6,6 +6,39 @@ class Hr_model extends CI_Model {
         $this->db = $this->load->database('hr', TRUE, TRUE);
     }
 
+	public function insertAppraisalManagementResponses($data){
+        $this->db->trans_start();
+		$this->db->insert('appraisal_direct_report_responses', $data);
+        $this->db->trans_complete();
+	}
+
+
+    public function getDirectReportStaff($staff_id){
+        $this->db->select('
+            id,
+            first_name,
+            last_name,
+            position,
+            employee_number,
+            date_hired,
+            designation,
+        ');
+
+        $this->db->from('user_profile');
+
+		$this->db->where('user_id', $staff_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+	public function insertAppraisalSelfResponses($data){
+        $this->db->trans_start();
+		$this->db->insert('appraisal_self_responses', $data);
+        $this->db->trans_complete();
+	}
+
+
     public function getDirectUserLatestActionItem($direct_user_id, $item_id){
         $this->db->select('
             id,
@@ -36,7 +69,7 @@ class Hr_model extends CI_Model {
     }
 
 
-    public function getUserActionItemByItemIdAndByDate($user_id){
+    public function getUserActionItemByItemIdAndByDate($user_id, $item_id){
         $this->db->select('
             C.id,
             C.item_id,
@@ -44,6 +77,7 @@ class Hr_model extends CI_Model {
             C.status as status_id,
             D.name as status,
 
+            B.user_id as staff_id,
             CONCAT(B.first_name," ",B.last_name) as staff_name, 
             B.position as staff_position,
             B.employee_number as staff_employee_number,
@@ -58,7 +92,7 @@ class Hr_model extends CI_Model {
         $this->db->join('items E', 'E.id = C.item_id');
 
 		$this->db->where('A.direct_user_id', $user_id);
-        $this->db->where('C.item_id', 1);
+        $this->db->where('C.item_id', $item_id);
         $this->db->where('C.dateadded <=', date('Y-m-d H:i:s'));
 
         $this->db->order_by('C.dateupdated', 'DESC');
@@ -295,16 +329,25 @@ class Hr_model extends CI_Model {
         return $query->row();
     }
 
-    public function getterKraKpiGrade($user_id){
-        $this->db->select('A.id, D.weight,
+    public function getterKraKpiGrade($user_id, $staff_user_id){
+        $this->db->select('A.id, E.weight,
                            A.key_result_areas_or_key_performance_indicators,
                            A.result_achieved_or_not_achieved,
                            A.rating');
         $this->db->from('appraisal_response_kra_or_kpi_grade_answers A');
         $this->db->join('appraisal_response_kra_or_kpi_grades B', 'A.appraisal_response_kra_or_kpi_grade_id = B.id', 'left');
         $this->db->join('appraisal_responses C', 'B.appraisal_response_id = C.id', 'left');
-        $this->db->join('kra_kpi_grade D', 'A.kra_kpi_grade_id = D.id', 'left');
-        $this->db->where('C.user_id', $user_id);
+        $this->db->join('kra_kpi_grade E', 'A.kra_kpi_grade_id = E.id', 'left');
+
+        
+        if(!isset($staff_user_id)){
+            $this->db->join('appraisal_self_responses D', 'C.id = D.appraisal_response_id', 'left');
+            $this->db->where('D.user_id', $user_id);
+        }else{
+            $this->db->join('appraisal_direct_report_responses D', 'C.id = D.appraisal_response_id', 'left');
+            $this->db->where('D.direct_user_id', $user_id);
+            $this->db->where('D.staff_user_id', $staff_user_id);
+        }
 
         $this->db->order_by('C.dateadded', 'DESC');
 
@@ -312,35 +355,61 @@ class Hr_model extends CI_Model {
         return $query->result();
     }
 
-    public function getterCoreCompetencyGrade($user_id){
-        $this->db->select('A.id, D.title, D.description, A.critical_incidents_or_comments, A.rating');
+    public function getterCoreCompetencyGrade($user_id, $staff_user_id){
+        $this->db->select('A.id, E.title, E.description, A.critical_incidents_or_comments, A.rating');
         $this->db->from('appraisal_response_core_competency_grade_answers A');
         $this->db->join('appraisal_response_core_competency_grades B', 'A.appraisal_response_core_competency_grade_id = B.id', 'left');
         $this->db->join('appraisal_responses C', 'B.appraisal_response_id = C.id', 'left');
-        $this->db->join('core_competency_grade D', 'A.core_competency_grade_id = D.id', 'left');
-        $this->db->where('C.user_id', $user_id);
+        $this->db->join('core_competency_grade E', 'A.core_competency_grade_id = E.id', 'left');
+
+        if(!isset($staff_user_id)){
+            $this->db->join('appraisal_self_responses D', 'C.id = D.appraisal_response_id', 'left');
+            $this->db->where('D.user_id', $user_id);
+        }else{
+            $this->db->join('appraisal_direct_report_responses D', 'C.id = D.appraisal_response_id', 'left');
+            $this->db->where('D.direct_user_id', $user_id);
+            $this->db->where('D.staff_user_id', $staff_user_id);
+        }
+
 
         $query = $this->db->get();
         return $query->result();
     }
 
-    public function getterFunctionalCompetencyAndPunctualityGrade($user_id){
-        $this->db->select('A.id, D.title, D.description, A.rating, A.critical_incidents_or_comments');
+    public function getterFunctionalCompetencyAndPunctualityGrade($user_id, $staff_user_id){
+        $this->db->select('A.id, E.title, E.description, A.rating, A.critical_incidents_or_comments');
         $this->db->from('appraisal_response_functional_competency_grade_answers A');
         $this->db->join('appraisal_response_functional_competency_grades B', 'A.appraisal_response_functional_competency_and_punctuality_grade_i = B.id', 'left');
         $this->db->join('appraisal_responses C', 'B.appraisal_response_id = C.id', 'left');
-        $this->db->join('functional_competency_and_punctuality_grade D', 'A.functional_competency_and_punctuality_grade_id = D.id', 'left');
-        $this->db->where('C.user_id', $user_id);
+        $this->db->join('functional_competency_and_punctuality_grade E', 'A.functional_competency_and_punctuality_grade_id = E.id', 'left');
+        
+        if(!isset($staff_user_id)){
+            $this->db->join('appraisal_self_responses D', 'C.id = D.appraisal_response_id', 'left');
+            $this->db->where('D.user_id', $user_id);
+        }else{
+            $this->db->join('appraisal_direct_report_responses D', 'C.id = D.appraisal_response_id', 'left');
+            $this->db->where('D.direct_user_id', $user_id);
+            $this->db->where('D.staff_user_id', $staff_user_id);
+        }
+
 
         $query = $this->db->get();
         return $query->result();
     }
 
-    public function getterAttendanceAndPunctualityGrade($user_id){
-        $this->db->select('B.absences, B.tardiness');
+    public function getterAttendanceAndPunctualityGrade($user_id, $staff_user_id){
+        $this->db->select('C.absences, C.tardiness');
         $this->db->from('appraisal_responses A');
-        $this->db->join('appraisal_response_functional_competency_grades B', 'B.appraisal_response_id = A.id', 'left');
-        $this->db->where('A.user_id', $user_id);
+        $this->db->join('appraisal_response_functional_competency_grades C', 'C.appraisal_response_id = A.id', 'left');
+        
+        if(!isset($staff_user_id)){
+            $this->db->join('appraisal_self_responses B', 'A.id = B.appraisal_response_id', 'left');
+            $this->db->where('B.user_id', $user_id);
+        }else{
+            $this->db->join('appraisal_direct_report_responses B', 'A.id = B.appraisal_response_id', 'left');
+            $this->db->where('B.direct_user_id', $user_id);
+            $this->db->where('B.staff_user_id', $staff_user_id);
+        }
 
         $this->db->order_by('A.dateadded', 'DESC');
 
@@ -348,11 +417,20 @@ class Hr_model extends CI_Model {
         return $query->row();
     }
 
-    public function getterComments($user_id){
+    public function getterComments($user_id, $staff_user_id){
         $this->db->select('A.key_strengths, A.areas_for_development, A.major_development_plans_for_next_year, A.comments_on_your_overall_performance_and_development_plan');
         $this->db->from('appraisal_response_comments A');
         $this->db->join('appraisal_responses B', 'A.appraisal_response_id = B.id', 'left');
-        $this->db->where('B.user_id', $user_id);
+        
+        if(!isset($staff_user_id)){
+            $this->db->join('appraisal_self_responses C', 'B.id = C.appraisal_response_id', 'left');
+            $this->db->where('C.user_id', $user_id);
+        }else{
+            $this->db->join('appraisal_direct_report_responses C', 'B.id = C.appraisal_response_id', 'left');
+            $this->db->where('C.direct_user_id', $user_id);
+            $this->db->where('C.staff_user_id', $staff_user_id);
+        }
+
 
         $this->db->order_by('B.dateadded', 'DESC');
         
@@ -360,10 +438,19 @@ class Hr_model extends CI_Model {
         return $query->row();
     }
 
-    public function getAppraisalResponse($user_id){
-        $this->db->select('id');
-        $this->db->from('appraisal_responses');
-        $this->db->where('user_id', $user_id);
+    public function getAppraisalResponse($user_id, $staff_user_id){
+        $this->db->select('A.id');
+        $this->db->from('appraisal_responses A');
+
+        if(!isset($staff_user_id)){
+            $this->db->join('appraisal_self_responses B', 'A.id = B.appraisal_response_id', 'left');
+            $this->db->where('b.user_id', $user_id);
+        }else{
+            $this->db->join('appraisal_direct_report_responses B', 'A.id = B.appraisal_response_id', 'left');
+            $this->db->where('b.direct_user_id', $user_id);
+            $this->db->where('b.staff_user_id', $staff_user_id);
+        }
+
         
         $query = $this->db->get();
         return $query->row();
