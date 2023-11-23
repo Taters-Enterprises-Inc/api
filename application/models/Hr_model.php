@@ -444,11 +444,11 @@ class Hr_model extends CI_Model {
 
         if(!isset($staff_user_id)){
             $this->db->join('appraisal_self_responses B', 'A.id = B.appraisal_response_id', 'left');
-            $this->db->where('b.user_id', $user_id);
+            $this->db->where('B.user_id', $user_id);
         }else{
             $this->db->join('appraisal_direct_report_responses B', 'A.id = B.appraisal_response_id', 'left');
-            $this->db->where('b.direct_user_id', $user_id);
-            $this->db->where('b.staff_user_id', $staff_user_id);
+            $this->db->where('B.direct_user_id', $user_id);
+            $this->db->where('B.staff_user_id', $staff_user_id);
         }
 
         
