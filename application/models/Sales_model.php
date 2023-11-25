@@ -60,6 +60,7 @@ class Sales_model extends CI_Model{
             A.name,
             A.is_required,
             A.is_date_field,
+            A.datatype,
 
             B.section_name,
 

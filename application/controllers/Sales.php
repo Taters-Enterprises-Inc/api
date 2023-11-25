@@ -97,47 +97,26 @@ class Sales extends CI_Controller {
                     'tc_grade' => $save_status ? 0 : 3,
                     'manager_grade' => 0
                 );
-                
-                // Insert into form_information, save return id for later
+
+
                 $sales_id = $this->sales_model->insertSalesInformation($sales_information);
+                $table_names = array('form_general_information', 
+                                    'form_payment_method', 
+                                    'form_special_sales', 
+                                    'form_discount', 
+                                    'form_transactions', 
+                                    'form_itemized_sales'
+                                );
+                $index = 0;
+                foreach(array_keys($this->input->post('formState')) as $key){
+                    $column_names = array_keys($this->input->post('formState')[$key]);
+                    if(isset($key)){
+                        $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id);
+                        $this->sales_model->insertSalesData($table_names[$index], $data);
+                    }
+                    $index++;
+                }
                 
-                // Prepare and insert data for form_general_information
-                if(isset($this->input->post('formState')['General Information'])){
-                    $general_information = $this->newInputData(array('entry_date', 'store', 'shift', 'cashier_name', 'email', 'declared_cash', 'calculated_cash', 'transaction_date', 'cash_deposit', 'other_deposit'), $this->input->post('formState')['General Information'], $sales_id);
-                    $this->sales_model->insertSalesData('form_general_information', $general_information);
-                }
-
-                // Prepare and insert data for form_payment_method
-                if(isset($this->input->post('formState')['Payment Method'])){
-                    $payment_method = $this->newInputData(array('id', 'form_information_id', 'credit_card_sales', 'credit_card_change', 'cr_memo', 'gcash', 'paymaya', 'shopeepay', 'gc', 'century_shopaholic_vouchers', 'metrodeal', 'grab', 'foodpandaAR', 'lazada', 'shopee', 'booky', 'foodtrip', 'parahero', 'eatigo', 'madison', 'zalora', 'metromart', 'rare_food_shop', 'pickaroo', 'honestbee', 'sharetreats', 'vip', 'vip_sold', 'marketingAR', 'sm_online', 'other_sm_events'), $this->input->post('formState')['Payment Method'], $sales_id);
-                    $this->sales_model->insertSalesData('form_payment_method', $payment_method);
-                }
-
-                // Prepare and insert data for form_special_sales
-                if(isset($this->input->post('formState')['Special Sales'])){
-                    $special_sales = $this->newInputData(array('id', 'form_information_id', 'bulk_whole_sale', 'others', 'catering', 'offsite_selling', 'reseller', 'snackshop', 'cart_sales', 'delivery_fee', 'consignment'), $this->input->post('formState')['Special Sales'], $sales_id);
-                    $this->sales_model->insertSalesData('form_special_sales', $special_sales);
-                }
-
-                // Prepare and insert data for form_discount
-                if(isset($this->input->post('formState')['Discount'])){
-                    $discount_type = $this->newInputData(array('id', 'form_information_id', 'discount_id'), $this->input->post('formState')['Discount'], $sales_id);
-                    $this->sales_model->insertSalesData('form_discount', $discount_type);
-                }
-
-                // Prepare and insert data for form_transactions
-                if(isset($this->input->post('formState')['Transactions'])){
-                    $transactions = $this->newInputData(array('id', 'form_information_id', 'transaction_count', 'originating_store', 'terminal_id', 'voids', 'serial_number'), $this->input->post('formState')['Transactions'], $sales_id);
-                    $this->sales_model->insertSalesData('form_transactions', $transactions);
-                }
-
-                // Prepare and insert data for form_transactions
-                if(isset($this->input->post('formState')['Itemized Sales'])){
-                    $itemized_sales = $this->newInputData(array('id', 'form_information_id', 'offsite_selling', 'catering', 'delivery'), $this->input->post('formState')['Itemized sales'], $sales_id);
-                    $this->sales_model->insertSalesData('form_itemized_sales', $itemized_sales);
-                }
-
-
                 $response = array(
                     "message" => 'Form successfully submitted!',
                 );
@@ -243,7 +222,36 @@ class Sales extends CI_Controller {
             case 'POST': 
                 $_POST =  json_decode(file_get_contents("php://input"), true); 
 
-                var_dump($_POST);
+                $user_id = $this->session->admin['user_id'];
+                $isAdmin = $this->ion_auth->is_admin();
+                $grade = $this->input->post('grade');
+                $sales_id = $this->input->post('id');
+
+                $table_names = array('form_general_information', 
+                                    'form_payment_method', 
+                                    'form_special_sales', 
+                                    'form_discount', 
+                                    'form_transactions', 
+                                    'form_itemized_sales'
+                                );
+
+                $form_info_data = array(
+                    'tc_user_id' => $user_id,
+                    'tc_grade' => $grade,
+                    'manager_grade' => '3'
+                );
+
+                $this->sales_model->updateForm('form_information', $sales_id, $form_info_data);
+
+                $index = 0;
+                foreach(array_keys($this->input->post('formState')) as $key){
+                    $column_names = array_keys($this->input->post('formState')[$key]);
+                    if(isset($key)){
+                        $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id);
+                        $this->sales_model->updateForm($table_names[$index], $sales_id, $data);
+                    }
+                    $index++;
+                }
 
                 $response = array(
                     "message" => 'Form successfully submitted!',
@@ -276,6 +284,8 @@ class Sales extends CI_Controller {
                     echo json_encode($response);
                     return;
             break;
+
+            
         }
     }
 
@@ -301,6 +311,73 @@ class Sales extends CI_Controller {
             break;
         }
 
+    }
+
+
+    public function submit_verdict(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+
+                case 'POST': 
+                    $_POST =  json_decode(file_get_contents("php://input"), true); 
+    
+                    $user_id = $this->session->admin['user_id'];
+                    $isAdmin = $this->ion_auth->is_admin();
+                    $type = $this->input->post('type');
+                    $grade = $this->input->post('grade');
+                    $sales_id = $this->input->post('id');
+    
+                    $table_names = array('form_general_information', 
+                                        'form_payment_method', 
+                                        'form_special_sales', 
+                                        'form_discount', 
+                                        'form_transactions', 
+                                        'form_itemized_sales'
+                                    );
+
+                    $form_info_data = array();
+                    if($type === 'tc'){
+                        $form_info_data = array(
+                            'tc_user_id' => $user_id,
+                            'tc_grade' => $grade,
+                            'manager_grade' => '3'
+                        );
+                    }else if($type === 'manager'){
+                        $form_info_data = array(
+                            'manager_user_id' => $user_id,
+                            'manager_grade' => $grade,
+                        );
+                    }else if($type === 'cashier'){
+                        $form_info_data = array(
+                            'save_status' => '0',
+                            'tc_grade' => '3',
+                        );
+                    } 
+                    
+                    
+                    
+                    $this->sales_model->updateForm('form_information', $sales_id, $form_info_data);
+    
+                    $index = 0;
+                    foreach(array_keys($this->input->post('formState')) as $key){
+                        $column_names = array_keys($this->input->post('formState')[$key]);
+                        if(isset($key)){
+                            $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id);
+                            $this->sales_model->updateForm($table_names[$index], $sales_id, $data);
+                        }
+                        $index++;
+                    }
+    
+                    $response = array(
+                        "message" => 'Form successfully submitted!',
+                        );
+                
+                        header('content-type: application/json');
+                        echo json_encode($response);
+                        return;
+    
+                    break;
+        }
     }
 
 }
