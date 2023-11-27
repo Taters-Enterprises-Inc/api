@@ -153,47 +153,7 @@ class Sales extends CI_Controller {
                     return;
             break;
             
-            case 'PATCH': 
-
-                $data =  json_decode(file_get_contents("php://input"), true);
-
-                $sales_id = $data['id'];
-
-                $sales_information = array(
-                    'save_status' => 0, //update saved state
-                    'tc_grade' => 3, //updated
-                );
-
-                $this->sales_model->updateForm('form_information', $sales_id,$sales_information);
-
-                $general_information = $this->newInputData(array('entry_date', 'store', 'shift', 'cashier_name', 'email', 'declared_cash', 'calculated_cash', 'transaction_date', 'cash_deposit', 'other_deposit'), $data['General Information'], $sales_id);
-                $this->sales_model->updateForm('form_general_information', $sales_id, $general_information);
-
-                $payment_method = $this->newInputData(array('id', 'form_information_id', 'credit_card_sales', 'credit_card_change', 'cr_memo', 'gcash', 'paymaya', 'shopeepay', 'gc', 'century_shopaholic_vouchers', 'metrodeal', 'grab', 'foodpandaAR', 'lazada', 'shopee', 'booky', 'foodtrip', 'parahero', 'eatigo', 'madison', 'zalora', 'metromart', 'rare_food_shop', 'pickaroo', 'honestbee', 'sharetreats', 'vip', 'vip_sold', 'marketingAR', 'sm_online', 'other_sm_events'), $this->input->post('Payment Method'), $sales_id);
-                $this->sales_model->updateForm('form_payment_method',$sales_id, $payment_method);
-
-                $special_sales = $this->newInputData(array('id', 'form_information_id', 'bulk_whole_sale', 'others', 'catering', 'offsite_selling', 'reseller', 'snackshop', 'cart_sales', 'delivery_fee', 'consignment'), $this->input->post('Special Sales'), $sales_id);
-                $this->sales_model->updateForm('form_special_sales',$sales_id, $special_sales);
-
-                $discount_type = $this->newInputData(array('id', 'form_information_id', 'discount_id'), $this->input->post('Discount Type'), $sales_id);
-                $this->sales_model->updateForm('form_discount',$sales_id, $discount_type);
-
-                $transactions = $this->newInputData(array('id', 'form_information_id', 'transaction_count', 'originating_store', 'terminal_id', 'voids', 'serial_number'), $this->input->post('Transactions'), $sales_id);
-                $this->sales_model->updateForm('form_transactions', $sales_id,$transactions);
-
-                $itemized_sales = $this->newInputData(array('id', 'form_information_id', 'offsite_selling', 'catering', 'delivery'), $this->input->post('Itemized Sales'), $sales_id);
-                $this->sales_model->updateForm('form_itemized_sales',$sales_id, $itemized_sales);
-
-
-                $response = array(
-                    "message" => 'Successfully updated form!',
-                    );
             
-                    header('content-type: application/json');
-                    echo json_encode($response);
-                    return;
-
-                break;
 
 		}
     }

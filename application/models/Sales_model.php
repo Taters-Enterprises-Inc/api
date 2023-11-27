@@ -207,11 +207,17 @@ class Sales_model extends CI_Model{
             B.shift,
             B.cashier_name,
 
-            C.grade
+            B2.first_name as tc_first_name,
+            B2.last_name as tc_last_name,
+
+            C.grade,
+            D.grade as tc_grade,
         ');
         $this->db->from('form_information A');
         $this->db->join('form_general_information B', 'B.form_information_id = A.id', 'left');
+        $this->db->join($this->newteishop->database.'.users B2', 'B2.id = A.tc_user_id', 'left');
         $this->db->join('form_manager_grade C', 'C.id = A.manager_grade', 'left');
+        $this->db->join('form_tc_grade D', 'D.id = A.tc_grade', 'left');
         $this->db->where('A.manager_grade', '3');
         $query = $this->db->get();
         return $query->result();
