@@ -3642,4 +3642,52 @@ class Admin_model extends CI_Model
             return ""; 
         }
     }
+
+    public function stores_by_user_id($user_id, $isAdmin){
+
+        if($isAdmin){
+            $this->db->select('store_id');
+            $this->db->from('store_tb');
+            $query = $this->db->get();
+            $store = $query->result();
+
+            $store_id = [];
+            foreach ($store as $item) {
+                $store_id[] = $item->store_id;
+            }
+
+            return $store_id;
+        }
+
+        $this->db->select('A.store_id');
+        $this->db->from('store_tb A');
+        $this->db->join('users_store_groups B', 'B.store_id = A.store_id', 'left');
+        $this->db->join('users C', 'C.id = B.user_id', 'left');
+        $this->db->where('C.id', $user_id);
+
+        $query = $this->db->get();
+        $store = $query->result();
+
+
+        $store_id = [];
+        foreach ($store as $item) {
+            $store_id[] = $item->store_id;
+        }
+
+       return $store_id;
+
+    }
+
+    function getStoreName($store_id){
+        $this->db->select('
+            name
+        ');
+
+        $this->db->from('store_tb');
+        $this->db->where_in('store_id', $store_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
 }
