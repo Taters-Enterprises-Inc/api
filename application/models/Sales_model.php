@@ -5,6 +5,8 @@ class Sales_model extends CI_Model{
     public function __construct()
     {
 		$this->db =  $this->load->database('sales', TRUE, TRUE);
+        $this->newteishop = $this->load->database('default', TRUE, TRUE);
+
     }
     
 
@@ -229,5 +231,60 @@ class Sales_model extends CI_Model{
         $query = $this->db->get();
         return $query->result();
     }
+
+
+    public function completed(){
+        $this->db->select('
+            A.id,
+
+            B1.first_name as cashier_first_name,
+            B1.last_name as cashier_last_name,
+
+            B2.first_name as tc_first_name,
+            B2.last_name as tc_last_name,
+
+            B3.first_name as manager_first_name,
+            B3.last_name as manager_last_name,
+
+            C.entry_date,
+            C.store,
+            C.shift,
+
+            D.grade as tc_grade,
+
+            E.grade as manager_grade,
+        ');
+        $this->db->from('form_information A');
+        $this->db->join($this->newteishop->database.'.users B1', 'B1.id = A.user_id', 'left');
+        $this->db->join($this->newteishop->database.'.users B2', 'B2.id = A.tc_user_id', 'left');
+        $this->db->join($this->newteishop->database.'.users B3', 'B3.id = A.manager_user_id', 'left');
+        $this->db->join('form_general_information C', 'C.form_information_id = A.id', 'left');
+        $this->db->join('form_tc_grade D', 'D.id = A.tc_grade', 'left');
+        $this->db->join('form_manager_grade E', 'E.id = A.manager_grade', 'left');
+
+        $this->db->where('A.manager_grade', 1);
+        $this->db->or_where('A.manager_grade', 2);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+    public function count_completed_approved(){
+        $this->db->select('count(*) as all_count');
+        $this->db->from('form_information');
+        $this->db->where('manager_grade', 1);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;    
+    }
+      
+    public function count_completed_not_approved(){
+        $this->db->select('count(*) as all_count');
+        $this->db->from('form_information');
+        $this->db->where('manager_grade', 2);
+
+        $query = $this->db->get();
+        return $query->row()->all_count;    
+    }
+
 
 }   

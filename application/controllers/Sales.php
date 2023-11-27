@@ -380,4 +380,32 @@ class Sales extends CI_Controller {
         }
     }
 
+    public function dashboard(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+                $user_id = $this->session->admin['user_id'];
+                $isAdmin = $this->ion_auth->is_admin();
+
+                $completed = $this->sales_model->completed();
+                $completed_approved = $this->sales_model->count_completed_approved();
+                $completed_not_approved = $this->sales_model->count_completed_not_approved();
+
+                $response = array(
+                    "message" => 'Successfully fetch all saved forms',
+                    "data" => array(
+                     'approved_count' => $completed_approved,
+                     'not_approved_count' => $completed_not_approved,
+                     'total_count' => $completed_approved + $completed_not_approved,
+                     'completed' => $completed,
+                    ),
+                    );
+            
+                    header('content-type: application/json');
+                    echo json_encode($response);
+                    return;
+            break;
+        }
+    }
+
 }
