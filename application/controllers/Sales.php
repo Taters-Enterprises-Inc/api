@@ -112,7 +112,7 @@ class Sales extends CI_Controller {
                     $column_names = array_keys($this->input->post('formState')[$key]);
                     if(isset($key)){
                         $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id);
-                        // $this->sales_model->insertSalesData($table_names[$index], $data);
+                        $this->sales_model->insertSalesData($table_names[$index], $data);
                     }
                     $index++;
                 }
