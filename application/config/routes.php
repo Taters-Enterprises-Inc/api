@@ -180,6 +180,41 @@ $route['hr/direct-report-staff/kras/(:any)'] = 'hr/direct_report_staff_kras/$1';
 
 $route['hr/appraisal/getter/(:any)'] = 'hr/getter/$1';
 
+//Sales
+$route['sales/fields'] = 'Sales/field';
+$route['sales/save-form'] = 'Sales/save_form';
+$route['sales/tc-task'] = 'Sales/tc_task';
+$route['sales/manager-task'] = 'Sales/manager_task';
+$route['sales/saved-forms'] = 'Sales/cashier_saved_forms';
+$route['sales/form-data'] = 'Sales/form_data';
+$route['sales/submit-verdict'] = 'Sales/submit_verdict';
+$route['sales/complete'] = 'Sales/dashboard';
+
+
+//HR
+$route['auth-hr/login'] = 'auth_hr/login';
+$route['auth-hr/logout'] = 'auth_hr/logout';
+$route['auth-hr/create-user'] = 'auth_hr/create_user';
+$route['auth-hr/edit-user'] = 'auth_hr/edit_user';
+$route['auth-hr/create-group'] = 'auth_hr/create_group';
+$route['hr/session'] = 'hr/session';
+$route['hr/action-items'] = 'hr/action_items';
+
+//HR Appraisal
+$route['hr/appraisal/performance-criteria'] = 'hr/performance_criteria';
+$route['hr/appraisal/rating-scale'] = 'hr/rating_scale';
+$route['hr/appraisal/kra-kpi-grade'] = 'hr/kra_kpi_grade';
+$route['hr/appraisal/core-competency-grade'] = 'hr/core_competency_grade';
+$route['hr/appraisal/functional-competency-and-punctuality-grade'] = 'hr/functional_competency_and_punctuality_grade';
+$route['hr/appraisal/attendance-and-punctuality'] = 'hr/attendance_and_punctuality';
+$route['hr/appraisal/submit'] = 'hr/submit_hr_appraisal';
+$route['hr/appraisal/kra-or-kpi'] = 'hr/kra_or_kpi';
+
+$route['hr/direct-report-staff/action-items'] = 'hr/direct_report_staff_action_items';
+$route['hr/direct-report-staff/kras/(:any)'] = 'hr/direct_report_staff_kras/$1';
+
+$route['hr/appraisal/getter/(:any)'] = 'hr/getter/$1';
+
 //Admin
 $route['auth/login'] = 'auth/login';
 $route['auth/logout'] = 'auth/logout';
