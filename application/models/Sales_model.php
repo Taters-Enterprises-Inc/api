@@ -147,7 +147,7 @@ class Sales_model extends CI_Model{
     }
 
     // Select all from all form tables given form id
-    public function selectFormsData($form_id) {
+    public function selectFormsData($form_id, $type_id) {
 
 
     
@@ -165,6 +165,8 @@ class Sales_model extends CI_Model{
             $this->db->select('*');
             $this->db->from($table);
             $this->db->where('form_information_id', $form_id);
+            $this->db->where('user_type_id', $type_id);
+
 
             $join_data[$index]['fieldData'] = $this->db->get()->row();
             $join_data[$index]['section'] = $sections[$index];
@@ -219,6 +221,8 @@ class Sales_model extends CI_Model{
         $this->db->join('form_manager_grade C', 'C.id = A.manager_grade', 'left');
         $this->db->join('form_tc_grade D', 'D.id = A.tc_grade', 'left');
         $this->db->where('A.manager_grade', '3');
+        $this->db->where('B.user_type_id', '1');
+
         $query = $this->db->get();
         return $query->result();
     }
@@ -270,6 +274,9 @@ class Sales_model extends CI_Model{
 
         $this->db->where('A.manager_grade', 1);
         $this->db->or_where('A.manager_grade', 2);
+        $this->db->where('C.user_type_id', 1);
+
+
 
         $query = $this->db->get();
         return $query->result();

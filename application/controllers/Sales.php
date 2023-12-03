@@ -17,15 +17,31 @@ class Sales extends CI_Controller {
 	}
 
     // Construct data array (utility function for POST)
-    function newInputData($keys, $data, $sales_id) {
+    function newInputData($keys, $data, $sales_id, $type_id) {
         $result = array();
         $result['form_information_id'] = $sales_id;
+        $result['user_type_id'] = $type_id;
         foreach ($keys as $key) {
             if (isset($data[$key]['value'])) {
                 $result[$key] = $data[$key]['value'];
             }
         }
         return $result;
+    }
+
+    public function userTypeToId($type){
+        switch($type){
+            case 'cashier': 
+                return 1;
+            case 'tc':
+                return 2;
+            case 'manager':
+                return 3;
+
+            default: 
+                return 0;
+        }
+        
     }
 
     // Get form data from all tables
@@ -38,11 +54,17 @@ class Sales extends CI_Controller {
                 // Populates response array only if no form_id is provided
                 if (isset($form_id)) {
                     // Fetch form data
-                    $form_data = $this->sales_model->selectFormsData($form_id);
-                    
+                    $cahier_form_data = $this->sales_model->selectFormsData($form_id, 1);
+                    $tc_form_data = $this->sales_model->selectFormsData($form_id, 2);
+                    $manager_form_data = $this->sales_model->selectFormsData($form_id, 3);
+
                     $response = array(
                         "message" => "Successfully fetched data!",
-                        "data" => $form_data,
+                        "data" => array(
+                            "cashier_data" => $cahier_form_data,
+                            "tc_data" => $tc_form_data,
+                            "manager_data" => $manager_form_data
+                        ),
                         
                     );
                 }
@@ -111,7 +133,7 @@ class Sales extends CI_Controller {
                 foreach(array_keys($this->input->post('formState')) as $key){
                     $column_names = array_keys($this->input->post('formState')[$key]);
                     if(isset($key)){
-                        $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id);
+                        $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id, $this->userTypeToId('cashier'));
                         $this->sales_model->insertSalesData($table_names[$index], $data);
                     }
                     $index++;
@@ -322,8 +344,8 @@ class Sales extends CI_Controller {
                     foreach(array_keys($this->input->post('formState')) as $key){
                         $column_names = array_keys($this->input->post('formState')[$key]);
                         if(isset($key)){
-                            $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id);
-                            $this->sales_model->updateForm($table_names[$index], $sales_id, $data);
+                            $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id, $this->userTypeToId($type));
+                            $this->sales_model->insertSalesData($table_names[$index], $data);
                         }
                         $index++;
                     }
@@ -367,5 +389,7 @@ class Sales extends CI_Controller {
             break;
         }
     }
+
+
 
 }
