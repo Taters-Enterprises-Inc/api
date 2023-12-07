@@ -327,6 +327,133 @@ class Hr_model extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+    
+    public function getUserJobDetails($user_id){
+        $this->db->select('
+            A.id,
 
+            B.hiring_date,
+            B.tenure,
+            B.company,
+            B.department,
+            B.position,
+            B.employee_status,
+        ');
 
+        $this->db->from('users A');
+        $this->db->join('user_job_details B', 'B.user_id = A.id');
+        $this->db->where('A.id', $user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function getUserPersonalDetails($user_id){
+        $this->db->select('
+            A.id,
+
+            B.gender,
+            B.date_of_birth,
+            B.education,
+            B.marital_status,
+            B.sss_no,
+            B.tin_no,
+            B.philhealth_no,
+            B.pagibig_no,
+        ');
+
+        $this->db->from('users A');
+        $this->db->join('user_personal_details B', 'B.user_id = A.id');
+        $this->db->where('A.id', $user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function getUserContactDetails($user_id){
+        $this->db->select('
+            A.id,
+
+            B.contact_number,
+            B.email,
+            B.address,
+            B.city,
+        ');
+
+        $this->db->from('users A');
+        $this->db->join('user_contact_details B', 'B.user_id = A.id');
+        $this->db->where('A.id', $user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+    
+    public function getUserEmergencyDetails($user_id){
+        $this->db->select('
+            A.id,
+
+            B.emergency_contact_person,
+            B.contact_info,
+            B.emergency_contact_relationship,
+            B.any_health_problem,
+            B.blood_type,
+        ');
+
+        $this->db->from('users A');
+        $this->db->join('user_emergency_details B', 'B.user_id = A.id');
+        $this->db->where('A.id', $user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    
+    public function getUserSalaryDetails($user_id){
+        $this->db->select('
+            A.id,
+
+            B.initial_salary,
+            B.current_salary,
+            B.bank_account_no,
+        ');
+
+        $this->db->from('users A');
+        $this->db->join('user_salary_details B', 'B.user_id = A.id');
+        $this->db->where('A.id', $user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+    
+    public function getUserTerminationDetails($user_id){
+        $this->db->select('
+            A.id,
+
+            B.active,
+            B.termination_date,
+            B.termination_reason,
+        ');
+
+        $this->db->from('users A');
+        $this->db->join('user_termination_details B', 'B.user_id = A.id');
+        $this->db->where('A.id', $user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
+    
+    public function getUserOtherDetails($user_id){
+        $this->db->select('
+            A.id,
+
+            B.detail,
+        ');
+
+        $this->db->from('users A');
+        $this->db->join('user_other_details B', 'B.user_id = A.id');
+        $this->db->where('A.id', $user_id);
+
+        $query = $this->db->get();
+        return $query->row();
+    }
 }

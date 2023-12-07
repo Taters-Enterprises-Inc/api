@@ -466,6 +466,13 @@ class Hr extends CI_Controller
 			);
 			
 			$data["hr"]['user_details'] = $this->hr_model->getUser($this->session->hr['user_id']);
+			$data["hr"]['user_job_details'] = $this->hr_model->getUserJobDetails($this->session->hr['user_id']);
+			$data["hr"]['user_personal_details'] = $this->hr_model->getUserPersonalDetails($this->session->hr['user_id']);
+			$data["hr"]['user_contact_details'] = $this->hr_model->getUserContactDetails($this->session->hr['user_id']);
+			$data["hr"]['user_emergency_details'] = $this->hr_model->getUserEmergencyDetails($this->session->hr['user_id']);
+			$data["hr"]['user_salary_details'] = $this->hr_model->getUserSalaryDetails($this->session->hr['user_id']);
+			$data["hr"]['user_termination_details'] = $this->hr_model->getUserTerminationDetails($this->session->hr['user_id']);
+			$data["hr"]['user_other_details'] = $this->hr_model->getUserOtherDetails($this->session->hr['user_id']);
 
 			$response = array(
 			  "message" => 'Successfully fetch hr session',
