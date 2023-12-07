@@ -162,14 +162,20 @@ $route['hr/action-items'] = 'hr/action_items';
 //HR Appraisal
 $route['hr/appraisal/performance-criteria'] = 'hr/performance_criteria';
 $route['hr/appraisal/rating-scale'] = 'hr/rating_scale';
-$route['hr/appraisal/kra-kpi-grade'] = 'hr/kra_kpi_grade';
-$route['hr/appraisal/core-competency-grade'] = 'hr/core_competency_grade';
-$route['hr/appraisal/functional-competency-and-punctuality-grade'] = 'hr/functional_competency_and_punctuality_grade';
+
+$route['hr/appraisal/kra-kpi-grade/(:any)/(:any)'] = 'hr/kra_kpi_grade/$1/$2';
+
+$route['hr/appraisal/core-competency-grade/(:any)/(:any)'] = 'hr/core_competency_grade/$1/$2';
+
+$route['hr/appraisal/functional-competency-and-punctuality-grade/(:any)/(:any)'] = 'hr/functional_competency_and_punctuality_grade/$1/$2';
 $route['hr/appraisal/attendance-and-punctuality'] = 'hr/attendance_and_punctuality';
 $route['hr/appraisal/submit'] = 'hr/submit_hr_appraisal';
 $route['hr/appraisal/kra-or-kpi'] = 'hr/kra_or_kpi';
+$route['hr/appraisal/comments/(:any)/(:any)'] = 'hr/comments/$1/$2';
+$route['hr/appraisal/response/(:any)/(:any)'] = 'hr/appraisal_response/$1/$2';
 
-$route['hr/direct-report-staff/action-items'] = 'hr/direct_report_staff_action_items';
+$route['hr/direct-report-staff/staff/(:any)'] = 'hr/direct_report_staff/$1';
+$route['hr/direct-report-staff/action-items/(:any)'] = 'hr/direct_report_staff_action_items/$1';
 $route['hr/direct-report-staff/kras/(:any)'] = 'hr/direct_report_staff_kras/$1';
 
 $route['hr/appraisal/getter/(:any)'] = 'hr/getter/$1';
