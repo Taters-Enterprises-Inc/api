@@ -17,10 +17,10 @@ class Sales extends CI_Controller {
 	}
 
     // Construct data array (utility function for POST)
-    function newInputData($keys, $data, $sales_id, $type_id) {
+    function newInputData($keys, $data, $sales_id, $ref_id) {
         $result = array();
         $result['form_information_id'] = $sales_id;
-        $result['user_type_id'] = $type_id;
+        $result['user_ref_id'] = $ref_id;
         foreach ($keys as $key) {
             if (isset($data[$key]['value'])) {
                 $result[$key] = $data[$key]['value'];
@@ -120,8 +120,15 @@ class Sales extends CI_Controller {
                     'manager_grade' => 0
                 );
 
-
                 $sales_id = $this->sales_model->insertSalesInformation($sales_information);
+
+                $sales_ref_information = array(
+                    'user_id' => $this->userTypeToId('cashier'),
+                    'form_information_id' => $sales_id,
+                );
+
+                $user_ref_id = $this->sales_model->insertSalesUserFormIdCombination($sales_ref_information);
+
                 $table_names = array('form_general_information', 
                                     'form_payment_method', 
                                     'form_special_sales', 
@@ -129,16 +136,30 @@ class Sales extends CI_Controller {
                                     'form_transactions', 
                                     'form_itemized_sales'
                                 );
-                $index = 0;
+
+                $key_names = array('General Information', 'Payment Method', 'Special Sales', 'Discount', 'Transactions', 'Itemized Sales');
+                        
+             
                 foreach(array_keys($this->input->post('formState')) as $key){
                     $column_names = array_keys($this->input->post('formState')[$key]);
                     if(isset($key)){
-                        $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id, $this->userTypeToId('cashier'));
-                        $this->sales_model->insertSalesData($table_names[$index], $data);
+                        $index = 0;
+                        foreach($key_names as $name){
+                            if($name === $key){
+                                $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id, $user_ref_id);
+                                $this->sales_model->insertSalesData($table_names[$index], $data);
+                            }
+                            $index++;
+                        }
                     }
-                    $index++;
                 }
                 
+                if($save_status){
+                    $this->realtime_fetch('cashier');
+                }else{
+                    $this->realtime_fetch('tc');
+                }
+
                 $response = array(
                     "message" => 'Form successfully submitted!',
                 );
@@ -235,13 +256,14 @@ class Sales extends CI_Controller {
                     $index++;
                 }
 
+
                 $response = array(
-                    "message" => 'Form successfully submitted!',
-                    );
-            
-                    header('content-type: application/json');
-                    echo json_encode($response);
-                    return;
+                "message" => 'Form successfully submitted!',
+                );
+        
+                header('content-type: application/json');
+                echo json_encode($response);
+                return;
 
                 break;
         }
@@ -253,7 +275,7 @@ class Sales extends CI_Controller {
                 $user_id = $this->session->admin['user_id'];
                 $isAdmin = $this->ion_auth->is_admin();
 
-                $task =  $this->sales_model->manager_task();;
+                $task =  $this->sales_model->manager_task();
 
                 $response = array(
                     "message" => 'Successfully fetch Manager\'s Task data',
@@ -262,9 +284,9 @@ class Sales extends CI_Controller {
                     ),
                     );
             
-                    header('content-type: application/json');
-                    echo json_encode($response);
-                    return;
+                header('content-type: application/json');
+                echo json_encode($response);
+                return;
             break;
 
             
@@ -280,16 +302,18 @@ class Sales extends CI_Controller {
 
                 $saved_forms =  $this->sales_model->get_saved_form($user_id);
 
+
                 $response = array(
                     "message" => 'Successfully fetch all saved forms',
                     "data" => array(
                      'saved_forms' => $saved_forms,
                     ),
                     );
-            
-                    header('content-type: application/json');
-                    echo json_encode($response);
-                    return;
+
+
+                header('content-type: application/json');
+                echo json_encode($response);
+                return;
             break;
         }
 
@@ -317,6 +341,9 @@ class Sales extends CI_Controller {
                                         'form_itemized_sales'
                                     );
 
+                    $key_names = array('General Information', 'Payment Method', 'Special Sales', 'Discount', 'Transactions', 'Itemized Sales');
+
+
                     $form_info_data = array();
                     if($type === 'tc'){
                         $form_info_data = array(
@@ -336,19 +363,40 @@ class Sales extends CI_Controller {
                         );
                     } 
                     
-                    
-                    
                     $this->sales_model->updateForm('form_information', $sales_id, $form_info_data);
+
+
+                    $sales_ref_information = array(
+                        'user_id' => $this->userTypeToId($type),
+                        'form_information_id' => $sales_id,
+                    );
     
-                    $index = 0;
+                    $user_ref_id = $this->sales_model->insertSalesUserFormIdCombination($sales_ref_information);
+                    
+    
                     foreach(array_keys($this->input->post('formState')) as $key){
                         $column_names = array_keys($this->input->post('formState')[$key]);
                         if(isset($key)){
-                            $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id, $this->userTypeToId($type));
-                            $this->sales_model->insertSalesData($table_names[$index], $data);
+                            $index = 0;
+                            foreach($key_names as $name){
+                                if($name === $key){
+                                    $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id, $user_ref_id);
+                                    $this->sales_model->insertSalesData($table_names[$index], $data);
+                                }
+                                $index++;
+                            }
                         }
-                        $index++;
                     }
+                    if($type === 'tc'){
+                        $this->realtime_fetch('tc');
+                        $this->realtime_fetch('manager');
+                    }else if($type === 'manager'){
+                        $this->realtime_fetch('manager');
+                        $this->realtime_fetch('dashboard');
+                    }else if($type === 'cashier'){
+                        $this->realtime_fetch('cashier');
+                        $this->realtime_fetch('tc');
+                    } 
     
                     $response = array(
                         "message" => 'Form successfully submitted!',
@@ -383,11 +431,47 @@ class Sales extends CI_Controller {
                     ),
                     );
             
-                    header('content-type: application/json');
-                    echo json_encode($response);
-                    return;
+                header('content-type: application/json');
+                echo json_encode($response);
+                return;
             break;
         }
+    }
+
+
+    public function realtime_fetch($type){
+        $user_id = $this->session->admin['user_id'];
+        $isAdmin = $this->ion_auth->is_admin();
+
+        $store = $this->admin_model->stores_by_user_id($user_id, $isAdmin);
+
+        $real_time_notification = array(
+            "store_id" => $store,
+            "message" => ""
+        );
+        
+        switch($type){
+            case 'cashier':  
+                notify('admin-sales','sales-fetch-cashier', $real_time_notification);
+            break;
+
+            case 'tc': 
+                notify('admin-sales','sales-fetch-tc', $real_time_notification);
+            break;
+
+            case 'manager': 
+                notify('admin-sales','sales-fetch-manager', $real_time_notification);
+            break;
+
+            case 'dashboard': 
+                notify('admin-sales','sales-fetch-dashboard', $real_time_notification);
+            break;
+
+            default:
+            break;
+        }
+
+
     }
 
 
