@@ -201,11 +201,16 @@ class Sales_model extends CI_Model{
             B.cashier_name,
 
             C.grade
+
+            
         ');
         $this->db->from('form_information A');
         $this->db->join('form_general_information B', 'B.form_information_id = A.id', 'left');
         $this->db->join('form_tc_grade C', 'C.id = A.tc_grade', 'left');
+        $this->db->join('user_form_id_combination D', 'D.id = B.user_ref_id', 'left');
         $this->db->where('A.tc_grade', '3');
+        $this->db->where('D.process_id', '2');
+
         $query = $this->db->get();
         return $query->result();
     }
@@ -231,7 +236,7 @@ class Sales_model extends CI_Model{
         $this->db->join('form_tc_grade D', 'D.id = A.tc_grade', 'left');
         $this->db->join('user_form_id_combination E', 'E.id = B.user_ref_id', 'left');
         $this->db->where('A.manager_grade', '3');
-        $this->db->where('E.user_id', '2');
+        $this->db->where('E.process_id', '3');
 
 
         $query = $this->db->get();
@@ -247,8 +252,11 @@ class Sales_model extends CI_Model{
         ');
         $this->db->from('form_information A');
         $this->db->join('form_general_information B', 'B.form_information_id = A.id', 'left');
+        $this->db->join('user_form_id_combination C', 'C.id = B.user_ref_id', 'left');
         $this->db->where('A.save_status', '1');
         $this->db->where('A.user_id', $user_id);
+        $this->db->where('C.process_id', '1');
+
         $query = $this->db->get();
         return $query->result();
     }
@@ -283,7 +291,7 @@ class Sales_model extends CI_Model{
         $this->db->join('form_tc_grade D', 'D.id = A.tc_grade', 'left');
         $this->db->join('form_manager_grade E', 'E.id = A.manager_grade', 'left');
         $this->db->join('user_form_id_combination F', 'F.id = C.user_ref_id', 'left');
-        $this->db->where('F.user_id', 3);
+        $this->db->where('F.process_id', 4);
 
 
 

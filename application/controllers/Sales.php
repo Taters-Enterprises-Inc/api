@@ -125,6 +125,7 @@ class Sales extends CI_Controller {
                 $sales_ref_information = array(
                     'user_id' => $this->userTypeToId('cashier'),
                     'form_information_id' => $sales_id,
+                    'process_id' => $save_status ? '1' : $this->userTypeToId('cashier') + 1,
                 );
 
                 $user_ref_id = $this->sales_model->insertSalesUserFormIdCombination($sales_ref_information);
@@ -369,6 +370,7 @@ class Sales extends CI_Controller {
                     $sales_ref_information = array(
                         'user_id' => $this->userTypeToId($type),
                         'form_information_id' => $sales_id,
+                        'process_id' => $this->userTypeToId($type) + 1,
                     );
     
                     $user_ref_id = $this->sales_model->insertSalesUserFormIdCombination($sales_ref_information);
