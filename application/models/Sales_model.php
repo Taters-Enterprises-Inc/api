@@ -139,6 +139,14 @@ class Sales_model extends CI_Model{
         return $info_id;
     }
 
+    public function insertSalesUserFormIdCombination($data) {
+        $this->db->trans_start();
+        $this->db->insert('user_form_id_combination', $data);
+        $info_id = $this->db->insert_id();
+        $this->db->trans_complete();
+        return $info_id;
+    }
+
     // Insert into appropriate table
     public function insertSalesData($table, $data) {
         $this->db->trans_start();
@@ -147,7 +155,7 @@ class Sales_model extends CI_Model{
     }
 
     // Select all from all form tables given form id
-    public function selectFormsData($form_id) {
+    public function selectFormsData($form_id, $type_id) {
 
 
     
@@ -163,8 +171,11 @@ class Sales_model extends CI_Model{
         $index = 0;
         foreach ($tables as $table) {
             $this->db->select('*');
-            $this->db->from($table);
-            $this->db->where('form_information_id', $form_id);
+            $this->db->from($table.' A');
+            $this->db->join('user_form_id_combination B', 'B.id = user_ref_id', 'left');
+            $this->db->where('B.form_information_id', $form_id);
+            $this->db->where('B.user_id', $type_id);
+
 
             $join_data[$index]['fieldData'] = $this->db->get()->row();
             $join_data[$index]['section'] = $sections[$index];
@@ -190,11 +201,16 @@ class Sales_model extends CI_Model{
             B.cashier_name,
 
             C.grade
+
+            
         ');
         $this->db->from('form_information A');
         $this->db->join('form_general_information B', 'B.form_information_id = A.id', 'left');
         $this->db->join('form_tc_grade C', 'C.id = A.tc_grade', 'left');
+        $this->db->join('user_form_id_combination D', 'D.id = B.user_ref_id', 'left');
         $this->db->where('A.tc_grade', '3');
+        $this->db->where('D.process_id', '2');
+
         $query = $this->db->get();
         return $query->result();
     }
@@ -218,7 +234,11 @@ class Sales_model extends CI_Model{
         $this->db->join($this->newteishop->database.'.users B2', 'B2.id = A.tc_user_id', 'left');
         $this->db->join('form_manager_grade C', 'C.id = A.manager_grade', 'left');
         $this->db->join('form_tc_grade D', 'D.id = A.tc_grade', 'left');
+        $this->db->join('user_form_id_combination E', 'E.id = B.user_ref_id', 'left');
         $this->db->where('A.manager_grade', '3');
+        $this->db->where('E.process_id', '3');
+
+
         $query = $this->db->get();
         return $query->result();
     }
@@ -232,8 +252,11 @@ class Sales_model extends CI_Model{
         ');
         $this->db->from('form_information A');
         $this->db->join('form_general_information B', 'B.form_information_id = A.id', 'left');
+        $this->db->join('user_form_id_combination C', 'C.id = B.user_ref_id', 'left');
         $this->db->where('A.save_status', '1');
         $this->db->where('A.user_id', $user_id);
+        $this->db->where('C.process_id', '1');
+
         $query = $this->db->get();
         return $query->result();
     }
@@ -267,9 +290,10 @@ class Sales_model extends CI_Model{
         $this->db->join('form_general_information C', 'C.form_information_id = A.id', 'left');
         $this->db->join('form_tc_grade D', 'D.id = A.tc_grade', 'left');
         $this->db->join('form_manager_grade E', 'E.id = A.manager_grade', 'left');
+        $this->db->join('user_form_id_combination F', 'F.id = C.user_ref_id', 'left');
+        $this->db->where('F.process_id', 4);
 
-        $this->db->where('A.manager_grade', 1);
-        $this->db->or_where('A.manager_grade', 2);
+
 
         $query = $this->db->get();
         return $query->result();
