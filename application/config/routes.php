@@ -158,6 +158,12 @@ $route['auth-hr/create-group'] = 'auth_hr/create_group';
 
 $route['hr/session'] = 'hr/session';
 $route['hr/action-items'] = 'hr/action_items';
+$route['hr/employees'] = 'hr/employees';
+$route['hr/departments'] = 'hr/departments';
+$route['hr/employee/info/(:any)'] = 'hr/employee_info/$1';
+
+
+$route['hr/user/employees'] = 'hr/user_employees';
 
 //HR Appraisal
 $route['hr/appraisal/performance-criteria'] = 'hr/performance_criteria';

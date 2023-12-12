@@ -22,6 +22,155 @@ class Hr extends CI_Controller
 		$this->load->model('hr_model');
 	}
 
+  
+
+  public function employee_info($user_id){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+
+        $data = array();
+
+        $user_job_details = $this->hr_model->getUserJobDetails($this->session->hr['user_id']);
+
+        $data['user_job_details'] = $this->hr_model->getUserJobDetails($user_id);
+        $data['user_personal_details'] = $this->hr_model->getUserPersonalDetails($user_id);
+        $data['user_contact_details'] = $this->hr_model->getUserContactDetails($user_id);
+        $data['user_emergency_details'] = $this->hr_model->getUserEmergencyDetails($user_id);
+
+        if($this->ion_auth->in_group(1) || $this->hr_auth->in_group(4) || ($this->hr_auth->in_group(2) 
+         && isset($data['user_job_details']->department_id) && isset($user_job_details->department_id) && $data['user_job_details']->department_id == $user_job_details->department_id)){
+            $data['user_salary_details'] = $this->hr_model->getUserSalaryDetails($user_id);
+            $data['user_termination_details'] = $this->hr_model->getUserTerminationDetails($user_id);
+            $data['user_other_details'] = $this->hr_model->getUserOtherDetails($user_id); 
+        }
+
+        $response = array(
+          "message" => 'Successfully fetch employee info',
+          "data" => $data,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+    
+  public function departments(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+
+        $departments = $this->hr_model->getDepartments();
+
+        $response = array(
+          "message" => 'Successfully fetch departments',
+          "data" => $departments,
+        );
+
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+  }
+    
+  public function user_employees(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'id';
+        $search = $this->input->get('search');
+        $department_id = $this->input->get('department_id');
+
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+
+        $employees_count = $this->hr_model->getEmployeesCount($search, $department_id);
+        $employees = $this->hr_model->getEmployees($page_no, $per_page, $order_by, $order, $search, $department_id);
+
+        $pagination = array(
+          "total_rows" => $employees_count,
+          "per_page" => $per_page,
+        );
+
+        $response = array(
+          "message" => 'Successfully fetch employees',
+          "data" => array(
+            "pagination" => $pagination,
+            "employees" => $employees
+          ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+
+  }
+
+  public function employees(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET': 
+        $per_page = $this->input->get('per_page') ?? 25;
+        $page_no = $this->input->get('page_no') ?? 0;
+        $order = $this->input->get('order') ?? 'desc';
+        $order_by = $this->input->get('order_by') ?? 'id';
+        $search = $this->input->get('search');
+        $department_id = $this->input->get('department_id');
+
+        if($page_no != 0){
+          $page_no = ($page_no - 1) * $per_page;
+        }
+
+        $employees_count = $this->hr_model->getEmployeesCount($search, $department_id);
+        $employees = $this->hr_model->getEmployees($page_no, $per_page, $order_by, $order, $search, $department_id);
+
+        
+        $index = 0;
+
+        foreach($employees as $val){
+            $kra = $this->hr_model->getActionItemStatus(1 ,$val->id);
+            $self_assessment = $this->hr_model->getActionItemStatus(3,$val->id);
+            $management_assessment = $this->hr_model->getActionItemStatus(4,$val->id);
+            $hr_180_degree_assessment = $this->hr_model->getActionItemStatus(5,$val->id);
+
+            $employees[$index]->kra_completed = isset($kra) && $kra->status == 3 ? 'Yes' : 'No';
+            $employees[$index]->self_assessment_completed = isset($self_assessment) && $self_assessment->status == 4 ? 'Yes' : 'No';
+
+            $group = $this->hr_model->getGroupId($employees[$index]->id);
+
+
+            $employees[$index]->management_assessment_completed = isset($management_assessment) && $management_assessment->status == 2 ? 
+            'Yes' 
+            : 
+            isset($group) && $group->id != 2 ? "---":
+            'No';
+            $employees[$index]->hr_180_degree_assessment_completed = isset($hr_180_degree_assessment) && $hr_180_degree_assessment->status == 2 ? 'Yes' : 'No';
+
+            $index++;
+        }
+
+        $pagination = array(
+          "total_rows" => $employees_count,
+          "per_page" => $per_page,
+        );
+
+        $response = array(
+          "message" => 'Successfully fetch employees',
+          "data" => array(
+            "pagination" => $pagination,
+            "employees" => $employees
+          ),
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        return;
+    }
+
+  }
+
     public function direct_report_staff($staff_id){
         
         switch($this->input->server('REQUEST_METHOD')){
@@ -110,11 +259,10 @@ class Hr extends CI_Controller
                 $status = $put['status'];
 
                 $action_item = $this->hr_model->getActionItemById($action_item_id);
-                $user_details = $this->hr_model->getUser($this->session->hr['user_id']);
+                $direct_user = $this->hr_model->getDirectReport($this->session->hr['user_id']);
 
                 if($status == 2 && $item_id == 1){ // Submit KRA - Status To Complete
-                    if($user_details->direct_user_id != null){
-                        $direct_user = $this->hr_model->getUser($user_details->direct_user_id);
+                    if(isset($direct_user)){
                         
                         $direct_user_latest_action_item_for_review_and_approve_kra = $this->hr_model->getDirectUserLatestActionItem($direct_user->id, 2);
 
@@ -141,6 +289,27 @@ class Hr extends CI_Controller
                     );
 
                     $this->hr_model->insertActionItem($new_action_item);
+
+                    $staff_id = $action_item->user_id;
+
+                    $staff_group_id =  $this->hr_model->getGroupId($staff_id);
+
+                    if(isset($staff_group_id) && $staff_group_id->id == 2){
+
+                        $staff_unders = $this->hr_model->getStaffs($staff_id);
+                        
+                        foreach($staff_unders as $val){
+                            $new_action_item = array(
+                                'user_id' => $val->user_id,
+                                'module_id' => 1,
+                                'item_id' => 5,
+                                'status' => 1,
+                                'dateupdated' => date('Y-m-d H:i:s',time() + 1)
+                            );
+            
+                            $this->hr_model->insertActionItem($new_action_item);
+                        }
+                    }
                 }
                 
 
@@ -148,7 +317,6 @@ class Hr extends CI_Controller
 
                 $response = array(
                     "message" => 'Successfully update action item',
-                    "data" =>  $user_details->direct_user_id,
                 );
             
                 header('content-type: application/json');
@@ -242,8 +410,9 @@ class Hr extends CI_Controller
             $generated_hash = substr(md5(uniqid(mt_rand(), true)), 0, 20);
             $user_id = $this->session->hr['user_id'];
 
-            $staff_id = $this->input->post('staff_id');
-            $staff_action_item_id = $this->input->post('staff_action_item_id');
+            $evaluatee_id = $this->input->post('evaluatee_id');
+            $evaluatee_action_item_id = $this->input->post('evaluatee_action_item_id');
+            $is_180_degree_assessment = $this->input->post('is_180_degree_assessment');
             $kra_kpi_grade = $this->input->post('kra_kpi_grade');
             $core_competency_grade = $this->input->post('core_competency_grade');
             $functional_competency_and_punctuality_grade = $this->input->post('functional_competency_and_punctuality_grade');
@@ -258,7 +427,7 @@ class Hr extends CI_Controller
 
             $appraisal_response_id = $this->hr_model->insertAppraisalResponses($appraisal_response);
 
-            if(!isset($staff_id)){
+            if(!isset($evaluatee_id)){
                 $appraisal_self_response = array(
                     "user_id " => $user_id,
                     'appraisal_response_id' => $appraisal_response_id,
@@ -267,12 +436,12 @@ class Hr extends CI_Controller
                 $this->hr_model->insertAppraisalSelfResponses($appraisal_self_response);
             }else{
                 $appraisal_management_response = array(
-                    "direct_user_id " => $user_id,
-                    "staff_user_id " => $staff_id,
+                    "evaluator_id " => $user_id,
+                    "evaluatee_id " => $evaluatee_id,
                     'appraisal_response_id' => $appraisal_response_id,
                 );
     
-                $this->hr_model->insertAppraisalManagementResponses($appraisal_management_response);
+                $this->hr_model->insertAppraisalEvaluationResponses($appraisal_management_response);
             }
 
             $appraisal_response_kra_or_kpi_grade = array(
@@ -344,19 +513,19 @@ class Hr extends CI_Controller
             $this->hr_model->insertAppraisalComments($appraisal_response_comments);
 
             
-            if(!isset($staff_id)){
-                $action_item = $this->hr_model->getActionItemSubmitKra($user_id);
+            if(!isset($evaluatee_id)){
+                $action_item = $this->hr_model->getActionItemSubmitSelfAssessment($user_id);
 
                 if(isset($action_item)){
                     $this->hr_model->updateActionItemStatus($action_item->id, 2);
-                    $user_details = $this->hr_model->getUser($user_id);
+                    $direct_user = $this->hr_model->getDirectReport($user_id);
     
-                    $direct_user_latest_action_item_for_approve_assessment = $this->hr_model->getDirectUserLatestActionItem($user_details->direct_user_id, 4);
+                    $direct_user_latest_action_item_for_approve_assessment = $this->hr_model->getDirectUserLatestActionItem($direct_user->id, 4);
     
                     if(empty($direct_user_latest_action_item_for_approve_assessment)){
     
                         $new_action_item = array(
-                            'user_id' => $user_details->direct_user_id,
+                            'user_id' => $direct_user->id,
                             'module_id' => 1,
                             'item_id' => 4,
                             'status' => 1,
@@ -367,7 +536,39 @@ class Hr extends CI_Controller
                     }
                 }
             }else{
-                $this->hr_model->updateActionItemStatus($staff_action_item_id, 4);
+
+                if($is_180_degree_assessment){
+                    
+                    $action_item = $this->hr_model->getActionItemSubmit180DegreeAssessment($user_id);
+                    $this->hr_model->updateActionItemStatus($action_item->id, 2);
+                    
+                    $direct_user = $this->hr_model->getDirectReport($user_id);
+
+                    $direct_user_latest_action_item_for_view_180_assessment = $this->hr_model->getDirectUserLatestActionItem($direct_user->id, 6);
+    
+                    if(empty($direct_user_latest_action_item_for_view_180_assessment)){
+    
+                        $new_action_item = array(
+                            'user_id' => $direct_user->id,
+                            'module_id' => 1,
+                            'item_id' => 6,
+                            'status' => 1,
+                            'dateupdated' => date('Y-m-d H:i:s',time() + 1)
+                        );
+        
+                        $this->hr_model->insertActionItem($new_action_item);
+                    }
+                }
+
+                # Submit Self Assessment
+                if($evaluatee_action_item_id == "3"){
+                    $action_item = $this->hr_model->getActionItemSubmitManagementAssessment($user_id);
+
+                    if(isset($action_item)){
+                        $this->hr_model->updateActionItemStatus($action_item->id, 2);
+                        $this->hr_model->updateActionItemStatus($evaluatee_action_item_id, 4);
+                    }
+                }
             }
 
             
@@ -432,9 +633,13 @@ class Hr extends CI_Controller
 
             $staff_user_id = null;
 
-            if($user_id != $this->session->hr['user_id'] && $type == "management"){
+            if($type == "management" || $type == '180'){
                 $staff_user_id = $user_id;
                 $user_id =  $this->session->hr['user_id'];
+            }
+
+            if($type == 'view-180'){
+                $staff_user_id =  $this->session->hr['user_id'];
             }
 
             $kra_kpi_grade = $this->hr_model->getKraKpiGrade();
@@ -446,7 +651,7 @@ class Hr extends CI_Controller
             }
 
 
-            $kras_with_answer = $this->hr_model->getterKraKpiGrade($user_id, $staff_user_id);
+            $kras_with_answer = $this->hr_model->getterKraKpiGrade($user_id, $staff_user_id, $type);
 
             $index = 0;
 
@@ -493,14 +698,18 @@ class Hr extends CI_Controller
 
             $staff_user_id = null;
 
-            if($user_id != $this->session->hr['user_id'] && $type == "management"){
+            if($type == "management" || $type == '180'){
                 $staff_user_id = $user_id;
                 $user_id =  $this->session->hr['user_id'];
             }
     
+            if($type == 'view-180'){
+                $staff_user_id =  $this->session->hr['user_id'];
+            }
+
             $core_competency_grade = $this->hr_model->getCoreCompetencyGrade();
 
-            $core_compe_with_answer = $this->hr_model->getterCoreCompetencyGrade($user_id, $staff_user_id);
+            $core_compe_with_answer = $this->hr_model->getterCoreCompetencyGrade($user_id, $staff_user_id, $type);
 
             $index = 0;
 
@@ -535,14 +744,18 @@ class Hr extends CI_Controller
 
             $staff_user_id = null;
             
-            if($user_id != $this->session->hr['user_id'] && $type == 'management'){
+            if($type == "management" || $type == '180'){
                 $staff_user_id = $user_id;
                 $user_id =  $this->session->hr['user_id'];
             }
 
+            if($type == 'view-180'){
+                $staff_user_id =  $this->session->hr['user_id'];
+            }
+
 
             $functional_competency_and_punctuality_grade = $this->hr_model->getFunctionalCompetencyAndPunctualityGrade();
-            $func_compe_with_answer = $this->hr_model->getterFunctionalCompetencyAndPunctualityGrade($user_id, $staff_user_id);
+            $func_compe_with_answer = $this->hr_model->getterFunctionalCompetencyAndPunctualityGrade($user_id, $staff_user_id, $type);
 
             $index = 0;
 
@@ -555,7 +768,7 @@ class Hr extends CI_Controller
                 $index++;
             }
             
-            $attendance_and_punctuality_with_answer = $this->hr_model->getterAttendanceAndPunctualityGrade($user_id, $staff_user_id);
+            $attendance_and_punctuality_with_answer = $this->hr_model->getterAttendanceAndPunctualityGrade($user_id, $staff_user_id, $type);
 
 
 
@@ -581,13 +794,17 @@ class Hr extends CI_Controller
 
             $staff_user_id = null;
             
-            if($user_id != $this->session->hr['user_id'] && $type == 'management'){
+            if($type == "management" || $type == '180'){
                 $staff_user_id = $user_id;
                 $user_id =  $this->session->hr['user_id'];
             }
     
+            if($type == 'view-180'){
+                $staff_user_id =  $this->session->hr['user_id'];
+            }
+
             
-            $comments = $this->hr_model->getterComments($user_id, $staff_user_id);
+            $comments = $this->hr_model->getterComments($user_id, $staff_user_id, $type);
 
 
             $data = array(
@@ -611,12 +828,16 @@ class Hr extends CI_Controller
             
             $staff_user_id = null;
         
-            if($user_id != $this->session->hr['user_id'] && $type == "management"){
+            if($type == "management" || $type == '180'){
                 $staff_user_id = $user_id;
                 $user_id =  $this->session->hr['user_id'];
             }
         
-            $appraisal_response = $this->hr_model->getAppraisalResponse($user_id, $staff_user_id);
+            if($type == 'view-180'){
+                $staff_user_id =  $this->session->hr['user_id'];
+            }
+
+            $appraisal_response = $this->hr_model->getAppraisalResponse($user_id, $staff_user_id, $type);
 
 
             $data = array(
@@ -658,8 +879,6 @@ class Hr extends CI_Controller
 	public function session(){
 		switch($this->input->server('REQUEST_METHOD')){
 		  case 'GET':
-
-			$user_profile =  $this->hr_model->getUserProfile($this->session->hr['user_id']);
 	
 			$data = array(
 				"hr" => array(
@@ -671,11 +890,10 @@ class Hr extends CI_Controller
 					"is_admin" => $this->hr_auth->in_group(1),
 					"is_manager" => $this->hr_auth->in_group(2),
 					"is_employee" => $this->hr_auth->in_group(3),
-					"user_status_id" => $user_profile->user_status_id,
+					"is_hr" => $this->hr_auth->in_group(4),
 				)
 			);
 			
-			$data["hr"]['user_details'] = $this->hr_model->getUser($this->session->hr['user_id']);
 			$data["hr"]['user_job_details'] = $this->hr_model->getUserJobDetails($this->session->hr['user_id']);
 			$data["hr"]['user_personal_details'] = $this->hr_model->getUserPersonalDetails($this->session->hr['user_id']);
 			$data["hr"]['user_contact_details'] = $this->hr_model->getUserContactDetails($this->session->hr['user_id']);
@@ -683,6 +901,7 @@ class Hr extends CI_Controller
 			$data["hr"]['user_salary_details'] = $this->hr_model->getUserSalaryDetails($this->session->hr['user_id']);
 			$data["hr"]['user_termination_details'] = $this->hr_model->getUserTerminationDetails($this->session->hr['user_id']);
 			$data["hr"]['user_other_details'] = $this->hr_model->getUserOtherDetails($this->session->hr['user_id']);
+			$data["hr"]['user_direct_report'] = $this->hr_model->getDirectReport($this->session->hr['user_id']);
 
 			$response = array(
 			  "message" => 'Successfully fetch hr session',
