@@ -560,14 +560,8 @@ class Hr extends CI_Controller
                     }
                 }
 
-                # Submit Self Assessment
-                if($evaluatee_action_item_id == "3"){
-                    $action_item = $this->hr_model->getActionItemSubmitManagementAssessment($user_id);
-
-                    if(isset($action_item)){
-                        $this->hr_model->updateActionItemStatus($action_item->id, 2);
-                        $this->hr_model->updateActionItemStatus($evaluatee_action_item_id, 4);
-                    }
+                if(isset($evaluatee_action_item_id)){
+                    $this->hr_model->updateActionItemStatus($evaluatee_action_item_id, 4);
                 }
             }
 
