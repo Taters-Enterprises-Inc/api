@@ -172,6 +172,7 @@ class Stock_ordering_model extends CI_Model {
         $this->db->select('
             A.id,
             B.name as store_name,
+            B.franchise_type_id,
             E.category_name,
             A.order_placement_date,
             A.requested_delivery_date,
@@ -250,7 +251,7 @@ class Stock_ordering_model extends CI_Model {
     public function getStore($user_id, $isAdmin){
 
         if($isAdmin){
-            $this->newteishop->select('store_id, name');
+            $this->newteishop->select('store_id, name, franchise_type_id');
             $this->newteishop->from('store_tb');
             $this->newteishop->where('branch_status', 1);
         }else{
@@ -258,6 +259,7 @@ class Stock_ordering_model extends CI_Model {
             $this->newteishop->select('
                 A.store_id,
                 A.name,
+                A.franchise_type_id
             ');
 
             $this->newteishop->from('store_tb A');
@@ -270,6 +272,8 @@ class Stock_ordering_model extends CI_Model {
         $query = $this->newteishop->get();
         return $query->result_array();
     }
+
+  
 
     public function getShipToAddress($id){
         $this->db->select('
@@ -668,7 +672,7 @@ class Stock_ordering_model extends CI_Model {
         return $filename_prefix;
     }
 
-    public function get_delivery_schedule( $store_id){
+    public function get_delivery_schedule($store_id){
 
         $this->db->select('*');
         $this->db->from('store_schedule');
@@ -676,4 +680,29 @@ class Stock_ordering_model extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+
+
+    public function getFranchiseType($order_id){
+        $this->db->select('B.franchise_type_id');
+        $this->db->from('order_information_tb A');
+        $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
+        $this->db->where('A.id', $order_id);
+
+        $query = $this->db->get();
+        return $query->row();
+
+    }
+
+    public function getFranchiseTypeByStoreId($store_id){
+        $this->newteishop->select('franchise_type_id');
+        $this->newteishop->from('store_tb');
+        $this->newteishop->where_in('store_id', $store_id);
+        $this->newteishop->where('franchise_type_id', '2');
+
+
+
+        $query = $this->newteishop->get();
+        return $query->result();
+    }
+
 }

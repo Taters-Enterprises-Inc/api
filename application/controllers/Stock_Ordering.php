@@ -265,7 +265,14 @@ class Stock_ordering extends CI_Controller
                   
                 $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab, $user_store_id);
                 $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab, $user_store_id);
+                $getFranchiseType = $this->stock_ordering_model->getFranchiseTypeByStoreId($user_store_id);
+                $franchiseType = 1; //default company owned
 
+                foreach($getFranchiseType as $type){
+                    if($type->franchise_type_id == 2){
+                        $franchiseType = $type->franchise_type_id;
+                    }
+                }
 
                 $getOrdersBadgeCount = array_fill(0, 10, 0);
                 for($i=0; $i < 10; $i++){
@@ -283,6 +290,7 @@ class Stock_ordering extends CI_Controller
                         "pagination" => $pagination,
                         "orders" => $getOrders,
                         "tab" => $getOrdersBadgeCount,
+                        "franchise_type" => $franchiseType,
                     ),
                 );
             
@@ -412,6 +420,11 @@ class Stock_ordering extends CI_Controller
             $status = $this->input->post('status');
 
             $product_data = $this->input->post('product_data');
+
+            $isFranchisee = $this->full_franchisee_check($order_information_id);
+            
+
+            // Revert the set commited quantity by supplier.
             if(isset($product_data) && $status === '1'){
                 foreach($product_data as $product){
                     $product_id = $product['productId'];
@@ -428,9 +441,11 @@ class Stock_ordering extends CI_Controller
 
             $order_information = array(
                 'reviewed_date' => $reviewed_date,
-                'status_id' => $status,
+                'status_id' => $isFranchisee ? '3' : $status,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
+
+
             $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
 
             $this->insert_tracking_log($status == '1' ? 3 : 4, $order_information_id);
@@ -453,6 +468,23 @@ class Stock_ordering extends CI_Controller
         }
     }
 
+    public function franchisee_order(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+            case 'POST':
+                $status = 4;
+
+                $response = array(
+                    "message" => 'Sucessfully updated the order',
+                );
+    
+                header('content-type: application/json');
+                echo json_encode($response);
+            
+            break;
+        }
+    }
+
     
 
     public function dispatch_order(){
@@ -467,7 +499,7 @@ class Stock_ordering extends CI_Controller
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
             
-            $status = 4;            
+            $status = 5;            
 
             $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
 
@@ -552,7 +584,7 @@ class Stock_ordering extends CI_Controller
 
             $order_information_id = $this->input->post('id');
             $actual_delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('actualDeliveryDate')));
-            $status = 5;
+            $status = 6;
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
 
@@ -713,7 +745,7 @@ class Stock_ordering extends CI_Controller
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
             $with_new_si = $this->input->post('withNewSI');
-            $status = 7;
+            $status = 6;
             $message = "";
 
             $uploadedGoodsReceipt_image_name = null;
@@ -818,7 +850,7 @@ class Stock_ordering extends CI_Controller
             $payment_detail_image = $this->input->post('paymentDetailImage');
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
-            $status = 8;
+            $status = 9;
 
             $index = 0;
 
@@ -944,7 +976,7 @@ class Stock_ordering extends CI_Controller
             $user_id = $this->session->admin['user_id'];
 
             $order_information = array(
-                'status_id' => 10,
+                'status_id' => 11,
             );
 
             $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
@@ -1475,6 +1507,12 @@ class Stock_ordering extends CI_Controller
 
         $this->stock_ordering_model->insertTracking($remarks_information);
 
+    }
+
+
+    public function full_franchisee_check($order_id){
+        $franchise_type_id = $this->stock_ordering_model->getFranchiseType($order_id)->franchise_type_id;
+        return $franchise_type_id === 2 ? true : false;
     }
 
    
