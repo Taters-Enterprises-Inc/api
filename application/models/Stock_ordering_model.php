@@ -47,6 +47,80 @@ class Stock_ordering_model extends CI_Model {
         return $result;
     }
 
+    public function getProducts($row_no, $row_per_page, $order_by, $order, $search){
+
+        $this->db->select('*');
+        $this->db->from('product_tb');
+
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('product_id', $search);
+            $this->db->or_like("product_name", $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        $query = $this->db->get();
+        $result = $query->result_array();
+
+        return $result;
+    }
+
+    public function getProductsCount($row_no, $row_per_page, $order_by, $order, $search){
+
+        $this->db->select('count(*) as all_count');
+        $this->db->from('product_tb');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('product_id', $search);
+            $this->db->or_like("product_name", $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        $query = $this->db->get();
+        $result = $query->row()->all_count;
+
+        return $result;
+    }
+
+    public function getProductDataById($id){
+
+        $this->db->select('*');
+        $this->db->from('product_tb');
+        $this->db->where('id', $id);
+       
+        
+        $query = $this->db->get();
+        $result = $query->row();
+
+        return $result;
+    }
+
+    public function getProductStore($product_id){
+
+        $this->db->select('C.name, C.store_id');
+        $this->db->from('product_tb A');
+        $this->db->join('product_availability_tb B', 'B.product_id = A.product_id', 'left');
+        $this->db->join($this->newteishop->database.'.store_tb C', 'C.store_id = B.store_id', 'left');
+        $this->db->where('A.product_id', $product_id);
+
+        $query = $this->db->get();
+        $result = $query->result();
+
+        return $result;
+    }
+
+
+    
+
+
     public function getSchedule($category,$store_id){
 
         $this->db->select('
@@ -83,6 +157,18 @@ class Stock_ordering_model extends CI_Model {
     public function insertNewOrdersProducts($data){
         $this->db->trans_start();
 		$this->db->insert('order_item_tb', $data);
+        $this->db->trans_complete();    
+	}
+
+    public function insertNewProducts($data){
+        $this->db->trans_start();
+		$this->db->insert('product_tb', $data);
+        $this->db->trans_complete();    
+	}
+
+    public function insertNewProductsStore($data){
+        $this->db->trans_start();
+		$this->db->insert('product_availability_tb', $data);
         $this->db->trans_complete();    
 	}
 
@@ -329,7 +415,16 @@ class Stock_ordering_model extends CI_Model {
     public function updateOrderInfo($id, $data){
         $this->db->where('id', $id);
         $this->db->update('order_information_tb', $data);
+    }
 
+    public function updateProductData($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('product_tb', $data);
+
+    }
+
+    public function removeProductDataAvailability($data){
+        $this->db->delete('product_availability_tb', $data);
     }
 
     public function updateOrderItem($id ,$id_product, $data){
@@ -372,8 +467,16 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('product_tb');
         $this->db->where('product_id', $product_id);
 
+
         $query = $this->db->get();
         return $query->row();
+    }
+
+    public function getAllStore(){
+        $this->newteishop->select('name, store_id');
+        $this->newteishop->from('store_tb');
+        $query = $this->newteishop->get();
+        return $query->result();
     }
 
     public function getStoreId($order_id){
@@ -547,6 +650,7 @@ class Stock_ordering_model extends CI_Model {
 
         $this->db->select('*');
         $this->db->from('product_tb');
+        $this->db->where('active_status', 1);
 
         $order_query = $this->db->get();
         return $order_query->result();

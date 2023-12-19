@@ -210,6 +210,7 @@ class Stock_ordering extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
             case 'GET': 
 
+                
                 $order_id = $this->input->get('orderId');
 
                 $getOrderData = $this->stock_ordering_model->getOrderData($order_id);
@@ -233,6 +234,162 @@ class Stock_ordering extends CI_Controller
         }
 
     }
+
+    public function settings_products(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+                $per_page = $this->input->get('per_page') ?? 25;
+                $page_no = $this->input->get('page_no') ?? 0;
+                $order = $this->input->get('order') ?? 'asc';
+                $order_by = $this->input->get('order_by') ?? 'id';
+                $search = $this->input->get('search');
+            
+                $products = $this->stock_ordering_model->getProducts($page_no, $per_page, $order_by, $order, $search);
+                $productsCount = $this->stock_ordering_model->getProductsCount($page_no, $per_page, $order_by, $order, $search);
+
+                $pagination = array(
+                    "total_rows" => $productsCount,
+                    "per_page" => $per_page,                    
+                  );
+
+                $data = array(
+                    "pagination" => $pagination,
+                    "products" => $products,
+                    
+                );
+                
+                $response = array(
+                    "message" => 'Successfully fetch all products',
+                    "data"    => $data, 
+
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+            break;
+        }
+    }
+
+    public function settings_create_product(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST': 
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+
+                $product_data = array(
+                    'product_id'    => $this->input->post('productId'),
+                    'product_name'  => $this->input->post('productName'),
+                    'uom'           => $this->input->post('uom'),
+                    'category_id'   => $this->input->post('categoryType'),
+                    'cost'          => $this->input->post('cost'),
+                    'active_status' => true,
+                );
+
+                $this->stock_ordering_model->insertNewProducts($product_data);
+
+                foreach($this->input->post('store_id') as $store_ids){
+                    $product_availability_data = array(
+                        'product_id' => $this->input->post('productId'),
+                        'store_id'   => $store_ids
+                    );
+                    $this->stock_ordering_model->insertNewProductsStore($product_availability_data);
+                }
+
+
+                $response = array(
+                    "message" => 'Successfully added new a product',
+                );
+
+                header('content-type: application/json');
+                echo json_encode($response);
+    
+            break;
+        }
+    }
+
+    public function settings_edit_product($id){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+                $products_data = $this->stock_ordering_model->getProductDataById($id);
+                $stores = $this->stock_ordering_model->getProductStore($products_data->product_id);
+                
+                $data = array(
+                    "products_data" => $products_data,
+                    "stores" => $stores,
+
+                );
+                
+                $response = array(
+                    "message" => 'Successfully fetch all products',
+                    "data"    => $data, 
+
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+            break;
+
+            case 'POST':
+
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+
+                $product_data = array(
+                    'product_id'    => $this->input->post('productId'),
+                    'product_name'  => $this->input->post('productName'),
+                    'uom'           => $this->input->post('uom'),
+                    'category_id'   => $this->input->post('categoryType'),
+                    'cost'          => $this->input->post('cost'),
+                );
+
+                $this->stock_ordering_model->updateProductData($id, $product_data);
+
+                $product_id = array('product_id' => $this->input->post('productId'));
+                $this->stock_ordering_model->removeProductDataAvailability($product_id);
+                
+                foreach($this->input->post('store_id') as $store_ids){
+                    $product_availability_data = array(
+                        'product_id' => $this->input->post('productId'),
+                        'store_id'   => $store_ids
+                    );
+                    $this->stock_ordering_model->insertNewProductsStore($product_availability_data);
+                }
+
+                $response = array(
+                    "message" => 'Successfully edited a product',
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+            break;
+        }
+    }
+
+
+    public function settings_enable_product(){
+        switch($this->input->server('REQUEST_METHOD')){
+           
+            case 'POST':
+
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+
+                $active_status = array(
+                    'active_status'    => $this->input->post('active_status'),
+                );
+
+                $this->stock_ordering_model->updateProductData($this->input->post('id'), $active_status);
+
+                $response = array(
+                    "message" => 'Successfully updated product active status',
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+            break;
+        }
+    }
+
+    
 
     public function getOrders(){
         switch($this->input->server('REQUEST_METHOD')){
@@ -1515,6 +1672,26 @@ class Stock_ordering extends CI_Controller
         return $franchise_type_id === 2 ? true : false;
     }
 
+    public function get_all_store(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+                $stores = $this->stock_ordering_model->getAllStore();
+            
+                $data = array(
+                    "stores" => $stores,
+                );
+                
+                $response = array(
+                    "message" => 'Successfully fetch all stores',
+                    "data"    => $data,
+
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+            break;
+        }
+    }
    
   
 }
