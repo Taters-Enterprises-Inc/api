@@ -127,9 +127,7 @@ class Stock_ordering extends CI_Controller
 
         case 'POST':
             $_POST =  json_decode(file_get_contents("php://input"), true);
-            var_dump("Hello world!");
-            var_dump($_POST);
-
+            
             $store_id = $this->input->post('selectedStoreId');
             $delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('deliveryScheduleData')));;
             $category_id = $this->input->post('category')['category_id'];
@@ -428,6 +426,7 @@ class Stock_ordering extends CI_Controller
                 foreach($getFranchiseType as $type){
                     if($type->franchise_type_id == 2){
                         $franchiseType = $type->franchise_type_id;
+                        break;
                     }
                 }
 
@@ -629,7 +628,41 @@ class Stock_ordering extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
 
             case 'POST':
+                $data =  json_decode(file_get_contents("php://input"), true);
+
+                $order_information_id = $_POST['id'];
+                $remarks = $this->input->post('remarks');                
                 $status = 4;
+
+
+                //Franchisee paybill upload Billing
+
+                $uploaded_billing_receipt_image_name = clean_str_for_img($this->input->post('uploadedBillingReceipt'). '-' . time());
+
+                $uploadedBillingReceipt = explode(".", $_FILES['uploadedBillingReceipt']['name']);
+                $ext = end($uploadedBillingReceipt);
+                $uploaded_billing_receipt_image_name = 'franchisee-paybill' . $uploaded_billing_receipt_image_name . '.' . $ext;
+
+                $uploadedBillingReceipt_error = upload('uploadedBillingReceipt','./assets/uploads/screenshots/',$uploaded_billing_receipt_image_name, $ext );
+
+                if($uploadedBillingReceipt_error){
+                    $this->output->set_status_header('401');
+                    echo json_encode(array( "message" => $uploadedBillingReceipt_error));
+                    return;
+                }
+
+                //Franchisee paybill update order tatus
+                $order_information = array(
+                    'status_id' => $status,
+                    'last_updated' => date('Y-m-d H:i:s'),
+                );
+                $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+
+                //Franchisee paybill remarks
+                $this->insert_remarks($remarks, $status, $order_information_id);
+                $this->realtime_badge();
+                $this->insert_tracking_log($status, $order_information_id);
+
 
                 $response = array(
                     "message" => 'Sucessfully updated the order',
@@ -656,30 +689,34 @@ class Stock_ordering extends CI_Controller
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
             
-            $status = 5;            
-
-            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
-
-            $delivery_receipt_image_name = clean_str_for_img($this->input->post('deliveryReceipt'). '-' . time());
-            $deliveryReceipt = explode(".", $_FILES['deliveryReceipt']['name']);
-            $ext = end($deliveryReceipt);
-            $delivery_receipt_image_name = $file_name_prefix . $delivery_receipt_image_name . '.' . $ext;
-            $path = './assets/uploads/screenshots/'.$delivery_receipt_image_name;
-
-            $deliveryReceipt_error = upload('deliveryReceipt','./assets/uploads/screenshots/', $delivery_receipt_image_name, $ext );
-
-            if($deliveryReceipt_error){
-              $this->output->set_status_header('401');
-              echo json_encode(array( "message" => $deliveryReceipt_error));
-              return;
-            }
+            $status = 5;       
             
-            $import_si = $this->import_si($order_information_id, $path);
+            $isFranchisee = $this->full_franchisee_check($order_information_id);
 
-            if ($import_si) {
+            if(!$isFranchisee){
+                $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
+
+                $delivery_receipt_image_name = clean_str_for_img($this->input->post('deliveryReceipt'). '-' . time());
+                $deliveryReceipt = explode(".", $_FILES['deliveryReceipt']['name']);
+                $ext = end($deliveryReceipt);
+                $delivery_receipt_image_name = $file_name_prefix . $delivery_receipt_image_name . '.' . $ext;
+                $path = './assets/uploads/screenshots/'.$delivery_receipt_image_name;
+
+                $deliveryReceipt_error = upload('deliveryReceipt','./assets/uploads/screenshots/', $delivery_receipt_image_name, $ext );
+
+                if($deliveryReceipt_error){
                 $this->output->set_status_header('401');
-                echo json_encode(array( "message" => $import_si));
+                echo json_encode(array( "message" => $deliveryReceipt_error));
                 return;
+                }
+                
+                $import_si = $this->import_si($order_information_id, $path, 'multim_si_tb');
+
+                if ($import_si) {
+                    $this->output->set_status_header('401');
+                    echo json_encode(array( "message" => $import_si));
+                    return;
+                }
             }
 
             $dispatch_date = DateTime::createFromFormat('h:i:s a', $dispatch_date)->format('H:i:s');
@@ -688,7 +725,7 @@ class Stock_ordering extends CI_Controller
             $dispatch_date = substr_replace($get_commited_date, $dispatch_date, 11, 8);
 
             $order_information = array(
-                'delivery_receipt' => $delivery_receipt_image_name,
+                'delivery_receipt' => $delivery_receipt_image_name ?? "",
                 'dispatch_date' => $dispatch_date,
                 'status_id' => $status,
                 'transportation_id' => $transport_id,
@@ -770,14 +807,15 @@ class Stock_ordering extends CI_Controller
                 /* Code that computes the final cost per product */
 
                 $product = $this->stock_ordering_model->getProductCost($productId);
-                $product_cost = $product->cost;
+                $product_cost = $product->cost ?? 1; //set to 1 if not exist in the database
 
                 $store = $this->stock_ordering_model->getStoreId($order_information_id);
                 $store_id = $store->store_id;
                 $category_id = $store->order_type_id;
 
                 $store_multiplier = $this->stock_ordering_model->getProductMultiplier($store_id, $category_id);
-                $multiplier = $store_multiplier->product_multiplier;
+
+                $multiplier = $store_multiplier->product_multiplier ?? 1; //set to 1 if not exist in the database
 
                 /* END */
 
@@ -902,7 +940,7 @@ class Stock_ordering extends CI_Controller
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
             $with_new_si = $this->input->post('withNewSI');
-            $status = 6;
+            $status = 8;
             $message = "";
 
             $uploadedGoodsReceipt_image_name = null;
@@ -1350,7 +1388,7 @@ class Stock_ordering extends CI_Controller
         $this->load->view('stock_ordering/import_view');
     }
 
-    public function import_si($order_information_id, $path){
+    public function import_si($order_information_id, $path, $table_name){
 
         if (isset($path)) {
             $object = PHPExcel_IOFactory::load($path);
@@ -1541,7 +1579,7 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            $import = $this->stock_ordering_model->insertSiTb($data);
+            $import = $this->stock_ordering_model->insertSiTb($data, $table_name);
 
             if (!$import) {
                 $message = "";

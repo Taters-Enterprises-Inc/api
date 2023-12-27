@@ -176,6 +176,7 @@ class Stock_ordering_model extends CI_Model {
         $this->db->select('
             B.name as store_name,
             B.store_id,
+            B.franchise_type_id,
             A.id,
             A.ship_to_address,
             E.category_id,
@@ -205,7 +206,6 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
         $this->db->join('order_status C', 'C.id = A.status_id', 'left');
-        $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
         $this->db->join('transportation_tb G', 'G.id = A.transportation_id', 'left');
@@ -266,8 +266,6 @@ class Stock_ordering_model extends CI_Model {
             A.order_confirmation_date,
             A.actual_delivery_date,
             C.description,
-            D.billing_id,
-            D.billing_amount,
             F.short_name,
             G.id as logistic_id,
             G.type as logistic_type, 
@@ -276,7 +274,6 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
         $this->db->join('order_status C', 'C.id = A.status_id', 'left');
-        $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
         $this->db->join('logistic_type G', 'G.id = A.logistic_type_id', 'left');
@@ -310,7 +307,6 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
         $this->db->join('order_status C', 'C.id = A.status_id', 'left');
-        $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
         $this->db->join('logistic_type G', 'G.id = A.logistic_type_id', 'left');
@@ -705,8 +701,8 @@ class Stock_ordering_model extends CI_Model {
 
     /* End */
 
-    public function insertSiTb($data){
-        $this->db->insert_batch('multim_si_tb', $data);
+    public function insertSiTb($data, $table_name){
+        $this->db->insert_batch($table_name, $data);
     }
 
     public function getOrderMSI($search){
