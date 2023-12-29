@@ -148,6 +148,14 @@ $route['stock/generate-multim-si-pdf/(:any)'] = 'download/multim_sales_invoice/$
 $route['stock/export-order-pdf/(:any)'] = 'download/export_order/$1';
 $route['stock/schedule/delivery'] = 'Stock_Ordering/get_schedule';
 $route['stock/update/order-items'] = 'Stock_Ordering/update_order_items';
+$route['stock/settings/products'] = 'Stock_Ordering/settings_products';
+$route['stock/settings/create-product'] = 'Stock_Ordering/settings_create_product';
+$route['stock/settings/edit-product/(:any)'] = 'Stock_Ordering/settings_edit_product/$1';
+$route['stock/settings/all-store'] = 'Stock_Ordering/get_all_store';
+$route['stock/settings/product-status'] = 'Stock_Ordering/settings_enable_product';
+$route['stock/order/franchisee-pay-bill'] = 'Stock_Ordering/franchisee_order';
+
+
 
 //HR
 $route['auth-hr/login'] = 'auth_hr/login';
