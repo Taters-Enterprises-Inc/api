@@ -194,6 +194,7 @@ class Stock_ordering_model extends CI_Model {
             A.updated_delivery_receipt,
             A.updated_delivery_goods_receipt,
             A.updated_delivery_region_receipt,
+            A.franchisee_payment_detail_image,
             A.payment_detail_image,
             G.label as transport_route,
             H.region_id,
@@ -718,7 +719,7 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('multim_si_tb A');
         $this->db->join('order_information_tb B', 'B.id = A.order_id', 'inner');
         $this->db->where('B.payment_status_id', 1); // Payment Status 1 for unpaid
-        $this->db->where('B.status_id', 7);
+        $this->db->where('B.status_id', 8);
 
         if($search){
             $this->db->where('A.si', $search);

@@ -636,7 +636,6 @@ class Stock_ordering extends CI_Controller
 
 
                 //Franchisee paybill upload Billing
-
                 $uploaded_billing_receipt_image_name = clean_str_for_img($this->input->post('uploadedBillingReceipt'). '-' . time());
 
                 $uploadedBillingReceipt = explode(".", $_FILES['uploadedBillingReceipt']['name']);
@@ -653,6 +652,7 @@ class Stock_ordering extends CI_Controller
 
                 //Franchisee paybill update order tatus
                 $order_information = array(
+                    'franchisee_payment_detail_image' => $uploaded_billing_receipt_image_name,
                     'status_id' => $status,
                     'last_updated' => date('Y-m-d H:i:s'),
                 );
@@ -725,7 +725,7 @@ class Stock_ordering extends CI_Controller
             $dispatch_date = substr_replace($get_commited_date, $dispatch_date, 11, 8);
 
             $order_information = array(
-                'delivery_receipt' => $delivery_receipt_image_name ?? "",
+                'delivery_receipt' => $delivery_receipt_image_name ?? null,
                 'dispatch_date' => $dispatch_date,
                 'status_id' => $status,
                 'transportation_id' => $transport_id,

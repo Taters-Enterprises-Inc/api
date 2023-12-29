@@ -264,7 +264,9 @@ class Download extends CI_Controller {
 		} else {
 
 			$this->output->set_status_header('401');
-			echo json_encode(array( "message" => "File does not exist"));
+			// echo json_encode(array( "message" => "File does not exist"));
+			echo json_encode(array( "message" => $filePath));
+
 			return;
 		}
     }
