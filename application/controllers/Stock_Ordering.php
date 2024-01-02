@@ -420,13 +420,17 @@ class Stock_ordering extends CI_Controller
                   
                 $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab, $user_store_id);
                 $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab, $user_store_id);
-                $getFranchiseType = $this->stock_ordering_model->getFranchiseTypeByStoreId($user_store_id);
+
                 $franchiseType = 1; //default company owned
 
-                foreach($getFranchiseType as $type){
-                    if($type->franchise_type_id == 2){
-                        $franchiseType = $type->franchise_type_id;
-                        break;
+                if (!empty($user_store_id)) {
+                    $getFranchiseType = $this->stock_ordering_model->getFranchiseTypeByStoreId($user_store_id);
+
+                    foreach($getFranchiseType as $type){
+                        if($type->franchise_type_id == 2){
+                            $franchiseType = $type->franchise_type_id;
+                            break;
+                        }
                     }
                 }
 
