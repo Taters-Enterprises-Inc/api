@@ -89,10 +89,10 @@ class Sales extends CI_Controller {
                 $storesIdByUserId = $this->admin_model->stores_by_user_id($user_id, $isAdmin);
                 $stores = array();
 
-                if(!isEmpty($storesIdByUserId)){
+                if (!empty($storesIdByUserId)) {
                     $stores = $this->admin_model->getStoreName($storesIdByUserId);
                 }
-
+                
                 $response = array(
                     "message" => 'Successfully fetch field data',
                     "data" => array(
