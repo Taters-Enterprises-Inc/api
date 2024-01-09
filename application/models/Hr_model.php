@@ -6,6 +6,192 @@ class Hr_model extends CI_Model {
         $this->db = $this->load->database('hr', TRUE, TRUE);
     }
 
+    #Temporarly
+    public function insertTable($data, $table_name){
+		$this->db->insert($table_name, $data);
+    }
+
+    public function getStaffsIfActionItemConditionMeets($item_id, $status, $direct_user_id){
+        $this->db->select('
+            A.user_id
+        ');
+
+        $this->db->from('user_direct_reports A');
+        $this->db->join('action_items B', 'B.user_id = A.user_id');
+
+		$this->db->where('A.direct_user_id', $direct_user_id);
+		$this->db->where('B.item_id', $item_id);
+		$this->db->where('B.status', $status);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getOverallSectionGrade(){
+        $this->db->select('name, weight');
+        $this->db->from('overall_section_grade');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getAttendanceAndTardinessSelfRatings($user_id){
+        $this->db->select('
+            A.absences,
+            A.tardiness
+        ');
+
+        $this->db->from('appraisal_response_functional_competency_grades A');
+        $this->db->join('appraisal_responses B', "B.id = A.appraisal_response_id");
+        $this->db->join('appraisal_self_responses C', "C.appraisal_response_id = B.id");
+
+		$this->db->where('C.user_id', $user_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getAttendanceAndTardinessEvaluatorRatings($evaluatee_id){
+        $this->db->select('
+        A.absences,
+        A.tardiness
+        ');
+
+        $this->db->from('appraisal_response_functional_competency_grades A');
+        $this->db->join('appraisal_responses B', "B.id = A.appraisal_response_id");
+        $this->db->join('appraisal_evaluate_responses C', "C.appraisal_response_id = B.id");
+
+		$this->db->where('C.evaluatee_id', $evaluatee_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getFunctionalCompetencyAndPunctualityEvaluatorRatings($evaluatee_id){
+        $this->db->select('
+            A.rating
+        ');
+
+        $this->db->from('appraisal_response_functional_competency_grade_answers A');
+        $this->db->join('appraisal_response_functional_competency_grades B', "B.id = A.appraisal_response_functional_competency_and_punctuality_grade_i");
+        $this->db->join('appraisal_responses C', "C.id = B.appraisal_response_id");
+        $this->db->join('appraisal_evaluate_responses D', "D.appraisal_response_id = C.id");
+
+		$this->db->where('D.evaluatee_id', $evaluatee_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getFunctionalCompetencyAndPunctualitySelfRatings($user_id){
+        $this->db->select('
+            A.rating
+        ');
+
+        $this->db->from('appraisal_response_functional_competency_grade_answers A');
+        $this->db->join('appraisal_response_functional_competency_grades B', "B.id = A.appraisal_response_functional_competency_and_punctuality_grade_i");
+        $this->db->join('appraisal_responses C', "C.id = B.appraisal_response_id");
+        $this->db->join('appraisal_self_responses D', "D.appraisal_response_id = C.id");
+
+		$this->db->where('D.user_id', $user_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getFunctionalCompetencyAndPunctualityGrades(){
+        $this->db->select('title, description');
+        $this->db->from('functional_competency_and_punctuality_grade');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getCoreCompetencyEvaluatorRatings($evaluatee_id){
+        $this->db->select('
+            A.rating
+        ');
+
+        $this->db->from('appraisal_response_core_competency_grade_answers A');
+        $this->db->join('appraisal_response_core_competency_grades B', "B.id = A.appraisal_response_core_competency_grade_id");
+        $this->db->join('appraisal_responses C', "C.id = B.appraisal_response_id");
+        $this->db->join('appraisal_evaluate_responses D', "D.appraisal_response_id = C.id");
+
+		$this->db->where('D.evaluatee_id', $evaluatee_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getCoreCompetencySelfRatings($user_id){
+        $this->db->select('
+            A.rating
+        ');
+
+        $this->db->from('appraisal_response_core_competency_grade_answers A');
+        $this->db->join('appraisal_response_core_competency_grades B', "B.id = A.appraisal_response_core_competency_grade_id");
+        $this->db->join('appraisal_responses C', "C.id = B.appraisal_response_id");
+        $this->db->join('appraisal_self_responses D', "D.appraisal_response_id = C.id");
+
+		$this->db->where('D.user_id', $user_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getCoreCompetencyGrades(){
+        $this->db->select('title, description');
+        $this->db->from('core_competency_grade');
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getAppraisalGroupWeight($group_id){
+        $this->db->select('
+            weight
+        ');
+
+        $this->db->from('appraisal_group_weight');
+
+		$this->db->where('group_id', $group_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getKraOrKpiGradeEvaluatorRatings($evaluatee_id){
+        $this->db->select('
+            A.rating
+        ');
+
+        $this->db->from('appraisal_response_kra_or_kpi_grade_answers A');
+        $this->db->join('appraisal_response_kra_or_kpi_grades B', "B.id = A.appraisal_response_kra_or_kpi_grade_id");
+        $this->db->join('appraisal_responses C', "C.id = B.appraisal_response_id");
+        $this->db->join('appraisal_evaluate_responses D', "D.appraisal_response_id = C.id");
+
+		$this->db->where('D.evaluatee_id', $evaluatee_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+    public function getKraOrKpiGradeSelfRatings($user_id){
+        $this->db->select('
+            A.rating
+        ');
+
+        $this->db->from('appraisal_response_kra_or_kpi_grade_answers A');
+        $this->db->join('appraisal_response_kra_or_kpi_grades B', "B.id = A.appraisal_response_kra_or_kpi_grade_id");
+        $this->db->join('appraisal_responses C', "C.id = B.appraisal_response_id");
+        $this->db->join('appraisal_self_responses D', "D.appraisal_response_id = C.id");
+
+		$this->db->where('D.user_id', $user_id);
+
+        $query = $this->db->get();
+        return $query->result();
+    }
+
     public function getStaffs($direct_user_id){
         $this->db->select('
             user_id
@@ -31,7 +217,7 @@ class Hr_model extends CI_Model {
 
 
     public function getDirectReport($user_id){
-        $this->db->select('B.user_id as id, B.first_name, B.last_name, C.position');
+        $this->db->select('A.direct_user_id as id, B.first_name, B.last_name, C.position');
 
         $this->db->from('user_direct_reports A');
         $this->db->join('user_personal_details B', 'B.user_id = A.direct_user_id', 'left');
@@ -60,7 +246,7 @@ class Hr_model extends CI_Model {
     }
 
     function getEmployees($row_no, $row_per_page, $order_by, $order, $search, $department_id) {
-        $this->db->select('A.id, B.first_name, B.middle_name, B.last_name');
+        $this->db->select('A.id, B.first_name, B.middle_name, B.last_name, C.employee_number, C.position');
         $this->db->from('users A');
         $this->db->join('user_personal_details B', 'B.user_id = A.id', 'left');
         $this->db->join('user_job_details C', 'C.user_id = A.id', 'left');
@@ -389,7 +575,7 @@ class Hr_model extends CI_Model {
     }
 
     public function getKraKpiGrade(){
-        $this->db->select('*');
+        $this->db->select('id, weight');
         $this->db->from('kra_kpi_grade');
 
         $query = $this->db->get();

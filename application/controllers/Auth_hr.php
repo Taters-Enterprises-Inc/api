@@ -248,23 +248,6 @@ class Auth_hr extends CI_Controller{
 					$user_id = $this->hr_auth->register($email, $password, $email);
 
 					if($user_id !== FALSE){
-						$user_details = array(
-							"user_id" => $user_id,
-							"first_name" => $this->input->post('firstName'),
-							"last_name" => $this->input->post('lastName'),
-							"designation" => $this->input->post('designation'),
-							"email" => $this->input->post('email'),
-							"phone_number" => $this->input->post('phoneNumber'),
-							"user_status_id" => 1,
-						);
-
-						$this->hr_model->insertUserProfile($user_details);
-
-						if( $this->input->post('store') !== 'none')
-							$this->hr_model->insertUserStore($user_id, $this->input->post('store'));
-							
-						$this->hr_model->insertUserCompany($user_id,$this->input->post('company'));
-
 						header('content-type: application/json');
 						echo json_encode(array("message" =>  $this->hr_auth->messages()));
 						return;
