@@ -3680,7 +3680,8 @@ class Admin_model extends CI_Model
 
     function getStoreName($store_id){
         $this->db->select('
-            name
+            name,
+            store_id
         ');
 
         $this->db->from('store_tb');
