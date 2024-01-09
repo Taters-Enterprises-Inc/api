@@ -30,7 +30,7 @@ $config['argon2_admin_params']		= [
 
 $config['site_title']                 = "Example.com";
 $config['admin_email']                = "admin@example.com";
-$config['default_group']              = 'members';
+$config['default_group']              = 'staff';
 $config['admin_group']                = 'admin';
 $config['identity']                   = 'username';
 

@@ -223,6 +223,7 @@ $route['hr/appraisal/functional-competency-and-punctuality-grade'] = 'hr/functio
 $route['hr/appraisal/attendance-and-punctuality'] = 'hr/attendance_and_punctuality';
 $route['hr/appraisal/submit'] = 'hr/submit_hr_appraisal';
 $route['hr/appraisal/kra-or-kpi'] = 'hr/kra_or_kpi';
+$route['hr/appraisal/summary'] = 'hr/appraisal_summary';
 
 $route['hr/direct-report-staff/action-items'] = 'hr/direct_report_staff_action_items';
 $route['hr/direct-report-staff/kras/(:any)'] = 'hr/direct_report_staff_kras/$1';
@@ -380,3 +381,7 @@ $route['survey/answer/(:any)'] = 'survey/answer/$1';
 //Others
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+$route['generate/hr/(:any)'] = 'hr/generate/$1';
+$route['hr/import-users'] = 'hr/import_users';
+

@@ -20,6 +20,8 @@ class Hr extends CI_Controller
         }
 
 		$this->load->model('hr_model');
+		$this->load->model('hr_auth_model');
+		$this->load->library('form_validation');
 	}
 
   
@@ -261,7 +263,7 @@ class Hr extends CI_Controller
                 $action_item = $this->hr_model->getActionItemById($action_item_id);
                 $direct_user = $this->hr_model->getDirectReport($this->session->hr['user_id']);
 
-                if($status == 2 && $item_id == 1){ // Submit KRA - Status To Complete
+                if($status == 2 && $item_id == 1){ // Submit KRA Completed
                     if(isset($direct_user)){
                         
                         $direct_user_latest_action_item_for_review_and_approve_kra = $this->hr_model->getDirectUserLatestActionItem($direct_user->id, 2);
@@ -279,7 +281,7 @@ class Hr extends CI_Controller
                         }
                         
                     }
-                }else if($status == 3 && $item_id == 1){ // Submit Self Assessment - Status To Approved
+                }else if($status == 3 && $item_id == 1){ // Submit KRA Approved
                     $new_action_item = array(
                         'user_id' => $action_item->user_id,
                         'module_id' => 1,
@@ -296,7 +298,7 @@ class Hr extends CI_Controller
 
                     if(isset($staff_group_id) && $staff_group_id->id == 2){
 
-                        $staff_unders = $this->hr_model->getStaffs($staff_id);
+                        $staff_unders = $this->hr_model->getStaffsIfActionItemConditionMeets(3, 4, $staff_id);
                         
                         foreach($staff_unders as $val){
                             $new_action_item = array(
@@ -513,16 +515,17 @@ class Hr extends CI_Controller
             $this->hr_model->insertAppraisalComments($appraisal_response_comments);
 
             
-            if(!isset($evaluatee_id)){
+            if(!isset($evaluatee_id)){ # Self Assessment 
                 $action_item = $this->hr_model->getActionItemSubmitSelfAssessment($user_id);
 
                 if(isset($action_item)){
                     $this->hr_model->updateActionItemStatus($action_item->id, 2);
+                    
                     $direct_user = $this->hr_model->getDirectReport($user_id);
     
                     $direct_user_latest_action_item_for_approve_assessment = $this->hr_model->getDirectUserLatestActionItem($direct_user->id, 4);
     
-                    if(empty($direct_user_latest_action_item_for_approve_assessment)){
+                    if(empty($direct_user_latest_action_item_for_approve_assessment)){ # Check if Action Item for approve is exist
     
                         $new_action_item = array(
                             'user_id' => $direct_user->id,
@@ -537,7 +540,7 @@ class Hr extends CI_Controller
                 }
             }else{
 
-                if($is_180_degree_assessment){
+                if($is_180_degree_assessment){ # 180 Degree Assessment
                     
                     $action_item = $this->hr_model->getActionItemSubmit180DegreeAssessment($user_id);
                     $this->hr_model->updateActionItemStatus($action_item->id, 2);
@@ -560,8 +563,47 @@ class Hr extends CI_Controller
                     }
                 }
 
-                if(isset($evaluatee_action_item_id)){
+
+                $evaluatee_group = $this->hr_model->getGroupId($evaluatee_id);
+
+                if(isset($evaluatee_action_item_id)){ # Management Assessment
                     $this->hr_model->updateActionItemStatus($evaluatee_action_item_id, 4);
+                    
+                    
+                    $kra = $this->hr_model->getActionItemStatus(1 ,$user_id);
+
+                    if(isset($kra) && $kra->status == 3){ # Check if kra approved, if true create a 180 degree
+
+                        $new_action_item = array(
+                            'user_id' => $evaluatee_id,
+                            'module_id' => 1,
+                            'item_id' => 5,
+                            'status' => 1,
+                            'dateupdated' => date('Y-m-d H:i:s',time() + 1)
+                        );
+        
+                        $this->hr_model->insertActionItem($new_action_item);
+                    }
+
+                    
+                    if($evaluatee_group->id == 3){ # Temporarly based on group: this condition will change to check first if all direct reports have 180 degree
+
+                        $direct_user_latest_action_item_for_view_assessment_summary = $this->hr_model->getDirectUserLatestActionItem($evaluatee_id, 7);
+    
+                        if(empty($direct_user_latest_action_item_for_view_assessment_summary)){
+        
+                            $new_action_item = array(
+                                'user_id' => $evaluatee_id,
+                                'module_id' => 1,
+                                'item_id' => 7,
+                                'status' => 1,
+                                'dateupdated' => date('Y-m-d H:i:s',time() + 1)
+                            );
+            
+                            $this->hr_model->insertActionItem($new_action_item);
+                        }
+                    }
+
                 }
             }
 
@@ -909,20 +951,6 @@ class Hr extends CI_Controller
 	}
 
     public function getter($user_id){
-        /*$kra_kpi_grade = $this->hr_model->getterKraKpiGrade($user_id);
-        $core_competency_grade = $this->hr_model->getterCoreCompetencyGrade($user_id);
-        $functional_competency_and_punctuality_grade = $this->hr_model->getterFunctionalCompetencyAndPunctualityGrade($user_id);
-        $comments = $this->hr_model->getterComments($user_id);
-        
-        $data = array(
-            "kra_kpi_grade" => $kra_kpi_grade,
-            "core_competency_grade" => $core_competency_grade,
-            "functional_competency_and_punctuality_grade" => $functional_competency_and_punctuality_grade,
-            "comments" => $comments,
-        );
-        print_r($data);
-        exit();*/
-        
         switch($this->input->server('REQUEST_METHOD')){
             case 'GET':
 
@@ -945,6 +973,648 @@ class Hr extends CI_Controller
             
             header('content-type: application/json');
             echo json_encode($response);
+            break;
+        }
+    }
+
+    public function appraisal_summary(){
+        
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+            $user_id = $this->session->hr['user_id'];
+            $group = $this->hr_model->getGroupId($user_id);
+
+            $overall_arr = array(
+                "name" => "OVERALL",
+                "columns" => [],
+            );
+
+            $section_kra_kpi = array(
+                "name" => "Section I - KRA / KPI",
+                "columns" => [
+                    "40%",
+                ]
+            );
+
+            $group_weights = $this->hr_model->getAppraisalGroupWeight($group->id);
+            $section_self_avarage_or_sum_array = array();
+            $section_evaluator_avarage_or_sum_array = array();
+
+            $kra_kpi_grades = $this->hr_model->getKraKpiGrade();
+            $self_kra_ratings = $this->hr_model->getKraOrKpiGradeSelfRatings($user_id);
+            $evaluator_kra_ratings = $this->hr_model->getKraOrKpiGradeEvaluatorRatings($user_id);
+
+            $index = 0;
+            $kras = array();
+            $sum_self_kra_score = 0;
+            $sum_evaluator_kra_score = 0;
+            foreach($kra_kpi_grades as $kra_kpi_grade){
+                
+                $weight = $kra_kpi_grade->weight;
+                $self_rating = $self_kra_ratings[$index]->rating;
+                $self_score = $weight * $self_rating;
+                $sum_self_kra_score += $self_score;
+
+                $evaluator_rating = $evaluator_kra_ratings[$index]->rating;
+                $evaluator_score = $weight * $evaluator_rating;
+                $sum_evaluator_kra_score += $evaluator_score;
+
+                
+                $weighted_score = $group_weights[0]->weight *  $self_score + $group_weights[1]->weight *  $evaluator_score;
+
+                $kras[] = array(
+                    "name" => "KRA " . ($index + 1),
+                    "columns" => [
+                         (string)$weight * 100 . "%",
+                        round($self_rating, 2),
+                        round($self_score, 2),
+                        round($evaluator_rating, 2),
+                        round($evaluator_score, 2),
+                        round($weighted_score, 2)
+                    ],
+                );
+                
+                $index++;
+            }
+
+            $weighted_kra_overall = $group_weights[0]->weight *  $sum_self_kra_score + $group_weights[1]->weight *  $sum_evaluator_kra_score;
+            $section_self_avarage_or_sum_array[] = $sum_self_kra_score;
+            $section_evaluator_avarage_or_sum_array[] = $sum_evaluator_kra_score;
+            
+
+            $kra_overall = array(
+                "name" => "KRA",
+                "is_overall" => true,
+                "columns" => [
+                    round($sum_self_kra_score, 2),
+                    round($sum_evaluator_kra_score, 2),
+                    round($weighted_kra_overall, 2)
+                ]
+            );
+
+
+            $core_competency_grades = $this->hr_model->getCoreCompetencyGrade();
+            $self_core_competency_ratings = $this->hr_model->getCoreCompetencySelfRatings($user_id);
+            $evaluator_core_competency_ratings = $this->hr_model->getCoreCompetencyEvaluatorRatings($user_id);
+
+
+            $index = 0;
+            $core_competencies = array();
+            $sum_self_core_competency_rating = 0;
+            $sum_evaluator_core_competency_rating = 0;
+            foreach($core_competency_grades as $val){
+                
+                $self_rating = $self_core_competency_ratings[$index]->rating;
+                $sum_self_core_competency_rating += $self_rating;
+                
+                $evaluator_rating = $evaluator_core_competency_ratings[$index]->rating;
+                $sum_evaluator_core_competency_rating += $evaluator_rating;
+
+                $average_rating = $group_weights[0]->weight *  $self_rating + $group_weights[1]->weight *  $evaluator_rating;
+
+                $core_competencies[] = array(
+                    "name" => $val->title,
+                    "description" => $val->description,
+                    "columns" => [
+                        round($self_rating, 2),
+                        round($evaluator_rating, 2),
+                        round($average_rating, 2)
+                    ],
+                );
+                
+                $index++;
+            }
+
+            $avarage_self_core_competency_rating = $sum_self_core_competency_rating / count($core_competency_grades);
+            $avarage_evaluator_core_competency_rating = $sum_evaluator_core_competency_rating / count($core_competency_grades);
+
+            
+            $weighted_core_competency_overall= $group_weights[0]->weight *  $avarage_self_core_competency_rating + $group_weights[1]->weight *  $avarage_evaluator_core_competency_rating;
+            $section_self_avarage_or_sum_array[] = $avarage_self_core_competency_rating;
+            $section_evaluator_avarage_or_sum_array[] = $avarage_evaluator_core_competency_rating;
+
+            $core_competency_overall = array(
+                "name" => "CORE COMPETENCY",
+                "is_overall" => true,
+                "columns" => [
+                    round($avarage_self_core_competency_rating, 2),
+                    round($avarage_evaluator_core_competency_rating, 2),
+                    round($weighted_core_competency_overall, 2)
+                ]
+            );
+
+
+            
+            $functional_competency_and_punctuality_grades = $this->hr_model->getFunctionalCompetencyAndPunctualityGrades();
+            $self_functional_competency_and_punctuality_ratings = $this->hr_model->getFunctionalCompetencyAndPunctualitySelfRatings($user_id);
+            $evaluator_functional_competency_and_punctuality_ratings = $this->hr_model->getFunctionalCompetencyAndPunctualityEvaluatorRatings($user_id);
+            
+            $index = 0;
+            $functional_competency_and_punctualities= array();
+            $sum_self_functional_competency_and_punctuality_rating = 0;
+            $sum_evaluator_functional_competency_and_punctuality_rating = 0;
+            foreach($functional_competency_and_punctuality_grades as $val){
+
+                $self_rating = $self_functional_competency_and_punctuality_ratings[$index]->rating;
+                $sum_self_functional_competency_and_punctuality_rating += $self_rating;
+                
+                $evaluator_rating = $evaluator_functional_competency_and_punctuality_ratings[$index]->rating;
+                $sum_evaluator_functional_competency_and_punctuality_rating += $evaluator_rating;
+
+                $average_rating = $group_weights[0]->weight *  $self_rating + $group_weights[1]->weight *  $evaluator_rating;
+                
+                $functional_competency_and_punctualities[] = array(
+                    "name" => $val->title,
+                    "description" => $val->description,
+                    "columns" => [
+                        round($self_rating, 2),
+                        round($evaluator_rating, 2),
+                        round($average_rating, 2)
+                    ],
+                );
+                
+                $index++;
+            }
+
+            $avarage_self_functional_competency_and_punctuality_rating = $sum_self_functional_competency_and_punctuality_rating / count($functional_competency_and_punctuality_grades);
+            $avarage_evaluator_functional_competency_and_punctuality_rating = $sum_evaluator_functional_competency_and_punctuality_rating / count($functional_competency_and_punctuality_grades);
+
+            
+            $weighted_functional_competency_and_punctuality_overall= $group_weights[0]->weight *  $avarage_self_functional_competency_and_punctuality_rating + $group_weights[1]->weight *  $avarage_evaluator_functional_competency_and_punctuality_rating;
+            
+
+            $functional_competency_and_punctuality_overall = array(
+                "name" => "FUNCTIONAL COMPETENCY AND PUNCTUALITY",
+                "is_overall" => true,
+                "columns" => [
+                    round($avarage_self_functional_competency_and_punctuality_rating, 2),
+                    round($avarage_evaluator_functional_competency_and_punctuality_rating, 2),
+                    round($weighted_functional_competency_and_punctuality_overall, 2),
+                ]
+            );
+
+            
+            $attendance_and_tardiness_grades = ["Absences", "Tardiness"];
+            $self_attendance_and_tardiness_ratings = $this->hr_model->getAttendanceAndTardinessSelfRatings($user_id);
+            $evaluator_attendance_and_tardiness_ratings = $this->hr_model->getAttendanceAndTardinessEvaluatorRatings($user_id);
+
+            $index = 0;
+            $attendance_and_tardiness = array();
+            $sum_self_attendance_and_tardiness_rating = 0;
+            $sum_evaluator_attendance_and_tardiness_rating = 0;
+            foreach($attendance_and_tardiness_grades as $val){
+                
+                if($val == 'Absences'){
+                    $self_rating = $self_attendance_and_tardiness_ratings[0]->absences;
+                    $evaluator_rating = $evaluator_attendance_and_tardiness_ratings[0]->absences;
+                }else {
+                    $self_rating = $self_attendance_and_tardiness_ratings[0]->tardiness;
+                    $evaluator_rating = $evaluator_attendance_and_tardiness_ratings[0]->tardiness;
+                }
+
+                $sum_self_attendance_and_tardiness_rating += $self_rating;
+                
+                $sum_evaluator_attendance_and_tardiness_rating += $evaluator_rating;
+
+                $average_rating = $group_weights[0]->weight *  $self_rating + $group_weights[1]->weight *  $evaluator_rating;
+
+                $attendance_and_tardiness[] = array(
+                    "name" => $val,
+                    "columns" => [
+                        round($self_rating, 2),
+                        round($evaluator_rating, 2),
+                        round($average_rating, 2)
+                    ],
+                );
+                $index++;
+            }
+            
+            $avarage_self_attendance_and_tardiness_rating = $sum_self_attendance_and_tardiness_rating / count($attendance_and_tardiness_grades);
+            $avarage_evaluator_attendance_and_tardiness_rating = $sum_evaluator_attendance_and_tardiness_rating / count($attendance_and_tardiness_grades);
+
+            
+            $weighted_attendance_and_tardiness_overall= $group_weights[0]->weight *  $avarage_self_attendance_and_tardiness_rating + $group_weights[1]->weight *  $avarage_evaluator_attendance_and_tardiness_rating;
+            $section_self_avarage_or_sum_array[] = $avarage_self_functional_competency_and_punctuality_rating * 0.9 + $avarage_self_attendance_and_tardiness_rating * 0.1;
+            $section_evaluator_avarage_or_sum_array[] = $avarage_evaluator_functional_competency_and_punctuality_rating * 0.9 + $avarage_evaluator_attendance_and_tardiness_rating * 0.1;
+
+            $attendance_and_tardiness_overall = array(
+                "name" => "ATTENDANCE AND TARDINESS",
+                "is_overall" => true,
+                "columns" => [
+                    round($avarage_self_attendance_and_tardiness_rating, 2),
+                    round($avarage_evaluator_attendance_and_tardiness_rating, 2),
+                    round($weighted_attendance_and_tardiness_overall, 2),
+                ]
+            );
+
+            $overall_section_grades = $this->hr_model->getOverallSectionGrade();
+            
+            $index = 0;
+            $overall_sections = array();
+            $sum_self_overall_section_rating = 0;
+            $sum_evaluator_overall_section_rating = 0;
+            foreach($overall_section_grades as $val){
+
+                $self_avarage_or_summ_array = $section_self_avarage_or_sum_array[$index];
+                $weighted_self_avarage_or_summ_array = $val->weight * $self_avarage_or_summ_array;
+                $sum_self_overall_section_rating += $weighted_self_avarage_or_summ_array;
+
+                $evaluator_avarage_or_summ_array = $section_evaluator_avarage_or_sum_array[$index];
+                $weighted_evaluator_avarage_or_summ_array =  $val->weight * $evaluator_avarage_or_summ_array;
+                $sum_evaluator_overall_section_rating += $weighted_evaluator_avarage_or_summ_array;
+                
+                $average_rating = $group_weights[0]->weight *  $weighted_self_avarage_or_summ_array + $group_weights[1]->weight *  $weighted_evaluator_avarage_or_summ_array;
+
+                $overall_sections[] = array(
+                    "name" => $val->name,
+                    "columns" => [
+                        (string)$val->weight * 100 . "%",
+                        round($self_avarage_or_summ_array, 2),
+                        round($weighted_self_avarage_or_summ_array, 2),
+                        round($evaluator_avarage_or_summ_array, 2),
+                        round($weighted_evaluator_avarage_or_summ_array, 2),
+                        round($average_rating, 2),
+                    ],
+                );
+                $index++;
+            }
+
+            $weighted_overall_section_overall= $group_weights[0]->weight *  $sum_self_overall_section_rating + $group_weights[1]->weight *  $sum_evaluator_overall_section_rating;
+            
+            $overall_section_overall = array(
+                "name" => "OVERALL",
+                "is_overall" => true,
+                "columns" => [
+                    round($sum_self_overall_section_rating, 2),
+                    round($sum_evaluator_overall_section_rating, 2),
+                    round($weighted_overall_section_overall,2 ),
+                ]
+            );
+
+            $data = array();
+
+            $data[] =  $overall_section_overall;
+
+            $data = array_merge(
+                $data, 
+                $overall_sections
+            );
+
+            $data[] =  $kra_overall;
+
+            $data = array_merge(
+                $data, 
+                $kras
+            );
+
+            $data[] =  $core_competency_overall;
+
+            $data = array_merge(
+                $data, 
+                $core_competencies
+            );
+
+            $data[] =  $functional_competency_and_punctuality_overall;
+
+            $data = array_merge(
+                $data, 
+                $functional_competency_and_punctualities
+            );
+
+            $data[] =  $attendance_and_tardiness_overall;
+            
+            $data = array_merge(
+                $data, 
+                $attendance_and_tardiness
+            );
+
+
+            $response = array(
+                "message" => 'Successfully get Appraisal Summary',
+                "data" => $data,
+            );
+            
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
+    }
+
+    public function generate($condition){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+                $email = "james.bond@test.com";
+                $password = "password";
+
+                if($condition == 'manager')
+                    $direct_user_id = 21;
+                else
+                    $direct_user_id = null;
+
+
+                $first_name = "James";
+                $middle_name = "Herbert";
+                $last_name = "Bond";
+                
+                $gender = "Male";
+                $date_of_birth = "1986-02-25";
+                $education = "High School";
+                $marital_status = "Single";
+                $sss_no = "4230441983";
+                $tin_no = "158102895";
+                $philhealth_no = "10505075892";
+                $pagibig_no = "920635109";
+                
+                $contact_number = "09188014175";
+                $address = "7675 Moon st lunar city";
+                $city = "Lunar";
+                $emergency_contact_person = 'Nick Fury';
+                $contact_info = "098765432";
+                $emergency_contact_relationship = "Father";
+                $any_health_problem = "no";
+                $blood_type = "O";
+
+                $employee_number = 'sadafa';
+                $hiring_date = '2023-12-07';
+                $tenure = '29YEARS;3MONTHS';
+                $company = 'TEI - HEAD OFFICE ';
+                $department_id = 1;
+                $position = 'Minister';
+                $employee_status = 'Regular';
+
+                $detail = 'Beatified';
+
+                $initial_salary = 200;
+                $current_salary = 242;
+                $bank_account_no = 123456789;
+
+                $active = 1;
+                $termination_date = '2023-12-14';
+                $termination_reason = 'Ayaw';
+
+
+                $company_id = 1;
+
+                if($condition == 'manager')
+                    $groups = [2];
+                else
+                    $groups = [3];
+
+                $user_id = $this->hr_auth_model->register($email, $password, $email, [], $groups);
+
+                $this->hr_model->insertTable(array(
+                    "user_id" => $user_id,
+                    "first_name" => $first_name,
+                    "middle_name" => $middle_name,
+                    "last_name" => $last_name,
+                    "gender" => $gender,
+                    "date_of_birth" => $date_of_birth,
+                    "education" => $education,
+                    "marital_status" => $marital_status,
+                    "sss_no" => $sss_no,
+                    "tin_no" => $tin_no,
+                    "philhealth_no" => $philhealth_no,
+                    "pagibig_no" => $pagibig_no,
+                ), 'user_personal_details');
+
+                $this->hr_model->insertTable(array(
+                    "user_id" => $user_id,
+                    "company_id" => $company_id,
+                ), 'user_companies');
+
+                $this->hr_model->insertTable(array(
+                    "user_id" => $user_id,
+                    "contact_number" => $contact_number,
+                    "email" => $email,
+                    "address" => $address,
+                    "city" => $city,
+                ), 'user_contact_details');
+
+
+                if($direct_user_id){
+                    $this->hr_model->insertTable(array(
+                        "user_id" => $user_id,
+                        "direct_user_id" => $direct_user_id,
+                    ), 'user_direct_reports');
+                }
+
+
+                $this->hr_model->insertTable(array(
+                    "user_id" => $user_id,
+                    "emergency_contact_person" => $emergency_contact_person,
+                    "contact_info" => $contact_info,
+                    "emergency_contact_relationship" => $emergency_contact_relationship,
+                    "any_health_problem" => $any_health_problem,
+                    "blood_type" => $blood_type,
+                ), 'user_emergency_details');
+                
+                $this->hr_model->insertTable(array(
+                    "user_id" => $user_id,
+                    "employee_number" => $employee_number,
+                    "hiring_date" => $hiring_date,
+                    "tenure" => $tenure,
+                    "company" => $company,
+                    "department_id" => $department_id,
+                    "position" => $position,
+                    "employee_status" => $employee_status,
+                ), 'user_job_details');
+                
+                $this->hr_model->insertTable(array(
+                    "user_id" => $user_id,
+                    "detail" => $detail,
+                ), 'user_other_details');
+
+                $this->hr_model->insertTable(array(
+                    "user_id" => $user_id,
+                    "initial_salary" => $initial_salary,
+                    "current_salary" => $current_salary,
+                    "bank_account_no" => $bank_account_no,
+                ), 'user_salary_details');
+
+
+                $this->hr_model->insertTable(array(
+                    "user_id" => $user_id,
+                    "active" => $active,
+                    "termination_date" => $termination_date,
+                    "termination_reason" => $termination_reason,
+                ), 'user_termination_details');
+
+                
+                $new_action_item = array(
+                    'user_id' => $user_id,
+                    'module_id' => 1,
+                    'item_id' => 1,
+                    'status' => 1,
+                    'dateupdated' => date('Y-m-d H:i:s',time() + 1)
+                );
+
+                $this->hr_model->insertActionItem($new_action_item);
+
+                $response = array(
+                    "message" => "Successfully create employee",
+                );
+                
+                header('content-type: application/json');
+                echo json_encode($response);
+            break;
+        }
+    }
+
+    public function import_users(){
+        switch($this->input->server('REQUEST_METHOD')){
+          case 'POST': 
+            $file = $_FILES['users_file']['tmp_name'];
+
+            try {
+                $fileObject = new SplFileObject($file, 'r');
+                $fileObject->setFlags(SplFileObject::READ_CSV);
+
+                $c = 0; // Counter
+                $data = array();
+    
+                foreach ($fileObject as $cell) {
+                    // Skip the header row
+                    if ($c !== 0 && count($cell) > 1) {
+ 
+
+                        $first_name = $cell[3];
+                        $middle_name =  $cell[2];
+                        $last_name =  $cell[1];
+
+                        $email = strtolower(preg_replace('/\s+/', '.', $first_name) . "." . preg_replace('/\s+/', '.', $last_name) . "@test.com");
+                        $password = "password";
+
+                        $gender = $cell[10];
+                        $date_of_birth = $cell[11];
+                        $education = $cell[12];
+                        $marital_status = $cell[13];
+                        $sss_no = $cell[14];
+                        $tin_no = $cell[15];
+                        $philhealth_no = $cell[16];
+                        $pagibig_no = $cell[17];
+                        
+                        $contact_number = $cell[18];
+                        $address = $cell[20];
+                        $city = $cell[21];
+                        $emergency_contact_person = $cell[22];
+                        $contact_info = $cell[23];
+                        $emergency_contact_relationship = $cell[24];
+                        $any_health_problem = $cell[25];
+                        $blood_type = $cell[26];
+
+                        $employee_number = $cell[0];
+                        $hiring_date = $cell[4];
+                        $tenure = $cell[5];
+                        $company = $cell[6];
+                        $position = $cell[8];
+                        $employee_status = $cell[9];
+
+                        $detail = $cell[33];
+
+                        $initial_salary = $cell[27];
+                        $current_salary = $cell[28];
+                        $bank_account_no = $cell[29];
+
+                        $active = 1;
+                        $termination_date = $cell[31];
+                        $termination_reason = $cell[32];
+
+                        $company_id = 1;
+                        $department_id = 1;
+
+                        $groups = [3];
+
+                        $user_id = $this->hr_auth_model->register($email, $password, $email, [], $groups);
+                        
+                        $this->hr_model->insertTable(array(
+                            "user_id" => $user_id,
+                            "first_name" => $first_name,
+                            "middle_name" => $middle_name,
+                            "last_name" => $last_name,
+                            "gender" => $gender,
+                            "date_of_birth" => $date_of_birth,
+                            "education" => $education,
+                            "marital_status" => $marital_status,
+                            "sss_no" => $sss_no,
+                            "tin_no" => $tin_no,
+                            "philhealth_no" => $philhealth_no,
+                            "pagibig_no" => $pagibig_no,
+                        ), 'user_personal_details');
+
+                        $this->hr_model->insertTable(array(
+                            "user_id" => $user_id,
+                            "company_id" => $company_id,
+                        ), 'user_companies');
+
+                        $this->hr_model->insertTable(array(
+                            "user_id" => $user_id,
+                            "contact_number" => $contact_number,
+                            "email" => $email,
+                            "address" => $address,
+                            "city" => $city,
+                        ), 'user_contact_details');
+
+                        $this->hr_model->insertTable(array(
+                            "user_id" => $user_id,
+                            "emergency_contact_person" => $emergency_contact_person,
+                            "contact_info" => $contact_info,
+                            "emergency_contact_relationship" => $emergency_contact_relationship,
+                            "any_health_problem" => $any_health_problem,
+                            "blood_type" => $blood_type,
+                        ), 'user_emergency_details');
+                        
+                        $this->hr_model->insertTable(array(
+                            "user_id" => $user_id,
+                            "employee_number" => $employee_number,
+                            "hiring_date" => $hiring_date,
+                            "tenure" => $tenure,
+                            "company" => $company,
+                            "department_id" => $department_id,
+                            "position" => $position,
+                            "employee_status" => $employee_status,
+                        ), 'user_job_details');
+                        
+                        $this->hr_model->insertTable(array(
+                            "user_id" => $user_id,
+                            "detail" => $detail,
+                        ), 'user_other_details');
+
+                        $this->hr_model->insertTable(array(
+                            "user_id" => $user_id,
+                            "initial_salary" => $initial_salary,
+                            "current_salary" => $current_salary,
+                            "bank_account_no" => $bank_account_no,
+                        ), 'user_salary_details');
+
+
+                        $this->hr_model->insertTable(array(
+                            "user_id" => $user_id,
+                            "active" => $active,
+                            "termination_date" => $termination_date,
+                            "termination_reason" => $termination_reason,
+                        ), 'user_termination_details');
+
+                        
+                        $new_action_item = array(
+                            'user_id' => $user_id,
+                            'module_id' => 1,
+                            'item_id' => 1,
+                            'status' => 1,
+                            'dateupdated' => date('Y-m-d H:i:s',time() + 1)
+                        );
+
+                        $this->hr_model->insertActionItem($new_action_item);
+                    }
+    
+                    $c++;
+                }
+    
+                $this->output->set_content_type('application/json')->set_output(json_encode(["message" => 'Successfully processed data']));
+            } catch (RuntimeException $e) {
+                $this->output->set_content_type('application/json')->set_output(json_encode(["error" => 'Error processing file: ' . $e->getMessage()]));
+            }
+            
             break;
         }
     }
