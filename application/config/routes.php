@@ -159,6 +159,8 @@ $route['sales/saved-forms'] = 'Sales/cashier_saved_forms';
 $route['sales/form-data'] = 'Sales/form_data';
 $route['sales/submit-verdict'] = 'Sales/submit_verdict';
 $route['sales/complete'] = 'Sales/dashboard';
+$route['sales/check-duplicate'] = 'Sales/form_check_duplicate';
+
 
 
 //HR
