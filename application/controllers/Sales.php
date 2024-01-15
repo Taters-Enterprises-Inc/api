@@ -505,7 +505,7 @@ class Sales extends CI_Controller {
                 $formattedDate = $date->format("Y-m-d");
 
 
-                $checkDuplicate = $this->sales_model->duplicate($formattedDate, $store_id, $shift);;
+                $checkDuplicate = $this->sales_model->duplicate($formattedDate, $store_id, $shift, $isAdmin? 1 : $user_id);;
 
                 $response = array(
                     "message" => 'Successfully fetch all saved forms',

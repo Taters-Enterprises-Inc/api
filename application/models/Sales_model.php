@@ -316,7 +316,7 @@ class Sales_model extends CI_Model{
         return $query->row()->all_count;    
     }
 
-    public function duplicate($entry_date, $store_id, $shift){
+    public function duplicate($entry_date, $store_id, $shift, $user_id){
         $this->db->select('*');
         $this->db->from('form_general_information A');
         $this->db->join('user_form_id_combination B', 'B.id = A.user_ref_id', 'left');
@@ -324,6 +324,8 @@ class Sales_model extends CI_Model{
         $this->db->where('entry_date', $entry_date);
         $this->db->where('store_id', $store_id);
         $this->db->where('shift', $shift);
+        $this->db->where('user_id', $user_id);
+
         
         $query = $this->db->get();
         if ($query->num_rows() > 0) {
