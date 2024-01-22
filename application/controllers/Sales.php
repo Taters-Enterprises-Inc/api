@@ -23,6 +23,7 @@ class Sales extends CI_Controller {
         $result['user_ref_id'] = $ref_id;
         if($table_key === 'General Information'){
             $result['dateadded'] = date('Y-m-d H:i:s');
+            $result['source'] = 1;
 
             if($verdict){
                 $store_id = $this->sales_model->getSalesStoreIdBySalesId($sales_id);
