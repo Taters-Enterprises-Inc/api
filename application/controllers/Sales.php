@@ -17,10 +17,22 @@ class Sales extends CI_Controller {
 	}
 
     // Construct data array (utility function for POST)
-    function newInputData($keys, $data, $sales_id, $ref_id) {
+    function newInputData($keys, $data, $sales_id, $ref_id, $verdict, $table_key) {
         $result = array();
         $result['form_information_id'] = $sales_id;
         $result['user_ref_id'] = $ref_id;
+        if($table_key === 'General Information'){
+            $result['dateadded'] = date('Y-m-d H:i:s');
+            $result['source'] = 1;
+
+            if($verdict){
+                $store_id = $this->sales_model->getSalesStoreIdBySalesId($sales_id);
+                $result['store_id'] = $store_id->store_id;
+            }
+
+
+        }
+        
         foreach ($keys as $key) {
             if (isset($data[$key]['value'])) {
                 $result[$key] = $data[$key]['value'];
@@ -149,7 +161,7 @@ class Sales extends CI_Controller {
                         $index = 0;
                         foreach($key_names as $name){
                             if($name === $key){
-                                $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id, $user_ref_id);
+                                $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id, $user_ref_id, false, $name);
                                 $this->sales_model->insertSalesData($table_names[$index], $data);
                             }
                             $index++;
@@ -253,7 +265,7 @@ class Sales extends CI_Controller {
                 foreach(array_keys($this->input->post('formState')) as $key){
                     $column_names = array_keys($this->input->post('formState')[$key]);
                     if(isset($key)){
-                        $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id);
+                        $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id, true, $key);
                         $this->sales_model->updateForm($table_names[$index], $sales_id, $data);
                     }
                     $index++;
@@ -376,7 +388,6 @@ class Sales extends CI_Controller {
                     );
     
                     $user_ref_id = $this->sales_model->insertSalesUserFormIdCombination($sales_ref_information);
-                    
     
                     foreach(array_keys($this->input->post('formState')) as $key){
                         $column_names = array_keys($this->input->post('formState')[$key]);
@@ -384,7 +395,7 @@ class Sales extends CI_Controller {
                             $index = 0;
                             foreach($key_names as $name){
                                 if($name === $key){
-                                    $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id, $user_ref_id);
+                                    $data = $this->newInputData($column_names, $this->input->post('formState')[$key], $sales_id, $user_ref_id, true, $name);
                                     $this->sales_model->insertSalesData($table_names[$index], $data);
                                 }
                                 $index++;
@@ -476,6 +487,40 @@ class Sales extends CI_Controller {
         }
 
 
+    }
+
+    public function form_check_duplicate(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+                $entry_date = $this->input->get('entryDate');
+                $store_id = $this->input->get('store_id');
+                $shift = $this->input->get('shift');
+
+                $user_id = $this->session->admin['user_id'];
+                $isAdmin = $this->ion_auth->is_admin();
+            
+                $trimmedDate = substr($entry_date, (strpos($entry_date, ' ') + 1), (strpos($entry_date, 'GMT') - 1) - (strpos($entry_date, ' ') + 1));
+
+                $date = DateTime::createFromFormat("M d Y H:i:s", $trimmedDate);
+                $formattedDate = $date->format("Y-m-d");
+
+
+                $checkDuplicate = $this->sales_model->duplicate($formattedDate, $store_id, $shift, $isAdmin? 1 : $user_id);;
+
+                $response = array(
+                    "message" => 'Successfully fetch all saved forms',
+                    "data" => array(
+                     'duplicate' => $checkDuplicate
+                    ),
+                    );
+            
+                header('content-type: application/json');
+                echo json_encode($response);
+                return;
+
+            break;
+        }
     }
 
 
