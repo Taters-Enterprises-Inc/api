@@ -14,6 +14,7 @@ class Stock_ordering_model extends CI_Model {
             B.product_id,
             B.product_name,
             B.uom,
+            B.cost,
             B.category_id,
             A.order_qty,
             A.commited_qty,
@@ -254,8 +255,7 @@ class Stock_ordering_model extends CI_Model {
         return $orders;
     }
 
-    public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status, $store_id){
-
+    public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status, $store_id, $filter_by_store_name, $date_type, $start_date, $end_date){
         $this->db->select('
             A.id,
             B.name as store_name,
@@ -285,6 +285,16 @@ class Stock_ordering_model extends CI_Model {
 
         $this->db->where('A.status_id', $status);
 
+        if(isset($filter_by_store_name)){
+           
+            $this->db->where('B.name', $filter_by_store_name);
+        }
+
+        if((isset($date_type) && isset($start_date) && isset($end_date))){
+            $this->db->where("A.$date_type BETWEEN '$start_date' AND '$end_date'");
+          
+        }
+        
         if($search){
             $this->db->group_start();
             $this->db->like('A.id', $search);
@@ -293,7 +303,6 @@ class Stock_ordering_model extends CI_Model {
             $this->db->or_like('F.short_name', $search);
             $this->db->group_end();
         }
-
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
 
@@ -302,7 +311,7 @@ class Stock_ordering_model extends CI_Model {
         
     }
 
-    public function getOrdersCount($search, $status, $store_id){
+    public function getOrdersCount($search, $status, $store_id, $filter_by_store_name, $date_type, $start_date, $end_date){
 
         $this->db->select('count(*) as all_count');
         $this->db->from('order_information_tb A');
@@ -316,6 +325,17 @@ class Stock_ordering_model extends CI_Model {
             $this->db->where_in('A.store_id', $store_id);
         }
         $this->db->where('A.status_id', $status);
+
+        if(isset($filter_by_store_name)){
+           
+            $this->db->where('B.name', $filter_by_store_name);
+        }
+
+        if((isset($date_type) && isset($start_date) && isset($end_date))){
+            $this->db->where("A.$date_type BETWEEN '$start_date' AND '$end_date'");
+          
+        }
+
 
         if($search){
             $this->db->group_start();
