@@ -127,9 +127,7 @@ class Stock_ordering extends CI_Controller
 
         case 'POST':
             $_POST =  json_decode(file_get_contents("php://input"), true);
-            var_dump("Hello world!");
-            var_dump($_POST);
-
+            
             $store_id = $this->input->post('selectedStoreId');
             $delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('deliveryScheduleData')));;
             $category_id = $this->input->post('category')['category_id'];
@@ -210,6 +208,7 @@ class Stock_ordering extends CI_Controller
         switch($this->input->server('REQUEST_METHOD')){
             case 'GET': 
 
+                
                 $order_id = $this->input->get('orderId');
 
                 $getOrderData = $this->stock_ordering_model->getOrderData($order_id);
@@ -234,6 +233,162 @@ class Stock_ordering extends CI_Controller
 
     }
 
+    public function settings_products(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+                $per_page = $this->input->get('per_page') ?? 25;
+                $page_no = $this->input->get('page_no') ?? 0;
+                $order = $this->input->get('order') ?? 'asc';
+                $order_by = $this->input->get('order_by') ?? 'id';
+                $search = $this->input->get('search');
+            
+                $products = $this->stock_ordering_model->getProducts($page_no, $per_page, $order_by, $order, $search);
+                $productsCount = $this->stock_ordering_model->getProductsCount($page_no, $per_page, $order_by, $order, $search);
+
+                $pagination = array(
+                    "total_rows" => $productsCount,
+                    "per_page" => $per_page,                    
+                  );
+
+                $data = array(
+                    "pagination" => $pagination,
+                    "products" => $products,
+                    
+                );
+                
+                $response = array(
+                    "message" => 'Successfully fetch all products',
+                    "data"    => $data, 
+
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+            break;
+        }
+    }
+
+    public function settings_create_product(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST': 
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+
+                $product_data = array(
+                    'product_id'    => $this->input->post('productId'),
+                    'product_name'  => $this->input->post('productName'),
+                    'uom'           => $this->input->post('uom'),
+                    'category_id'   => $this->input->post('categoryType'),
+                    'cost'          => $this->input->post('cost'),
+                    'active_status' => true,
+                );
+
+                $this->stock_ordering_model->insertNewProducts($product_data);
+
+                foreach($this->input->post('store_id') as $store_ids){
+                    $product_availability_data = array(
+                        'product_id' => $this->input->post('productId'),
+                        'store_id'   => $store_ids
+                    );
+                    $this->stock_ordering_model->insertNewProductsStore($product_availability_data);
+                }
+
+
+                $response = array(
+                    "message" => 'Successfully added new a product',
+                );
+
+                header('content-type: application/json');
+                echo json_encode($response);
+    
+            break;
+        }
+    }
+
+    public function settings_edit_product($id){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+
+                $products_data = $this->stock_ordering_model->getProductDataById($id);
+                $stores = $this->stock_ordering_model->getProductStore($products_data->product_id);
+                
+                $data = array(
+                    "products_data" => $products_data,
+                    "stores" => $stores,
+
+                );
+                
+                $response = array(
+                    "message" => 'Successfully fetch all products',
+                    "data"    => $data, 
+
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+            break;
+
+            case 'POST':
+
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+
+                $product_data = array(
+                    'product_id'    => $this->input->post('productId'),
+                    'product_name'  => $this->input->post('productName'),
+                    'uom'           => $this->input->post('uom'),
+                    'category_id'   => $this->input->post('categoryType'),
+                    'cost'          => $this->input->post('cost'),
+                );
+
+                $this->stock_ordering_model->updateProductData($id, $product_data);
+
+                $product_id = array('product_id' => $this->input->post('productId'));
+                $this->stock_ordering_model->removeProductDataAvailability($product_id);
+                
+                foreach($this->input->post('store_id') as $store_ids){
+                    $product_availability_data = array(
+                        'product_id' => $this->input->post('productId'),
+                        'store_id'   => $store_ids
+                    );
+                    $this->stock_ordering_model->insertNewProductsStore($product_availability_data);
+                }
+
+                $response = array(
+                    "message" => 'Successfully edited a product',
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+            break;
+        }
+    }
+
+
+    public function settings_enable_product(){
+        switch($this->input->server('REQUEST_METHOD')){
+           
+            case 'POST':
+
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+
+                $active_status = array(
+                    'active_status'    => $this->input->post('active_status'),
+                );
+
+                $this->stock_ordering_model->updateProductData($this->input->post('id'), $active_status);
+
+                $response = array(
+                    "message" => 'Successfully updated product active status',
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+            break;
+        }
+    }
+
+    
+
     public function getOrders(){
         switch($this->input->server('REQUEST_METHOD')){
             
@@ -246,11 +401,35 @@ class Stock_ordering extends CI_Controller
                 $page_no = $this->input->get('page_no') ?? 0;
                 $order = $this->input->get('order') ?? 'asc';
                 $order_by = $this->input->get('order_by') ?? 'last_updated';
+
+                $store_name = $this->input->get('store');
+                $date_type = $this->input->get('dateType');
+                $start_date = $this->input->get('startDate');
+                $end_date = $this->input->get('endDate');
+               
+                //Format start date and time
+                if(isset($start_date)){
+                    $date_parts = explode(" ", $start_date);
+                    $date_time_string = implode(" ", array_slice($date_parts, 1, 4));
+                    $date = DateTime::createFromFormat("M d Y H:i:s", $date_time_string);
+                    $start_date = $date->format("Y-m-d H:i:s");
+                }
+
+                
+                //Format end date and time
+                if(isset($end_date)){
+                    $date_parts = explode(" ", $end_date);
+                    $date_time_string = implode(" ", array_slice($date_parts, 1, 4));
+                    $date = DateTime::createFromFormat("M d Y H:i:s", $date_time_string);
+                    $end_date = $date->format("Y-m-d H:i:s");
+                }
+
                 $search = $this->input->get('search');
 
                 $user_id = $this->session->admin['user_id'];
                 $isAdmin = $this->ion_auth->is_admin();
 
+      
                 $user_store_id = array();
 
                 $store_id = $this->stock_ordering_model->getStore($user_id, $isAdmin);
@@ -263,13 +442,25 @@ class Stock_ordering extends CI_Controller
                     $page_no = ($page_no - 1) * $per_page;
                   }
                   
-                $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab, $user_store_id);
-                $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab, $user_store_id);
+                $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab, $user_store_id, $store_name, $date_type, $start_date, $end_date);
+                $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab, $user_store_id, $store_name, $date_type, $start_date, $end_date);
 
+                $franchiseType = 1; //default company owned
+
+                if (!empty($user_store_id)) {
+                    $getFranchiseType = $this->stock_ordering_model->getFranchiseTypeByStoreId($user_store_id);
+
+                    foreach($getFranchiseType as $type){
+                        if($type->franchise_type_id == 2){
+                            $franchiseType = $type->franchise_type_id;
+                            break;
+                        }
+                    }
+                }
 
                 $getOrdersBadgeCount = array_fill(0, 10, 0);
                 for($i=0; $i < 10; $i++){
-                    $getOrdersBadgeCount[$i] += $this->stock_ordering_model->getOrdersCount("", $i + 1, $user_store_id);
+                    $getOrdersBadgeCount[$i] += $this->stock_ordering_model->getOrdersCount("", $i + 1, $user_store_id, $store_name, $date_type, $start_date, $end_date);
                 }
 
                 $pagination = array(
@@ -283,6 +474,7 @@ class Stock_ordering extends CI_Controller
                         "pagination" => $pagination,
                         "orders" => $getOrders,
                         "tab" => $getOrdersBadgeCount,
+                        "franchise_type" => $franchiseType,
                     ),
                 );
             
@@ -360,6 +552,7 @@ class Stock_ordering extends CI_Controller
                 $_POST =  json_decode(file_get_contents("php://input"), true);
 
                 $productData = array();
+                $order_information_id = $_POST[0]['order_information_id'];
 
                 if (empty($_POST)) {
 
@@ -411,6 +604,11 @@ class Stock_ordering extends CI_Controller
             $status = $this->input->post('status');
 
             $product_data = $this->input->post('product_data');
+
+            $isFranchisee = $this->full_franchisee_check($order_information_id);
+            
+
+            // Revert the set commited quantity by supplier.
             if(isset($product_data) && $status === '1'){
                 foreach($product_data as $product){
                     $product_id = $product['productId'];
@@ -427,9 +625,11 @@ class Stock_ordering extends CI_Controller
 
             $order_information = array(
                 'reviewed_date' => $reviewed_date,
-                'status_id' => $status,
+                'status_id' => $isFranchisee ? '3' : $status,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
+
+
             $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
 
             $this->insert_tracking_log($status == '1' ? 3 : 4, $order_information_id);
@@ -452,6 +652,57 @@ class Stock_ordering extends CI_Controller
         }
     }
 
+    public function franchisee_order(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+            case 'POST':
+                $data =  json_decode(file_get_contents("php://input"), true);
+
+                $order_information_id = $_POST['id'];
+                $remarks = $this->input->post('remarks');                
+                $status = 4;
+
+
+                //Franchisee paybill upload Billing
+                $uploaded_billing_receipt_image_name = clean_str_for_img($this->input->post('uploadedBillingReceipt'). '-' . time());
+
+                $uploadedBillingReceipt = explode(".", $_FILES['uploadedBillingReceipt']['name']);
+                $ext = end($uploadedBillingReceipt);
+                $uploaded_billing_receipt_image_name = 'franchisee-paybill' . $uploaded_billing_receipt_image_name . '.' . $ext;
+
+                $uploadedBillingReceipt_error = upload('uploadedBillingReceipt','./assets/uploads/screenshots/',$uploaded_billing_receipt_image_name, $ext );
+
+                if($uploadedBillingReceipt_error){
+                    $this->output->set_status_header('401');
+                    echo json_encode(array( "message" => $uploadedBillingReceipt_error));
+                    return;
+                }
+
+                //Franchisee paybill update order tatus
+                $order_information = array(
+                    'franchisee_payment_detail_image' => $uploaded_billing_receipt_image_name,
+                    'status_id' => $status,
+                    'last_updated' => date('Y-m-d H:i:s'),
+                );
+                $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+
+                //Franchisee paybill remarks
+                $this->insert_remarks($remarks, $status, $order_information_id);
+                $this->realtime_badge();
+                $this->insert_tracking_log($status, $order_information_id);
+
+
+                $response = array(
+                    "message" => 'Sucessfully updated the order',
+                );
+    
+                header('content-type: application/json');
+                echo json_encode($response);
+            
+            break;
+        }
+    }
+
     
 
     public function dispatch_order(){
@@ -466,30 +717,34 @@ class Stock_ordering extends CI_Controller
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
             
-            $status = 4;            
-
-            $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
-
-            $delivery_receipt_image_name = clean_str_for_img($this->input->post('deliveryReceipt'). '-' . time());
-            $deliveryReceipt = explode(".", $_FILES['deliveryReceipt']['name']);
-            $ext = end($deliveryReceipt);
-            $delivery_receipt_image_name = $file_name_prefix . $delivery_receipt_image_name . '.' . $ext;
-            $path = './assets/uploads/screenshots/'.$delivery_receipt_image_name;
-
-            $deliveryReceipt_error = upload('deliveryReceipt','./assets/uploads/screenshots/', $delivery_receipt_image_name, $ext );
-
-            if($deliveryReceipt_error){
-              $this->output->set_status_header('401');
-              echo json_encode(array( "message" => $deliveryReceipt_error));
-              return;
-            }
+            $status = 5;       
             
-            $import_si = $this->import_si($order_information_id, $path);
+            $isFranchisee = $this->full_franchisee_check($order_information_id);
 
-            if ($import_si) {
+            if(!$isFranchisee){
+                $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'');
+
+                $delivery_receipt_image_name = clean_str_for_img($this->input->post('deliveryReceipt'). '-' . time());
+                $deliveryReceipt = explode(".", $_FILES['deliveryReceipt']['name']);
+                $ext = end($deliveryReceipt);
+                $delivery_receipt_image_name = $file_name_prefix . $delivery_receipt_image_name . '.' . $ext;
+                $path = './assets/uploads/screenshots/'.$delivery_receipt_image_name;
+
+                $deliveryReceipt_error = upload('deliveryReceipt','./assets/uploads/screenshots/', $delivery_receipt_image_name, $ext );
+
+                if($deliveryReceipt_error){
                 $this->output->set_status_header('401');
-                echo json_encode(array( "message" => $import_si));
+                echo json_encode(array( "message" => $deliveryReceipt_error));
                 return;
+                }
+                
+                $import_si = $this->import_si($order_information_id, $path, 'multim_si_tb');
+
+                if ($import_si) {
+                    $this->output->set_status_header('401');
+                    echo json_encode(array( "message" => $import_si));
+                    return;
+                }
             }
 
             $dispatch_date = DateTime::createFromFormat('h:i:s a', $dispatch_date)->format('H:i:s');
@@ -498,7 +753,7 @@ class Stock_ordering extends CI_Controller
             $dispatch_date = substr_replace($get_commited_date, $dispatch_date, 11, 8);
 
             $order_information = array(
-                'delivery_receipt' => $delivery_receipt_image_name,
+                'delivery_receipt' => $delivery_receipt_image_name ?? null,
                 'dispatch_date' => $dispatch_date,
                 'status_id' => $status,
                 'transportation_id' => $transport_id,
@@ -551,7 +806,7 @@ class Stock_ordering extends CI_Controller
 
             $order_information_id = $this->input->post('id');
             $actual_delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('actualDeliveryDate')));
-            $status = 5;
+            $status = 6;
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
 
@@ -580,14 +835,15 @@ class Stock_ordering extends CI_Controller
                 /* Code that computes the final cost per product */
 
                 $product = $this->stock_ordering_model->getProductCost($productId);
-                $product_cost = $product->cost;
+                $product_cost = $product->cost ?? 1; //set to 1 if not exist in the database
 
                 $store = $this->stock_ordering_model->getStoreId($order_information_id);
                 $store_id = $store->store_id;
                 $category_id = $store->order_type_id;
 
                 $store_multiplier = $this->stock_ordering_model->getProductMultiplier($store_id, $category_id);
-                $multiplier = $store_multiplier->product_multiplier;
+
+                $multiplier = $store_multiplier->product_multiplier ?? 1; //set to 1 if not exist in the database
 
                 /* END */
 
@@ -712,7 +968,7 @@ class Stock_ordering extends CI_Controller
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
             $with_new_si = $this->input->post('withNewSI');
-            $status = 7;
+            $status = 8;
             $message = "";
 
             $uploadedGoodsReceipt_image_name = null;
@@ -817,7 +1073,7 @@ class Stock_ordering extends CI_Controller
             $payment_detail_image = $this->input->post('paymentDetailImage');
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
-            $status = 8;
+            $status = 9;
 
             $index = 0;
 
@@ -943,7 +1199,7 @@ class Stock_ordering extends CI_Controller
             $user_id = $this->session->admin['user_id'];
 
             $order_information = array(
-                'status_id' => 10,
+                'status_id' => 11,
             );
 
             $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
@@ -1160,7 +1416,7 @@ class Stock_ordering extends CI_Controller
         $this->load->view('stock_ordering/import_view');
     }
 
-    public function import_si($order_information_id, $path){
+    public function import_si($order_information_id, $path, $table_name){
 
         if (isset($path)) {
             $object = PHPExcel_IOFactory::load($path);
@@ -1351,7 +1607,7 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            $import = $this->stock_ordering_model->insertSiTb($data);
+            $import = $this->stock_ordering_model->insertSiTb($data, $table_name);
 
             if (!$import) {
                 $message = "";
@@ -1476,6 +1732,32 @@ class Stock_ordering extends CI_Controller
 
     }
 
+
+    public function full_franchisee_check($order_id){
+        $franchise_type_id = $this->stock_ordering_model->getFranchiseType($order_id)->franchise_type_id;
+        return $franchise_type_id === 2 ? true : false;
+    }
+
+    public function get_all_store(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'GET':
+                $stores = $this->stock_ordering_model->getAllStore();
+            
+                $data = array(
+                    "stores" => $stores,
+                );
+                
+                $response = array(
+                    "message" => 'Successfully fetch all stores',
+                    "data"    => $data,
+
+                  );
+            
+                  header('content-type: application/json');
+                  echo json_encode($response);
+            break;
+        }
+    }
    
   
 }

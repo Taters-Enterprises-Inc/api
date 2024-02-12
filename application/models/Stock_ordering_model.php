@@ -14,6 +14,7 @@ class Stock_ordering_model extends CI_Model {
             B.product_id,
             B.product_name,
             B.uom,
+            B.cost,
             B.category_id,
             A.order_qty,
             A.commited_qty,
@@ -46,6 +47,80 @@ class Stock_ordering_model extends CI_Model {
 
         return $result;
     }
+
+    public function getProducts($row_no, $row_per_page, $order_by, $order, $search){
+
+        $this->db->select('*');
+        $this->db->from('product_tb');
+
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('product_id', $search);
+            $this->db->or_like("product_name", $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        $query = $this->db->get();
+        $result = $query->result_array();
+
+        return $result;
+    }
+
+    public function getProductsCount($row_no, $row_per_page, $order_by, $order, $search){
+
+        $this->db->select('count(*) as all_count');
+        $this->db->from('product_tb');
+
+        if($search){
+            $this->db->group_start();
+            $this->db->like('product_id', $search);
+            $this->db->or_like("product_name", $search);
+            $this->db->group_end();
+        }
+
+        $this->db->limit($row_per_page, $row_no);
+        $this->db->order_by($order_by, $order);
+        
+        $query = $this->db->get();
+        $result = $query->row()->all_count;
+
+        return $result;
+    }
+
+    public function getProductDataById($id){
+
+        $this->db->select('*');
+        $this->db->from('product_tb');
+        $this->db->where('id', $id);
+       
+        
+        $query = $this->db->get();
+        $result = $query->row();
+
+        return $result;
+    }
+
+    public function getProductStore($product_id){
+
+        $this->db->select('C.name, C.store_id');
+        $this->db->from('product_tb A');
+        $this->db->join('product_availability_tb B', 'B.product_id = A.product_id', 'left');
+        $this->db->join($this->newteishop->database.'.store_tb C', 'C.store_id = B.store_id', 'left');
+        $this->db->where('A.product_id', $product_id);
+
+        $query = $this->db->get();
+        $result = $query->result();
+
+        return $result;
+    }
+
+
+    
+
 
     public function getSchedule($category,$store_id){
 
@@ -86,10 +161,23 @@ class Stock_ordering_model extends CI_Model {
         $this->db->trans_complete();    
 	}
 
+    public function insertNewProducts($data){
+        $this->db->trans_start();
+		$this->db->insert('product_tb', $data);
+        $this->db->trans_complete();    
+	}
+
+    public function insertNewProductsStore($data){
+        $this->db->trans_start();
+		$this->db->insert('product_availability_tb', $data);
+        $this->db->trans_complete();    
+	}
+
     public function getOrderData($id){
         $this->db->select('
             B.name as store_name,
             B.store_id,
+            B.franchise_type_id,
             A.id,
             A.ship_to_address,
             E.category_id,
@@ -107,6 +195,7 @@ class Stock_ordering_model extends CI_Model {
             A.updated_delivery_receipt,
             A.updated_delivery_goods_receipt,
             A.updated_delivery_region_receipt,
+            A.franchisee_payment_detail_image,
             A.payment_detail_image,
             G.label as transport_route,
             H.region_id,
@@ -119,7 +208,6 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
         $this->db->join('order_status C', 'C.id = A.status_id', 'left');
-        $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
         $this->db->join('transportation_tb G', 'G.id = A.transportation_id', 'left');
@@ -167,11 +255,11 @@ class Stock_ordering_model extends CI_Model {
         return $orders;
     }
 
-    public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status, $store_id){
-
+    public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status, $store_id, $filter_by_store_name, $date_type, $start_date, $end_date){
         $this->db->select('
             A.id,
             B.name as store_name,
+            B.franchise_type_id,
             E.category_name,
             A.order_placement_date,
             A.requested_delivery_date,
@@ -179,8 +267,6 @@ class Stock_ordering_model extends CI_Model {
             A.order_confirmation_date,
             A.actual_delivery_date,
             C.description,
-            D.billing_id,
-            D.billing_amount,
             F.short_name,
             G.id as logistic_id,
             G.type as logistic_type, 
@@ -189,7 +275,6 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
         $this->db->join('order_status C', 'C.id = A.status_id', 'left');
-        $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
         $this->db->join('logistic_type G', 'G.id = A.logistic_type_id', 'left');
@@ -200,6 +285,16 @@ class Stock_ordering_model extends CI_Model {
 
         $this->db->where('A.status_id', $status);
 
+        if(isset($filter_by_store_name)){
+           
+            $this->db->where('B.name', $filter_by_store_name);
+        }
+
+        if((isset($date_type) && isset($start_date) && isset($end_date))){
+            $this->db->where("A.$date_type BETWEEN '$start_date' AND '$end_date'");
+          
+        }
+        
         if($search){
             $this->db->group_start();
             $this->db->like('A.id', $search);
@@ -208,7 +303,6 @@ class Stock_ordering_model extends CI_Model {
             $this->db->or_like('F.short_name', $search);
             $this->db->group_end();
         }
-
         $this->db->limit($row_per_page, $row_no);
         $this->db->order_by($order_by, $order);
 
@@ -217,13 +311,12 @@ class Stock_ordering_model extends CI_Model {
         
     }
 
-    public function getOrdersCount($search, $status, $store_id){
+    public function getOrdersCount($search, $status, $store_id, $filter_by_store_name, $date_type, $start_date, $end_date){
 
         $this->db->select('count(*) as all_count');
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
         $this->db->join('order_status C', 'C.id = A.status_id', 'left');
-        $this->db->join('billing_information_tb D', 'D.id = A.billing_information_id', 'left');
         $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
         $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
         $this->db->join('logistic_type G', 'G.id = A.logistic_type_id', 'left');
@@ -232,6 +325,17 @@ class Stock_ordering_model extends CI_Model {
             $this->db->where_in('A.store_id', $store_id);
         }
         $this->db->where('A.status_id', $status);
+
+        if(isset($filter_by_store_name)){
+           
+            $this->db->where('B.name', $filter_by_store_name);
+        }
+
+        if((isset($date_type) && isset($start_date) && isset($end_date))){
+            $this->db->where("A.$date_type BETWEEN '$start_date' AND '$end_date'");
+          
+        }
+
 
         if($search){
             $this->db->group_start();
@@ -250,7 +354,7 @@ class Stock_ordering_model extends CI_Model {
     public function getStore($user_id, $isAdmin){
 
         if($isAdmin){
-            $this->newteishop->select('store_id, name');
+            $this->newteishop->select('store_id, name, franchise_type_id');
             $this->newteishop->from('store_tb');
             $this->newteishop->where('branch_status', 1);
         }else{
@@ -258,6 +362,7 @@ class Stock_ordering_model extends CI_Model {
             $this->newteishop->select('
                 A.store_id,
                 A.name,
+                A.franchise_type_id
             ');
 
             $this->newteishop->from('store_tb A');
@@ -270,6 +375,8 @@ class Stock_ordering_model extends CI_Model {
         $query = $this->newteishop->get();
         return $query->result_array();
     }
+
+  
 
     public function getShipToAddress($id){
         $this->db->select('
@@ -325,7 +432,16 @@ class Stock_ordering_model extends CI_Model {
     public function updateOrderInfo($id, $data){
         $this->db->where('id', $id);
         $this->db->update('order_information_tb', $data);
+    }
 
+    public function updateProductData($id, $data){
+        $this->db->where('id', $id);
+        $this->db->update('product_tb', $data);
+
+    }
+
+    public function removeProductDataAvailability($data){
+        $this->db->delete('product_availability_tb', $data);
     }
 
     public function updateOrderItem($id ,$id_product, $data){
@@ -368,8 +484,16 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('product_tb');
         $this->db->where('product_id', $product_id);
 
+
         $query = $this->db->get();
         return $query->row();
+    }
+
+    public function getAllStore(){
+        $this->newteishop->select('name, store_id');
+        $this->newteishop->from('store_tb');
+        $query = $this->newteishop->get();
+        return $query->result();
     }
 
     public function getStoreId($order_id){
@@ -543,6 +667,7 @@ class Stock_ordering_model extends CI_Model {
 
         $this->db->select('*');
         $this->db->from('product_tb');
+        $this->db->where('active_status', 1);
 
         $order_query = $this->db->get();
         return $order_query->result();
@@ -597,8 +722,8 @@ class Stock_ordering_model extends CI_Model {
 
     /* End */
 
-    public function insertSiTb($data){
-        $this->db->insert_batch('multim_si_tb', $data);
+    public function insertSiTb($data, $table_name){
+        $this->db->insert_batch($table_name, $data);
     }
 
     public function getOrderMSI($search){
@@ -614,7 +739,7 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('multim_si_tb A');
         $this->db->join('order_information_tb B', 'B.id = A.order_id', 'inner');
         $this->db->where('B.payment_status_id', 1); // Payment Status 1 for unpaid
-        $this->db->where('B.status_id', 7);
+        $this->db->where('B.status_id', 8);
 
         if($search){
             $this->db->where('A.si', $search);
@@ -668,7 +793,7 @@ class Stock_ordering_model extends CI_Model {
         return $filename_prefix;
     }
 
-    public function get_delivery_schedule( $store_id){
+    public function get_delivery_schedule($store_id){
 
         $this->db->select('*');
         $this->db->from('store_schedule');
@@ -676,4 +801,29 @@ class Stock_ordering_model extends CI_Model {
         $query = $this->db->get();
         return $query->result();
     }
+
+
+    public function getFranchiseType($order_id){
+        $this->db->select('B.franchise_type_id');
+        $this->db->from('order_information_tb A');
+        $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
+        $this->db->where('A.id', $order_id);
+
+        $query = $this->db->get();
+        return $query->row();
+
+    }
+
+    public function getFranchiseTypeByStoreId($store_id){
+        $this->newteishop->select('franchise_type_id');
+        $this->newteishop->from('store_tb');
+        $this->newteishop->where_in('store_id', $store_id);
+        $this->newteishop->where('franchise_type_id', '2');
+
+
+
+        $query = $this->newteishop->get();
+        return $query->result();
+    }
+
 }

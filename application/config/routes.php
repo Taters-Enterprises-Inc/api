@@ -148,7 +148,45 @@ $route['stock/generate-multim-si-pdf/(:any)'] = 'download/multim_sales_invoice/$
 $route['stock/export-order-pdf/(:any)'] = 'download/export_order/$1';
 $route['stock/schedule/delivery'] = 'Stock_Ordering/get_schedule';
 $route['stock/update/order-items'] = 'Stock_Ordering/update_order_items';
+$route['stock/settings/products'] = 'Stock_Ordering/settings_products';
+$route['stock/settings/create-product'] = 'Stock_Ordering/settings_create_product';
+$route['stock/settings/edit-product/(:any)'] = 'Stock_Ordering/settings_edit_product/$1';
+$route['stock/settings/all-store'] = 'Stock_Ordering/get_all_store';
+$route['stock/settings/product-status'] = 'Stock_Ordering/settings_enable_product';
+$route['stock/order/franchisee-pay-bill'] = 'Stock_Ordering/franchisee_order';
 
+
+
+//HR
+$route['auth-hr/login'] = 'auth_hr/login';
+$route['auth-hr/logout'] = 'auth_hr/logout';
+$route['auth-hr/create-user'] = 'auth_hr/create_user';
+$route['auth-hr/edit-user'] = 'auth_hr/edit_user';
+$route['auth-hr/create-group'] = 'auth_hr/create_group';
+
+$route['hr/session'] = 'hr/session';
+$route['hr/action-items'] = 'hr/action_items';
+
+//HR Appraisal
+$route['hr/appraisal/performance-criteria'] = 'hr/performance_criteria';
+$route['hr/appraisal/rating-scale'] = 'hr/rating_scale';
+
+$route['hr/appraisal/kra-kpi-grade/(:any)/(:any)'] = 'hr/kra_kpi_grade/$1/$2';
+
+$route['hr/appraisal/core-competency-grade/(:any)/(:any)'] = 'hr/core_competency_grade/$1/$2';
+
+$route['hr/appraisal/functional-competency-and-punctuality-grade/(:any)/(:any)'] = 'hr/functional_competency_and_punctuality_grade/$1/$2';
+$route['hr/appraisal/attendance-and-punctuality'] = 'hr/attendance_and_punctuality';
+$route['hr/appraisal/submit'] = 'hr/submit_hr_appraisal';
+$route['hr/appraisal/kra-or-kpi'] = 'hr/kra_or_kpi';
+$route['hr/appraisal/comments/(:any)/(:any)'] = 'hr/comments/$1/$2';
+$route['hr/appraisal/response/(:any)/(:any)'] = 'hr/appraisal_response/$1/$2';
+
+$route['hr/direct-report-staff/staff/(:any)'] = 'hr/direct_report_staff/$1';
+$route['hr/direct-report-staff/action-items/(:any)'] = 'hr/direct_report_staff_action_items/$1';
+$route['hr/direct-report-staff/kras/(:any)'] = 'hr/direct_report_staff_kras/$1';
+
+$route['hr/appraisal/getter/(:any)'] = 'hr/getter/$1';
 
 //Sales
 $route['sales/fields'] = 'Sales/field';
