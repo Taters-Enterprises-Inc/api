@@ -401,11 +401,35 @@ class Stock_ordering extends CI_Controller
                 $page_no = $this->input->get('page_no') ?? 0;
                 $order = $this->input->get('order') ?? 'asc';
                 $order_by = $this->input->get('order_by') ?? 'last_updated';
+
+                $store_name = $this->input->get('store');
+                $date_type = $this->input->get('dateType');
+                $start_date = $this->input->get('startDate');
+                $end_date = $this->input->get('endDate');
+               
+                //Format start date and time
+                if(isset($start_date)){
+                    $date_parts = explode(" ", $start_date);
+                    $date_time_string = implode(" ", array_slice($date_parts, 1, 4));
+                    $date = DateTime::createFromFormat("M d Y H:i:s", $date_time_string);
+                    $start_date = $date->format("Y-m-d H:i:s");
+                }
+
+                
+                //Format end date and time
+                if(isset($end_date)){
+                    $date_parts = explode(" ", $end_date);
+                    $date_time_string = implode(" ", array_slice($date_parts, 1, 4));
+                    $date = DateTime::createFromFormat("M d Y H:i:s", $date_time_string);
+                    $end_date = $date->format("Y-m-d H:i:s");
+                }
+
                 $search = $this->input->get('search');
 
                 $user_id = $this->session->admin['user_id'];
                 $isAdmin = $this->ion_auth->is_admin();
 
+      
                 $user_store_id = array();
 
                 $store_id = $this->stock_ordering_model->getStore($user_id, $isAdmin);
@@ -418,8 +442,8 @@ class Stock_ordering extends CI_Controller
                     $page_no = ($page_no - 1) * $per_page;
                   }
                   
-                $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab, $user_store_id);
-                $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab, $user_store_id);
+                $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab, $user_store_id, $store_name, $date_type, $start_date, $end_date);
+                $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab, $user_store_id, $store_name, $date_type, $start_date, $end_date);
 
                 $franchiseType = 1; //default company owned
 
@@ -436,7 +460,7 @@ class Stock_ordering extends CI_Controller
 
                 $getOrdersBadgeCount = array_fill(0, 10, 0);
                 for($i=0; $i < 10; $i++){
-                    $getOrdersBadgeCount[$i] += $this->stock_ordering_model->getOrdersCount("", $i + 1, $user_store_id);
+                    $getOrdersBadgeCount[$i] += $this->stock_ordering_model->getOrdersCount("", $i + 1, $user_store_id, $store_name, $date_type, $start_date, $end_date);
                 }
 
                 $pagination = array(
