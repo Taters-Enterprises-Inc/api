@@ -555,6 +555,8 @@ class Stock_ordering_model extends CI_Model {
         if($user_id == 1) {
             $this->db->select('*');
             $this->db->from('order_status');
+            $this->db->order_by('id', 'asc');
+
 
             $query = $this->db->get();
             return $query->result();
@@ -569,6 +571,7 @@ class Stock_ordering_model extends CI_Model {
         $this->db->from('user_tab_combination A');
         $this->db->join('order_status B', 'B.id = A.order_status_id	');
         $this->db->where('A.user_id',$user_id);
+        $this->db->order_by('B.id', 'asc');
         
 
         $query = $this->db->get();
