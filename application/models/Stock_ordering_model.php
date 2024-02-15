@@ -351,6 +351,31 @@ class Stock_ordering_model extends CI_Model {
         
     }
 
+
+    public function getOrdersBadge($status, $store_id){
+
+        $this->db->select('count(*) as all_count');
+        $this->db->from('order_information_tb A');
+        $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
+        $this->db->join('order_status C', 'C.id = A.status_id', 'left');
+        $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
+        $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
+        $this->db->join('logistic_type G', 'G.id = A.logistic_type_id', 'left');
+
+        if($store_id){
+            $this->db->where_in('A.store_id', $store_id);
+        }
+
+        $this->db->where('A.status_id', $status);
+        
+
+        $order_query = $this->db->get();
+        return $order_query->row()->all_count;
+        
+    }
+
+
+
     public function getStore($user_id, $isAdmin){
 
         if($isAdmin){

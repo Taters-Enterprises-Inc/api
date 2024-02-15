@@ -460,7 +460,7 @@ class Stock_ordering extends CI_Controller
 
                 $getOrdersBadgeCount = array_fill(0, 10, 0);
                 for($i=0; $i < 10; $i++){
-                    $getOrdersBadgeCount[$i] += $this->stock_ordering_model->getOrdersCount("", $i + 1, $user_store_id, $store_name, $date_type, $start_date, $end_date);
+                    $getOrdersBadgeCount[$i] += $this->stock_ordering_model->getOrdersBadge($i + 1, $user_store_id);
                 }
 
                 $pagination = array(
