@@ -402,7 +402,7 @@ class Stock_ordering extends CI_Controller
                 $order = $this->input->get('order') ?? 'asc';
                 $order_by = $this->input->get('order_by') ?? 'last_updated';
 
-                $store_name = $this->input->get('store');
+                $store = json_decode($this->input->get('store'));
                 $date_type = $this->input->get('dateType');
                 $start_date = $this->input->get('startDate');
                 $end_date = $this->input->get('endDate');
@@ -437,13 +437,16 @@ class Stock_ordering extends CI_Controller
                 foreach ($store_id as $id) {
                     $user_store_id[] = $id['store_id'];
                 }
-            
+
+                $store_id = !isset($store) ? $user_store_id : $store;
+
+             
                 if($page_no != 0){
                     $page_no = ($page_no - 1) * $per_page;
                   }
                   
-                $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab, $user_store_id, $store_name, $date_type, $start_date, $end_date);
-                $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab, $user_store_id, $store_name, $date_type, $start_date, $end_date);
+                $getOrders = $this->stock_ordering_model->getOrders($page_no, $per_page, $order_by, $order, $search, $currentTab, $store_id, $date_type, $start_date, $end_date);
+                $getOrdersCount = $this->stock_ordering_model->getOrdersCount($search, $currentTab, $store_id, $date_type, $start_date, $end_date);
 
                 $franchiseType = 1; //default company owned
 
