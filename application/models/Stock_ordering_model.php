@@ -255,7 +255,7 @@ class Stock_ordering_model extends CI_Model {
         return $orders;
     }
 
-    public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status, $store_id, $filter_by_store_name, $date_type, $start_date, $end_date){
+    public function getOrders($row_no, $row_per_page, $order_by,  $order, $search, $status, $store_id, $date_type, $start_date, $end_date){
         $this->db->select('
             A.id,
             B.name as store_name,
@@ -285,11 +285,6 @@ class Stock_ordering_model extends CI_Model {
 
         $this->db->where('A.status_id', $status);
 
-        if(isset($filter_by_store_name)){
-           
-            $this->db->where('B.name', $filter_by_store_name);
-        }
-
         if((isset($date_type) && isset($start_date) && isset($end_date))){
             $this->db->where("A.$date_type BETWEEN '$start_date' AND '$end_date'");
           
@@ -311,7 +306,7 @@ class Stock_ordering_model extends CI_Model {
         
     }
 
-    public function getOrdersCount($search, $status, $store_id, $filter_by_store_name, $date_type, $start_date, $end_date){
+    public function getOrdersCount($search, $status, $store_id, $date_type, $start_date, $end_date){
 
         $this->db->select('count(*) as all_count');
         $this->db->from('order_information_tb A');
@@ -324,12 +319,8 @@ class Stock_ordering_model extends CI_Model {
         if($store_id){
             $this->db->where_in('A.store_id', $store_id);
         }
-        $this->db->where('A.status_id', $status);
 
-        if(isset($filter_by_store_name)){
-           
-            $this->db->where('B.name', $filter_by_store_name);
-        }
+        $this->db->where('A.status_id', $status);
 
         if((isset($date_type) && isset($start_date) && isset($end_date))){
             $this->db->where("A.$date_type BETWEEN '$start_date' AND '$end_date'");
@@ -350,6 +341,31 @@ class Stock_ordering_model extends CI_Model {
         return $order_query->row()->all_count;
         
     }
+
+
+    public function getOrdersBadge($status, $store_id){
+
+        $this->db->select('count(*) as all_count');
+        $this->db->from('order_information_tb A');
+        $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
+        $this->db->join('order_status C', 'C.id = A.status_id', 'left');
+        $this->db->join('category_tb E', 'E.category_id = A.order_type_id', 'left');
+        $this->db->join('payment_status_tb F', 'F.id = A.payment_status_id', 'left');
+        $this->db->join('logistic_type G', 'G.id = A.logistic_type_id', 'left');
+
+        if($store_id){
+            $this->db->where_in('A.store_id', $store_id);
+        }
+
+        $this->db->where('A.status_id', $status);
+        
+
+        $order_query = $this->db->get();
+        return $order_query->row()->all_count;
+        
+    }
+
+
 
     public function getStore($user_id, $isAdmin){
 
