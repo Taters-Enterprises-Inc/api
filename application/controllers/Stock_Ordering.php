@@ -97,13 +97,12 @@ class Stock_ordering extends CI_Controller
 
                 $category = $this->input->get('category');
 
-                $store_info = json_decode($this->input->get('store_information'));
+                $store_info = $this->input->get('store_information');
                 
                 // $store_id = 18;
                 // $category = 1;
 
-
-                $products = $this->stock_ordering_model->getProduct($category, $store_info->store_id);
+                $products = $this->stock_ordering_model->getProduct($category, $store_info['store_id']);
               
 
                 $data = array(
