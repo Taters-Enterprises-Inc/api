@@ -498,6 +498,7 @@ class Stock_ordering extends CI_Controller
             $commited_delivery_date = date('Y-m-d H:i:s', strtotime($this->input->post('commitedDelivery')));
             $product_data = $this->input->post('product_data');
             $remarks = $this->input->post('remarks');
+            $penalty   = $this->input->post('penalty');
 
             if(isset($product_data)){
                 foreach($product_data as $product){
@@ -522,8 +523,9 @@ class Stock_ordering extends CI_Controller
 
             $order_information = array(
                 'commited_delivery_date' => $commited_delivery_date,
-                'status_id' => 2,
+                'status_id' => $penalty === true ? '7' : '2',
                 'last_updated' => date('Y-m-d H:i:s'),
+                'penalty' => $penalty,
             );
 
             $updateOrderInformation = $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
@@ -557,7 +559,6 @@ class Stock_ordering extends CI_Controller
                 $order_information_id = $_POST[0]['order_information_id'];
 
                 if (empty($_POST)) {
-
                     $this->output->set_status_header('400');
                     echo json_encode(array( "message" => "No input was provided in the submission."));
                     return;
@@ -608,7 +609,8 @@ class Stock_ordering extends CI_Controller
             $product_data = $this->input->post('product_data');
 
             $isFranchisee = $this->full_franchisee_check($order_information_id);
-            
+            $order_penalty_check = $this->stock_ordering_model->orderPenaltyCheck($order_information_id);
+
 
             // Revert the set commited quantity by supplier.
             if(isset($product_data) && $status === '1'){
@@ -625,9 +627,17 @@ class Stock_ordering extends CI_Controller
 
             }
 
+            if($isFranchisee && $status !== '1'){
+                $status = '3';
+            }
+            // Just comment might need this in the future
+            // else if($order_penalty_check && $status !== '1'){
+            //     $status = '7';
+            // }
+
             $order_information = array(
                 'reviewed_date' => $reviewed_date,
-                'status_id' => $isFranchisee ? '3' : $status,
+                'status_id' => $status,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
@@ -647,6 +657,7 @@ class Stock_ordering extends CI_Controller
                 "message" => 'Sucessfully updated the order',
             );
 
+            
             header('content-type: application/json');
             echo json_encode($response);
 
@@ -704,6 +715,60 @@ class Stock_ordering extends CI_Controller
             break;
         }
     }
+
+    public function penalized_order(){
+        switch($this->input->server('REQUEST_METHOD')){
+
+            case 'POST':
+                $data =  json_decode(file_get_contents("php://input"), true);
+
+                $order_information_id = $_POST['id'];
+                $remarks = $this->input->post('remarks');                
+                $status = 4;
+
+
+                //Penalized paybill upload Billing
+                $uploaded_billing_receipt_image_name = clean_str_for_img($this->input->post('paymentFile'). '-' . time());
+
+                $uploadedBillingReceipt = explode(".", $_FILES['paymentFile']['name']);
+                $ext = end($uploadedBillingReceipt);
+                $uploaded_billing_receipt_image_name = 'penalized-paybill' . $uploaded_billing_receipt_image_name . '.' . $ext;
+
+                $uploadedBillingReceipt_error = upload('paymentFile','./assets/uploads/screenshots/',$uploaded_billing_receipt_image_name, $ext );
+
+                if($uploadedBillingReceipt_error){
+                    $this->output->set_status_header('401');
+                    echo json_encode(array( "message" => $uploadedBillingReceipt_error));
+                    return;
+                }
+
+                //Penalized paybill update order tatus
+                $order_information = array(
+                    'payment_detail_image' => $uploaded_billing_receipt_image_name,
+                    'status_id' => $status,
+                    'last_updated' => date('Y-m-d H:i:s'),
+                );
+                $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
+
+                //Penalized paybill remarks
+                $this->insert_remarks($remarks, $status, $order_information_id);
+                $this->realtime_badge();
+                $this->insert_tracking_log($status, $order_information_id);
+
+
+                $response = array(
+                    "message" => 'Sucessfully updated the order',
+                );
+    
+                header('content-type: application/json');
+                echo json_encode($response);
+            
+            break;
+        }
+    }
+
+
+
 
     
 
@@ -764,21 +829,6 @@ class Stock_ordering extends CI_Controller
 
             $productData = array();
             $index = 0;
-            
-
-            while ($this->input->post('product_data_'.$index.'_id')) {
-                $dispatchedQuantity = $this->input->post('product_data_'.$index.'_dispatchedQuantity');
-                $productId = $this->input->post('product_data_'.$index.'_productId');
-
-                $dispatched_qty_data = array(
-                    'dispatched_qty' => $dispatchedQuantity,
-                );
-
-                $this->stock_ordering_model->updateOrderItem($order_information_id, $productId, $dispatched_qty_data);
-
-                $index++;
-                
-            }
 
             $dispatch_order = $this->stock_ordering_model->updateOrderInfo($order_information_id, $order_information);
 
@@ -829,37 +879,22 @@ class Stock_ordering extends CI_Controller
             }
 
             $productData = array();
-            $index = 0;
-            while ($this->input->post('product_data_'.$index.'_id')) {
-                $deliveryQuantity = $this->input->post('product_data_'.$index.'_deliveryQuantity');
-                $productId = $this->input->post('product_data_'.$index.'_productId');
 
-                /* Code that computes the final cost per product */
+            foreach($this->input->post('product_data') as $data){
+                $total_cost = $this->compute_final_cost($data['productId'], $order_information_id, $data['deliveryQuantity'], true);
+                $product_rate = $this->compute_final_cost($data['productId'], $order_information_id, $data['deliveryQuantity'], false);
 
-                $product = $this->stock_ordering_model->getProductCost($productId);
-                $product_cost = $product->cost ?? 1; //set to 1 if not exist in the database
+                $data['total_cost'] = $total_cost;
+                $data['product_rate'] = $product_rate;
+                $data['product_id'] = $data['productId'];
+                $data['delivered_qty'] = $data['deliveryQuantity'];
+                unset($data['productId']); 
+                unset($data['deliveryQuantity']); 
 
-                $store = $this->stock_ordering_model->getStoreId($order_information_id);
-                $store_id = $store->store_id;
-                $category_id = $store->order_type_id;
-
-                $store_multiplier = $this->stock_ordering_model->getProductMultiplier($store_id, $category_id);
-
-                $multiplier = $store_multiplier->product_multiplier ?? 1; //set to 1 if not exist in the database
-
-                /* END */
-
-                $delivered_qty_data = array(
-                    'delivered_qty' => $deliveryQuantity,
-                    'product_rate' => $product_cost * $multiplier,
-                    'total_cost' => $product_cost * $multiplier * $deliveryQuantity
-                );
-
-                $this->stock_ordering_model->updateOrderItem($order_information_id, $productId, $delivered_qty_data);
-
-                $index++;
-                
+                $productData[] = $data;
             }
+
+            $this->stock_ordering_model->updateOrderItemBatch($productData);           
 
             $order_information = array(
                 'updated_delivery_receipt' => $updated_delivery_receipt_image_name,
@@ -966,15 +1001,14 @@ class Stock_ordering extends CI_Controller
             $data =  json_decode(file_get_contents("php://input"), true);
 
             $order_information_id = $this->input->post('id');
-            $updated_si = $this->input->post('uploadedReceipt');
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
-            $with_new_si = $this->input->post('withNewSI');
             $status = 8;
             $message = "";
 
             $uploadedGoodsReceipt_image_name = null;
             $uploadedRegionReceipt_image_name = null;
+            $uploadedPenaltyReceipt_image_name = null;
             // Updated Sales Invoice
             if(isset($_FILES['uploadedGoodsReceipt'])){
 
@@ -1014,10 +1048,39 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
+            if(isset($_FILES['uploadedPenaltyReceipt'])){
+
+                $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_id,'penalty');
+
+                $uploadedPenaltyReceipt_image_name = clean_str_for_img($this->input->post('uploadedPenaltyReceipt'). '-' . time());
+
+                $uploadedPenaltyReceipt = explode(".", $_FILES['uploadedPenaltyReceipt']['name']);
+                $ext = end($uploadedPenaltyReceipt);
+                $uploadedPenaltyReceipt_image_name = $file_name_prefix . $uploadedPenaltyReceipt_image_name . '.' . $ext;
+
+                $uploadedPenaltyReceipt_error = upload('uploadedPenaltyReceipt','./assets/uploads/screenshots/',$uploadedPenaltyReceipt_image_name, $ext );
+
+                if($uploadedPenaltyReceipt_error){
+                $this->output->set_status_header('401');
+                echo json_encode(array( "message" => $uploadedPenaltyReceipt_error));
+                return;
+                }
+
+                $path = './assets/uploads/screenshots/'.$uploadedPenaltyReceipt_image_name;
+                $import_si = $this->import_si($order_information_id, $path, 'multim_si_tb');
+
+                if ($import_si) {
+                    $this->output->set_status_header('401');
+                    echo json_encode(array( "message" => $import_si));
+                    return;
+                }
+            }
+
             $order_information_data = array(
                 "status_id"   => $status,
                 'updated_delivery_goods_receipt' => $uploadedGoodsReceipt_image_name ?? null,
                 'updated_delivery_region_receipt' => $uploadedRegionReceipt_image_name ?? null,
+                'updated_delivery_penalty_receipt' => $uploadedPenaltyReceipt_image_name ?? null,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
 
@@ -1074,42 +1137,44 @@ class Stock_ordering extends CI_Controller
 
             $payment_detail_image = $this->input->post('paymentDetailImage');
             $remarks = $this->input->post('remarks');
+            $selectedData = $this->input->post('selectedData');
             $user_id = $this->session->admin['user_id'];
             $status = 9;
 
             $index = 0;
 
             $order_information_data = array();
-            while($this->input->post('selectedData_'.$index.'_orderId')){
-                $order_information_data[$index]['order_id'] = $this->input->post('selectedData_'.$index.'_orderId');
-                $order_information_data[$index]['invoice'] = $this->input->post('selectedData_'.$index.'_invoice');
-                $index++;
-            }
 
-            for($i=0; $i < count($order_information_data); $i++){
-                if($order_information_data[$i]['order_id'] != $order_information_data[0]['order_id']){
-                        $this->output->set_status_header('400');
-                        echo json_encode(array( "message" => "Invalid OrderId. Select Invoice Number with the same orderId"));
-                        return;
+            if(isset($selectedData)){
+                foreach($selectedData as $data){
+                    $order_information_data[] = $data;
                 }
             }
+
+            foreach($order_information_data as $orderData){
+               if($orderData['orderId'] !== $order_information_data[0]['orderId']){
+                    $this->output->set_status_header('400');
+                    echo json_encode(array( "message" => "Invalid OrderId. Select Invoice Number with the same orderId"));
+                    return;
+               }
+            }
             
-            $order_information_OrderId = $order_information_data[0]['order_id'];
+            $order_information_OrderId = $order_information_data[0]['orderId'];
 
             $file_name_prefix = $this->stock_ordering_model->filename_factory_prefix($order_information_OrderId,'');
             $payment_detail_image_name = clean_str_for_img($this->input->post('paymentFile'). '-' . time());
 
             $payment_detail_image = explode(".", $_FILES['paymentFile']['name']);
             $ext = end($payment_detail_image);
-            $payment_detail_image_name = $file_name_prefix . $payment_detail_image_name . '.' . $ext;
+            $payment_detail_image_name = $file_name_prefix. '_PAYMENT_' . $payment_detail_image_name . '.' . $ext;
             $path = './assets/uploads/screenshots/'.$payment_detail_image_name;
 
             $payment_detail_image_name_error = upload('paymentFile','./assets/uploads/screenshots/',$payment_detail_image_name, $ext );
 
             if($payment_detail_image_name_error){
-            $this->output->set_status_header('401');
-            echo json_encode(array( "message" => $payment_detail_image_name_error));
-            return;
+                $this->output->set_status_header('401');
+                echo json_encode(array( "message" => $payment_detail_image_name_error));
+                return;
             }
 
             $import = $this->import_pay_bill_payment($path, $order_information_data);
@@ -1120,9 +1185,10 @@ class Stock_ordering extends CI_Controller
                 return;
             }
 
+
             $order_information = array(
                 'payment_detail_image' => $payment_detail_image_name,
-                "status_id"   => $status,
+                "status_id"   => 9,
                 'last_updated' => date('Y-m-d H:i:s'),
             );
             
@@ -1159,7 +1225,13 @@ class Stock_ordering extends CI_Controller
             $remarks = $this->input->post('remarks');
             $user_id = $this->session->admin['user_id'];
             $status = $this->input->post('status');
-          
+            
+            $panalty = $this->stock_ordering_model->orderPenaltyCheck($order_information_id);
+
+
+            if($penalty && $status !== '8'){
+                $status = '4';
+            }
 
             $order_information = array(
                 'payment_confirmation_date' => $payment_confirmation_date,
@@ -1639,6 +1711,7 @@ class Stock_ordering extends CI_Controller
                     $wtax_amt      = $worksheet->getCellByColumnAndRow(4, $row)->getValue();
 
                     $data[] = array(
+                        "order_id" => $order_information_data[0]['orderId'],
                         "selected" => $selected,
                         "reference_no" => $reference_no,
                         "ap_total" => $ap_total,
@@ -1676,10 +1749,9 @@ class Stock_ordering extends CI_Controller
                 }
             }
 
-            if (isset($import)) {
-                $this->stock_ordering_model->insertPayBillPaymentTb($data);
-            } 
+            $this->stock_ordering_model->insertPayBillPaymentTb($data);
         }
+
 
         return $message;
     }
@@ -1759,6 +1831,28 @@ class Stock_ordering extends CI_Controller
                   echo json_encode($response);
             break;
         }
+    }
+
+    public function compute_final_cost($productId, $order_information_id, $deliveryQuantity, $isTotalCost){
+        /* Code that computes the final cost per product */
+
+         $product = $this->stock_ordering_model->getProductCost($productId);
+         $product_cost = $product->cost ?? 1; //set to 1 if not exist in the database
+
+         $store = $this->stock_ordering_model->getStoreId($order_information_id);
+         $store_id = $store->store_id;
+         $category_id = $store->order_type_id;
+
+         $store_multiplier = $this->stock_ordering_model->getProductMultiplier($store_id, $category_id);
+
+         $multiplier = $store_multiplier->product_multiplier ?? 1; //set to 1 if not exist in the database
+        
+         if($isTotalCost){
+            return $product_cost * $multiplier * $deliveryQuantity;
+         }else{
+            return $product_cost * $multiplier;
+         }
+
     }
    
   

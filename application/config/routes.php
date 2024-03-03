@@ -154,6 +154,7 @@ $route['stock/settings/edit-product/(:any)'] = 'Stock_Ordering/settings_edit_pro
 $route['stock/settings/all-store'] = 'Stock_Ordering/get_all_store';
 $route['stock/settings/product-status'] = 'Stock_Ordering/settings_enable_product';
 $route['stock/order/franchisee-pay-bill'] = 'Stock_Ordering/franchisee_order';
+$route['stock/order/penalized-pay-bill'] = 'Stock_Ordering/penalized_order';
 
 
 

@@ -202,8 +202,9 @@ class Stock_ordering_model extends CI_Model {
             I.region_name,
             A.status_id,
             J.id as logistic_id,
-            J.type as logistic_type, 
-
+            J.type as logistic_type,
+            A.penalty,
+            A.payment_status_id,
         ');
         $this->db->from('order_information_tb A');
         $this->db->join($this->newteishop->database.'.store_tb B', 'B.store_id = A.store_id', 'left');
@@ -464,6 +465,10 @@ class Stock_ordering_model extends CI_Model {
         $this->db->where('order_information_id', $id);
         $this->db->where('product_id', $id_product);
         $this->db->update('order_item_tb', $data);
+    }
+
+    public function updateOrderItemBatch($data){
+        $this->db->update_batch('order_item_tb', $data, 'id');
     }
 
     public function insertNewOrderitem($data){
@@ -840,6 +845,19 @@ class Stock_ordering_model extends CI_Model {
 
         $query = $this->newteishop->get();
         return $query->result();
+    }
+
+    public function orderPenaltyCheck($id){
+        $this->db->select('penalty');
+        $this->db->from('order_information_tb');
+        $this->db->where('id', $id);
+
+        $query = $this->db->get();
+
+        
+    
+        return $query->row()->penalty === 1 ? true : false;
+
     }
 
 }
