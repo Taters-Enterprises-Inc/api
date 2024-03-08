@@ -372,6 +372,9 @@ $route['admin/dashboard/customer-feedback/ratings'] = 'admin/customer_feedback_r
 $route['admin/region-store-combination'] = 'admin/region_store_combination';
 $route['admin/locales'] = 'admin/locales';
 
+//Ticketing
+$route['ticketing/tickets'] = 'ticketing/tickets';
+
 //Notification
 $route['notification'] = 'notification';
 $route['notification/(:num)/seen'] = 'notification/seen/$1';
