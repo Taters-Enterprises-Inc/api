@@ -596,7 +596,7 @@ class Hr extends CI_Controller
                                 'user_id' => $evaluatee_id,
                                 'module_id' => 1,
                                 'item_id' => 7,
-                                'status' => 1,
+                                'status' => 5,
                                 'dateupdated' => date('Y-m-d H:i:s',time() + 1)
                             );
             
