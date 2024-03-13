@@ -1,4 +1,6 @@
-<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+if (!defined('BASEPATH')) exit('No direct script access allowed');
+
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Authorization");
@@ -8,8 +10,9 @@ date_default_timezone_set('Asia/Manila');
 
 class Ticketing extends CI_Controller
 {
-	public function __construct(){
-		parent::__construct();
+    public function __construct()
+    {
+        parent::__construct();
 
         $this->load->library('form_validation');
         $this->load->library('excel');
@@ -20,35 +23,49 @@ class Ticketing extends CI_Controller
         $this->bsc_auth->set_error_delimiters('', '');
 
         $this->lang->load('auth');
-		//$this->load->model('stock_ordering_model');
         $this->load->model('ticketing_model');
-	}
+    }
 
-    public function tickets(){
-
+    public function tickets()
+    {
         // FOR TESTING PURPOSES ONLY
         // echo "This is working!";
         // $ticket = $this->ticketing_model->getTickets();
         // print_r($ticket);
         // die();
 
-        switch($this->input->server('REQUEST_METHOD')){
+        switch ($this->input->server('REQUEST_METHOD')) {
             case 'GET':
+                $per_page = $this->input->get('per_page') ?? 25;
+                $page_no = $this->input->get('page_no') ?? 0;
+                $status = $this->input->get('status') ?? null;
+                $order = $this->input->get('order') ?? 'desc';
+                $order_by = $this->input->get('order_by') ?? 'id'; // 👈 change 'id' to change the default ordering
+                $search = $this->input->get('search');
 
-            $ticket = $this->ticketing_model->getTickets();
+                if ($page_no != 0) {
+                    $page_no = ($page_no - 1) * $per_page;
+                }
 
-            $data = array(
-                "tickets" => $ticket,
-            );
+                $tickets_count = $this->ticketing_model->getTicketsCount($status, $search);
+                $tickets = $this->ticketing_model->getTickets($page_no, $per_page, $status, $order_by, $order, $search);
 
-            $response = array(
-                "message" => 'Successfully fetch all tickets',
-                "data"    => $data, 
-            );
-            
-            header('content-type: application/json');
-            echo json_encode($response);
-            break;
+                $pagination = array(
+                    "total_rows" => $tickets_count,
+                    "per_page" => $per_page,
+                );
+
+                $response = array(
+                    "message" => 'Successfully fetch all tickets',
+                    "data"    => array(
+                        "pagination" => $pagination,
+                        "tickets" => $tickets,
+                    ),
+                );
+
+                header('content-type: application/json');
+                echo json_encode($response);
+                return;
         }
     }
 }
