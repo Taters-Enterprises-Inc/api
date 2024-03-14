@@ -12,6 +12,7 @@ class Ticketing_model extends CI_Model {
     $this->db->select('
       T.id, 
       T.status,
+      T.department_id,
       TI.ticket_title
     ');
     $this->db->from('tickets T');
