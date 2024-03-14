@@ -28,7 +28,7 @@ class Ticketing extends CI_Controller
 
     public function tickets()
     {
-        // FOR TESTING PURPOSES ONLY
+        // USE THIS CODE FOR TESTING
         // echo "This is working!";
         // $ticket = $this->ticketing_model->getTickets();
         // print_r($ticket);
@@ -47,8 +47,8 @@ class Ticketing extends CI_Controller
                     $page_no = ($page_no - 1) * $per_page;
                 }
 
-                $tickets_count = $this->ticketing_model->getTicketsCount($status, $search);
-                $tickets = $this->ticketing_model->getTickets($page_no, $per_page, $status, $order_by, $order, $search);
+                $tickets_count = $this->ticketing_model->getAllTicketsCount($status, $search);
+                $tickets = $this->ticketing_model->getAllTickets($page_no, $per_page, $status, $order_by, $order, $search);
 
                 $pagination = array(
                     "total_rows" => $tickets_count,
@@ -57,6 +57,43 @@ class Ticketing extends CI_Controller
 
                 $response = array(
                     "message" => 'Successfully fetch all tickets',
+                    "data"    => array(
+                        "pagination" => $pagination,
+                        "tickets" => $tickets,
+                    ),
+                );
+
+                header('content-type: application/json');
+                echo json_encode($response);
+                return;
+        }
+    }
+
+    public function my_tickets()
+    {
+        switch ($this->input->server('REQUEST_METHOD')) {
+            case 'GET':
+                $per_page = $this->input->get('per_page') ?? 25;
+                $page_no = $this->input->get('page_no') ?? 0;
+                $status = $this->input->get('status') ?? null;
+                $order = $this->input->get('order') ?? 'desc';
+                $order_by = $this->input->get('order_by') ?? 'id'; // 👈 change 'id' to change the default ordering
+                $search = $this->input->get('search');
+
+                if ($page_no != 0) {
+                    $page_no = ($page_no - 1) * $per_page;
+                }
+
+                $tickets_count = $this->ticketing_model->getMyTicketsCount($status, $search);
+                $tickets = $this->ticketing_model->getMyTickets($page_no, $per_page, $status, $order_by, $order, $search);
+
+                $pagination = array(
+                    "total_rows" => $tickets_count,
+                    "per_page" => $per_page,
+                );
+
+                $response = array(
+                    "message" => 'Successfully fetch my tickets',
                     "data"    => array(
                         "pagination" => $pagination,
                         "tickets" => $tickets,
