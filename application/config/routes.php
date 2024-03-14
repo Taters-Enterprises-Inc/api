@@ -374,6 +374,7 @@ $route['admin/locales'] = 'admin/locales';
 
 //Ticketing
 $route['ticketing/tickets'] = 'ticketing/tickets';
+$route['ticketing/my-tickets'] = 'ticketing/my_tickets';
 
 //Notification
 $route['notification'] = 'notification';
