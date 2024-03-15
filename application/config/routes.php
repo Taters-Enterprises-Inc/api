@@ -259,10 +259,13 @@ $route['admin/admin-catering-privilege'] = 'admin/admin_catering_privilege';
 $route['admin/partner-company-employee-id-number'] = 'admin/partner_company_employee_id_number';
 
 $route['admin/catering-update-status'] = 'admin/catering_update_status';
+$route['admin/catering-override-event-date'] = 'admin/catering_override_event_date';
 $route['admin/catering'] = 'admin/catering';
 $route['admin/catering/(:any)'] = 'admin/catering_order/$1';
 $route['admin/catering-update-order-item-remarks'] = 'admin/catering_update_order_item_remarks';
 $route['admin/catering-package-flavors/(:num)'] = 'admin/catering_package_flavors/$1';
+$route['admin/catering/overrides/(:num)'] = 'admin/catering_transaction_overrides/$1';
+$route['admin/catering/overrides/approve'] = 'admin/catering_transaction_override_approve';
 
 $route['admin/print_view/(:any)'] = 'admin/print_view/$1';
 $route['admin/print_asdoc/(:any)'] = 'admin/print_asdoc/$1';

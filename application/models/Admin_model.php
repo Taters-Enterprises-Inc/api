@@ -6,6 +6,47 @@ class Admin_model extends CI_Model
         $this->bsc_db = $this->load->database('bsc', TRUE, TRUE);
     }
 
+    public function updateCateringTransactionOverride($transaction_id, $data){
+        $this->db->where('id', $transaction_id);
+        $this->db->update("catering_transaction_tb", $data);
+    }
+
+    public function approveCateringTransactionOverride($override_id){
+		$this->db->set('status', 1);
+        $this->db->where('id', $override_id);
+        $this->db->update("catering_transaction_override");
+    }
+
+    public function getCateringTransactionOverrides($transaction_id){
+        $this->db->select('A.id, A.start_datetime, A.end_datetime, CONCAT(B.first_name," ",B.last_name) as user, A.status');
+        
+        $this->db->from('catering_transaction_override A');
+        $this->db->join('users B', 'B.id = A.user_id');
+        
+        $this->db->where('A.catering_transaction_id', $transaction_id);
+  
+        $query = $this->db->get();
+        return $query->result();
+    }
+
+	public function insertCateringTransactionOverride($data){
+        $this->db->trans_start();
+		$this->db->insert('catering_transaction_override', $data);
+        $this->db->trans_complete();
+	}
+
+	public function getCateringOverlappingTransaction($start_datetime){
+        $this->db->select("start_datetime, end_datetime");
+        $this->db->from('catering_transaction_tb');
+
+        $this->db->where('DATE_ADD(FROM_UNIXTIME(end_datetime), INTERVAL 3 HOUR) >=', date('Y-m-d H:i:s',$start_datetime));
+        $this->db->where('DATE_SUB(FROM_UNIXTIME(start_datetime), INTERVAL 3 HOUR) <=', date('Y-m-d H:i:s',$start_datetime));
+        $query = $this->db->get();
+
+		return $query->row();
+	}
+    
+
     public function getCustomerFeedBackAveragePerRatingsGroupsQuestion($question_id, $group_id, $store_id, $startDate, $endDate){
         $this->bsc_db->select('E.lowest_rate, E.highest_rate,AVG(A.rate) as avg');
             
@@ -3450,12 +3491,17 @@ class Admin_model extends CI_Model
 
             E.name AS discount_name,
             E.percentage AS discount_percentage,
+
+            F.id AS override_id,
+            F.user_approver_id AS approver_id,
+            F.status AS override_status,
         ");
         $this->db->from('catering_transaction_tb A');
         $this->db->join('catering_client_tb B', 'B.id = A.client_id');
         $this->db->join('store_tb C', 'C.store_id = A.store');
         $this->db->join('discount_users D', 'D.id = A.discount_user_id','left');
         $this->db->join('discount E', 'E.id = D.discount_id','left');
+        $this->db->join('catering_transaction_override F', 'F.catering_transaction_id = A.id','left');
         $this->db->where('A.tracking_no', $tracking_no);
 
         $query = $this->db->get();

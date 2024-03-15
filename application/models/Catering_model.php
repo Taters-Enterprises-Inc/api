@@ -7,6 +7,17 @@ class Catering_model extends CI_Model
 		$this->db =  $this->load->database('default', TRUE, TRUE);
         $this->bscDB = $this->load->database('bsc', TRUE, TRUE);
     }
+
+	public function getOverlappingTransaction($start_datetime){
+        $this->db->select("start_datetime, end_datetime");
+        $this->db->from('catering_transaction_tb');
+
+        $this->db->where('DATE_ADD(FROM_UNIXTIME(end_datetime), INTERVAL 3 HOUR) >=', date('Y-m-d H:i:s',$start_datetime));
+        $this->db->where('DATE_SUB(FROM_UNIXTIME(start_datetime), INTERVAL 3 HOUR) <=', date('Y-m-d H:i:s',$start_datetime));
+        $query = $this->db->get();
+
+		return $query->row();
+	}
     
     public function getUserCateringBookingHistoryCount($type, $id, $search){
         $this->db->select('count(*) as all_count');

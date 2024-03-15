@@ -32,6 +32,99 @@ class Admin extends CI_Controller{
 
 	}
 
+
+  
+  public function catering_transaction_override_approve(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST': 
+        $_POST = json_decode(file_get_contents("php://input"), true);
+        $override_id = (int) $this->input->post('overrideId');
+        $transaction_id = (int) $this->input->post('transactionId');
+        $start_datetime = $this->input->post('startDate');
+        $end_datetime = $this->input->post('endDate');
+
+        $data = array(
+          "serving_time" => $start_datetime,
+          "start_datetime" => $start_datetime,
+          "end_datetime" => $end_datetime
+        );
+
+        $this->admin_model->approveCateringTransactionOverride($override_id);
+        $this->admin_model->updateCateringTransactionOverride($transaction_id, $data);
+
+        header('content-type: application/json');
+        echo json_encode(array( "message" => 'Successfully override event date!'));
+        return;
+    }
+
+  }
+
+  public function catering_transaction_overrides($transaction_id){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'GET':
+
+        $catering_overrides = $this->admin_model->getCateringTransactionOverrides($transaction_id);
+
+        $response = array(
+          "message" => 'Successfully fetch catering overrides',
+          "data" => $catering_overrides,
+        );
+  
+        header('content-type: application/json');
+        echo json_encode($response);
+        break;
+    }
+  }
+
+  
+  public function catering_override_event_date(){
+    switch($this->input->server('REQUEST_METHOD')){
+      case 'POST': 
+        date_default_timezone_set('Asia/Manila');
+        
+        $_POST = json_decode(file_get_contents("php://input"), true);
+        $user_id = $this->session->admin['user_id'];
+        $trans_id = (int) $this->input->post('transactionId');
+        $startDate = $this->input->post('startDate');
+        $endDate = $this->input->post('endDate');
+
+				$startDateTimeUnix = strtotime($startDate);
+				$endDateTimeUnix = strtotime($endDate);
+
+				$checkOverLapping = $this->admin_model->getCateringOverlappingTransaction($startDateTimeUnix);
+
+				if(isset($checkOverLapping)){
+
+					$response = array(
+						'message' => 'Overlapping booking'
+					);
+					
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode($response);
+					return;
+				}
+
+        
+
+        $data = array(
+          "catering_transaction_id" => $trans_id,
+          "user_id" => $user_id,
+          "user_approver_id" => 1,
+          "start_datetime" => $startDateTimeUnix,
+          "end_datetime" => $endDateTimeUnix,
+        );
+
+        $this->admin_model->insertCateringTransactionOverride($data);
+
+
+        header('content-type: application/json');
+        echo json_encode(array( "message" => 'Successfully override event date!'));
+        return;
+    }
+
+  }
+
   public function customer_feedback_ratings(){
     switch($this->input->server('REQUEST_METHOD')){
       case 'GET':

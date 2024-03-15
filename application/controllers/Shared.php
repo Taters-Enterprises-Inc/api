@@ -238,6 +238,8 @@ class Shared extends CI_Controller {
 	public function session(){
 		switch($this->input->server('REQUEST_METHOD')){
 			case 'GET':
+                // $query_result = $this->catering_model->getOverlappingTransaction(1711569600);
+				// $data = array('query_result' => $query_result);
 				$data = array(
 					'popclub_data' 						=> $this->session->popclub_data,
 					'cache_data' 						=> $this->session->cache_data,
@@ -253,6 +255,7 @@ class Shared extends CI_Controller {
 					"minimum_rate"						=> $this->session->minimum_rate,
 					"catering_delivery_rate"			=> $this->session->catering_delivery_rate,
 					"catering_minimum_rate"				=> $this->session->catering_minimum_rate,
+					"catering_type"						=> $this->session->catering_type,
 					"catering_start_date"				=> $this->session->catering_start_date,
 					"catering_end_date"					=> $this->session->catering_end_date,
 					"catering_night_differential_fee"	=> $this->session->catering_night_differential_fee,
