@@ -36,6 +36,9 @@ class Admin_model extends CI_Model
 	}
 
 	public function getCateringOverlappingTransaction($start_datetime){
+        // Set timezone for the database connection to Asia/Manila
+        $this->db->query("SET time_zone = '+08:00'"); // Manila timezone offset is UTC+8
+        
         $this->db->select("start_datetime, end_datetime");
         $this->db->from('catering_transaction_tb');
 
