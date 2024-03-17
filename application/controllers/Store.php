@@ -59,21 +59,22 @@ class Store extends CI_Controller {
 				echo json_encode($response);
 				break;
 			case 'POST':
-				date_default_timezone_set('Asia/Manila');
 				$_POST = json_decode(file_get_contents("php://input"), true);
 
-				$start_date = $this->input->post('cateringStartDate');
+				$start_datetime = $this->input->post('cateringStartDate');
+				$end_datetime = $this->input->post('cateringEndDate');
 
 				
-				$unix = strtotime($start_date);
+				$unix_starting_datetime = strtotime($start_datetime);
+				$unix_end_datetime = strtotime($end_datetime);
 
-				$checkOverLapping = $this->catering_model->getOverlappingTransaction($unix);
+				$checkOverLapping = $this->catering_model->getOverlappingTransaction($unix_starting_datetime, $unix_end_datetime);
 
 				if(isset($checkOverLapping)){
 
 
 					$response = array(
-						'message' => 'Overlapping booking'
+						'message' => "This date is unavailable for booking. We're currently prioritizing reservations for our valued customers."
 					);
 					
 					$this->output->set_status_header('401');
