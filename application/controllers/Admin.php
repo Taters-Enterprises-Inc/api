@@ -87,16 +87,17 @@ class Admin extends CI_Controller{
         $trans_id = (int) $this->input->post('transactionId');
         $startDate = $this->input->post('startDate');
         $endDate = $this->input->post('endDate');
+        $storeId = $this->input->post('storeId');
 
 				$startDateTimeUnix = strtotime($startDate);
 				$endDateTimeUnix = strtotime($endDate);
 
-				$checkOverLapping = $this->admin_model->getCateringOverlappingTransaction($startDateTimeUnix);
+				$checkOverLapping = $this->admin_model->getCateringOverlappingTransaction($startDateTimeUnix, $endDateTimeUnix, $storeId);
 
 				if(isset($checkOverLapping)){
 
 					$response = array(
-						'message' => 'Overlapping booking'
+						'message' => "This date is unavailable for booking. We're currently prioritizing reservations for our valued customers."
 					);
 					
 					$this->output->set_status_header('401');

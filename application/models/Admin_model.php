@@ -35,15 +35,21 @@ class Admin_model extends CI_Model
         $this->db->trans_complete();
 	}
 
-	public function getCateringOverlappingTransaction($start_datetime){
-        // Set timezone for the database connection to Asia/Manila
-        $this->db->query("SET time_zone = '+08:00'"); // Manila timezone offset is UTC+8
-        
-        $this->db->select("start_datetime, end_datetime");
+	public function getCateringOverlappingTransaction($start_datetime, $end_datetime, $store_id){
+        $this->db->select("tracking_no, start_datetime, end_datetime");
         $this->db->from('catering_transaction_tb');
 
-        $this->db->where('DATE_ADD(FROM_UNIXTIME(end_datetime), INTERVAL 3 HOUR) >=', date('Y-m-d H:i:s',$start_datetime));
-        $this->db->where('DATE_SUB(FROM_UNIXTIME(start_datetime), INTERVAL 3 HOUR) <=', date('Y-m-d H:i:s',$start_datetime));
+        $adjusted_start_datetime = strtotime("-3 hours", $start_datetime);
+        $adjusted_end_datetime = strtotime("+3 hours", $end_datetime);
+
+        // Condition to check for overlapping transactions
+        $this->db->where("(
+            (start_datetime <= $adjusted_end_datetime AND end_datetime >= $adjusted_start_datetime) OR 
+            (start_datetime >= $adjusted_start_datetime AND start_datetime <= $end_datetime) OR 
+            (end_datetime >= $adjusted_start_datetime AND end_datetime <= $end_datetime)
+        )");
+        $this->db->where("store", $store_id);
+
         $query = $this->db->get();
 
 		return $query->row();

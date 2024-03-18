@@ -8,7 +8,7 @@ class Catering_model extends CI_Model
         $this->bscDB = $this->load->database('bsc', TRUE, TRUE);
     }
 
-	public function getOverlappingTransaction($start_datetime, $end_datetime){
+	public function getOverlappingTransaction($start_datetime, $end_datetime, $store_id){
         $this->db->select("tracking_no, start_datetime, end_datetime");
         $this->db->from('catering_transaction_tb');
 
@@ -21,6 +21,7 @@ class Catering_model extends CI_Model
             (start_datetime >= $adjusted_start_datetime AND start_datetime <= $end_datetime) OR 
             (end_datetime >= $adjusted_start_datetime AND end_datetime <= $end_datetime)
         )");
+        $this->db->where("store", $store_id);
 
         $query = $this->db->get();
 

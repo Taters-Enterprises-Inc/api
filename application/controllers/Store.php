@@ -63,12 +63,13 @@ class Store extends CI_Controller {
 
 				$start_datetime = $this->input->post('cateringStartDate');
 				$end_datetime = $this->input->post('cateringEndDate');
+				$store_id = $this->input->post('storeId');
 
 				
 				$unix_starting_datetime = strtotime($start_datetime);
 				$unix_end_datetime = strtotime($end_datetime);
 
-				$checkOverLapping = $this->catering_model->getOverlappingTransaction($unix_starting_datetime, $unix_end_datetime);
+				$checkOverLapping = $this->catering_model->getOverlappingTransaction($unix_starting_datetime, $unix_end_datetime, $store_id);
 
 				if(isset($checkOverLapping)){
 
