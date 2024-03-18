@@ -496,9 +496,54 @@ class Stock_ordering_model extends CI_Model {
         $this->db->trans_complete();
     }
 
-    //-----Flag for remove-----
+    public function insertToPriceIncrease_tb($data){
+        $this->db->trans_start();
+		$this->db->insert('price_increase_tb', $data);
+		$insert_id = $this->db->insert_id();
+        $this->db->trans_complete();
+		return $insert_id;
+	}
 
-    //========================
+    public function insertToPriceIncreaseRegions($data){
+        $this->db->insert_batch("locality_region_combination", $data);
+    }
+
+    public function getStoresProductPriceIncrease($product_id, $store_id, $effectivity_date = null, $end_date = null){
+
+        $this->db->select('region_id');
+        $this->db->from('store_region_combination');
+        $this->db->where('store_id', $store_id);
+        $region_query = $this->db->get();
+        $store_region = $region_query->row();
+
+
+        $this->db->select('
+            A.product_id,
+            (CASE 
+                WHEN A.effectivity_date <= CURRENT_DATE AND A.end_date > CURRENT_DATE THEN B.cost + A.increase_amount
+                ELSE B.cost
+            END) AS new_price,
+            MAX(A.effectivity_date) as latest_date,
+            A.end_date,
+            C.region_id
+        ');
+        $this->db->from('price_increase_tb A');
+        $this->db->join('product_tb B', "B.product_id = A.product_id", 'left');
+        $this->db->join('locality_region_combination C', 'C.price_increase_id = A.id', 'left');
+        $this->db->where('A.product_id', $product_id);
+        $this->db->where('C.region_id', $store_region->region_id);
+    
+        if($effectivity_date !== NULL){
+            $this->db->where('A.effectivity_date <=', $effectivity_date);
+        }
+    
+        $this->db->group_by('A.product_id');
+        
+        $query = $this->db->get();
+        return $query->row();
+    }
+    
+    
 
     public function getProductCost($product_id){
         $this->db->select('cost');
@@ -859,5 +904,7 @@ class Stock_ordering_model extends CI_Model {
         return $query->row()->penalty === 1 ? true : false;
 
     }
+
+
 
 }

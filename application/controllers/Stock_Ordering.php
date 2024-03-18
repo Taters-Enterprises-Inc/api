@@ -1262,6 +1262,73 @@ class Stock_ordering extends CI_Controller
     }
 
 
+    public function price_increase(){
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST':
+            $_POST =  json_decode(file_get_contents("php://input"), true);
+
+            $region_ids = $this->input->post('region_id');
+            $product_id = $this->input->post('product_id');
+            $increase_amount = $this->input->post('increase_amount');
+            $effectivity_date = $this->input->post('effectivity_date');
+            $end_date = $this->input->post('end_date');
+
+
+            $data = array(
+                'product_id' => $product_id,
+                'increase_amount' => $increase_amount,
+                'effectivity_date' => $effectivity_date,
+                'end_date' => $end_date,  
+            );
+
+            
+            $priceIncreaseId = $this->stock_ordering_model->insertToPriceIncrease_tb($data);
+
+            $region_data = array();
+            
+             foreach($region_ids as $id){
+
+                $region_data[] = array(
+                    'region_id' => $id,
+                    'price_increase_id' => $priceIncreaseId
+                );
+    
+             }
+            
+            $this->stock_ordering_model->insertToPriceIncreaseRegions($region_data);
+
+         
+
+            $response = array(
+                "message" => 'Successfully inserted new price',
+            );
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+
+
+            case 'GET': 
+            
+                $product_id = $this->input->get('productId');
+                $store_id = $this->input->get('storeId');
+                $effectitivity_date = $this->input->get('effectivity_date');
+                $end_date = $this->input->get('end_date');
+
+
+
+            $data = $this->stock_ordering_model->getStoresProductPriceIncrease($product_id, $store_id,$effectitivity_date,$end_date);
+
+            $response = array(
+                "message" => 'Successfully fetched new price',
+                "data" => $data,
+            );
+            header('content-type: application/json');
+            echo json_encode($response);
+            break;
+        }
+    }
+
+
     public function cancelled_order(){
         switch($this->input->server('REQUEST_METHOD')){
             case 'POST':
