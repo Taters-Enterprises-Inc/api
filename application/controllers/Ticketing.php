@@ -105,4 +105,41 @@ class Ticketing extends CI_Controller
                 return;
         }
     }
+
+    public function submit_ticket()
+    {
+        switch($this->input->server('REQUEST_METHOD')){
+            case 'POST': 
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+                
+                $department_id = $this->input->post('departmentId');
+                if ($department_id === null) {
+                    $department_id = 0;
+                }
+
+                $ticket_data = array(
+                    'department_id' => $department_id,
+                    'status'        => 1,
+                );
+
+                $ticket_id = $this->ticketing_model->insertTicket($ticket_data);
+
+                $ticket_information = array(
+                    'ticket_id'    => $ticket_id,
+                    'ticket_title'  => $this->input->post('ticketTitle'),
+                    'ticket_details' => $this->input->post('ticketDetails'),
+                );
+
+                $this->ticketing_model->insertTicketInformation($ticket_information);
+
+                $response = array(
+                    "message" => 'Successfully added a new ticket',
+                );
+
+                header('content-type: application/json');
+                echo json_encode($response);
+
+            break;
+        }
+    }
 }

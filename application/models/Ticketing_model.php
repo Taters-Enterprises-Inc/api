@@ -119,4 +119,19 @@ class Ticketing_model extends CI_Model {
     $query = $this->db->get();
     return $query->row()->all_count;
   }
+
+  public function insertTicket($ticket_data)
+	{
+		$this->db->insert('tickets', $ticket_data);
+		$ticket_id = $this->db->insert_id();
+
+		return $ticket_id;
+	}
+
+  public function insertTicketInformation($ticket_information)
+	{
+		$this->db->trans_start();
+		$this->db->insert('ticket_information', $ticket_information);
+		$this->db->trans_complete();
+	}
 }
