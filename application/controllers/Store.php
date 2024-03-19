@@ -12,6 +12,7 @@ class Store extends CI_Controller {
 		parent::__construct();
         $this->load->library('google');
 		$this->load->model('store_model');
+		$this->load->model('catering_model');
 	}
 
 	public function index(){
@@ -59,6 +60,29 @@ class Store extends CI_Controller {
 				break;
 			case 'POST':
 				$_POST = json_decode(file_get_contents("php://input"), true);
+
+				$start_datetime = $this->input->post('cateringStartDate');
+				$end_datetime = $this->input->post('cateringEndDate');
+				$store_id = $this->input->post('storeId');
+
+				
+				$unix_starting_datetime = strtotime($start_datetime);
+				$unix_end_datetime = strtotime($end_datetime);
+
+				$checkOverLapping = $this->catering_model->getOverlappingTransaction($unix_starting_datetime, $unix_end_datetime, $store_id);
+
+				if(isset($checkOverLapping)){
+
+
+					$response = array(
+						'message' => "This date is unavailable for booking. We're currently prioritizing reservations for our valued customers."
+					);
+					
+					$this->output->set_status_header('401');
+					header('content-type: application/json');
+					echo json_encode($response);
+					return;
+				}
 				
 				set_store_sessions(
 					$this->input->post('storeId'),
@@ -67,6 +91,7 @@ class Store extends CI_Controller {
 					null,
 					$this->input->post('cateringStartDate'),
 					$this->input->post('cateringEndDate'),
+					$this->input->post('cateringType'),
 				);
 
 				$response = array(

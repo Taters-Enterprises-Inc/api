@@ -7,6 +7,26 @@ class Catering_model extends CI_Model
 		$this->db =  $this->load->database('default', TRUE, TRUE);
         $this->bscDB = $this->load->database('bsc', TRUE, TRUE);
     }
+
+	public function getOverlappingTransaction($start_datetime, $end_datetime, $store_id){
+        $this->db->select("tracking_no, start_datetime, end_datetime");
+        $this->db->from('catering_transaction_tb');
+
+        $adjusted_start_datetime = strtotime("-3 hours", $start_datetime);
+        $adjusted_end_datetime = strtotime("+3 hours", $end_datetime);
+
+        // Condition to check for overlapping transactions
+        $this->db->where("(
+            (start_datetime <= $adjusted_end_datetime AND end_datetime >= $adjusted_start_datetime) OR 
+            (start_datetime >= $adjusted_start_datetime AND start_datetime <= $end_datetime) OR 
+            (end_datetime >= $adjusted_start_datetime AND end_datetime <= $end_datetime)
+        )");
+        $this->db->where("store", $store_id);
+
+        $query = $this->db->get();
+
+		return $query->row();
+	}
     
     public function getUserCateringBookingHistoryCount($type, $id, $search){
         $this->db->select('count(*) as all_count');

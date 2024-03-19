@@ -9,7 +9,8 @@ if ( ! function_exists('set_store_sessions'))
         $service,
         $platform_id,
         $catering_start_date=null,
-        $catering_end_date=null
+        $catering_end_date=null,
+        $catering_type=null
     ){
         $CI = get_instance();
 
@@ -47,6 +48,7 @@ if ( ! function_exists('set_store_sessions'))
         
         if($service == 'CATERING'){
             
+            $CI->session->set_userdata('catering_type', $catering_type);
             $CI->session->set_userdata('catering_delivery_rate', $opening->catering_delivery_rate);
             $CI->session->set_userdata('catering_minimum_rate', $opening->catering_minimum_rate);
 
@@ -84,7 +86,17 @@ if ( ! function_exists('set_store_sessions'))
         $distance = $get_routes;
         
         if($service == 'CATERING'){
-            $delivery_charge = $delivery_charge * 2;
+            switch($catering_type){
+                case 'catering':
+                    $delivery_charge = $delivery_charge * 2;
+                    break;
+                case 'bulk-order-delivery':
+                    $delivery_charge = $delivery_charge;
+                    break;
+                case 'bulk-order-pickup':
+                    $delivery_charge = 0;
+                    break;
+            }
         }
 
         $CI->session->set_userdata('distance', round($routes));
