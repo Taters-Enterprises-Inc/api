@@ -26,6 +26,22 @@ class Ticketing extends CI_Controller
         $this->load->model('ticketing_model');
     }
 
+    public function ticket($ticket_id){
+        switch ($this->input->server('REQUEST_METHOD')) {
+          case 'GET':
+            $ticket = $this->ticketing_model->getTicket($ticket_id);
+
+            $response = array(
+              "message" => 'Successfully fetch ticket',
+              "data"    => $ticket,
+            );
+
+            header('content-type: application/json');
+            echo json_encode($response);
+            return;
+        }
+    }
+
     public function tickets()
     {
         // USE THIS CODE FOR TESTING

@@ -8,6 +8,25 @@ class Ticketing_model extends CI_Model {
     $this->newteishop = $this->load->database('default', TRUE, TRUE);
   }  
 
+  public function getTicket($ticket_id) {
+    $this->db->select('
+      T.id, 
+      T.status,
+      T.department_id,
+      TI.ticket_title
+    ');
+    $this->db->from('tickets T');
+    $this->db->join('
+      ticket_information TI', 
+      'TI.ticket_id = T.id', 
+      'left'
+    );
+    $this->db->where('T.id', $ticket_id);
+    
+    $query = $this->db->get();
+    return $query->row();
+  }
+
   public function getAllTickets($row_no, $row_per_page, $status, $order_by,  $order, $search) {
     $this->db->select('
       T.id, 
