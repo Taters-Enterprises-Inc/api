@@ -284,6 +284,12 @@ $route['admin/discount/user-discount-change-status'] = 'admin/user_discount_chan
 $route['admin/discount/(:num)'] = 'admin/discount/$1';
 $route['admin/discounts'] = 'admin/discounts';
 
+//Ticketing
+$route['ticketing/ticket/(:num)'] = 'ticketing/ticket/$1';
+$route['ticketing/tickets'] = 'ticketing/tickets';
+$route['ticketing/my-tickets'] = 'ticketing/my_tickets';
+$route['ticketing/submit-ticket'] = 'ticketing/submit_ticket';
+
 
 $route['admin/availability/deal'] = 'admin/deal_availability';
 $route['admin/availability/product'] = 'admin/product_availability';
@@ -374,11 +380,6 @@ $route['admin/dashboard/customer-feedback/ratings'] = 'admin/customer_feedback_r
 
 $route['admin/region-store-combination'] = 'admin/region_store_combination';
 $route['admin/locales'] = 'admin/locales';
-
-//Ticketing
-$route['ticketing/tickets'] = 'ticketing/tickets';
-$route['ticketing/my-tickets'] = 'ticketing/my_tickets';
-$route['ticketing/submit-ticket'] = 'ticketing/submit_ticket';
 
 //Notification
 $route['notification'] = 'notification';
