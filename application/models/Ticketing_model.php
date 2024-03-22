@@ -153,4 +153,10 @@ class Ticketing_model extends CI_Model {
 		$this->db->insert('ticket_information', $ticket_information);
 		$this->db->trans_complete();
 	}
+
+  public function triageTicket($ticket_id, $data)
+	{
+		$this->db->where('id', $ticket_id);
+    $this->db->update('tickets', $data);
+	}
 }

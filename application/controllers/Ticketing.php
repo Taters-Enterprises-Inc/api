@@ -158,4 +158,43 @@ class Ticketing extends CI_Controller
             break;
         }
     }
+
+    public function triage($id)
+	{
+        switch ($this->input->server('REQUEST_METHOD')) {
+            case 'GET':
+                $ticket = $this->ticketing_model->getTicket($id);
+
+                $response = array(
+                    "message" => 'Successfully fetched a ticket',
+                    "data"    => $ticket,
+                );
+
+                header('content-type: application/json');
+                echo json_encode($response);
+                break;
+            
+            case 'POST':
+                $_POST =  json_decode(file_get_contents("php://input"), true);
+                
+                $department_id = $this->input->post('departmentId');
+                if ($department_id === null) {
+                    $department_id = 0;
+                }
+
+                $ticket_data = array(
+                    'department_id' => $department_id,
+                );
+
+                $this->ticketing_model->triageTicket($id, $ticket_data);
+
+                $response = array(
+                    "message" => 'Ticket successfully triaged',
+                );
+
+                header('content-type: application/json');
+                echo json_encode($response);
+                break;
+        }
+	}
 }
