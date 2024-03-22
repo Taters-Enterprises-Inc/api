@@ -156,6 +156,13 @@ $route['stock/settings/product-status'] = 'Stock_Ordering/settings_enable_produc
 $route['stock/order/franchisee-pay-bill'] = 'Stock_Ordering/franchisee_order';
 
 
+//Ticketing
+$route['ticketing/ticket/(:num)'] = 'ticketing/ticket/$1';
+$route['ticketing/tickets'] = 'ticketing/tickets';
+$route['ticketing/my-tickets'] = 'ticketing/my_tickets';
+$route['ticketing/submit-ticket'] = 'ticketing/submit_ticket';
+$route['ticketing/ticket/triage/(:any)'] = 'ticketing/triage/$1';
+
 
 //HR
 $route['auth-hr/login'] = 'auth_hr/login';
@@ -283,12 +290,6 @@ $route['admin/popclub'] = 'admin/popclub';
 $route['admin/discount/user-discount-change-status'] = 'admin/user_discount_change_status';
 $route['admin/discount/(:num)'] = 'admin/discount/$1';
 $route['admin/discounts'] = 'admin/discounts';
-
-//Ticketing
-$route['ticketing/ticket/(:num)'] = 'ticketing/ticket/$1';
-$route['ticketing/tickets'] = 'ticketing/tickets';
-$route['ticketing/my-tickets'] = 'ticketing/my_tickets';
-$route['ticketing/submit-ticket'] = 'ticketing/submit_ticket';
 
 
 $route['admin/availability/deal'] = 'admin/deal_availability';
